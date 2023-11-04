@@ -13,18 +13,28 @@ Development version:
 
 open in web browser: http://127.0.0.1:8000
 
+### Development
+    docker-compose exec web python manage.py collectstatic
+
 ### Testing
     docker-compose exec web python manage.py test
     docker-compose logs
 
 ### Versions
-* Django: 2.6
+* Django: 4.2.6
 * Python: 3.8
 * Postgres: 16
 * Bootstrap: 5.3.2 
 
+### Admin
+The admin login can be found unter /backend.
+
 ### Production
-    docker-compose exec web python manage.py collectstatic
+Build and push to Dockerhub.
+    docker build -f Dockerfile.prod -t luftdaten/datahub:0.1 .
+    docker push luftdaten/datahub:tagname
+Create docker-compose.prod.yml from example-docker-compose.prod.yml by setting the secret key. Then run:
+    docker-compose -f docker-compose.prod.yml up -d 
 
 ## License
 This project is licensed under GNU General Public License v3.0.
