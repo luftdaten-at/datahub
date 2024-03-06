@@ -23,4 +23,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Local apps
     path("", include("pages.urls")),
+    path("api/", include("api.urls")),
+    path("workshops/", include("workshops.urls")),
+    path("devices/", include("devices.urls")),
 ]

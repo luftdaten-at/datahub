@@ -1,0 +1,15 @@
+{% extends "_base.html" %}
+{% load static %}
+
+{% block title %}{{ device.name }}{% endblock title %}
+
+{% block content %}
+    <h1>{{ device.name }}</h1>
+    <ul>
+        <li>Board ID: {{ device.board_id }}</li>
+        <li>Bluetooth MAC: {{ device.btmac_address }}</li>
+        <li>Sensor SEN5X: {{ device.sensor_sen5x }}</li>
+    </ul>        
+    
+    <a href="{% url 'device-list' %}">Back to list</a>
+{% endblock content %}

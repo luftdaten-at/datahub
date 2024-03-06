@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     # Local
     'accounts.apps.AccountsConfig',
     'pages.apps.PagesConfig',
+    'api.apps.ApiConfig',
+    'workshops.apps.WorkshopsConfig',
+    'devices.apps.DevicesConfig',
 ]
 
 MIDDLEWARE = [
@@ -124,8 +127,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'de-at'
+TIME_ZONE = 'Europe/Vienna'
 USE_I18N = True
 USE_TZ = True
 
@@ -150,7 +153,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # django-allauth config
 LOGIN_REDIRECT_URL = "home"
 ACCOUNT_LOGOUT_REDIRECT = "home"
-SITE_ID = 1  # new
+SITE_ID = 1 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",

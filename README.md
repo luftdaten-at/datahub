@@ -12,7 +12,7 @@ Development version:
     docker-compose exec web python manage.py migrate
     docker-compose exec web python manage.py createsuperuser
 
-open in web browser: http://127.0.0.1:8080
+open in web browser: http://localhost
 
 ### Testing
     docker-compose exec web python manage.py test
@@ -24,6 +24,15 @@ open in web browser: http://127.0.0.1:8080
 * Postgres: 16
 * Bootstrap: 5.3.2
 * Gunicorn: 20.1.0
+
+
+### Templates and static files
+
+All template files are in the folder /code/templates
+_base.html is the base template with different blocks.
+home.html can be used as an example on how to use the blocks.
+
+Static files like css, js and images are in the folder /code/static.
 
 ### Admin
 The admin login can be found unter /backend.

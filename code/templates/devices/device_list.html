@@ -1,0 +1,15 @@
+{% extends "_base.html" %}
+{% load static %}
+
+{% block title %}Devices{% endblock title %}
+
+{% block content %}
+<h1>Devices</h1>
+<ul>
+    {% for device in devices %}
+        <li><a href="{% url 'device-detail' device.pk %}">{{ device.name }}</a></li>
+    {% empty %}
+        <li>Keine Devices gefunden.</li>
+    {% endfor %}
+</ul>
+{% endblock content %}
