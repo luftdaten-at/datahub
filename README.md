@@ -20,11 +20,11 @@ open in web browser: http://localhost
     docker-compose logs
 
 ### Versions
-* Django: 4.2.6
-* Python: 3.8
+* Django: 4.2.11
+* Python: 3.12
 * Postgres: 16
 * Bootstrap: 5.3.2
-* Gunicorn: 20.1.0
+* Gunicorn: 21.2.0
 
 
 ### Templates and static files
