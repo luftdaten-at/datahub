@@ -9,6 +9,7 @@ luftaten-datahub is an open-source plattform build on the Django Web Framework. 
 Development version:
 
     docker-compose up -d
+    docker-compose exec web python manage.py makemigrations
     docker-compose exec web python manage.py migrate
     docker-compose exec web python manage.py createsuperuser
 
@@ -44,7 +45,7 @@ Collect static files as preparation.
 
 Build and push to Dockerhub.
 
-    docker build -f Dockerfile.prod -t luftdaten/datahub:0.1 --platform linux/amd64 .
+    docker build -f Dockerfile.prod -t luftdaten/datahub:tagname --platform linux/amd64 .
     docker push luftdaten/datahub:tagname
 
 Create docker-compose.prod.yml from example-docker-compose.prod.yml by setting the secret key. Then run:

@@ -1,12 +1,21 @@
-from django.http import JsonResponse, HttpResponseBadRequest, Http404
-from .models import AirQualityRecord, Location
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.generics import RetrieveAPIView
+
+from .models import Location, AirQualityRecord
 from workshops.models import Workshop
 from devices.models import Device
-import json
-from django.views.decorators.csrf import csrf_exempt
 
-@csrf_exempt
-def air_quality_data_add(request):
+from .serializers import AirQualityRecordSerializer, WorkshopSerializer
+import json
+
+from drf_spectacular.utils import extend_schema
+from rest_framework.decorators import action
+
+
+@extend_schema(tags=['Air Quality Records'])
+class AirQualityDataAdd(APIView):
     """
     Processes a POST request containing JSON data about air quality records. Each record includes information
     about air quality metrics, the device reporting the data, the workshop associated with the data,
@@ -40,45 +49,42 @@ def air_quality_data_add(request):
                 "precision": 10
             }
         }]
-
-    Note:
-        This view is CSRF exempt, making it more accessible from external clients without requiring a CSRF token.
-        Ensure that proper authentication and permissions checks are implemented in production environments
-        to secure the endpoint.
     """
-    if request.method == 'POST':
+    def post(self, request):
+        data = request.data  # DRF parses the request body
         try:
-            data = json.loads(request.body)
+            records = []
             for record in data:
                 location_data = record.pop('location', {})
                 location, _ = Location.objects.get_or_create(**location_data)
 
-                device, _ = Device.objects.get_or_create(name=record.pop('device'))
-                workshop, _ = Workshop.objects.get_or_create(unique_id=record.pop('workshop'))
+                device, _ = Device.objects.get_or_create(name=record.pop('device', {}))
+                workshop, _ = Workshop.objects.get_or_create(id=record.pop('workshop'))
 
-                AirQualityRecord.objects.create(**record, location=location, device=device, workshop=workshop)
-            return JsonResponse({"status": "success"}, status=201)
+                air_quality_record = AirQualityRecord.objects.create(**record, location=location, device=device, workshop=workshop)
+                records.append(air_quality_record)
+
+            serializer = AirQualityRecordSerializer(records, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            return JsonResponse({'error': str(e)}, status=400)
-    else:
-        return HttpResponseBadRequest("Only POST requests are allowed")
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-def workshop_detail(request, pk):
+
+class WorkshopDetailView(RetrieveAPIView):
     """
     Processes a GET request by returning the details of the requested Workshop as JSON.
     
     """
-    try:
-        workshop = Workshop.objects.get(pk=pk)
-    except Workshop.DoesNotExist:
-        raise Http404("Workshop not found")
-    
-    # Prepare the data to be JSON-serializable
-    data = {
-        "id": workshop.id,
-        "title": workshop.title,
-        "description": workshop.description,
-        "start_date": workshop.start_date.strftime('%Y-%m-%d %H:%M:%S'),  # Format the date as a string
-        "end_date": workshop.end_date.strftime('%Y-%m-%d %H:%M:%S'),  # Format the date as a string
-    }
-    return JsonResponse(data)
+    queryset = Workshop.objects.all()
+    serializer_class = WorkshopSerializer
+
+
+class WorkshopAirQualityData(RetrieveAPIView):
+    """
+    Processes a GET request by returning the AirQualityRecords connected with the workshop ID
+
+    """
+    def get(self, request, workshop_id):
+        records = AirQualityRecord.objects.filter(workshop__id=workshop_id)
+        serializer = AirQualityRecordSerializer(records, many=True)
+        return Response(serializer.data)

@@ -194,7 +194,7 @@
         const ts = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
         // Convert date to string of format yyyy-mm-dd hh:mm:ss.000
         const dateString = ts.toISOString();
-        const response = await fetch(`https://api.luftdaten.at/v1/station/history/?station_ids=${uid}&smooth=100&start=${dateString}`);
+        const response = await fetch("https://api.luftdaten.at/v1/station/history/?station_ids=${uid}&smooth=100&start=${dateString}");
 
         // Parse response CSV
         const text = await response.text();

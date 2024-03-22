@@ -30,7 +30,7 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = ["datahub.luftdaten.at", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["datahub.luftdaten.at", "localhost", "127.0.0.1", "172.18.0.*"]
 
 
 # Application definition
@@ -48,6 +48,9 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "allauth",
     "allauth.account",
+    'rest_framework',
+    'drf_spectacular',
+    'drf_spectacular_sidecar',
     # Local
     'accounts.apps.AccountsConfig',
     'pages.apps.PagesConfig',
@@ -178,3 +181,17 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = env.bool("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS
 SECURE_HSTS_PRELOAD = env.bool("DJANGO_SECURE_HSTS_PRELOAD", default=True)
 SESSION_COOKIE_SECURE = env.bool("DJANGO_SESSION_COOKIE_SECURE", default=True)
 CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=True)
+
+# REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Luftdaten.at Datahub API',
+    'DESCRIPTION': '',
+    'VERSION': '1.0.0',
+    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
+    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
+    'REDOC_DIST': 'SIDECAR',
+}
