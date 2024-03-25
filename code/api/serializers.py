@@ -1,18 +1,16 @@
 from rest_framework import serializers
-from .models import AirQualityRecord, Location
+from .models import AirQualityRecord
 from workshops.models import Workshop
-#from devices.models import Device
+from devices.models import Device
 
 
-class LocationSerializer(serializers.ModelSerializer):
+class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Location
+        model = Device
         fields = '__all__'
 
 
-class AirQualityRecordSerializer(serializers.ModelSerializer):
-    location = LocationSerializer(read_only=True)  # Nest the LocationSerializer
-    
+class AirQualityRecordSerializer(serializers.ModelSerializer):    
     class Meta:
         model = AirQualityRecord
         fields = '__all__'

@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 from django.test import TestCase
-from .models import Device, Workshop, Location, AirQualityRecord
+from .models import Device, Workshop, AirQualityRecord
 from .serializers import AirQualityRecordSerializer
 
 class AirQualityDataTests(TestCase):
@@ -12,12 +12,6 @@ class AirQualityDataTests(TestCase):
         # Create initial objects required for the test
         self.device = Device.objects.create(name="B040")
         self.workshop = Workshop.objects.create(id="i7847g", title="Test Workshop",start_date="2019-01-01T00:00:00+00:00", end_date="2019-01-01T00:00:00+00:00")
-        self.location_data = {
-            "lat": 51.509865,
-            "lon": -0.118092,
-            "precision": 10
-        }
-        self.location = Location.objects.create(**self.location_data)
 
         self.valid_payload = [{
             "time": "2019-01-01T00:00:00+00:00",
@@ -30,7 +24,9 @@ class AirQualityDataTests(TestCase):
             "nox": 200,
             "device": "B040",
             "workshop": "i7847g",
-            "location": self.location_data
+            "lat": 51.509865,
+            "lon": -0.118092,
+            "location_precision": 10
         }]
 
         self.invalid_payload = [{

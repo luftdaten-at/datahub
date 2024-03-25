@@ -3,71 +3,55 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 
-from .models import Location, AirQualityRecord
+from .models import AirQualityRecord
 from workshops.models import Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, WorkshopSerializer
-import json
-
-from drf_spectacular.utils import extend_schema
-from rest_framework.decorators import action
+from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer
 
 
-@extend_schema(tags=['Air Quality Records'])
 class AirQualityDataAdd(APIView):
     """
     Processes a POST request containing JSON data about air quality records. Each record includes information
     about air quality metrics, the device reporting the data, the workshop associated with the data,
     and the location of the measurement. This view attempts to parse the JSON data, create or retrieve
-    related instances (Device, Workshop, Location), and save each air quality record to the database.
-
-    Args:
-        request (HttpRequest): The request object used to access the POST data. It is expected to contain
-                               a JSON body with a list of air quality record objects.
-
-    Returns:
-        JsonResponse: An HTTP response object that indicates the outcome of the operation. It returns
-                      a status code of 201 (Created) if all records are processed successfully, or
-                      400 (Bad Request) with an error message if an exception occurs.
-
-    Example POST data format:
-        [{
-            "time": "2019-01-01T00:00:00+00:00",
-            "pm1": 10,
-            "pm25": 20,
-            "pm10": 30,
-            "temperature": 20,
-            "humidity": 50,
-            "voc": 100,
-            "nox": 200,
-            "device": "B040",
-            "workshop": "i7847g",
-            "location": {
-                "lat": 51.509865,
-                "lon": -0.118092,
-                "precision": 10
-            }
-        }]
+    related instances (Device, Workshop), and save each air quality record to the database.
     """
-    def post(self, request):
-        data = request.data  # DRF parses the request body
+    serializer_class = AirQualityRecordSerializer
+
+    def post(self, request, *args, **kwargs):
+        data = request.data
         try:
-            records = []
-            for record in data:
-                location_data = record.pop('location', {})
-                location, _ = Location.objects.get_or_create(**location_data)
+            # Lookup or create the device and workshop instances based on provided identifiers
+            device, _ = Device.objects.get_or_create(name=data.get('device'))
+            workshop, _ = Workshop.objects.get(id=data.get('workshop'))
 
-                device, _ = Device.objects.get_or_create(name=record.pop('device', {}))
-                workshop, _ = Workshop.objects.get_or_create(id=record.pop('workshop'))
+            # Prepare air quality record data, replacing string identifiers with model instances
+            air_quality_data = {
+                **data,
+                'device': device.name,
+                'workshop': workshop.id,
+                'lat': data.get('lat'),
+                'lon': data.get('lon'),
+                'location_precision': data.get('location_precision')
+            }
 
-                air_quality_record = AirQualityRecord.objects.create(**record, location=location, device=device, workshop=workshop)
-                records.append(air_quality_record)
-
-            serializer = AirQualityRecordSerializer(records, many=True)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer = AirQualityRecordSerializer(data=air_quality_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeviceDetailView(RetrieveAPIView):
+    """
+    Processes a GET request by returning the details of the requested Device as JSON.
+    
+    """
+    queryset = Device.objects.all()
+    serializer_class = DeviceSerializer
 
 
 class WorkshopDetailView(RetrieveAPIView):
@@ -84,7 +68,7 @@ class WorkshopAirQualityData(RetrieveAPIView):
     Processes a GET request by returning the AirQualityRecords connected with the workshop ID
 
     """
-    def get(self, request, workshop_id):
-        records = AirQualityRecord.objects.filter(workshop__id=workshop_id)
+    def get(self, request, pk):
+        records = AirQualityRecord.objects.filter(workshop__id=pk)
         serializer = AirQualityRecordSerializer(records, many=True)
         return Response(serializer.data)

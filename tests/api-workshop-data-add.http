@@ -1,9 +1,11 @@
+# API test request for the endpoint /api/workshop/data/add
+# 
 
 POST http://localhost/api/workshop/data/add HTTP/1.1
 content-type: application/json
 
 {
-    "time": "2019-01-01T00:00:00+00:00",
+    "time": "2024-03-22T13:29:46.455Z",
     "pm1": 10,
     "pm25": 20,
     "pm10": 30,
@@ -11,10 +13,9 @@ content-type: application/json
     "humidity": 50,
     "voc": 100,
     "nox": 200,
-    "device": "B040",
+    "device": "B041",
     "workshop": "i7847g",
-    "location": {
-        "lat": 51.509865,
-        "lon": -0.118092,
-    }
+    "lat": 51.509865,
+    "lon": -0.118092,
+    "location_precision": 10
 }
