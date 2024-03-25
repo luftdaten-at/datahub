@@ -9,6 +9,10 @@ class DeviceListView(ListView):
     context_object_name = 'devices'
     template_name = 'devices/devices_list.html'
 
+    def get_queryset(self):
+        # Return the Device queryset ordered by 'name' in ascending order
+        return Device.objects.all().order_by('name')
+
 
 class DeviceDetailView(DetailView):
     model = Device
