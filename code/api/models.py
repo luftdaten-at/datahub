@@ -3,6 +3,14 @@ from workshops.models import Workshop
 from devices.models import Device
 
 
+class MobilityMode(models.Model):
+    name = models.CharField(max_length=255, unique=True, primary_key=True, blank=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(null=True)
+    
+    def __str__(self):
+        return self.name
+
 class AirQualityRecord(models.Model):
     time = models.DateTimeField()
     pm1 = models.FloatField(null=True, blank=True)
@@ -17,3 +25,5 @@ class AirQualityRecord(models.Model):
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
     location_precision = models.FloatField(null=True, blank=True)
+    mode = models.ForeignKey(MobilityMode, on_delete=models.CASCADE, null=True, blank=True)
+
