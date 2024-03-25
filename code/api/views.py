@@ -21,28 +21,37 @@ class AirQualityDataAdd(APIView):
 
     def post(self, request, *args, **kwargs):
         data = request.data
-        try:
+        if not isinstance(data, list):
+            return Response({'error': 'Expected a list of records'}, status=status.HTTP_400_BAD_REQUEST)
+
+        records = []
+        errors = []
+        for record in data:
             # Lookup or create the device and workshop instances based on provided identifiers
-            device, _ = Device.objects.get_or_create(name=data.get('device'))
-            workshop, _ = Workshop.objects.get(id=data.get('workshop'))
+            device, _ = Device.objects.get_or_create(name=record.get('device'))
+            
+            try:
+                workshop = Workshop.objects.get(id=record.get('workshop'))
+            except Workshop.DoesNotExist:
+                return Response({'error': 'Workshop not found'}, status=status.HTTP_400_BAD_REQUEST)
 
             # Prepare air quality record data, replacing string identifiers with model instances
             air_quality_data = {
-                **data,
+                **record,
                 'device': device.name,
                 'workshop': workshop.id,
-                'lat': data.get('lat'),
-                'lon': data.get('lon'),
-                'location_precision': data.get('location_precision')
             }
 
             serializer = AirQualityRecordSerializer(data=air_quality_data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                records.append(serializer.data)
+            else:
+                errors.append(serializer.errors)
+
+        if errors:
+            return Response({'errors': errors}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(records, status=status.HTTP_201_CREATED)
 
 
 class DeviceDetailView(RetrieveAPIView):
@@ -68,6 +77,8 @@ class WorkshopAirQualityData(RetrieveAPIView):
     Processes a GET request by returning the AirQualityRecords connected with the workshop ID
 
     """
+    serializer_class = AirQualityRecordSerializer
+
     def get(self, request, pk):
         records = AirQualityRecord.objects.filter(workshop__id=pk)
         serializer = AirQualityRecordSerializer(records, many=True)
