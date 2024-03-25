@@ -1,0 +1,4 @@
+# API test request for the endpoint /api/workshop/data/{id}
+# 
+
+GET http://localhost/api/workshop/data/i7847g/ HTTP/1.1

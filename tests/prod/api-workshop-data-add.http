@@ -1,0 +1,36 @@
+# API test request for the endpoint /api/workshop/data/add
+# 
+
+POST https://datahub.luftdaten.at/api/workshop/data/add HTTP/1.1
+content-type: application/json
+
+[{
+    "time": "2024-03-22T13:29:46.455Z",
+    "pm1": 10,
+    "pm25": 20,
+    "pm10": 30,
+    "temperature": 20,
+    "humidity": 50,
+    "voc": 100,
+    "nox": 200,
+    "device": "B040",
+    "workshop": "zf8ftb",
+    "lat": 51.509865,
+    "lon": -0.118092,
+    "location_precision": 10
+},
+{
+    "time": "2024-03-22T13:29:46.455Z",
+    "pm1": 10,
+    "pm25": 20,
+    "pm10": 30,
+    "temperature": 20,
+    "humidity": 50,
+    "voc": 100,
+    "nox": 200,
+    "device": "B040",
+    "workshop": "zf8ftb",
+    "lat": 51.509865,
+    "lon": -0.118092,
+    "location_precision": 10
+}]

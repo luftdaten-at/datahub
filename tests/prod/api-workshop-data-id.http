@@ -1,0 +1,4 @@
+# API test request for the endpoint /api/workshop/data/{id}
+# 
+
+GET https://datahub.luftdaten.at/api/workshop/data/zf8ftb/ HTTP/1.1
