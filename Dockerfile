@@ -1,7 +1,10 @@
 FROM python:3-alpine
 
 # add additional packages which are not in alpine
-RUN apk add gcc musl-dev libffi-dev
+RUN apk add --no-cache gcc musl-dev libffi-dev tzdata
+
+# Set timezone
+ENV TZ=Europe/Vienna
 
 # Set environment variables
 ENV PYTHONUNBUFFERED 1
