@@ -40,7 +40,7 @@
     <h1>{{ workshop.title }}</h1>
     <p>{{ workshop.description }}</p>
     <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
-    <p>Code: {{ workshop.id }}</p>
+    <p>Code: {{ workshop.name }}</p>
     <a href="{% url 'workshop-list' %}">Back to list</a>
 
     <script>
