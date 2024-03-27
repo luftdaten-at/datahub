@@ -78,7 +78,7 @@ class WorkshopDetailView(RetrieveAPIView):
 
 class WorkshopAirQualityData(RetrieveAPIView):
     """
-    Processes a GET request by returning the AirQualityRecords connected with the workshop ID
+    Processes a GET request by returning the AirQualityRecords connected with the workshop name
 
     """
     queryset = AirQualityRecord.objects.all()
