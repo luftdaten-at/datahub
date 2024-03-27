@@ -1,4 +1,4 @@
-# API test request for the endpoint /api/workshop/data/{id}
+# API test request for the endpoint /api/workshop/data/{name}
 # 
 
-GET https://datahub.luftdaten.at/api/workshop/data/zf8ftb/ HTTP/1.1
+GET https://datahub.luftdaten.at/api/workshop/data/hh6p87/ HTTP/1.1
