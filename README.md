@@ -8,16 +8,23 @@ luftaten-datahub is an open-source plattform build on the Django Web Framework. 
 ### Installation
 Development version:
 
-    docker-compose up -d
-    docker-compose exec web python manage.py makemigrations
-    docker-compose exec web python manage.py migrate
-    docker-compose exec web python manage.py createsuperuser
+    docker compose up -d
+    docker compose exec web python manage.py migrate
+    docker compose exec web python manage.py createsuperuser
 
 open in web browser: http://localhost
 
+### Development
+Create migrations after doing changes at the data models:
+
+    docker compose exec web python manage.py makemigrations
+
 ### Testing
-    docker-compose exec web python manage.py test
-    docker-compose logs
+Run the unit tests.
+    docker compose exec web python manage.py test
+    docker compose logs
+
+There are https-tests in the /test folder which can be run with the Visual Studio Code Extension REST Client.
 
 ### Versions
 * Django: 4.2.11
@@ -41,7 +48,7 @@ The admin login can be found unter /backend.
 ### Production
 Collect static files as preparation.
 
-    docker-compose exec web python manage.py collectstatic
+    docker compose exec web python manage.py collectstatic
 
 Build and push to Dockerhub.
 
@@ -50,7 +57,7 @@ Build and push to Dockerhub.
 
 Create docker-compose.prod.yml from example-docker-compose.prod.yml by setting the secret key. Then run:
 
-    docker-compose -f docker-compose.prod.yml up -d 
+    docker compose -f docker-compose.prod.yml up -d 
 
 ## License
 This project is licensed under GNU General Public License v3.0.

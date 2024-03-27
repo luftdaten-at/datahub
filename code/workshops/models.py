@@ -2,6 +2,8 @@ from django.db import models
 import string
 import random
 
+from devices.models import Device
+
 class Workshop(models.Model):
     name = models.CharField(max_length=6, unique=True, primary_key=True, blank=True, editable=False)
     title = models.CharField(max_length=255)
@@ -28,3 +30,12 @@ class Workshop(models.Model):
         while Workshop.objects.filter(name=name).exists():
             name = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
         return name
+    
+class Participant(models.Model):
+    name = models.CharField(max_length=255, unique=True, primary_key=True, blank=True)
+    workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True)
+    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)
+
+    def __str__(self):
+        return self.name
+    

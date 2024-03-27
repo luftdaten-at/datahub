@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 
 from .models import AirQualityRecord, MobilityMode
-from workshops.models import Workshop
+from workshops.models import Participant, Workshop
 from devices.models import Device
 
 from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer
@@ -33,6 +33,7 @@ class AirQualityDataAdd(APIView):
 
             try:
                 workshop = Workshop.objects.get(name=record.get('workshop'))
+                participant, _ = Participant.objects.get_or_create(name=record.get('participant'), workshop=workshop, device=device)
             except Workshop.DoesNotExist:
                 return Response({'error': 'Workshop not found'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -41,6 +42,7 @@ class AirQualityDataAdd(APIView):
                 **record,
                 'device': device.name,
                 'workshop': workshop.name,
+                'participant': participant.name,
                 'mode': mode.name,
             }
 
@@ -79,6 +81,7 @@ class WorkshopAirQualityData(RetrieveAPIView):
     Processes a GET request by returning the AirQualityRecords connected with the workshop ID
 
     """
+    queryset = AirQualityRecord.objects.all()
     serializer_class = AirQualityRecordSerializer
 
     def get(self, request, pk):
