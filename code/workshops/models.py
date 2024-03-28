@@ -12,7 +12,7 @@ class Workshop(models.Model):
     end_date = models.DateTimeField()
     mapbox_top_left_lat = models.FloatField(null=True, blank=True)
     mapbox_top_left_lon = models.FloatField(null=True, blank=True)
-    mapbox_topr_ight_lat = models.FloatField(null=True, blank=True)
+    mapbox_top_right_lat = models.FloatField(null=True, blank=True)
     mapbox_top_right_lon = models.FloatField(null=True, blank=True)
     mapbox_bottom_left_lat = models.FloatField(null=True, blank=True)
     mapbox_bottom_left_lon = models.FloatField(null=True, blank=True)
