@@ -1,11 +1,11 @@
 # luftdaten-datahub
 
 ## About luftdaten-datahub
-luftaten-datahub is an open-source plattform build on the Django Web Framework. It is an citizen science too to explore air quality data measured by Luftdaten.at devices and other sources.
+luftaten-datahub is an open source plattform build on the Django Web Framework. It is an citizen science tool to explore air quality data measured by Luftdaten.at devices and other sources.
 
 ## Documentation
 
-### Installation
+### Development
 Development version:
 
     docker compose up -d
@@ -14,7 +14,6 @@ Development version:
 
 open in web browser: http://localhost
 
-### Development
 Create migrations after doing changes at the data models:
 
     docker compose exec web python manage.py makemigrations
@@ -32,7 +31,6 @@ There are https-tests in the /test folder which can be run with the Visual Studi
 * Postgres: 16
 * Bootstrap: 5.3.2
 * Gunicorn: 21.2.0
-
 
 ### Templates and static files
 
@@ -58,6 +56,13 @@ Build and push to Dockerhub.
 Create docker-compose.prod.yml from example-docker-compose.prod.yml by setting the secret key. Then run:
 
     docker compose -f docker-compose.prod.yml up -d 
+
+## API Documentation
+
+Open API Standard 3.1
+
+/api/docs
+https://datahub.luftdaten.at/api/docs
 
 ## License
 This project is licensed under GNU General Public License v3.0.
