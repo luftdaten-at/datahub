@@ -23,11 +23,19 @@
     <div class="position-absolute top-0 end-0 card"
         style="width: 18rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card-body">
-            <h5 class="card-title">Feinstaub</h5>
-            <select class="form-select" aria-label="Default select example" onchange="showPM(this)">
-                <option value="1">PM1.0</option>
-                <option value="25" selected>PM2.5</option>
-                <option value="10">PM10.0</option>
+            <h5 class="card-title">Messwerte</h5>
+            <select class="form-select" id="select-value" aria-label="Default select example" onchange="updateValues">
+                <option value="pm1">PM1.0</option>
+                <option value="pm25" selected>PM2.5</option>
+                <option value="pm10">PM10.0</option>
+                <option value="temperature">Temperatur</option>
+                <option value="humidity">Luftfeuchtigkeit</option>
+                <option value="voc">VOCs</option>
+                <option value="nox">Stickoxide</option>
+            </select>
+            <h5 class="card-title" style="margin-top: 1rem;">Gerät</h5>
+            <select class="form-select" id="select-device" aria-label="Default select example" onchange="updateValues">
+                <option value="all" selected>Alle Geräte</option>
             </select>
         </div>
     </div>
@@ -40,7 +48,7 @@
     <h1>{{ workshop.title }}</h1>
     <p>{{ workshop.description }}</p>
     <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
-    <p>Code: {{ workshop.name }}</p>
+    <p>Code: {{ workshop.id }}</p>
     <a href="{% url 'workshop-list' %}">Back to list</a>
 
     <script>
@@ -69,9 +77,11 @@
     
         let hsv2hsl = (h, s, v, l = v - v * s / 2, m = Math.min(l, 1 - l)) => [h, m ? (v - l) / m : 0, l];
     
-        function showPM(selection) {
-            var index = selection.selectedIndex;
-            addMarkerLayer(index);
+        function updateValues() {
+            var value = document.getElementById("select-value").value;
+            var device = document.getElementById("select-device").value;
+            if(device == "all") device = null;
+            addMarkerLayer(value, device);
         }
     
         const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
@@ -81,27 +91,34 @@
             attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
     
-        var stationData;
+        var points;
     
         async function fetchMarkerData() {
-            const response = await fetch("https://api.luftdaten.at/v1/station/current/all");
+            const response = await fetch("/api/workshop/data/{{ workshop.name }}/");
     
-            stationData = [];
+            points = [];
     
-            // Parse response CSV
+            // Parse response JSON
             const text = await response.text();
-            const items = text.split("\n");
-            for (let row in items) {
-                if (items[row].length == 0) continue;
-                var data = items[row].split("\t");
-                const [stationID, lat, lon, pm1, pm25, pm10] = data;
-                const marker = {stationID, lat, lon, pm1, pm25, pm10};
-                stationData.push(marker);
+            const json = JSON.parse(text);;
+            for (let item in json) {
+                points.push(json[item]);
             }
         }
     
         fetchMarkerData().then(() => {
-            addMarkerLayer(1);
+            addMarkerLayer("pm1");
+            const devices = new Set();
+            for(let i = 0; i < points.length; i++) {
+                devices.add(points[i].device);
+            }
+            const select = document.getElementById("select-device");
+            for (let device of devices) {
+                var option = document.createElement("option");
+                option.text = device;
+                option.value = device;
+                select.add(option);
+            }
         });
     
         function getMean(arr) {
@@ -118,43 +135,46 @@
     
         var markerLayer;
     
-        // Add markers for 0: pm1, 1: pm25, 2: pm10
-        async function addMarkerLayer(pmType) {
+        async function addMarkerLayer(value, device = null) {
     
             if (markerLayer != null) {
                 map.removeLayer(markerLayer);
             }
     
             // Marker layer
-            markerLayer = L.markerClusterGroup({
+            markerLayer = L.layerGroup({
                 iconCreateFunction: function (cluster) {
                     const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
                     const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
                     const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
                     const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
                     const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                    return L.divIcon({iconSize: [40, 40], className: '', html: '<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"><span style="color: ' + textColor + ';">' + (isNaN(meanPM) ? '' : meanPM.toFixed(1)) + '</span></div>'});
+                    return L.divIcon({iconSize: [6, 6], className: '', html: '<div class="clickable" style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"></div>'});
                 },
                 showCoverageOnHover: false,
             });
     
             const markerList = [];
     
-            // Add markers for each station
-            for (let stationIndex in stationData) {
-                const station = stationData[stationIndex];
-                const pm = station[['pm1', 'pm25', 'pm10'][pmType]];
+            // Add markers for each point
+            for (let i in points) {
+                const point = points[i];
+                if(device != null && point.device != device) continue;
+                const pm = point[value];
                 const colorArrayHSV = getColorForPM25(pm);
                 const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
                 const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
                 const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                var marker = L.marker([station.lat, station.lon], {icon: L.divIcon({iconSize: [40, 40], className: '', html: '<a class="hiddenlink clickable" onclick="requestStationData(' + station.stationID + ')" href="#infobox"><div style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"><span style="color: ' + textColor + ';">' + (isNaN(pm) ? '' : Number(pm).toFixed(1)) + '</span></div></a>'})});
+                var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
                 marker.pm = pm; // Add a custom attribute to marker
+                marker.bindPopup("Gemessen: " + pm); // Bind a popup to the marker
                 markerList.push(marker);
             }
     
-            // Add markers to map
-            markerLayer.addLayers(markerList);
+            for (let i = 0; i < markerList.length; i++) {
+                markerLayer.addLayer(markerList[i]);
+            }
+            
             map.addLayer(markerLayer);
         };
     
@@ -165,13 +185,13 @@
     
         // Chart logic
         async function loadDataForStation(uid) {
-            // Fetch data for station
+            // Fetch data for point
             //const response = await fetch("/data/demostationweekly.csv");
             const currentDate = new Date();
             const ts = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
             // Convert date to string of format yyyy-mm-dd hh:mm:ss.000
             const dateString = ts.toISOString();
-            const response = await fetch(`https://api.luftdaten.at/v1/station/history/?station_ids=${uid}&smooth=100&start=${dateString}`);
+            const response = await fetch(`https://api.luftdaten.at/v1/point/history/?station_ids=${uid}&smooth=100&start=${dateString}`);
     
             // Parse response CSV
             const text = await response.text();
