@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>Möchtest du wirklich "{{ object.title }}" löschen?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Ja, bitte löschen</button>
+        <a href="{% url 'workshops-my' %}" class="btn btn-secondary">Abbrechen</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% load i18n %}
+
+{% extends "_base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>{% trans "My workshops" %}</h2>
+    <table class="table table-striped"> <!-- Bootstrap table classes -->
+        <thead>
+            <tr>
+                <th>{% trans "Title" %}</th>
+                <th>{% trans "Start date" %}</th>
+                <th>{% trans "End date" %}</th>
+                <th>{% trans "Public" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for workshop in workshops %}
+            <tr>
+                <td>{{ workshop.title }}</td>
+                <td>{{ workshop.start_date|date:"d.m.Y H:i" }}</td> <!-- Formatting dates -->
+                <td>{{ workshop.end_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ workshop.public|yesno:"Ja,Nein" }}</td> <!-- Yes/No for Boolean fields -->
+                <td>
+                    <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                    <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a>
+                    <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>    
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">{% trans "No workshops found." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'workshop-create' %}" class="btn btn-primary">{% trans "Create workshop" %}"</a>
+</div>
+{% endblock %}

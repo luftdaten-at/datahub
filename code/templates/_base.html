@@ -18,7 +18,7 @@
             <span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    <li class="nav-item"><a class="nav-link" href="{% url 'workshop-list' %}">Workshops</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'workshops-list' %}">Workshops</a></li>
                     {% if user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'device-list' %}">Devices</a></li>
                     {% endif %}            
@@ -30,6 +30,7 @@
                         {{ user.username }}
                       </a>
                       <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'workshops-my' %}">Meine Workshops</a></li>
                         <li><a class="dropdown-item" href="{% url 'account_change_password' %}">Passwort ändern</a></li>
                         <li><hr class="dropdown-divider" /></li>
                         <li><a class="dropdown-item" href="{% url 'account_logout' %}">Abmelden</a></li>
