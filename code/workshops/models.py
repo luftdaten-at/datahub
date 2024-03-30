@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 import string
 import random
 
@@ -10,6 +11,7 @@ class Workshop(models.Model):
     description = models.TextField(null=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
+    public = models.BooleanField(default=True)
     mapbox_top_left_lat = models.FloatField(null=True, blank=True)
     mapbox_top_left_lon = models.FloatField(null=True, blank=True)
     mapbox_top_right_lat = models.FloatField(null=True, blank=True)
@@ -18,7 +20,13 @@ class Workshop(models.Model):
     mapbox_bottom_left_lon = models.FloatField(null=True, blank=True)
     mapbox_bottom_right_lat = models.FloatField(null=True, blank=True)
     mapbox_bottom_right_lon = models.FloatField(null=True, blank=True)
-
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='owned_workshops',  # Allows user.owned_workshops.all() to get all owned workshops
+        null=True,
+        blank=True
+    )
     def __str__(self):
         return self.title
     
