@@ -1,15 +1,35 @@
 {% extends "_base.html" %}
+{% load i18n %}
 {% load static %}
 
-{% block title %}Devices{% endblock title %}
+{% block title %}{% trans "Devices" %}{% endblock title %}
 
 {% block content %}
-<h1>Devices</h1>
-<ul>
-    {% for device in devices %}
-        <li><a href="{% url 'device-detail' device.pk %}">{{ device.name }}</a></li>
-    {% empty %}
-        <li>Keine Devices gefunden.</li>
-    {% endfor %}
-</ul>
+<div class="container mt-3">
+    <h1>Devices</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">{% trans "Name"%}</th>
+                <th scope="col">{% trans "MAC adress" %}</th>
+                <th scope="col">{% trans "Firmware version" %}</th>
+                <th scope="col">{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+            <tr>
+                <td><a href="{% url 'device-detail' device.pk %}">{{ device.name }}</a></td>
+                <td>{{ device.btmac_address }}</td>
+                <td>{{ device.firmware_version }}</td>
+                <td><a href="{% url 'device-update' device.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a></td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">{% trans "No devices found." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock content %}

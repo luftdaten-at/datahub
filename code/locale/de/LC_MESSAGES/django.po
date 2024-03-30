@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-30 14:50+0100\n"
+"POT-Creation-Date: 2024-03-30 16:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,11 +35,11 @@ msgstr ""
 msgid "Workshops"
 msgstr ""
 
-#: templates/_base.html:24
+#: templates/_base.html:24 templates/devices/device_list.html:5
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:34 templates/workshops/workshops_my.html:7
+#: templates/_base.html:34 templates/workshops/workshops_my.html:6
 msgid "My workshops"
 msgstr "Meine Workshops"
 
@@ -112,6 +112,48 @@ msgid ""
 "spam folder. Otherwise contact us if you do not receive it in a few minutes."
 msgstr ""
 
+#: templates/devices/device_form.html:7
+#, fuzzy
+#| msgid "Devices"
+msgid "Edit Device"
+msgstr "Geräte"
+
+#: templates/devices/device_form.html:11
+msgid "Update"
+msgstr "Aktualisieren"
+
+#: templates/devices/device_form.html:12
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: templates/devices/device_list.html:13
+msgid "Name"
+msgstr "Gerätename"
+
+#: templates/devices/device_list.html:14
+msgid "MAC adress"
+msgstr "MAC Adresse"
+
+#: templates/devices/device_list.html:15
+msgid "Firmware version"
+msgstr "Firmware Version"
+
+#: templates/devices/device_list.html:16
+#: templates/workshops/workshops_my.html:14
+msgid "Actions"
+msgstr "Aktionen"
+
+#: templates/devices/device_list.html:25
+#: templates/workshops/workshops_my.html:26
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/devices/device_list.html:29
+#, fuzzy
+#| msgid "No workshops found."
+msgid "No devices found."
+msgstr "Keine Workshops gefunden."
+
 #: templates/workshops/workshop_form.html:6
 msgid "Workshop"
 msgstr "Workshop"
@@ -125,6 +167,9 @@ msgid ""
 "We continuously host workshops where air quality is measured together. On "
 "this page, the results of all public workshops are listed."
 msgstr ""
+"Wir veranstalten kontinuierlich Workshops, in denen gemeinsam die "
+"Luftqualität gemessen wird. Auf dieser Seite sind die Ergebnisse aller "
+"öffentlichen Workshops aufgelistet."
 
 #: templates/workshops/workshops_list.html:10
 msgid "Upcoming workshops"
@@ -142,59 +187,68 @@ msgstr "Vergangene Workshops"
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
-#: templates/workshops/workshops_my.html:11 workshops/forms.py:15
+#: templates/workshops/workshops_my.html:10 workshops/forms.py:15
 msgid "Title"
 msgstr "Titel"
 
-#: templates/workshops/workshops_my.html:12
+#: templates/workshops/workshops_my.html:11
 msgid "Start date"
 msgstr "Startdatum"
 
-#: templates/workshops/workshops_my.html:13
+#: templates/workshops/workshops_my.html:12
 msgid "End date"
 msgstr "Enddatum"
 
-#: templates/workshops/workshops_my.html:14 workshops/forms.py:19
-#: workshops/forms.py:26
+#: templates/workshops/workshops_my.html:13 workshops/forms.py:19
 msgid "Public"
 msgstr "Öffentlich"
 
-#: templates/workshops/workshops_my.html:15
-msgid "Actions"
-msgstr "Aktionen"
-
-#: templates/workshops/workshops_my.html:26
+#: templates/workshops/workshops_my.html:25
 msgid "Details"
 msgstr "Details"
 
 #: templates/workshops/workshops_my.html:27
-msgid "Edit"
-msgstr "Bearbeiten"
-
-#: templates/workshops/workshops_my.html:28
 msgid "Delete"
 msgstr "Löschen"
 
-#: templates/workshops/workshops_my.html:33
+#: templates/workshops/workshops_my.html:32
 msgid "No workshops found."
 msgstr "Keine Workshops gefunden."
 
-#: templates/workshops/workshops_my.html:38
+#: templates/workshops/workshops_my.html:37
 msgid "Create workshop"
 msgstr "Workshop erstellen"
 
-#: workshops/forms.py:16 workshops/forms.py:23
+#: workshops/forms.py:16
 msgid "Description"
 msgstr "Beschreibung"
 
-#: workshops/forms.py:17 workshops/forms.py:24
+#: workshops/forms.py:17
 msgid "Start Date"
-msgstr ""
+msgstr "Startdatum"
 
-#: workshops/forms.py:18 workshops/forms.py:25
+#: workshops/forms.py:18
 msgid "End Date"
-msgstr ""
+msgstr "Enddatum"
 
 #: workshops/forms.py:22
 msgid "Enter the title of the workshop."
+msgstr "Gibt einen aussagekräftigen Titel ein."
+
+#: workshops/forms.py:23
+msgid ""
+"Write some lines about the workshop. Where does it take place? Is it "
+"associated with an event or a project? Who can participate?"
 msgstr ""
+"Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er "
+"mit einer Veranstaltung oder einem Projekt verbunden? Wer kann "
+"teilnehmen?"
+
+#: workshops/forms.py:24
+msgid ""
+"Should the workshop be publicly available on the Datahub? If not, only "
+"logged-in users with set permissions can see the results."
+msgstr ""
+"Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht,"
+" können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
+"Ergebnisse sehen."

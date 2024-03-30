@@ -1,5 +1,10 @@
 from django.db import models
 
+class FirmwareVersion(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 class DeviceModel(models.Model):
     name = models.CharField(max_length=255, unique=True, primary_key=True)
@@ -14,6 +19,8 @@ class Device(models.Model):
     board_id = models.CharField(max_length=12, null=True, blank=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     sensor_sen5x = models.CharField(max_length = 255, null=True, blank=True)
+    firmware_version = models.ForeignKey(FirmwareVersion, on_delete=models.CASCADE, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name
