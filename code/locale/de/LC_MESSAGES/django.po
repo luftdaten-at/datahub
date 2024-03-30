@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-30 14:26+0100\n"
+"POT-Creation-Date: 2024-03-30 14:50+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,11 +20,44 @@ msgstr ""
 
 #: main/settings.py:139
 msgid "English"
-msgstr ""
+msgstr "Englisch"
 
 #: main/settings.py:140
 msgid "German"
+msgstr "Deutsch"
+
+#: templates/_base.html:7 templates/_base.html:17
+msgid "Luftdaten.at Datahub"
 msgstr ""
+
+#: templates/_base.html:22 templates/workshops/workshops_list.html:5
+#: templates/workshops/workshops_list.html:8
+msgid "Workshops"
+msgstr ""
+
+#: templates/_base.html:24
+msgid "Devices"
+msgstr "Geräte"
+
+#: templates/_base.html:34 templates/workshops/workshops_my.html:7
+msgid "My workshops"
+msgstr "Meine Workshops"
+
+#: templates/_base.html:35
+msgid "Change password"
+msgstr "Passwort ändern"
+
+#: templates/_base.html:37
+msgid "Log out"
+msgstr "Abmelden"
+
+#: templates/_base.html:41
+msgid "Log in"
+msgstr "Anmelden"
+
+#: templates/_base.html:42
+msgid "Sign up"
+msgstr "Registrieren"
 
 #: templates/account/email/email_confirmation_message.txt:5
 #, python-format
@@ -42,7 +75,7 @@ msgstr ""
 #: templates/account/email_confirm.html:4
 #: templates/account/email_confirm.html:6
 msgid "Confirm E-mail Address"
-msgstr ""
+msgstr "Bestätige deine E-Mail-Adresse"
 
 #: templates/account/email_confirm.html:8
 #, python-format
@@ -54,7 +87,7 @@ msgstr ""
 
 #: templates/account/email_confirm.html:11
 msgid "Confirm"
-msgstr ""
+msgstr "Bestätigen"
 
 #: templates/account/email_confirm.html:14
 #, python-format
@@ -65,7 +98,7 @@ msgstr ""
 
 #: templates/account/password_change.html:13
 msgid "Forgot Password?"
-msgstr ""
+msgstr "Passwort vergessen?"
 
 #: templates/account/password_reset.html:13
 msgid ""
@@ -79,13 +112,80 @@ msgid ""
 "spam folder. Otherwise contact us if you do not receive it in a few minutes."
 msgstr ""
 
-#: workshops/forms.py:15
-msgid "Title"
+#: templates/workshops/workshop_form.html:6
+msgid "Workshop"
+msgstr "Workshop"
+
+#: templates/workshops/workshop_form.html:10
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/workshops/workshops_list.html:9
+msgid ""
+"We continuously host workshops where air quality is measured together. On "
+"this page, the results of all public workshops are listed."
 msgstr ""
+
+#: templates/workshops/workshops_list.html:10
+msgid "Upcoming workshops"
+msgstr "Kommende Workshops"
+
+#: templates/workshops/workshops_list.html:15
+msgid "No upcoming workshops."
+msgstr "Keine kommenden Workshops."
+
+#: templates/workshops/workshops_list.html:18
+msgid "Past workshops"
+msgstr "Vergangene Workshops"
+
+#: templates/workshops/workshops_list.html:23
+msgid "No past workshops."
+msgstr "Keine vergangenen Workshops."
+
+#: templates/workshops/workshops_my.html:11 workshops/forms.py:15
+msgid "Title"
+msgstr "Titel"
+
+#: templates/workshops/workshops_my.html:12
+msgid "Start date"
+msgstr "Startdatum"
+
+#: templates/workshops/workshops_my.html:13
+msgid "End date"
+msgstr "Enddatum"
+
+#: templates/workshops/workshops_my.html:14 workshops/forms.py:19
+#: workshops/forms.py:26
+msgid "Public"
+msgstr "Öffentlich"
+
+#: templates/workshops/workshops_my.html:15
+msgid "Actions"
+msgstr "Aktionen"
+
+#: templates/workshops/workshops_my.html:26
+msgid "Details"
+msgstr "Details"
+
+#: templates/workshops/workshops_my.html:27
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/workshops/workshops_my.html:28
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/workshops/workshops_my.html:33
+msgid "No workshops found."
+msgstr "Keine Workshops gefunden."
+
+#: templates/workshops/workshops_my.html:38
+msgid "Create workshop"
+msgstr "Workshop erstellen"
 
 #: workshops/forms.py:16 workshops/forms.py:23
 msgid "Description"
-msgstr ""
+msgstr "Beschreibung"
 
 #: workshops/forms.py:17 workshops/forms.py:24
 msgid "Start Date"
@@ -93,10 +193,6 @@ msgstr ""
 
 #: workshops/forms.py:18 workshops/forms.py:25
 msgid "End Date"
-msgstr ""
-
-#: workshops/forms.py:19 workshops/forms.py:26
-msgid "Public"
 msgstr ""
 
 #: workshops/forms.py:22
