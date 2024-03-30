@@ -43,6 +43,19 @@ Static files like css, js and images are in the folder /code/static.
 ### Admin
 The admin login can be found unter /backend.
 
+
+### Translation to German
+Run the following command in your project directory:
+
+    docker compose exec web python manage.py makemessages -l de
+
+This scans your project for strings marked for translation and creates a django.po file in the locale/de/LC_MESSAGES directory.
+
+Open the django.po file, find your strings, and add the German translation.
+
+    docker compose exec web python manage.py compilemessages
+
+
 ### Production
 Collect static files as preparation.
 

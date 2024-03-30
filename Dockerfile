@@ -1,7 +1,7 @@
 FROM python:3-alpine
 
 # add additional packages which are not in alpine
-RUN apk add --no-cache gcc musl-dev libffi-dev tzdata
+RUN apk add --no-cache gcc musl-dev libffi-dev tzdata gettext
 
 # Set timezone
 ENV TZ=Europe/Vienna
