@@ -1,6 +1,10 @@
 {% extends '_base.html' %}
 {% load i18n %}
+{% load static %}
 {% load crispy_forms_tags %}
+
+{% block styles %}
+{% endblock styles %}
 
 {% block content %}
 <h2>{% trans "Workshop" %}</h2>
@@ -9,4 +13,5 @@
     {{ form|crispy }}
     <button class="btn btn-success" type="submit">{% trans "Save" %}</button>
 </form>
+
 {% endblock %}

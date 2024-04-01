@@ -45,12 +45,12 @@
 {% endblock map %}
 
 {% block content %}
-    <h1>{{ workshop.title }}</h1>
-    <p>{{ workshop.description }}</p>
-    <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
-    <p>Code: {{ workshop.name }}</p>
-    <a href="{% url 'workshops-list' %}">Back to list</a>
-
+    <div class="mt-3">
+        <h2>{{ workshop.title }}</h2>
+        <p>{{ workshop.description }}</p>
+        <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
+        <p>Code: {{ workshop.name }}</p>
+    </div>
     <script>
         const colorSteps = [
             [0, [115, 0.8, 0.8]],

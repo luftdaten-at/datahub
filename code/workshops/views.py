@@ -86,7 +86,7 @@ class WorkshopUpdateView(UpdateView):
         return reverse_lazy('workshops-my')  # Redirect to the workshop list after update
 
     def form_valid(self, form):
-        # Optional: Add any additional logic here before saving the form
+  
         return super().form_valid(form)
     
 
