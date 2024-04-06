@@ -18,6 +18,13 @@ Create migrations after doing changes at the data models:
 
     docker compose exec web python manage.py makemigrations
 
+Changes to the database:
+
+    docker compose exec web python manage.py shell
+    >> from {app_name}.models import {model_name}
+    >> {model_name}.objects.all().delete()
+
+
 ### Testing
 Run the unit tests.
     docker compose exec web python manage.py test

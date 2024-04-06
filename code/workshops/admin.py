@@ -8,6 +8,6 @@ class WorkshopAdmin(admin.ModelAdmin):
 admin.site.register(Workshop, WorkshopAdmin)
 
 class ParticipantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'workshop', 'device')
+    list_display = ('name', 'workshop')
 
 admin.site.register(Participant, ParticipantAdmin)
