@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-30 16:05+0100\n"
+"POT-Creation-Date: 2024-04-29 12:36+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,46 +18,59 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: main/settings.py:139
+#: main/settings.py:146
 msgid "English"
 msgstr "Englisch"
 
-#: main/settings.py:140
+#: main/settings.py:147
 msgid "German"
 msgstr "Deutsch"
 
-#: templates/_base.html:7 templates/_base.html:17
+#: templates/_base.html:7 templates/_base.html:18
+msgid "Saubere Luft am Arbeitsplatz"
+msgstr ""
+
+#: templates/_base.html:7 templates/_base.html:20
 msgid "Luftdaten.at Datahub"
 msgstr ""
 
-#: templates/_base.html:22 templates/workshops/workshops_list.html:5
+#: templates/_base.html:28 templates/workshops/workshops_list.html:5
 #: templates/workshops/workshops_list.html:8
 msgid "Workshops"
 msgstr ""
 
-#: templates/_base.html:24 templates/devices/device_list.html:5
+#: templates/_base.html:30 templates/devices/device_list.html:5
+#: templates/devices/device_list.html:9
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:34 templates/workshops/workshops_my.html:6
+#: templates/_base.html:41 templates/workshops/workshops_my.html:6
 msgid "My workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:35
+#: templates/_base.html:42
 msgid "Change password"
 msgstr "Passwort ändern"
 
-#: templates/_base.html:37
+#: templates/_base.html:44
 msgid "Log out"
 msgstr "Abmelden"
 
-#: templates/_base.html:41
+#: templates/_base.html:48
 msgid "Log in"
 msgstr "Anmelden"
 
-#: templates/_base.html:42
+#: templates/_base.html:49
 msgid "Sign up"
 msgstr "Registrieren"
+
+#: templates/_base.html:66
+msgid "Privacy"
+msgstr "Datenschutz"
+
+#: templates/_base.html:67
+msgid "About us"
+msgstr "Impressum"
 
 #: templates/account/email/email_confirmation_message.txt:5
 #, python-format
@@ -70,7 +83,7 @@ msgstr ""
 
 #: templates/account/email/email_confirmation_subject.txt:3
 msgid "Confirm Your Sign Up"
-msgstr ""
+msgstr "Bestätige deine Anmeldung"
 
 #: templates/account/email_confirm.html:4
 #: templates/account/email_confirm.html:6
@@ -154,11 +167,11 @@ msgstr "Bearbeiten"
 msgid "No devices found."
 msgstr "Keine Workshops gefunden."
 
-#: templates/workshops/workshop_form.html:6
+#: templates/workshops/workshop_form.html:10
 msgid "Workshop"
 msgstr "Workshop"
 
-#: templates/workshops/workshop_form.html:10
+#: templates/workshops/workshop_form.html:14
 msgid "Save"
 msgstr "Speichern"
 
@@ -240,15 +253,14 @@ msgid ""
 "Write some lines about the workshop. Where does it take place? Is it "
 "associated with an event or a project? Who can participate?"
 msgstr ""
-"Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er "
-"mit einer Veranstaltung oder einem Projekt verbunden? Wer kann "
-"teilnehmen?"
+"Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er mit "
+"einer Veranstaltung oder einem Projekt verbunden? Wer kann teilnehmen?"
 
 #: workshops/forms.py:24
 msgid ""
 "Should the workshop be publicly available on the Datahub? If not, only "
 "logged-in users with set permissions can see the results."
 msgstr ""
-"Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht,"
-" können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
+"Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
+"können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."

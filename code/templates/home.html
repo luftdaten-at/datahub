@@ -4,300 +4,317 @@
 {% block title %}Home{% endblock title %}
 
 {% block styles %}
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
-<link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
-<link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
+    {% if host == "arbeitsplatz.luftdaten.at" %}
+    {% else %}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
+    <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
 
-<!-- Leaflet JS -->
-<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
-<script src="{% static 'js/leaflet.markercluster.js' %}"></script>
+    <!-- Leaflet JS -->
+    <script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
+    <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
 
-<!-- Plotly JS -->
-<script src="{% static 'js/plotly-2.27.0.min.js' %}" charset="utf-8"></script>
+    <!-- Plotly JS -->
+    <script src="{% static 'js/plotly-2.27.0.min.js' %}" charset="utf-8"></script>
 
+    {% endif %}
 {% endblock styles %}
 
 
 {% block map %}
-<div class=".container-fluid">
-    <div class="position-absolute top-0 end-0 card"
-        style="width: 18rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
-        <div class="card-body">
-            <h5 class="card-title">Feinstaub</h5>
-            <select class="form-select" aria-label="Default select example" onchange="showPM(this)">
-                <option value="1">PM1.0</option>
-                <option value="25" selected>PM2.5</option>
-                <option value="10">PM10.0</option>
-            </select>
+    {% if host == "arbeitsplatz.luftdaten.at" %}
+    {% else %}
+    <div class=".container-fluid">
+        <div class="position-absolute top-0 end-0 card"
+            style="width: 18rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+            <div class="card-body">
+                <h5 class="card-title">Feinstaub</h5>
+                <select class="form-select" aria-label="Default select example" onchange="showPM(this)">
+                    <option value="1">PM1.0</option>
+                    <option value="25" selected>PM2.5</option>
+                    <option value="10">PM10.0</option>
+                </select>
+            </div>
+        </div>
+        <div id="map">
         </div>
     </div>
-    <div id="map">
-    </div>
-</div>
+    {% endif %}
 {% endblock map %}
 
 {% block content %}
-    <div class="row mt-3">
-        <div class="col-md-9">
-            <div>
-                <h2>Luftdaten.at Datahub</h2>
-                <p>Die angezeigten Daten stammen aus den Luftmessnetzen von Luftdaten.at und der Sensor.Community. Dabei 
-                werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
-                <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
-            </div>
-            <div id="infobox">
-            </div>
-            
-        </div>
-        <div class="col-md-3">
-            <h3>Feinstaub</h3>
-            <p>Feinstaub, auch bekannt als Particulate Matter (PM), bezeichnet eine Mischung aus winzigen Partikeln 
-                und Tröpfchen in der Luft, die so klein sind, dass sie eingeatmet werden können. Diese Partikel 
-                können aus verschiedenen Quellen stammen, einschließlich Autoabgasen, Industrieemissionen, Staub, 
-                Pollen und Ruß. Feinstaub werden nach ihrer Größe unterteilt: PM10, das Partikel umfasst, die 
-                kleiner als 10 Mikrometer sind, und PM2.5, das noch feinere Partikel umfasst, die kleiner als 2,5 
-                Mikrometer sind. Diese kleinen Partikel können tief in die Lunge eindringen und gesundheitliche 
-                Probleme verursachen, darunter Atemwegserkrankungen, Herz-Kreislauf-Erkrankungen und andere 
-                ernsthafte Gesundheitsrisiken.</p>
-            <h3>Temperatur</h3>
-            <p>Die angezeigten Temperaturen werden nahe den Luftqualitätssensoren gemessen. Da sie von Bürger*innen 
-                eingesetzt werden, können diese Messungen von der Lage und Montage der Sensoren beeinflusst werden.
-                Die Messwerte gelten immer nur für den Ort der jeweiligen Messung und sind sehr lokal zu verstehen.
-            </p>
+    {% if host == "arbeitsplatz.luftdaten.at" %}
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Saubere Luft am Arbeitsplatz</h2>
+            <p>Unsichtbare Moleküle in der Luft wie Feinstaub, Ozon oder volatile organische Chemikalien (VOC) können langfristig eine starke Belastung für die Gesundheit von Arbeitnehmerinnen darstellen. Doch leider wird dieses Thema häufig ignoriert und vielen Arbeitnehmerinnen ist gar nicht bewusst welchen Risiken sie ausgesetzt sind. Um dieses Problemfeld begreif- und messbar zu machen wollen wir gemeinsam mit den Arbeitnehmer*innen zwei Gadgets entwickeln, die Feinstaub, Ozon, CO2, volatile Chemikalien und Temperatur/Luftfeuchtigkeit messen. Einerseits einen Cube für Office-Arbeitsplätze und einmal ein Wearable, dass in die Arbeitskleidung integriert werden kann. Diese messen jeweils die Luftbelastung und informieren direkt wenn Grenzwerte überschritten werden. Gleichzeitig werden die Messdaten aufgezeichnet um sie später wissenschaftlich auszuwerten und – je nach Datenschutzbedürfnis – dem Betriebsrat, der Gewerkschaft oder der Allgemeinheit zur Verfügung zu stellen.</p>
+
+            <p>Gefördert aus Mitteln des Digitalisierungsfonds Arbeit 4.0 der AK Wien.</p>
         </div>
     </div>
+    {% else %}
+        <div class="row mt-3">
+            <div class="col-md-9">
+                <div>
+                    <h2>Luftdaten.at Datahub</h2>
+                    <p>Die angezeigten Daten stammen aus den Luftmessnetzen von Luftdaten.at und der Sensor.Community. Dabei 
+                    werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
+                    <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
+                </div>
+                <div id="infobox">
+                </div>
+                
+            </div>
+            <div class="col-md-3">
+                <h3>Feinstaub</h3>
+                <p>Feinstaub, auch bekannt als Particulate Matter (PM), bezeichnet eine Mischung aus winzigen Partikeln 
+                    und Tröpfchen in der Luft, die so klein sind, dass sie eingeatmet werden können. Diese Partikel 
+                    können aus verschiedenen Quellen stammen, einschließlich Autoabgasen, Industrieemissionen, Staub, 
+                    Pollen und Ruß. Feinstaub werden nach ihrer Größe unterteilt: PM10, das Partikel umfasst, die 
+                    kleiner als 10 Mikrometer sind, und PM2.5, das noch feinere Partikel umfasst, die kleiner als 2,5 
+                    Mikrometer sind. Diese kleinen Partikel können tief in die Lunge eindringen und gesundheitliche 
+                    Probleme verursachen, darunter Atemwegserkrankungen, Herz-Kreislauf-Erkrankungen und andere 
+                    ernsthafte Gesundheitsrisiken.</p>
+                <h3>Temperatur</h3>
+                <p>Die angezeigten Temperaturen werden nahe den Luftqualitätssensoren gemessen. Da sie von Bürger*innen 
+                    eingesetzt werden, können diese Messungen von der Lage und Montage der Sensoren beeinflusst werden.
+                    Die Messwerte gelten immer nur für den Ort der jeweiligen Messung und sind sehr lokal zu verstehen.
+                </p>
+            </div>
+        </div>
 
-<script>
-    const colorSteps = [
-        [0, [115, 0.8, 0.8]],
-        [5, [115, 0.8, 0.8]],
-        [15, [60, 0.87, 0.95]],
-        [25, [0, 0.87, 0.8]],
-        [60, [0, 0.87, 0.4]],
-    ];
+    <script>
+        const colorSteps = [
+            [0, [115, 0.8, 0.8]],
+            [5, [115, 0.8, 0.8]],
+            [15, [60, 0.87, 0.95]],
+            [25, [0, 0.87, 0.8]],
+            [60, [0, 0.87, 0.4]],
+        ];
 
-    function interpolate(a, b, fraction) {
-        return [a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction, a[2] + (b[2] - a[2]) * fraction];
-    }
+        function interpolate(a, b, fraction) {
+            return [a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction, a[2] + (b[2] - a[2]) * fraction];
+        }
 
-    function getColorForPM25(value) {
-        if(isNaN(value)) return [0, 0, 0.7]; // grey
-        for (let i = 0; i < colorSteps.length - 1; i++) {
-            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
-                const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
-                return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
+        function getColorForPM25(value) {
+            if(isNaN(value)) return [0, 0, 0.7]; // grey
+            for (let i = 0; i < colorSteps.length - 1; i++) {
+                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
+                    const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
+                    return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
+                }
+            }
+            return colorSteps[colorSteps.length - 1][1];
+        }
+
+        let hsv2hsl = (h, s, v, l = v - v * s / 2, m = Math.min(l, 1 - l)) => [h, m ? (v - l) / m : 0, l];
+
+        function showPM(selection) {
+            var index = selection.selectedIndex;
+            addMarkerLayer(index);
+        }
+
+        const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
+
+        const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        var stationData;
+
+        async function fetchMarkerData() {
+            const response = await fetch("https://api.luftdaten.at/v1/station/current/all");
+
+            stationData = [];
+
+            // Parse response CSV
+            const text = await response.text();
+            const items = text.split("\n");
+            for (let row in items) {
+                if (items[row].length == 0) continue;
+                var data = items[row].split("\t");
+                const [stationID, lat, lon, pm1, pm25, pm10] = data;
+                const marker = {stationID, lat, lon, pm1, pm25, pm10};
+                stationData.push(marker);
             }
         }
-        return colorSteps[colorSteps.length - 1][1];
-    }
 
-    let hsv2hsl = (h, s, v, l = v - v * s / 2, m = Math.min(l, 1 - l)) => [h, m ? (v - l) / m : 0, l];
+        fetchMarkerData().then(() => {
+            addMarkerLayer(1);
+        });
 
-    function showPM(selection) {
-        var index = selection.selectedIndex;
-        addMarkerLayer(index);
-    }
-
-    const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
-
-    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    var stationData;
-
-    async function fetchMarkerData() {
-        const response = await fetch("https://api.luftdaten.at/v1/station/current/all");
-
-        stationData = [];
-
-        // Parse response CSV
-        const text = await response.text();
-        const items = text.split("\n");
-        for (let row in items) {
-            if (items[row].length == 0) continue;
-            var data = items[row].split("\t");
-            const [stationID, lat, lon, pm1, pm25, pm10] = data;
-            const marker = {stationID, lat, lon, pm1, pm25, pm10};
-            stationData.push(marker);
-        }
-    }
-
-    fetchMarkerData().then(() => {
-        addMarkerLayer(1);
-    });
-
-    function getMean(arr) {
-        var acc = 0;
-        var count = 0;
-        for(let i = 0; i < arr.length; i++) {
-            if(isNaN(arr[i])) continue;
-            acc += Number(arr[i]);
-            count++;
-        }
-        if(count == 0) return NaN;
-        return acc / count;
-    }
-
-    var markerLayer;
-
-    // Add markers for 0: pm1, 1: pm25, 2: pm10
-    async function addMarkerLayer(pmType) {
-
-        if (markerLayer != null) {
-            map.removeLayer(markerLayer);
+        function getMean(arr) {
+            var acc = 0;
+            var count = 0;
+            for(let i = 0; i < arr.length; i++) {
+                if(isNaN(arr[i])) continue;
+                acc += Number(arr[i]);
+                count++;
+            }
+            if(count == 0) return NaN;
+            return acc / count;
         }
 
-        // Marker layer
-        markerLayer = L.markerClusterGroup({
-            iconCreateFunction: function (cluster) {
-                const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
-                const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
+        var markerLayer;
+
+        // Add markers for 0: pm1, 1: pm25, 2: pm10
+        async function addMarkerLayer(pmType) {
+
+            if (markerLayer != null) {
+                map.removeLayer(markerLayer);
+            }
+
+            // Marker layer
+            markerLayer = L.markerClusterGroup({
+                iconCreateFunction: function (cluster) {
+                    const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
+                    const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
+                    const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
+                    const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
+                    const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
+                    return L.divIcon({iconSize: [40, 40], className: '', html: '<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"><span style="color: ' + textColor + ';">' + (isNaN(meanPM) ? '' : meanPM.toFixed(1)) + '</span></div>'});
+                },
+                showCoverageOnHover: false,
+            });
+
+            const markerList = [];
+
+            // Add markers for each station
+            for (let stationIndex in stationData) {
+                const station = stationData[stationIndex];
+                const pm = station[['pm1', 'pm25', 'pm10'][pmType]];
+                const colorArrayHSV = getColorForPM25(pm);
                 const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
                 const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
                 const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                return L.divIcon({iconSize: [40, 40], className: '', html: '<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"><span style="color: ' + textColor + ';">' + (isNaN(meanPM) ? '' : meanPM.toFixed(1)) + '</span></div>'});
+                var marker = L.marker([station.lat, station.lon], {icon: L.divIcon({iconSize: [40, 40], className: '', html: '<a class="hiddenlink clickable" onclick="requestStationData(' + station.stationID + ')" href="#infobox"><div style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"><span style="color: ' + textColor + ';">' + (isNaN(pm) ? '' : Number(pm).toFixed(1)) + '</span></div></a>'})});
+                marker.pm = pm; // Add a custom attribute to marker
+                markerList.push(marker);
+            }
+
+            // Add markers to map
+            markerLayer.addLayers(markerList);
+            map.addLayer(markerLayer);
+        };
+
+        function requestStationData(uid) {
+            loadDataForStation(uid);
+            return true;
+        }
+
+        // Chart logic
+        async function loadDataForStation(uid) {
+            // Fetch data for station
+            //const response = await fetch("/data/demostationweekly.csv");
+            const currentDate = new Date();
+            const ts = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+            // Convert date to string of format yyyy-mm-dd hh:mm:ss.000
+            const dateString = ts.toISOString();
+            const response = await fetch("https://api.luftdaten.at/v1/station/history/?station_ids=${uid}&smooth=100&start=${dateString}");
+
+            // Parse response CSV
+            const text = await response.text();
+            const items = text.split(" ");
+            var pm1Values = [];
+            var pm25Values = [];
+            var pm10Values = [];
+            var timestamps = [];
+            for (let row in items) {
+                if (items[row].length == 0) continue;
+                var data = items[row].split(";");
+                // Careful: check for presence of pm1
+                const [secsSinceEpoch, pm1, pm25, pm10] = data;
+                pm1Values.push(pm1);
+                pm25Values.push(pm25);
+                pm10Values.push(pm10);
+                timestamps.push(new Date(secsSinceEpoch * 1000).toISOString());
+            }
+
+            TESTER = document.getElementById('infobox');
+            Plotly.newPlot(TESTER, [{
+                x: timestamps,
+                y: pm1Values,
+                type: 'line',
+                name: 'PM1',
+                hovertemplate: '%{x}: %{y:.2f} µg/m³',
             },
-            showCoverageOnHover: false,
-        });
-
-        const markerList = [];
-
-        // Add markers for each station
-        for (let stationIndex in stationData) {
-            const station = stationData[stationIndex];
-            const pm = station[['pm1', 'pm25', 'pm10'][pmType]];
-            const colorArrayHSV = getColorForPM25(pm);
-            const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-            const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
-            const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-            var marker = L.marker([station.lat, station.lon], {icon: L.divIcon({iconSize: [40, 40], className: '', html: '<a class="hiddenlink clickable" onclick="requestStationData(' + station.stationID + ')" href="#infobox"><div style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"><span style="color: ' + textColor + ';">' + (isNaN(pm) ? '' : Number(pm).toFixed(1)) + '</span></div></a>'})});
-            marker.pm = pm; // Add a custom attribute to marker
-            markerList.push(marker);
-        }
-
-        // Add markers to map
-        markerLayer.addLayers(markerList);
-        map.addLayer(markerLayer);
-    };
-
-    function requestStationData(uid) {
-        loadDataForStation(uid);
-        return true;
-    }
-
-    // Chart logic
-    async function loadDataForStation(uid) {
-        // Fetch data for station
-        //const response = await fetch("/data/demostationweekly.csv");
-        const currentDate = new Date();
-        const ts = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-        // Convert date to string of format yyyy-mm-dd hh:mm:ss.000
-        const dateString = ts.toISOString();
-        const response = await fetch("https://api.luftdaten.at/v1/station/history/?station_ids=${uid}&smooth=100&start=${dateString}");
-
-        // Parse response CSV
-        const text = await response.text();
-        const items = text.split(" ");
-        var pm1Values = [];
-        var pm25Values = [];
-        var pm10Values = [];
-        var timestamps = [];
-        for (let row in items) {
-            if (items[row].length == 0) continue;
-            var data = items[row].split(";");
-            // Careful: check for presence of pm1
-            const [secsSinceEpoch, pm1, pm25, pm10] = data;
-            pm1Values.push(pm1);
-            pm25Values.push(pm25);
-            pm10Values.push(pm10);
-            timestamps.push(new Date(secsSinceEpoch * 1000).toISOString());
-        }
-
-        TESTER = document.getElementById('infobox');
-        Plotly.newPlot(TESTER, [{
-            x: timestamps,
-            y: pm1Values,
-            type: 'line',
-            name: 'PM1',
-            hovertemplate: '%{x}: %{y:.2f} µg/m³',
-        },
-        {
-            x: timestamps,
-            y: pm25Values,
-            type: 'line',
-            name: 'PM2.5',
-            hovertemplate: '%{x}: %{y:.2f} µg/m³',
-        },
-        {
-            x: timestamps,
-            y: pm10Values,
-            type: 'line',
-            name: 'PM10',
-            hovertemplate: '%{x}: %{y:.2f} µg/m³',
-        }], {
-            margin: {t: 0},
-            height: 500,
-            yaxis: {
+            {
+                x: timestamps,
+                y: pm25Values,
+                type: 'line',
+                name: 'PM2.5',
+                hovertemplate: '%{x}: %{y:.2f} µg/m³',
+            },
+            {
+                x: timestamps,
+                y: pm10Values,
+                type: 'line',
+                name: 'PM10',
+                hovertemplate: '%{x}: %{y:.2f} µg/m³',
+            }], {
+                margin: {t: 0},
+                height: 500,
+                yaxis: {
+                    title: {
+                        text: 'Konzenration (µg/m³)',
+                    },
+                    fixedrange: true,
+                },
                 title: {
-                    text: 'Konzenration (µg/m³)',
+                    text: 'Station 12345 - Feinstaub der letzten Woche',
+                    automargin: true,
                 },
-                fixedrange: true,
-            },
-            title: {
-                text: 'Station 12345 - Feinstaub der letzten Woche',
-                automargin: true,
-            },
-            xaxis: {fixedrange: true},
-            shapes: [
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    y0: 5,
-                    x1: 1,
-                    y1: 5,
-                    line: {
-                        color: 'rgb(0, 0, 0)',
-                        width: 1,
-                        dash: 'dot'
+                xaxis: {fixedrange: true},
+                shapes: [
+                    {
+                        type: 'line',
+                        xref: 'paper',
+                        x0: 0,
+                        y0: 5,
+                        x1: 1,
+                        y1: 5,
+                        line: {
+                            color: 'rgb(0, 0, 0)',
+                            width: 1,
+                            dash: 'dot'
+                        },
+                        layer: 'below',
                     },
-                    layer: 'below',
-                },
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    y0: 15,
-                    x1: 1,
-                    y1: 15,
-                    line: {
-                        color: 'rgb(0, 0, 0)',
-                        width: 1,
-                        dash: 'dot'
+                    {
+                        type: 'line',
+                        xref: 'paper',
+                        x0: 0,
+                        y0: 15,
+                        x1: 1,
+                        y1: 15,
+                        line: {
+                            color: 'rgb(0, 0, 0)',
+                            width: 1,
+                            dash: 'dot'
+                        },
+                        layer: 'below',
                     },
-                    layer: 'below',
-                },
-                {
-                    type: 'line',
-                    xref: 'paper',
-                    x0: 0,
-                    y0: 45,
-                    x1: 1,
-                    y1: 45,
-                    line: {
-                        color: 'rgb(0, 0, 0)',
-                        width: 1,
-                        dash: 'dot'
+                    {
+                        type: 'line',
+                        xref: 'paper',
+                        x0: 0,
+                        y0: 45,
+                        x1: 1,
+                        y1: 45,
+                        line: {
+                            color: 'rgb(0, 0, 0)',
+                            width: 1,
+                            dash: 'dot'
+                        },
+                        layer: 'below',
                     },
-                    layer: 'below',
-                },
-            ],
-        });
-    }
+                ],
+            });
+        }
 
-</script>
+    </script>
+    {% endif %}
 {% endblock content %}

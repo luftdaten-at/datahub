@@ -4,7 +4,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{% block title %}{% trans "Luftdaten.at Datahub" %}{% endblock title %}</title>
+    <title>{% block title %}{% if host == "arbeitsplatz.luftdaten.at" %}{% trans "Saubere Luft am Arbeitsplatz" %}{% else %}{% trans "Luftdaten.at Datahub" %}{% endif %}{% endblock title %}</title>
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"\>
     <!-- CSS -->
@@ -12,17 +12,24 @@
     {% block styles %}{% endblock styles %}
 </head>    
 <body>
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
         <div class="container-fluid">
+          {% if host == "arbeitsplatz.luftdaten.at" %}
+            <a class="navbar-brand" href="{% url 'home' %}">{% trans "Saubere Luft am Arbeitsplatz" %}</a>
+          {% else %}
             <a class="navbar-brand" href="{% url 'home' %}">{% trans "Luftdaten.at Datahub" %}</a>
+          {% endif %}  
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-targ\ et="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Tog\ gle navigation">
             <span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                  {% if host == "arbeitsplatz.luftdaten.at" %}
+                  {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'workshops-list' %}">{% trans "Workshops" %}</a></li>
                     {% if user.is_authenticated and user.is_superuser %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'device-list' %}">{% trans "Devices" %}</a></li>
-                    {% endif %}            
+                    {% endif %}
+                  {% endif %}           
                 </ul>
                 <ul class="navbar-nav d-flex flex-row ms-auto me-3">
                     {% if user.is_authenticated %}
@@ -50,6 +57,20 @@
         {% block content %}
         {% endblock content %}
     </div>
+    <footer class="footer bg-dark text-white py-3">
+      <div class="container">
+        <nav aria-label="Footer navigation">
+        <div class="row">
+          <div class="col">
+            <ul class="list-unstyled list-inline">
+            <li class="list-inline-item"><a href="https://luftdaten.at/datenschutz/" class="text-white">{% trans "Privacy" %}</a></li>
+            <li class="list-inline-item"><a href="https://luftdaten.at/impressum/" class="text-white">{% trans "About us" %}</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      </div>
+    </footer>
     <!-- Bootstrap JavaScript -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <!-- JavaScript -->

@@ -50,3 +50,8 @@ html {
     height: 100vh;
     padding-top: 15vh;
 }
+
+.footer a:hover {
+    text-decoration: underline;
+    color: #aaaaaa; /* Lighter grey for hover to maintain contrast */
+}
