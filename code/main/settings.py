@@ -30,7 +30,13 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
-ALLOWED_HOSTS = ["datahub.luftdaten.at", "localhost", "127.0.0.1", "172.18.0.*"]
+ALLOWED_HOSTS = [
+    "datahub.luftdaten.at",
+    "arbeitsplatz.luftdaten.at",
+    "localhost",
+    "127.0.0.1",
+    "172.18.0.*"
+]
 
 
 # Application definition
@@ -51,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_spectacular_sidecar',
+    'oauth2_provider',
     # Local
     'accounts.apps.AccountsConfig',
     'pages.apps.PagesConfig',
@@ -209,4 +216,14 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
+}
+
+# Django OAuth Toolkit settings
+OAUTH2_PROVIDER = {
+    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,  # Token expiration time
+    'SCOPES': {
+        'read': 'Read scope',
+        'write': 'Write scope',
+    },
+    'OIDC_RSA_PRIVATE_KEY': env("OIDC_RSA_PRIVATE_KEY"),
 }
