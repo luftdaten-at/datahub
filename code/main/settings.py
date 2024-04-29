@@ -60,10 +60,11 @@ INSTALLED_APPS = [
     'oauth2_provider',
     # Local
     'accounts.apps.AccountsConfig',
-    'pages.apps.PagesConfig',
     'api.apps.ApiConfig',
-    'workshops.apps.WorkshopsConfig',
+    'campaign.apps.CampaignConfig',
     'devices.apps.DevicesConfig',
+    'pages.apps.PagesConfig',
+    'workshops.apps.WorkshopsConfig',
 ]
 
 MIDDLEWARE = [
