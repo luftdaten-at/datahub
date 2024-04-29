@@ -25,9 +25,10 @@ class Device(models.Model):
     """
     Device model.
     """
-    name = models.CharField(max_length=4, unique=True, primary_key=True)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=4)
     model = models.ForeignKey(DeviceModel, on_delete=models.CASCADE, null=True)
-    board_id = models.CharField(max_length=12, null=True, blank=True)
+    board_id = models.CharField(max_length=12, null=True, blank=True, unique=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     sensor_sen5x = models.CharField(max_length = 255, null=True, blank=True)
     firmware_version = models.ForeignKey(FirmwareVersion, on_delete=models.CASCADE, null=True, blank=True)
