@@ -15,6 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.i18n import i18n_patterns
 
 urlpatterns = [
     # Django admin
@@ -26,4 +27,8 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("workshops/", include("workshops.urls")),
     path("devices/", include("devices.urls")),
-]
+] + i18n_patterns(
+    # Your URLs that require localization
+    # Include set_language URL
+    path('i18n/', include('django.conf.urls.i18n')),
+)

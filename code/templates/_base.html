@@ -67,6 +67,20 @@
             <li class="list-inline-item"><a href="https://luftdaten.at/impressum/" class="text-white">{% trans "About us" %}</a></li>
             </ul>
           </div>
+          <div class="col text-end">
+            <form action="{% url 'set_language' %}" method="post">
+              {% csrf_token %}
+              <input name="next" type="hidden" value="{{ request.path }}">
+              <select name="language" onchange="this.form.submit()">
+                  {% get_current_language as LANGUAGE_CODE %}
+                  {% get_available_languages as LANGUAGES %}
+                  {% for code, name in LANGUAGES %}
+                      <option value="{{ code }}" {% if code == LANGUAGE_CODE %}selected{% endif %}>
+                          {{ name }}
+                      </option>
+                  {% endfor %}
+              </select>
+          </form>
         </div>
       </nav>
       </div>
