@@ -227,5 +227,5 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
     },
     'OIDC_RSA_PRIVATE_KEY': env("OIDC_RSA_PRIVATE_KEY"),
-    'REDIRECT_URI_VALIDATOR_CLASS': 'accounts.validators.CustomRedirectURIValidator',
+    'REDIRECT_URI_VALIDATOR_CLASS': 'accounts.validators.CustomOAuth2Validator',
 }
