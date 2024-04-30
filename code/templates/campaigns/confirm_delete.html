@@ -1,0 +1,12 @@
+{% extends '_base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>{% trans "Do you really want to delete" %} "{{ object.title }}" ?</h2>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">{% trans "Yes, please delete." %}</button>
+        <a href="{% url 'campaigns-my' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+    </form>
+</div>
+{% endblock %}

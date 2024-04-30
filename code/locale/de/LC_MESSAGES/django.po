@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Silvio Heinze <silvio.heinze@luftdaten.at>, 2023.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-29 12:36+0200\n"
+"POT-Creation-Date: 2024-04-30 20:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,57 +18,123 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: main/settings.py:146
+#: campaign/forms.py:15 templates/devices/list.html:13
+#: templates/devices/my.html:13
+msgid "Name"
+msgstr "Name"
+
+#: campaign/forms.py:16 workshops/forms.py:16
+msgid "Description"
+msgstr "Beschreibung"
+
+#: campaign/forms.py:17 workshops/forms.py:17
+msgid "Start Date"
+msgstr "Startdatum"
+
+#: campaign/forms.py:18 workshops/forms.py:18
+msgid "End Date"
+msgstr "Enddatum"
+
+#: campaign/forms.py:19 templates/campaigns/my.html:13
+#: templates/workshops/my.html:13 workshops/forms.py:19
+msgid "Public"
+msgstr "Öffentlich"
+
+#: campaign/forms.py:22
+#, fuzzy
+#| msgid "Enter the title of the workshop."
+msgid "Enter the name of the campaign."
+msgstr "Gibt einen aussagekräftigen Titel ein."
+
+#: campaign/forms.py:23
+#, fuzzy
+#| msgid ""
+#| "Write some lines about the workshop. Where does it take place? Is it "
+#| "associated with an event or a project? Who can participate?"
+msgid ""
+"Write some lines about the Campaign. Where does it take place? Is it "
+"associated with an event or a project? Who can participate?"
+msgstr ""
+"Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er mit "
+"einer Veranstaltung oder einem Projekt verbunden? Wer kann teilnehmen?"
+
+#: campaign/forms.py:24
+#, fuzzy
+#| msgid ""
+#| "Should the workshop be publicly available on the Datahub? If not, only "
+#| "logged-in users with set permissions can see the results."
+msgid ""
+"Should the Campaign be publicly available on the Datahub? If not, only "
+"logged-in users with set permissions can see the results."
+msgstr ""
+"Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
+"können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
+"Ergebnisse sehen."
+
+#: main/settings.py:147
 msgid "English"
 msgstr "Englisch"
 
-#: main/settings.py:147
+#: main/settings.py:148
 msgid "German"
 msgstr "Deutsch"
 
 #: templates/_base.html:7 templates/_base.html:18
-msgid "Saubere Luft am Arbeitsplatz"
-msgstr ""
+msgid "Clean air at the workplace"
+msgstr "Saubere Luft am Arbeitsplatz"
 
 #: templates/_base.html:7 templates/_base.html:20
 msgid "Luftdaten.at Datahub"
-msgstr ""
+msgstr "Luftdaten.at Datahub"
 
-#: templates/_base.html:28 templates/workshops/workshops_list.html:5
-#: templates/workshops/workshops_list.html:8
+#: templates/_base.html:28 templates/workshops/list.html:5
+#: templates/workshops/list.html:8
 msgid "Workshops"
-msgstr ""
+msgstr "Workshops"
 
-#: templates/_base.html:30 templates/devices/device_list.html:5
-#: templates/devices/device_list.html:9
+#: templates/_base.html:30 templates/devices/list.html:5
+#: templates/devices/list.html:9 templates/devices/my.html:5
+#: templates/devices/my.html:9
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:41 templates/workshops/workshops_my.html:6
+#: templates/_base.html:41 templates/campaigns/my.html:6
+#, fuzzy
+#| msgid "Campaigns"
+msgid "My campaigns"
+msgstr "Meine Messkampagnen"
+
+#: templates/_base.html:42
+#, fuzzy
+#| msgid "Devices"
+msgid "My devices"
+msgstr "Meine Geräte"
+
+#: templates/_base.html:44 templates/workshops/my.html:6
 msgid "My workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:42
+#: templates/_base.html:46
 msgid "Change password"
 msgstr "Passwort ändern"
 
-#: templates/_base.html:44
+#: templates/_base.html:48
 msgid "Log out"
 msgstr "Abmelden"
 
-#: templates/_base.html:48
+#: templates/_base.html:52
 msgid "Log in"
 msgstr "Anmelden"
 
-#: templates/_base.html:49
+#: templates/_base.html:53
 msgid "Sign up"
 msgstr "Registrieren"
 
-#: templates/_base.html:66
+#: templates/_base.html:70
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:67
+#: templates/_base.html:71
 msgid "About us"
 msgstr "Impressum"
 
@@ -118,64 +184,120 @@ msgid ""
 "Forgotten your password? Enter your email address below, and we'll send you "
 "an email allowing you to reset it."
 msgstr ""
+"Passwort vergessen? Geben Sie unten Ihre E-Mail-Adresse ein, und wir senden "
+"Ihnen eine E-Mail, mit der Sie es zurücksetzen können."
 
 #: templates/account/password_reset_done.html:12
 msgid ""
 "We have sent you an email. If you have not received it please check your "
 "spam folder. Otherwise contact us if you do not receive it in a few minutes."
 msgstr ""
+"Wir haben Ihnen eine E-Mail gesendet. Wenn Sie diese nicht erhalten haben, "
+"überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, "
+"wenn Sie sie nicht innerhalb weniger Minuten erhalten."
 
-#: templates/devices/device_form.html:7
-#, fuzzy
-#| msgid "Devices"
-msgid "Edit Device"
-msgstr "Geräte"
+#: templates/campaigns/confirm_delete.html:5
+#: templates/workshops/confirm_delete.html:5
+msgid "Do you really want to delete"
+msgstr "Möchtest du wirklich "
 
-#: templates/devices/device_form.html:11
-msgid "Update"
-msgstr "Aktualisieren"
+#: templates/campaigns/confirm_delete.html:8
+#: templates/workshops/confirm_delete.html:8
+msgid "Yes, please delete."
+msgstr "Ja, bitte löschen."
 
-#: templates/devices/device_form.html:12
+#: templates/campaigns/confirm_delete.html:9 templates/devices/form.html:12
+#: templates/workshops/confirm_delete.html:9
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: templates/devices/device_list.html:13
-msgid "Name"
-msgstr "Gerätename"
+#: templates/campaigns/form.html:10
+#, fuzzy
+#| msgid "Campaigns"
+msgid "Campaign"
+msgstr "Messkampagne"
 
-#: templates/devices/device_list.html:14
-msgid "MAC adress"
-msgstr "MAC Adresse"
+#: templates/campaigns/form.html:14 templates/workshops/form.html:14
+msgid "Save"
+msgstr "Speichern"
 
-#: templates/devices/device_list.html:15
-msgid "Firmware version"
-msgstr "Firmware Version"
+#: templates/campaigns/home.html:5 templates/campaigns/home.html:8
+msgid "Campaigns"
+msgstr "Messkampagnen"
 
-#: templates/devices/device_list.html:16
-#: templates/workshops/workshops_my.html:14
+#: templates/campaigns/my.html:10
+#, fuzzy
+#| msgid "Campaigns"
+msgid "Campaign name"
+msgstr "Messkampagnenname"
+
+#: templates/campaigns/my.html:11 templates/workshops/my.html:11
+msgid "Start date"
+msgstr "Startdatum"
+
+#: templates/campaigns/my.html:12 templates/workshops/my.html:12
+msgid "End date"
+msgstr "Enddatum"
+
+#: templates/campaigns/my.html:14 templates/devices/list.html:16
+#: templates/devices/my.html:16 templates/workshops/my.html:14
 msgid "Actions"
 msgstr "Aktionen"
 
-#: templates/devices/device_list.html:25
-#: templates/workshops/workshops_my.html:26
+#: templates/campaigns/my.html:25 templates/workshops/my.html:25
+msgid "Details"
+msgstr "Details"
+
+#: templates/campaigns/my.html:26 templates/devices/list.html:25
+#: templates/devices/my.html:25 templates/workshops/my.html:26
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: templates/devices/device_list.html:29
+#: templates/campaigns/my.html:27 templates/workshops/my.html:27
+msgid "Delete"
+msgstr "Löschen"
+
+#: templates/campaigns/my.html:32
+#, fuzzy
+#| msgid "No workshops found."
+msgid "No campaigns found."
+msgstr "Keine Messkampagnen gefunden."
+
+#: templates/campaigns/my.html:37
+#, fuzzy
+#| msgid "Campaigns"
+msgid "Create campaign"
+msgstr "Messkampagne erstellen"
+
+#: templates/devices/form.html:7
+#, fuzzy
+#| msgid "Devices"
+msgid "Edit Device"
+msgstr "Gerät bearbeiten"
+
+#: templates/devices/form.html:11
+msgid "Update"
+msgstr "Aktualisieren"
+
+#: templates/devices/list.html:14 templates/devices/my.html:14
+msgid "MAC adress"
+msgstr "MAC Adresse"
+
+#: templates/devices/list.html:15 templates/devices/my.html:15
+msgid "Firmware version"
+msgstr "Firmware Version"
+
+#: templates/devices/list.html:29 templates/devices/my.html:29
 #, fuzzy
 #| msgid "No workshops found."
 msgid "No devices found."
 msgstr "Keine Workshops gefunden."
 
-#: templates/workshops/workshop_form.html:10
+#: templates/workshops/form.html:10
 msgid "Workshop"
 msgstr "Workshop"
 
-#: templates/workshops/workshop_form.html:14
-msgid "Save"
-msgstr "Speichern"
-
-#: templates/workshops/workshops_list.html:9
+#: templates/workshops/list.html:9
 msgid ""
 "We continuously host workshops where air quality is measured together. On "
 "this page, the results of all public workshops are listed."
@@ -184,65 +306,33 @@ msgstr ""
 "Luftqualität gemessen wird. Auf dieser Seite sind die Ergebnisse aller "
 "öffentlichen Workshops aufgelistet."
 
-#: templates/workshops/workshops_list.html:10
+#: templates/workshops/list.html:10
 msgid "Upcoming workshops"
 msgstr "Kommende Workshops"
 
-#: templates/workshops/workshops_list.html:15
+#: templates/workshops/list.html:15
 msgid "No upcoming workshops."
 msgstr "Keine kommenden Workshops."
 
-#: templates/workshops/workshops_list.html:18
+#: templates/workshops/list.html:18
 msgid "Past workshops"
 msgstr "Vergangene Workshops"
 
-#: templates/workshops/workshops_list.html:23
+#: templates/workshops/list.html:23
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
-#: templates/workshops/workshops_my.html:10 workshops/forms.py:15
+#: templates/workshops/my.html:10 workshops/forms.py:15
 msgid "Title"
 msgstr "Titel"
 
-#: templates/workshops/workshops_my.html:11
-msgid "Start date"
-msgstr "Startdatum"
-
-#: templates/workshops/workshops_my.html:12
-msgid "End date"
-msgstr "Enddatum"
-
-#: templates/workshops/workshops_my.html:13 workshops/forms.py:19
-msgid "Public"
-msgstr "Öffentlich"
-
-#: templates/workshops/workshops_my.html:25
-msgid "Details"
-msgstr "Details"
-
-#: templates/workshops/workshops_my.html:27
-msgid "Delete"
-msgstr "Löschen"
-
-#: templates/workshops/workshops_my.html:32
+#: templates/workshops/my.html:32
 msgid "No workshops found."
 msgstr "Keine Workshops gefunden."
 
-#: templates/workshops/workshops_my.html:37
+#: templates/workshops/my.html:37
 msgid "Create workshop"
 msgstr "Workshop erstellen"
-
-#: workshops/forms.py:16
-msgid "Description"
-msgstr "Beschreibung"
-
-#: workshops/forms.py:17
-msgid "Start Date"
-msgstr "Startdatum"
-
-#: workshops/forms.py:18
-msgid "End Date"
-msgstr "Enddatum"
 
 #: workshops/forms.py:22
 msgid "Enter the title of the workshop."

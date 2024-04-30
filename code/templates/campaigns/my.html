@@ -1,0 +1,39 @@
+{% extends "_base.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>{% trans "My campaigns" %}</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% trans "Campaign name" %}</th>
+                <th>{% trans "Start date" %}</th>
+                <th>{% trans "End date" %}</th>
+                <th>{% trans "Public" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for campaign in campaigns %}
+            <tr>
+                <td>{{ campaign.name }}</td>
+                <td>{{ campaign.start_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ campaign.end_date|date:"d.m.Y H:i" }}</td>
+                <td>{{ campaign.public|yesno:"Ja,Nein" }}</td> <!-- Yes/No for Boolean fields -->
+                <td>
+                    <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                    <a href="{% url 'campaigns-update' campaign.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a>
+                    <a href="{% url 'campaigns-delete' campaign.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>    
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">{% trans "No campaigns found." %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{% url 'campaigns-create' %}" class="btn btn-primary">{% trans "Create campaign" %}</a>
+</div>
+{% endblock %}

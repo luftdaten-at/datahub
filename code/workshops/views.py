@@ -11,7 +11,7 @@ from .forms import WorkshopForm
 class WorkshopListView(ListView):
     model = Workshop
     context_object_name = 'workshops'
-    template_name = 'workshops/workshops_list.html'
+    template_name = 'workshops/list.html'
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -29,7 +29,7 @@ class WorkshopListView(ListView):
 class WorkshopDetailView(DetailView):
     model = Workshop
     context_object_name = 'workshop'
-    template_name = 'workshops/workshop_detail.html'
+    template_name = 'workshops/detail.html'
 
     def get_queryset(self):
         """
@@ -56,7 +56,7 @@ class WorkshopDetailView(DetailView):
 
 class WorkshopMyView(LoginRequiredMixin, ListView):
     model = Workshop
-    template_name = 'workshops/workshops_my.html'
+    template_name = 'workshops/my.html'
     context_object_name = 'workshops'
     
     def get_queryset(self):
@@ -69,7 +69,7 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
 class WorkshopCreateView(CreateView):
     model = Workshop
     form_class = WorkshopForm
-    template_name = 'workshops/workshop_form.html'
+    template_name = 'workshops/form.html'
     success_url = reverse_lazy('workshops-my')  # Redirect after a successful creation
 
     def form_valid(self, form):
@@ -80,7 +80,7 @@ class WorkshopCreateView(CreateView):
 class WorkshopUpdateView(UpdateView):
     model = Workshop
     form_class = WorkshopForm
-    template_name = 'workshops/workshop_form.html'  # Reuse the form template
+    template_name = 'workshops/form.html'  # Reuse the form template
 
     def get_success_url(self):
         return reverse_lazy('workshops-my')  # Redirect to the workshop list after update
@@ -92,7 +92,7 @@ class WorkshopUpdateView(UpdateView):
 
 class WorkshopDeleteView(DeleteView):
     model = Workshop
-    template_name = 'workshops/workshop_confirm_delete.html'  # Confirmation page template
+    template_name = 'workshops/confirm_delete.html'  # Confirmation page template
     success_url = reverse_lazy('workshops-my')  # Redirect here after deletion
 
     def get_queryset(self):
