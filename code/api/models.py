@@ -17,6 +17,7 @@ class AirQualityDatapoint(models.Model):
     """
     Datapoint on one location at a specific time, which can include several measurements.
     """
+    id = models.BigAutoField(unique=True, primary_key=True)
     time = models.DateTimeField()
     device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)
     campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True)
