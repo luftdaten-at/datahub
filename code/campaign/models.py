@@ -3,10 +3,11 @@ from django.conf import settings
 
 class Campaign(models.Model):
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     public = models.BooleanField(default=True)
+    id_token = models.CharField(max_length=8, null=True)
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
