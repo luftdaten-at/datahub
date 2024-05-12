@@ -1,14 +1,5 @@
 from django.db import models
-
-class FirmwareVersion(models.Model):
-    """
-    Firmware version model.
-    """
-    name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)
-
-    def __str__(self):
-        return self.name
+from django.utils import timezone
 
 class DeviceModel(models.Model):
     """
@@ -31,8 +22,35 @@ class Device(models.Model):
     board_id = models.CharField(max_length=12, null=True, blank=True, unique=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     sensor_sen5x = models.CharField(max_length = 255, null=True, blank=True)
-    firmware_version = models.ForeignKey(FirmwareVersion, on_delete=models.CASCADE, null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
 
     def __str__(self):
+        return self.board_id
+    
+
+class Sensor(models.Model):
+    """
+    Sensor model.
+    """
+    name = models.CharField(max_length=255, unique=True, primary_key=True)
+    description = models.TextField(null=True, blank=True)
+
+    def __str__(self):
         return self.name
+    
+
+class DeviceStatus(models.Model):
+    """
+    Device status model.
+    """
+    id = models.BigAutoField(primary_key=True)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE)
+    time_received = models.DateTimeField()
+    status = models.JSONField()
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Check if the instance is new
+            self.time_received = timezone.now()  # Set the created_at field only if it's a new instance
+        super(DeviceStatus, self).save(*args, **kwargs)
+
+

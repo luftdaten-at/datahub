@@ -227,5 +227,9 @@ OAUTH2_PROVIDER = {
         'write': 'Write scope',
     },
     'OIDC_RSA_PRIVATE_KEY': env("OIDC_RSA_PRIVATE_KEY"),
-    'REDIRECT_URI_VALIDATOR_CLASS': 'accounts.validators.CustomOAuth2Validator',
+    'ALLOWED_REDIRECT_URI_SCHEMES': {
+        "http",
+        "https",
+        "at.luftdaten.pmble"
+    },
 }
