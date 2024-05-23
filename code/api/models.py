@@ -1,7 +1,7 @@
 from django.db import models
 from workshops.models import Participant, Workshop
 from devices.models import Device, Sensor
-from campaign.models import Campaign
+#from campaign.models import Campaign
 
 
 class MobilityMode(models.Model):
@@ -19,8 +19,8 @@ class AirQualityDatapoint(models.Model):
     """
     id = models.BigAutoField(unique=True, primary_key=True)
     time = models.DateTimeField()
-    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)
-    campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, null=True, blank=True)
+    #campaign = models.ForeignKey(Campaign, on_delete=models.SET_NULL, null=True, blank=True)
     workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True, blank=True)
     participant = models.ForeignKey(Participant, on_delete=models.SET_NULL, null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
@@ -68,10 +68,10 @@ class AirQualityRecord(models.Model):
     iaq_acc = models.SmallIntegerField(null=True, blank=True)
     iaq_static = models.FloatField(null=True, blank=True)
     pressure = models.FloatField(null=True, blank=True)
-    device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)
-    workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True, blank=True)
-    participant = models.ForeignKey(Participant, on_delete=models.SET_NULL, null=True, blank=True)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, null=True)
+    workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, null=True, blank=True)
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
     lon = models.FloatField(null=True, blank=True)
     location_precision = models.FloatField(null=True, blank=True)
-    mode = models.ForeignKey(MobilityMode, on_delete=models.SET_NULL, null=True, blank=True)
+    mode = models.ForeignKey(MobilityMode, on_delete=models.CASCADE, null=True, blank=True)

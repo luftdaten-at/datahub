@@ -6,11 +6,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 
-from .models import AirQualityRecord, MobilityMode
+from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer
+from .serializers import AirQualityRecordSerializer, AirQualityDatapointSerializer, DeviceSerializer, WorkshopSerializer
 
    
 class AirQualityDataAdd(APIView):
@@ -31,7 +31,7 @@ class AirQualityDataAdd(APIView):
         errors = []
         for record in data:
             try:
-                device, _ = Device.objects.get_or_create(name=record.get('device'))
+                device, _ = Device.objects.get_or_create(id=record.get('device'))
                 participant, _ = Participant.objects.get_or_create(name=record.get('participant'))
                 mode, _ = MobilityMode.objects.get_or_create(name=record.get('mode'))
                 workshop = Workshop.objects.get(name=record.get('workshop'))
@@ -39,7 +39,7 @@ class AirQualityDataAdd(APIView):
                 
                 # Check if a record already exists
                 if AirQualityRecord.objects.filter(time=time, device=device).exists():
-                    errors.append({'error': f'Record with time {time} and device {device.name} already exists'})
+                    errors.append({'error': f'Record with time {time} and device {device.id} already exists'})
                     continue  # Skip this record and continue with the next one
                 
                  # Check if the time of the record is within the workshop's timeframe
@@ -78,6 +78,20 @@ class DeviceDetailView(RetrieveAPIView):
     """
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
+
+class DeviceDataAdd(APIView):
+    """
+    Processes a POST request with sensor data.
+
+    """
+    def post(self, request, format=None):
+        serializer = AirQualityDatapointSerializer(data=request.data, many=True)
+        
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkshopDetailView(RetrieveAPIView):

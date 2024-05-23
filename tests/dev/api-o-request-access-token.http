@@ -1,0 +1,6 @@
+# API test request for the endpoint /api/o/token/
+# 
+
+POST http://localhost/api/o/token/ HTTP/1.1
+
+"grant_type=authorization_code&client_id=c1342PNAL4eQ7Mov6dHITDu8FL9Ucqi3u8KXWuOP&client_secret=pbkdf2_sha256$600000$k795hPhlqO0PyawRYPGKMR$xQK/d7sVdEBxnCIz8esYajPqeneWpp3lz2/GjZ3fSHY="

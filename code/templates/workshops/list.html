@@ -7,12 +7,12 @@
     {% block content %}
     <h2>{% trans "Workshops" %}</h2>
     <p>{% trans "We continuously host workshops where air quality is measured together. On this page, the results of all public workshops are listed." %}</p>
-    <h3>{% trans "Upcoming workshops" %}</h3>
+    <h3>{% trans "Running workshops" %}</h3>
     <ul>
         {% for workshop in upcoming_workshops %}
             <li><a href="{% url 'workshop-detail' workshop.pk %}">{{ workshop.title }}, Start: {{ workshop.start_date }}</a></li>
         {% empty %}
-            <li>{% trans "No upcoming workshops." %}</li>
+            <li>{% trans "No running workshops." %}</li>
         {% endfor %}
     </ul>
     <h3>{% trans "Past workshops" %}</h3>

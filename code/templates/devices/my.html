@@ -19,7 +19,7 @@
         <tbody>
             {% for device in devices %}
             <tr>
-                <td><a href="{% url 'device-detail' device.pk %}">{{ device.name }}</a></td>
+                <td><a href="{% url 'device-detail' device.pk %}">{{ device.id }}</a></td>
                 <td>{{ device.btmac_address }}</td>
                 <td>{{ device.firmware_version }}</td>
                 <td><a href="{% url 'device-detail' device.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a><a href="{% url 'device-update' device.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a></td>

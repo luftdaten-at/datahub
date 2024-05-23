@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-30 20:26+0200\n"
+"POT-Creation-Date: 2024-05-13 01:34+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: campaign/forms.py:15 templates/devices/list.html:13
-#: templates/devices/my.html:13
+#: templates/devices/my.html:13 templates/workshops/my.html:10
 msgid "Name"
 msgstr "Name"
 
@@ -93,8 +93,7 @@ msgid "Workshops"
 msgstr "Workshops"
 
 #: templates/_base.html:30 templates/devices/list.html:5
-#: templates/devices/list.html:9 templates/devices/my.html:5
-#: templates/devices/my.html:9
+#: templates/devices/list.html:9
 msgid "Devices"
 msgstr "Geräte"
 
@@ -104,7 +103,8 @@ msgstr "Geräte"
 msgid "My campaigns"
 msgstr "Meine Messkampagnen"
 
-#: templates/_base.html:42
+#: templates/_base.html:42 templates/devices/my.html:5
+#: templates/devices/my.html:9
 #, fuzzy
 #| msgid "Devices"
 msgid "My devices"
@@ -244,7 +244,8 @@ msgstr "Enddatum"
 msgid "Actions"
 msgstr "Aktionen"
 
-#: templates/campaigns/my.html:25 templates/workshops/my.html:25
+#: templates/campaigns/my.html:25 templates/devices/my.html:25
+#: templates/workshops/my.html:25
 msgid "Details"
 msgstr "Details"
 
@@ -307,12 +308,12 @@ msgstr ""
 "öffentlichen Workshops aufgelistet."
 
 #: templates/workshops/list.html:10
-msgid "Upcoming workshops"
-msgstr "Kommende Workshops"
+msgid "Running workshops"
+msgstr "Laufende Workshops"
 
 #: templates/workshops/list.html:15
-msgid "No upcoming workshops."
-msgstr "Keine kommenden Workshops."
+msgid "No running workshops."
+msgstr "Keine laufenden Workshops."
 
 #: templates/workshops/list.html:18
 msgid "Past workshops"
@@ -322,10 +323,6 @@ msgstr "Vergangene Workshops"
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
-#: templates/workshops/my.html:10 workshops/forms.py:15
-msgid "Title"
-msgstr "Titel"
-
 #: templates/workshops/my.html:32
 msgid "No workshops found."
 msgstr "Keine Workshops gefunden."
@@ -333,6 +330,10 @@ msgstr "Keine Workshops gefunden."
 #: templates/workshops/my.html:37
 msgid "Create workshop"
 msgstr "Workshop erstellen"
+
+#: workshops/forms.py:15
+msgid "Title"
+msgstr "Titel"
 
 #: workshops/forms.py:22
 msgid "Enter the title of the workshop."
