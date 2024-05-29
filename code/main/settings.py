@@ -32,7 +32,9 @@ DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = [
     "datahub.luftdaten.at",
+    "staging.datahub.luftdaten.at",
     "arbeitsplatz.luftdaten.at",
+    "staging.arbeitsplatz.luftdaten.at",
     "localhost",
     "127.0.0.1",
     "172.18.0.*"
