@@ -1,4 +1,4 @@
-name: Testing Build and Publish Docker Image
+name: Build and Publish Staging Docker Image
 
 on:
   push:
@@ -26,4 +26,4 @@ jobs:
           context: .
           file: Dockerfile.prod
           push: true
-          tags: luftdaten/datahub:testing
+          tags: luftdaten/datahub:staging
