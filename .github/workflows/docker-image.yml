@@ -26,6 +26,5 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: Dockerfile.prod
           push: true
           tags: luftdaten/datahub:testing
