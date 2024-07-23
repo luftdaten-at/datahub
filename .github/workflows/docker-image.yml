@@ -1,7 +1,7 @@
 on: [push]
 jobs:
   build:
-    name: Testing: Build and Publish Docker Image
+    name: Testing Build and Publish Docker Image
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
