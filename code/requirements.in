@@ -1,0 +1,14 @@
+asgiref
+Django
+sqlparse
+psycopg2-binary
+django-crispy-forms
+crispy-bootstrap5
+django-allauth
+django-oauth-toolkit
+environs[django]
+whitenoise
+gunicorn
+djangorestframework
+drf-spectacular
+drf-spectacular-sidecar
