@@ -2,28 +2,15 @@ from django.db import models
 from django.utils import timezone
 
 
-class DeviceModel(models.Model):
-    """
-    Device model model.
-    """
-    name = models.CharField(max_length=255, unique=True, primary_key=True)
-    description = models.TextField(null=True, blank=True)
-    
-    def __str__(self):
-        return self.name
-
-
 class Device(models.Model):
     """
     Device model.
     """
-    id = models.CharField(max_length=12, primary_key=True, blank=True)
-    device_name = models.CharField(max_length=255, null=True, blank=True)
-    model = models.ForeignKey(DeviceModel, on_delete=models.CASCADE, null=True)
+    id = models.CharField(max_length=255, primary_key=True)
+    device_name = models.CharField(max_length=255, blank=True)
+    model = models.CharField(max_length=255, blank=True)
+    firmware = models.CharField(max_length=12, blank=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
-    sensor_sen5x = models.CharField(max_length = 255, null=True, blank=True)
-    sensor_bme280 = models.CharField(max_length = 255, null=True, blank=True)
-    sensor_bme680 = models.CharField(max_length = 255, null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
 
@@ -35,8 +22,13 @@ class Sensor(models.Model):
     """
     Sensor model.
     """
-    name = models.CharField(max_length=255, unique=True, primary_key=True)
-    description = models.TextField(null=True, blank=True)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)  # Für das Feld "model"
+    product_type = models.CharField(max_length=100, blank=True)  # Optionales Feld für "product_type"
+    serial = models.CharField(max_length=100, blank=True)  # Für die Seriennummer
+    firmware = models.CharField(max_length=50, blank=True)  # Für die Firmware-Version
+    hardware = models.CharField(max_length=50, blank=True)  # Für die Hardware-Version
+    protocol = models.CharField(max_length=50, blank=True)  # Für die Protokoll-Version
 
     def __str__(self):
         return self.name

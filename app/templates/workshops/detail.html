@@ -423,7 +423,7 @@
         legend._container.className += ' leaflet-center';
 
         // Check if coordinates are specified for workshop and set view accordingly
-        if({{ workshop.mapbox_top_left_lat }} != null) {
+        {% comment %} if({{ workshop.mapbox_top_left_lat }} != null) {
             // Rotate map to make the bottom left to bottom right line horizontal
             var bottomLonDistance = {{ workshop.mapbox_bottom_right_lon }} - {{ workshop.mapbox_bottom_left_lon }};
             var bottomLatDistance = {{ workshop.mapbox_bottom_right_lat }} - {{ workshop.mapbox_bottom_left_lat }};
@@ -440,7 +440,7 @@
                 [{{ workshop.mapbox_bottom_right_lat }}, {{ workshop.mapbox_bottom_right_lon }}]
             ];
             map.fitBounds(bounds);
-        }
+        } {% endcomment %}
     </script>
 
 {% endblock content %}

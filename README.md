@@ -101,18 +101,18 @@ By following these steps, you can contribute effectively using GitHub Flow. Than
 Development version:
 
     docker compose up -d
-    docker compose exec web python manage.py migrate
-    docker compose exec web python manage.py createsuperuser
+    docker compose exec app python manage.py migrate
+    docker compose exec app python manage.py createsuperuser
 
 open in web browser: http://localhost
 
 Create migrations after doing changes at the data models:
 
-    docker compose exec web python manage.py makemigrations
+    docker compose exec app python manage.py makemigrations
 
 Changes to the database:
 
-    docker compose exec web python manage.py shell
+    docker compose exec app python manage.py shell
     >> from {app_name}.models import {model_name}
     >> {model_name}.objects.all().delete()
 
@@ -123,7 +123,7 @@ Update requirements.txt:
 
 ### Testing
 Run the unit tests.
-    docker compose exec web python manage.py test
+    docker compose exec app python manage.py test
     docker compose logs
 
 There are https-tests in the /test folder which can be run with the Visual Studio Code Extension REST Client.
@@ -150,19 +150,19 @@ The admin login can be found unter /backend.
 ### Translation to German
 Run the following command in your project directory:
 
-    docker compose exec web python manage.py makemessages -l de
+    docker compose exec app python manage.py makemessages -l de
 
 This scans your project for strings marked for translation and creates a django.po file in the locale/de/LC_MESSAGES directory.
 
 Open the django.po file, find your strings, and add the German translation.
 
-    docker compose exec web python manage.py compilemessages
+    docker compose exec app python manage.py compilemessages
 
 
 ### Production
 Collect static files as preparation.
 
-    docker compose exec web python manage.py collectstatic
+    docker compose exec app python manage.py collectstatic
 
 Build and push to Dockerhub.
 

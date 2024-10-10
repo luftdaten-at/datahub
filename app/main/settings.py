@@ -219,6 +219,7 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
+    'VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
 }
 
 # Django OAuth Toolkit settings

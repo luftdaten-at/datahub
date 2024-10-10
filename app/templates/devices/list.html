@@ -10,9 +10,10 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th scope="col">{% trans "Name"%}</th>
+                <th scope="col">{% trans "Id"%}</th>
                 <th scope="col">{% trans "MAC adress" %}</th>
                 <th scope="col">{% trans "Firmware version" %}</th>
+                <th scope="col">{% trans "Last status update" %}</th>
                 <th scope="col">{% trans "Actions" %}</th>
             </tr>
         </thead>
@@ -22,6 +23,7 @@
                 <td><a href="{% url 'device-detail' device.pk %}">{{ device.id }}</a></td>
                 <td>{{ device.btmac_address }}</td>
                 <td>{{ device.firmware_version }}</td>
+                <td>{{ device.last_update }}</td>
                 <td><a href="{% url 'device-update' device.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a></td>
             </tr>
             {% empty %}

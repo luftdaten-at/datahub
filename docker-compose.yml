@@ -1,11 +1,9 @@
 services:
-  web:
+  app:
     build: .
-    ports:
-      - "8000:8000"
-    command: gunicorn main.wsgi -b 0.0.0.0:8000
+    command: uvicorn main.asgi:application --host 0.0.0.0 --port 8000 --reload
     volumes:
-      - ./code:/code
+      - ./app:/usr/src/app
     env_file:
       - .env
     depends_on:
@@ -14,16 +12,16 @@ services:
     image: postgres:16-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    env_file:
+      - .env
   nginx:
     build: ./nginx
     volumes:
-      - ./code/staticfiles:/home/app/web/staticfiles
+      - ./app/staticfiles:/home/app/web/staticfiles
 #      - static_volume:/home/app/web/staticfiles
     ports:
       - "80:80"
     depends_on:
-      - web      
+      - app      
 volumes:
   postgres_data:
