@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
     'workshops.apps.WorkshopsConfig',
+    'stations.apps.StationsConfig',
 ]
 
 MIDDLEWARE = [
