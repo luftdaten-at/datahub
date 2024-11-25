@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ station.id }}{% endblock title %}
+
+{% block styles %}
+{% endblock styles %}
+
+{% block content %}
+    <h1>Station Details für {{ station.name }}</h1>
+    <ul>
+        <li>ID: {{ station.id }}</li>
+        <li>Ort: {{ station.location }}</li>
+        <li>Status: {{ station.status }}</li>
+        <li>Letzte Aktualisierung: {{ station.last_update }}</li>
+    </ul>
+{% endblock content %}

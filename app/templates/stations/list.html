@@ -1,0 +1,42 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Stations overview" %}{% endblock title %}
+
+{% block styles %}
+{% endblock styles %}
+
+{% block content %}
+<h2>{% trans "Stations overview" %}</h2>
+<div class="container mt-5">
+    <div class="row">
+        <!-- Spalte 1: Stationen mit den höchsten Werten -->
+        <div class="col-md-6">
+            <h3 class="text-center">Top 10 Stationen mit höchsten Werten</h3>
+            <ul class="list-group">
+                {% for station in top_stations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ station.name }}
+                        <span class="badge bg-danger rounded-pill">{{ station.value }} µg/m³</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <!-- Spalte 2: Stationen mit den niedrigsten Werten -->
+        <div class="col-md-6">
+            <h3 class="text-center">Top 10 Stationen mit niedrigsten Werten</h3>
+            <ul class="list-group">
+                {% for station in lowest_stations %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ station.name }}
+                        <span class="badge bg-success rounded-pill">{{ station.value }} µg/m³</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
