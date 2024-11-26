@@ -8,11 +8,30 @@
 {% endblock styles %}
 
 {% block content %}
-    <h1>Station Details für {{ station.name }}</h1>
+    <h1>Station Details</h1>
     <ul>
-        <li>ID: {{ station.id }}</li>
-        <li>Ort: {{ station.location }}</li>
-        <li>Status: {{ station.status }}</li>
-        <li>Letzte Aktualisierung: {{ station.last_update }}</li>
+        <li><strong>ID:</strong> {{ station.id }}</li>
+        <li><strong>Höhe:</strong> {{ station.height }} m</li>
+        <li><strong>Koordinaten:</strong> Längengrad: {{ station.coordinates.0 }}, Breitengrad: {{ station.coordinates.1 }}</li>
     </ul>
+
+    {% if station.sensors %}
+    <h2>Sensordaten:</h2>
+    <ul>
+        {% for sensor in station.sensors %}
+            <li>
+                <strong>Sensor Modell:</strong> {{ sensor.sensor_model_name }}
+                <ul>
+                    {% for value in sensor.values %}
+                        <li>
+                            {{ value.dimension_name }}: {{ value.value }} {{ value.unit }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+        <p>Keine Sensordaten verfügbar.</p>
+    {% endif %}
 {% endblock content %}
