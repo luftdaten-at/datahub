@@ -5,33 +5,211 @@
 {% block title %}{{ station.id }}{% endblock title %}
 
 {% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css" />
+
 {% endblock styles %}
 
 {% block content %}
-    <h1>Station Details</h1>
-    <ul>
-        <li><strong>ID:</strong> {{ station.id }}</li>
-        <li><strong>Höhe:</strong> {{ station.height }} m</li>
-        <li><strong>Koordinaten:</strong> Längengrad: {{ station.coordinates.0 }}, Breitengrad: {{ station.coordinates.1 }}</li>
-    </ul>
+<div class="container">
+<div class="row">
+    <div class="col-lg-12">
 
-    {% if station.sensors %}
-    <h2>Sensordaten:</h2>
-    <ul>
-        {% for sensor in station.sensors %}
-            <li>
-                <strong>Sensor Modell:</strong> {{ sensor.sensor_model_name }}
-                <ul>
-                    {% for value in sensor.values %}
-                        <li>
-                            {{ value.dimension_name }}: {{ value.value }} {{ value.unit }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-        <p>Keine Sensordaten verfügbar.</p>
-    {% endif %}
+        <h1>Station Details</h1>
+        <ul>
+            <li><strong>ID:</strong> {{ station.id }}</li>
+            <li><strong>Stadt/Gemeinde: <a href="">Wien</a></strong></li>
+            <li><strong>Sensoren:</strong> {% for sensor in station.sensors %} {{ sensor.sensor_model_name }} {% endfor %}</li>
+            <li><strong>Letztes Update:</strong> {{ station.time }}</li>
+        </ul>
+
+    </div>
+</div>    
+
+<!-- Content Block -->
+
+    <div class="row">
+      <!-- Linke Spalte: Chart.js Diagramme -->
+      <div class="col-lg-6 col-md-12">
+        <h3>48 Stunden Übersicht</h3>
+        <div class="mb-4">
+            <h5>Feinstaub (PM1)</h5>
+            <canvas id="chart-pm1" style="height: 100px;"></canvas>
+          </div>  
+        <div class="mb-4">
+          <h5>Feinstaub (PM2.5)</h5>
+          <canvas id="chart-pm25" style="height: 100px;"></canvas>
+        </div>
+        <div class="mb-4">
+          <h5>Feinstaub (PM10)</h5>
+          <canvas id="chart-pm10" style="height: 100px;"></canvas>
+        </div>
+        <div class="mb-4">
+            <h5>Temperatur (°C)</h5>
+            <canvas id="chart-temperature" class="chart-height"></canvas>
+        </div>
+        <div class="mb-4">
+            <h5>Luftfeuchtigkeit (%)</h5>
+            <canvas id="chart-humidity" class="chart-height"></canvas>
+          </div>
+    
+    </div>
+        
+      <!-- Rechte Spalte: Leaflet-Karte -->
+      <div class="col-lg-6 col-md-12 mb-4">
+        <h3>Umgebung der Station</h3>
+        <div id="map" style="width: 100%; height: 400px;"></div>
+        <div class="mt-3">
+            <h5>Daten herunterladen</h5>
+            <a href="" class="btn btn-primary mb-2">Monatsmittelwerte als CSV herunterladen</a>
+            <a href="" class="btn btn-primary mb-2">Jahresmittelwerte als CSV herunterladen</a>
+        </div>
+      </div>
+    </div>
+</div>
+
+
+<!-- Lade die erforderlichen JS-Dateien -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
+
+<!-- JavaScript-Code zur Initialisierung der Karte und Diagramme -->
+<script>
+// Initialisierung der Leaflet-Karte
+var map = L.map('map').setView([{{ station.coordinates.1 }}, {{ station.coordinates.0 }}], 13); // Beispielkoordinaten (Wien)
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Beispielmarker hinzufügen
+L.marker([{{ station.coordinates.1 }}, {{ station.coordinates.0 }}]).addTo(map)
+  .bindPopup('Station {{ station.id }}')
+  .openPopup();
+
+// Daten für die Diagramme (Beispieldaten)
+var labels = [];
+for (var i = 48; i > 0; i--) {
+  labels.push(i + 'h');
+}
+var dataPM25 = [];
+  var dataPM10 = [];
+  var dataPM1 = [];
+  var dataTemperature = [];
+  var dataHumidity = [];
+for (var i = 0; i < 48; i++) {
+    dataPM25.push(Math.random() * 50);            // Zufällige Werte für PM2.5
+    dataPM10.push(Math.random() * 100);           // Zufällige Werte für PM10
+    dataPM1.push(Math.random() * 30);             // Zufällige Werte für PM1
+    dataTemperature.push(Math.random() * 15 + 5); // Zufällige Temperatur zwischen 5°C und 20°C
+    dataHumidity.push(Math.random() * 50 + 30);   // Zufällige Luftfeuchtigkeit zwischen 30% und 80%
+}
+
+  // Gemeinsame Optionen für alle Diagramme
+  var commonOptions = {
+    responsive: true,
+    aspectRatio: 5,
+    plugins: {
+      legend: {
+        display: false // Legende ausblenden
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: false,
+          text: 'Stunden vor aktuell'
+        },
+        grid: {
+          display: false
+        },
+        ticks: {
+          maxRotation: 90,
+          minRotation: 90,
+          autoSkip: true,
+          maxTicksLimit: 10
+        }
+      },
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: '' // Wird individuell gesetzt
+        }
+      }
+    }
+  };
+
+ // Funktion zum Erstellen eines Diagramms
+ function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
+    var options = JSON.parse(JSON.stringify(commonOptions)); // Kopie der gemeinsamen Optionen
+    options.scales.y.title.text = yAxisLabel;
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: label,
+          data: data,
+          backgroundColor: backgroundColor,
+          borderColor: borderColor,
+          borderWidth: 1,
+          barPercentage: 1.0,
+          categoryPercentage: 1.0
+        }]
+      },
+      options: options
+    });
+  }
+
+ // Diagramme erstellen
+ createChart(
+    document.getElementById('chart-pm25').getContext('2d'),
+    'PM2.5 (µg/m³)',
+    dataPM25,
+    'Konzentration (µg/m³)',
+    'rgba(54, 162, 235, 0.5)',
+    'rgba(54, 162, 235, 1)'
+  );
+
+ createChart(
+    document.getElementById('chart-pm10').getContext('2d'),
+    'PM10 (µg/m³)',
+    dataPM10,
+    'Konzentration (µg/m³)',
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(255, 99, 132, 1)'
+  );
+
+  createChart(
+    document.getElementById('chart-pm1').getContext('2d'),
+    'PM1 (µg/m³)',
+    dataPM1,
+    'Konzentration (µg/m³)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(75, 192, 192, 1)'
+  );
+
+  createChart(
+    document.getElementById('chart-temperature').getContext('2d'),
+    'Temperatur (°C)',
+    dataTemperature,
+    'Temperatur (°C)',
+    'rgba(255, 159, 64, 0.5)',
+    'rgba(255, 159, 64, 1)'
+  );
+
+  createChart(
+    document.getElementById('chart-humidity').getContext('2d'),
+    'Luftfeuchtigkeit (%)',
+    dataHumidity,
+    'Relative Luftfeuchtigkeit (%)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(153, 102, 255, 1)'
+  );
+
+</script>
+
+
 {% endblock content %}
