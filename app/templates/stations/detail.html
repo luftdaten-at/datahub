@@ -92,18 +92,19 @@ var labels = [];
 for (var i = 48; i > 0; i--) {
   labels.push(i + 'h');
 }
+
 var dataPM25 = [];
-  var dataPM10 = [];
-  var dataPM1 = [];
-  var dataTemperature = [];
-  var dataHumidity = [];
-for (var i = 0; i < 48; i++) {
-    dataPM25.push(Math.random() * 50);            // Zufällige Werte für PM2.5
-    dataPM10.push(Math.random() * 100);           // Zufällige Werte für PM10
-    dataPM1.push(Math.random() * 30);             // Zufällige Werte für PM1
-    dataTemperature.push(Math.random() * 15 + 5); // Zufällige Temperatur zwischen 5°C und 20°C
-    dataHumidity.push(Math.random() * 50 + 30);   // Zufällige Luftfeuchtigkeit zwischen 30% und 80%
-}
+var dataPM10 = [];
+var dataPM1 = [];
+var dataTemperature = [];
+var dataHumidity = [];
+
+dataPM25 = {{ station.data_48h.3 }};
+dataPM10 = {{ station.data_48h.5 }};
+dataPM1 = {{ station.data_48h.2 }};
+dataTemperature = {{ station.data_48h.7 }};
+dataHumidity = {{ station.data_48h.6 }}
+
 
   // Gemeinsame Optionen für alle Diagramme
   var commonOptions = {
