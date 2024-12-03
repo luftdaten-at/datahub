@@ -24,6 +24,10 @@
         </ul>
 
     </div>
+    <div class="col-lg-12">
+
+
+    </div>
 </div>    
 
 <!-- Content Block -->
@@ -32,27 +36,42 @@
       <!-- Linke Spalte: Chart.js Diagramme -->
       <div class="col-lg-6 col-md-12">
         <h3>48 Stunden Übersicht</h3>
+
+        {% if station.data_48h.2|length > 0 %}
         <div class="mb-4">
-            <h5>Feinstaub (PM1)</h5>
-            <canvas id="chart-pm1" style="height: 100px;"></canvas>
-          </div>  
+          <h5>Feinstaub (PM1)</h5>
+          <canvas id="chart-pm1" style="height: 100px;"></canvas>
+        </div>
+        {% endif %}
+        
+        {% if station.data_48h.3|length > 0 %}
         <div class="mb-4">
           <h5>Feinstaub (PM2.5)</h5>
           <canvas id="chart-pm25" style="height: 100px;"></canvas>
         </div>
+        {% endif %}
+
+        {% if station.data_48h.5|length > 0 %}
         <div class="mb-4">
           <h5>Feinstaub (PM10)</h5>
           <canvas id="chart-pm10" style="height: 100px;"></canvas>
         </div>
+        {% endif %}
+        
+        {% if station.data_48h.7|length > 0 %}
         <div class="mb-4">
-            <h5>Temperatur (°C)</h5>
-            <canvas id="chart-temperature" class="chart-height"></canvas>
+          <h5>Temperatur (°C)</h5>
+          <canvas id="chart-temperature" class="chart-height"></canvas>
         </div>
+        {% endif %}
+        
+        {% if station.data_48h.6|length > 0 %}
         <div class="mb-4">
-            <h5>Luftfeuchtigkeit (%)</h5>
-            <canvas id="chart-humidity" class="chart-height"></canvas>
-          </div>
-    
+          <h5>Luftfeuchtigkeit (%)</h5>
+          <canvas id="chart-humidity" class="chart-height"></canvas>
+        </div>
+        {% endif %}
+
     </div>
         
       <!-- Rechte Spalte: Leaflet-Karte -->
@@ -61,8 +80,19 @@
         <div id="map" style="width: 100%; height: 400px;"></div>
         <div class="mt-3">
             <h5>Daten herunterladen</h5>
-            <a href="" class="btn btn-primary mb-2">Monatsmittelwerte als CSV herunterladen</a>
-            <a href="" class="btn btn-primary mb-2">Jahresmittelwerte als CSV herunterladen</a>
+            <!-- Formular für Monatsmittelwerte -->
+            <!-- Formular für benutzerdefinierten Zeitraum -->
+            <form method="get" action="" class="form-inline mb-2">
+                <div class="form-group mr-2">
+                    <label for="startDate" class="mr-2">Startdatum:</label>
+                    <input type="date" class="form-control" id="startDate" name="start_date" required>
+                </div>
+                <div class="form-group mr-2">
+                    <label for="endDate" class="mr-2">Enddatum:</label>
+                    <input type="date" class="form-control" id="endDate" name="end_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Messwerte als CSV herunterladen</button>
+            </form>
         </div>
       </div>
     </div>
@@ -82,12 +112,12 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Beispielmarker hinzufügen
+// Marker hinzufügen
 L.marker([{{ station.coordinates.1 }}, {{ station.coordinates.0 }}]).addTo(map)
   .bindPopup('Station {{ station.id }}')
   .openPopup();
 
-// Daten für die Diagramme (Beispieldaten)
+// Daten für die Diagramme
 var labels = [];
 for (var i = 48; i > 0; i--) {
   labels.push(i + 'h');
@@ -120,7 +150,7 @@ dataHumidity = {{ station.data_48h.6 }}
         display: true,
         title: {
           display: false,
-          text: 'Stunden vor aktuell'
+          text: ''
         },
         grid: {
           display: false
@@ -155,7 +185,7 @@ dataHumidity = {{ station.data_48h.6 }}
           data: data,
           backgroundColor: backgroundColor,
           borderColor: borderColor,
-          borderWidth: 1,
+          borderWidth: 0,
           barPercentage: 1.0,
           categoryPercentage: 1.0
         }]
