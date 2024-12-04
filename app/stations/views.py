@@ -34,7 +34,8 @@ def StationDetailView(request, pk):
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
             # api query
-            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format={OutputFormat.JSON}&precision={Precision.HOURLY}&start={formatted_time_minus_48h}&end={formatted_current_time}"
+            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format={OutputFormat.JSON.value}&precision={Precision.HOURLY.value}&start={formatted_time_minus_48h}&end={formatted_current_time}"
+            print(api_sensor_data_48h)
             response = requests.get(api_sensor_data_48h)
             response.raise_for_status()
             data_48h = response.json()
