@@ -5,6 +5,31 @@
 {% block title %}{% trans "Stations overview" %}{% endblock title %}
 
 {% block styles %}
+<style>
+    .station-link {
+        display: inline-block;
+        background-color: #007bff; /* Blue background */
+        color: white; /* White text */
+        padding: 4px 12px; /* Reduced padding for a sleeker look */
+        border-radius: 3px; /* Slightly smaller border radius */
+        text-decoration: none; /* Remove underline */
+        font-weight: normal; /* Regular font weight for a more subtle look */
+        font-size: 14px; /* Adjust font size for a cleaner appearance */
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    .station-link:hover {
+        background-color: #0056b3; /* Darker blue on hover */
+        transform: scale(1.03); /* Slight zoom effect */
+    }
+    .station-link:focus {
+        outline: none;
+        box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.75); /* Focus ring for accessibility */
+    }
+    .badge {
+        font-size: 14px;
+        font-weight: normal;
+    }
+</style>
 {% endblock styles %}
 
 {% block content %}
@@ -17,7 +42,9 @@
             <ul class="list-group">
                 {% for station in top_stations %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ station.0 }}  <!-- Station name or device -->
+                        <a href="/stations/{{ station.0 }}" class="station-link">
+                            {{ station.0 }}  <!-- Station name or device -->
+                        </a>
                         <span class="badge bg-danger rounded-pill">{{ station.3 }} µg/m³</span> <!-- Value -->
                     </li>
                 {% endfor %}
@@ -29,7 +56,9 @@
             <ul class="list-group">
                 {% for station in lowest_stations %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ station.0 }}  <!-- Station name or device -->
+                        <a href="/stations/{{ station.0 }}" class="station-link">
+                            {{ station.0 }}  <!-- Station name or device -->
+                        </a>
                         <span class="badge bg-success rounded-pill">{{ station.3 }} µg/m³</span> <!-- Value -->
                     </li>
                 {% endfor %}
