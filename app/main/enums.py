@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class Dimension():
     PM0_1 = 1
     PM1_0 = 2
@@ -76,6 +79,21 @@ class Dimension():
         NO2: "no2_ppb",
     }
 
+    _sensor_community_names_import = {
+        PM0_1: "P01",
+        PM1_0: "P10",
+        PM2_5: "P2",
+        PM4_0: "P4",
+        PM10_0: "P1",
+        HUMIDITY: "humidity",
+        TEMPERATURE: "temperature",
+        PRESSURE: "pressure",
+        CO2: "co2_ppm",
+        O3: "ozone_ppb",
+        TVOC: "tvoc",
+        NO2: "no2_ppb",
+    }
+
     @classmethod
     def get_unit(cls, dimension_id: int) -> str:
         """
@@ -97,6 +115,10 @@ class Dimension():
     @classmethod
     def get_dimension_from_sensor_community_name(cls, sensor_community_name: str):
         return {v:k for k, v in cls._sensor_community_names.items()}.get(sensor_community_name, None)
+    
+    @classmethod
+    def get_dimension_from_sensor_community_name_import(cls, sensor_community_name: str):
+        return {v:k for k, v in cls._sensor_community_names_import.items()}.get(sensor_community_name, None)
 
 
 class SensorModel():
@@ -190,3 +212,34 @@ class Source():
         :return: Der zugehörige Name oder 'Unknown', wenn kein Name vorhanden ist
         """
         return cls._names.get(source_id, "Unknown")
+
+
+class Precision(str, Enum):
+    MAX = "all"
+    HOURLY = "hour"
+    DAYLY = "day"
+    WEEKLY = "week"
+    MONTHLY = "month"
+    YEARYLY = "year"
+
+    __to_time_frame = {
+        MAX: "milliseconds",
+        HOURLY: "hour",
+        DAYLY: "day",
+        WEEKLY: "week",
+        MONTHLY: "month",
+        YEARYLY: "year",
+    }
+
+    @classmethod
+    def get_time_frame(cls, precision: str):
+        return cls.__to_time_frame[precision]
+
+
+class OutputFormat(str, Enum):
+    JSON = "json"
+    CSV = "csv"
+
+class Order(str, Enum):
+    MIN="min"
+    MAX="max"

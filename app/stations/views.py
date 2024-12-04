@@ -46,37 +46,7 @@ def StationDetailView(request, pk):
                     val = dim_val["value"]
                     dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
 
-            from pprint import pprint
-            pprint(dim_hour_val)
             station_info["data_48h"] = dim_hour_val
-
-            '''
-            # Verarbeitung der Sensoren
-            sensors = properties.get('sensors', [])
-            for sensor in sensors:
-                sensor_model_id = sensor.get('sensor_model')
-                sensor_model_name = SensorModel.get_sensor_name(sensor_model_id)
-
-                values = []
-                for value in sensor.get('values', []):
-                    dimension_id = value.get('dimension')
-                    dimension_name = Dimension.get_name(dimension_id)
-                    unit = Dimension.get_unit(dimension_id)
-                    val = value.get('value')
-
-                    values.append({
-                        'dimension_id': dimension_id,
-                        'dimension_name': dimension_name,
-                        'unit': unit,
-                        'value': val,
-                    })
-
-                station_info['sensors'].append({
-                    'sensor_model_id': sensor_model_id,
-                    'sensor_model_name': sensor_model_name,
-                    'values': values,
-                })
-            '''
         else:
             raise Http404(f"Station mit ID {pk} nicht gefunden.")
 
