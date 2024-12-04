@@ -82,7 +82,8 @@
             <h5>Daten herunterladen</h5>
             <!-- Formular für Monatsmittelwerte -->
             <!-- Formular für benutzerdefinierten Zeitraum -->
-            <form method="get" action="https://www.orf.at" class="form-inline mb-2">
+            <!--
+            <form method="get" action="" class="form-inline mb-2">
                 <div class="form-group mr-2">
                     <label for="startDate" class="mr-2">Startdatum:</label>
                     <input type="date" class="form-control" id="startDate" name="start_date" required>
@@ -93,11 +94,22 @@
                 </div>
                 <button type="submit" class="btn btn-primary">Messwerte als CSV herunterladen</button>
             </form>
+            -->
+            <form method="get" action="" class="form-inline mb-2" id="dateForm">
+              <div class="form-group mr-2">
+                  <label for="startDate" class="mr-2">Startdatum:</label>
+                  <input type="date" class="form-control" id="startDate" name="start_date" required>
+              </div>
+              <div class="form-group mr-2">
+                  <label for="endDate" class="mr-2">Enddatum:</label>
+                  <input type="date" class="form-control" id="endDate" name="end_date" required>
+              </div>
+              <button type="submit" class="btn btn-primary">Messwerte als CSV herunterladen</button>
+          </form>
         </div>
       </div>
     </div>
 </div>
-
 
 <!-- Lade die erforderlichen JS-Dateien -->
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -239,6 +251,25 @@ dataHumidity = {{ station.data_48h.6 }}
     'rgba(153, 102, 255, 0.5)',
     'rgba(153, 102, 255, 1)'
   );
+  // messwerte herunterladen
+  document.getElementById("dateForm").addEventListener("submit", function(event) {
+      // Prevent the form from submitting normally
+      event.preventDefault();
+
+      // Extract the station ID from the current URL (e.g., /stations/34106)
+      const pathname = window.location.pathname;
+
+      // Get the values from the form fields
+      const startDate = document.getElementById("startDate").value;
+      const endDate = document.getElementById("endDate").value;
+
+      const stationId = window.location.pathname.split("/").filter(i => i).pop();
+      // Build the URL with the query parameters
+      const url = `https://staging.api.luftdaten.at/v1/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
+
+      // Redirect the browser to the constructed URL
+      window.location.href = url;
+  });
 
 </script>
 
