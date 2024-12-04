@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 from django.conf import settings
-from main.enums import Dimension, SensorModel, OutputFormat, Precision
+from main.enums import Dimension, SensorModel, OutputFormat, Precision, Order
 
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
@@ -60,14 +60,34 @@ def StationDetailView(request, pk):
     return render(request, 'stations/detail.html', {'station': station_info})
 
 def StationListView(request):
-    api_url = f"{settings.API_URL}/station/current?last_active=36000&output_format=csv"
+    """
+    max_station: List[Tuple[device,time_measured,dimension,value]]
+    min_stations: List[Tuple[device,time_measured,dimension,value]]
+    """
 
-   # top_stations = Station.objects.order_by('-value')[:10]  # Top 10 nach Feinstaubwerten
-   # lowest_stations = Station.objects.order_by('value')[:10]  # Niedrigste 10 nach Feinstaubwerten
-    top_stations = []
-    lowest_stations = []
+    url_min = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
+    url_max = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
     
+    resp_min = requests.get(url_min)
+    resp_max = requests.get(url_max)
+
+    # TODO: try catch
+    resp_min.raise_for_status()
+    resp_max.raise_for_status()
+
+    min_stations = [
+        line.split(",") 
+        for i, line in enumerate(resp_min.text.splitlines())
+            if i
+    ]
+
+    max_stations = [
+        line.split(",") 
+        for i, line in enumerate(resp_max.text.splitlines())
+            if i
+    ]
+
     return render(request, 'stations/list.html', {
-        'top_stations': top_stations,
-        'lowest_stations': lowest_stations,
+        'top_stations': max_stations,
+        'lowest_stations': min_stations,
     })
