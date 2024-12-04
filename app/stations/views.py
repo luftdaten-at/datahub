@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.shortcuts import render, get_object_or_404
 from django.http import Http404
 from django.conf import settings
-from main.enums import Dimension, SensorModel
+from main.enums import Dimension, SensorModel, OutputFormat, Precision
 
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
@@ -34,7 +34,7 @@ def StationDetailView(request, pk):
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
             # api query
-            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format=json&precision=hourly%20avg%20(one%20data%20point%20per%20hour)&start={formatted_time_minus_48h}&end={formatted_current_time}"
+            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format={OutputFormat.JSON}&precision={Precision.HOURLY}&start={formatted_time_minus_48h}&end={formatted_current_time}"
             response = requests.get(api_sensor_data_48h)
             response.raise_for_status()
             data_48h = response.json()
