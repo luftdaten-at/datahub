@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
     'workshops.apps.WorkshopsConfig',
+    'stations.apps.StationsConfig',
 ]
 
 MIDDLEWARE = [
@@ -236,3 +237,9 @@ OAUTH2_PROVIDER = {
         "at.luftdaten.pmble"
     },
 }
+
+# Bestimme die API-URL basierend auf der Umgebung
+if env("DJANGO_ENV") == 'production':
+    API_URL = 'https://api.luftdaten.at/v1'
+else:
+    API_URL = 'https://staging.api.luftdaten.at/v1'

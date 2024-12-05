@@ -27,6 +27,7 @@ urlpatterns = [
     path("api/", include("api.urls")),
     path("campaigns/", include("campaign.urls")),
     path("devices/", include("devices.urls")),
+    path("stations/", include("stations.urls")),
     path("workshops/", include("workshops.urls")),
 ] + i18n_patterns(
     # Your URLs that require localization
