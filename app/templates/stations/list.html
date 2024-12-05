@@ -38,7 +38,7 @@
     <div class="row">
         <!-- Spalte 1: Stationen mit den höchsten Werten -->
         <div class="col-md-6">
-            <h3 class="text-center">Top 10 Stationen mit höchsten Werten</h3>
+            <h3 class="text-center">{% trans "Top 10 stations with the highest values for PM2.5" %}</h3>
             <ul class="list-group">
                 {% for station in top_stations %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -52,7 +52,7 @@
         </div>
         <!-- Spalte 2: Stationen mit den niedrigsten Werten -->
         <div class="col-md-6">
-            <h3 class="text-center">Top 10 Stationen mit niedrigsten Werten</h3>
+            <h3 class="text-center">{% trans "Top 10 stations with the lowest values for PM2.5" %}</h3>
             <ul class="list-group">
                 {% for station in lowest_stations %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">

@@ -14,19 +14,42 @@
 <div class="container">
 <div class="row">
     <div class="col-lg-12">
-
-        <h1>Station Details</h1>
-        <ul>
-            <li><strong>ID:</strong> {{ station.id }}</li>
-            <li><strong>Stadt/Gemeinde: <a href="">Wien</a></strong></li>
-            <li><strong>Sensoren:</strong> {% for sensor in station.sensors %} {{ sensor.sensor_model_name }} {% endfor %}</li>
-            <li><strong>Letztes Update:</strong> {{ station.time }}</li>
-        </ul>
-
-    </div>
-    <div class="col-lg-12">
-
-
+        <h1>{% trans "Station" %} {{ station.id }}</h1>
+        <!-- 
+        <div>
+          <div>
+            <h5>Letzte Messung</h5>
+            <small class="text-muted">Gemessen am {{ measurement.time }}</small>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">PM1</h6>
+                    <p class="card-text display-4">12 µg/m³</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">PM2.5</h6>
+                    <p class="card-text display-4">15 µg/m³</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="card text-center">
+                  <div class="card-body">
+                    <h6 class="card-subtitle mb-2 text-muted">PM10</h6>
+                    <p class="card-text display-4">25 µg/m³</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
     </div>
 </div>    
 
@@ -35,39 +58,39 @@
     <div class="row">
       <!-- Linke Spalte: Chart.js Diagramme -->
       <div class="col-lg-6 col-md-12">
-        <h3>48 Stunden Übersicht</h3>
+        <h3>{% trans "48-hour overview" %}</h3>
 
         {% if station.data_48h.2|length > 0 %}
         <div class="mb-4">
-          <h5>Feinstaub (PM1)</h5>
+          <h5>{% trans "Particulate Matter (PM1)" %}</h5>
           <canvas id="chart-pm1" style="height: 100px;"></canvas>
         </div>
         {% endif %}
         
         {% if station.data_48h.3|length > 0 %}
         <div class="mb-4">
-          <h5>Feinstaub (PM2.5)</h5>
+          <h5>{% trans "Particulate Matter (PM2.5)" %}</h5>
           <canvas id="chart-pm25" style="height: 100px;"></canvas>
         </div>
         {% endif %}
 
         {% if station.data_48h.5|length > 0 %}
         <div class="mb-4">
-          <h5>Feinstaub (PM10)</h5>
+          <h5>{% trans "Particulate Matter (PM10)" %}</h5>
           <canvas id="chart-pm10" style="height: 100px;"></canvas>
         </div>
         {% endif %}
         
         {% if station.data_48h.7|length > 0 %}
         <div class="mb-4">
-          <h5>Temperatur (°C)</h5>
+          <h5>{% trans "Temperature (°C)" %}</h5>
           <canvas id="chart-temperature" class="chart-height"></canvas>
         </div>
         {% endif %}
         
         {% if station.data_48h.6|length > 0 %}
         <div class="mb-4">
-          <h5>Luftfeuchtigkeit (%)</h5>
+          <h5>{% trans "Humidity (%)" %}</h5>
           <canvas id="chart-humidity" class="chart-height"></canvas>
         </div>
         {% endif %}
@@ -76,35 +99,20 @@
         
       <!-- Rechte Spalte: Leaflet-Karte -->
       <div class="col-lg-6 col-md-12 mb-4">
-        <h3>Umgebung der Station</h3>
+        <h3>{% trans "Surroundings" %}</h3>
         <div id="map" style="width: 100%; height: 400px;"></div>
         <div class="mt-3">
-            <h5>Daten herunterladen</h5>
-            <!-- Formular für Monatsmittelwerte -->
-            <!-- Formular für benutzerdefinierten Zeitraum -->
-            <!--
-            <form method="get" action="" class="form-inline mb-2">
-                <div class="form-group mr-2">
-                    <label for="startDate" class="mr-2">Startdatum:</label>
-                    <input type="date" class="form-control" id="startDate" name="start_date" required>
-                </div>
-                <div class="form-group mr-2">
-                    <label for="endDate" class="mr-2">Enddatum:</label>
-                    <input type="date" class="form-control" id="endDate" name="end_date" required>
-                </div>
-                <button type="submit" class="btn btn-primary">Messwerte als CSV herunterladen</button>
-            </form>
-            -->
+            <h5>{% trans "Download data" %}</h5>
             <form method="get" action="" class="form-inline mb-2" id="dateForm">
               <div class="form-group mr-2">
-                  <label for="startDate" class="mr-2">Startdatum:</label>
+                  <label for="startDate" class="mr-2">{% trans "Start date:" %}</label>
                   <input type="date" class="form-control" id="startDate" name="start_date" required>
               </div>
               <div class="form-group mr-2">
-                  <label for="endDate" class="mr-2">Enddatum:</label>
+                  <label for="endDate" class="mr-2">{% trans "End date:" %}</label>
                   <input type="date" class="form-control" id="endDate" name="end_date" required>
               </div>
-              <button type="submit" class="btn btn-primary">Messwerte als CSV herunterladen</button>
+              <button type="submit" class="btn btn-primary">{% trans "Download measurements as CSV" %}</button>
           </form>
         </div>
       </div>
