@@ -317,7 +317,7 @@ msgstr "Luftqualität"
 #, fuzzy
 #| msgid "Particulate Matter (PM1)"
 msgid "Particulate Matter"
-msgstr "Feinstaub (PM1)"
+msgstr "Feinstaub"
 
 #: templates/home.html:41
 msgid "AQI"
