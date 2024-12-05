@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-05 08:28+0100\n"
+"POT-Creation-Date: 2024-12-05 18:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -307,6 +307,45 @@ msgstr ""
 #| msgid "No workshops found."
 msgid "No devices found."
 msgstr "Keine Workshops gefunden."
+
+#: templates/home.html:34
+msgid "Air quality"
+msgstr "Luftqualität"
+
+#: templates/home.html:36 templates/home.html:37 templates/home.html:38
+#: templates/home.html:75
+#, fuzzy
+#| msgid "Particulate Matter (PM1)"
+msgid "Particulate Matter"
+msgstr "Feinstaub (PM1)"
+
+#: templates/home.html:41
+msgid "AQI"
+msgstr ""
+
+#: templates/home.html:41
+msgid "by U.S. EPA NAAQS"
+msgstr ""
+
+#: templates/home.html:90 templates/home.html:98 templates/home.html:106
+msgid "Good"
+msgstr "Gut"
+
+#: templates/home.html:91 templates/home.html:99 templates/home.html:107
+msgid "Moderate"
+msgstr "Mäßig"
+
+#: templates/home.html:92 templates/home.html:100 templates/home.html:108
+msgid "Unhealthy for sensitive groups"
+msgstr "Ungesund für empfindliche Gruppen"
+
+#: templates/home.html:93 templates/home.html:101 templates/home.html:109
+msgid "Unhealthy"
+msgstr "Ungesund"
+
+#: templates/home.html:94 templates/home.html:102 templates/home.html:110
+msgid "Very unhealthy"
+msgstr "Sehr ungesund"
 
 #: templates/stations/detail.html:17
 #, fuzzy
