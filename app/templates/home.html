@@ -1,4 +1,5 @@
 {% extends "_base.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block title %}Home{% endblock title %}
@@ -28,14 +29,15 @@
     {% else %}
     <div class=".container-fluid">
         <div class="position-absolute top-0 end-0 card"
-            style="width: 18rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+            style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
             <div class="card-body">
-                <h5 class="card-title">Feinstaub</h5>
+                <h5 class="card-title">{% trans "Air quality" %}</h5>
                 <select class="form-select" aria-label="Default select example" onchange="showPM(this)">
-                    <option value="1">PM1.0</option>
-                    <option value="25" selected>PM2.5</option>
-                    <option value="10">PM10.0</option>
+                    <option value="1">{% trans "Particulate Matter" %} PM1</option>
+                    <option value="25" selected>{% trans "Particulate Matter" %} PM2.5</option>
+                    <option value="10">{% trans "Particulate Matter" %} PM10</option>
                 </select>
+                <div id="legend" style="margin-top: 1rem;"></div>
             </div>
         </div>
         <div id="map">
@@ -64,12 +66,10 @@
                     werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
                     <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
                 </div>
-                <div id="infobox">
-                </div>
                 
             </div>
             <div class="col-md-3">
-                <h3>Feinstaub</h3>
+                <h3>{% trans "Particulate Matter" %}</h3>
                 <p>Feinstaub, auch bekannt als Particulate Matter (PM), bezeichnet eine Mischung aus winzigen Partikeln 
                     und Tröpfchen in der Luft, die so klein sind, dass sie eingeatmet werden können. Diese Partikel 
                     können aus verschiedenen Quellen stammen, einschließlich Autoabgasen, Industrieemissionen, Staub, 
@@ -78,144 +78,233 @@
                     Mikrometer sind. Diese kleinen Partikel können tief in die Lunge eindringen und gesundheitliche 
                     Probleme verursachen, darunter Atemwegserkrankungen, Herz-Kreislauf-Erkrankungen und andere 
                     ernsthafte Gesundheitsrisiken.</p>
-                <h3>Temperatur</h3>
-                <p>Die angezeigten Temperaturen werden nahe den Luftqualitätssensoren gemessen. Da sie von Bürger*innen 
-                    eingesetzt werden, können diese Messungen von der Lage und Montage der Sensoren beeinflusst werden.
-                    Die Messwerte gelten immer nur für den Ort der jeweiligen Messung und sind sehr lokal zu verstehen.
-                </p>
             </div>
         </div>
 
     <script>
-        const colorSteps = [
-            [0, [115, 0.8, 0.8]],
-            [5, [115, 0.8, 0.8]],
-            [15, [60, 0.87, 0.95]],
-            [25, [0, 0.87, 0.8]],
-            [60, [0, 0.87, 0.4]],
+        // Define color steps for PM1.0
+        const colorStepsPM1 = [
+            [0,    [120, 1, 0.75], "{% trans 'Good' %}"],                                // Grün
+            [9.1,  [60, 1, 1],     "{% trans 'Moderate' %}"],                              // Gelb
+            [35.5, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],  // Orange
+            [55.5, [0, 1, 1],      "{% trans 'Unhealthy' %}"],                           // Rot
+            [125.5,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]                      // Violett
         ];
 
-        function interpolate(a, b, fraction) {
-            return [a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction, a[2] + (b[2] - a[2]) * fraction];
-        }
+        const colorStepsPM25 = [
+            [0,    [120, 1, 0.75], "{% trans 'Good' %}"],                           
+            [9.1,  [60, 1, 1],     "{% trans 'Moderate' %}"],                          
+            [35.5, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],  
+            [55.5, [0, 1, 1],      "{% trans 'Unhealthy' %}"],                   
+            [125.5,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]
+        ];
 
-        function getColorForPM25(value) {
-            if(isNaN(value)) return [0, 0, 0.7]; // grey
-            for (let i = 0; i < colorSteps.length - 1; i++) {
-                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
-                    const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
-                    return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
-                }
-            }
-            return colorSteps[colorSteps.length - 1][1];
-        }
+        const colorStepsPM10 = [
+            [0,    [120, 1, 0.75], "{% trans 'Good' %}"],
+            [54,   [60, 1, 1],     "{% trans 'Moderate' %}"],
+            [154,  [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],
+            [254,  [0, 1, 1],      "{% trans 'Unhealthy' %}"],
+            [354,  [300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]
+        ];
 
-        let hsv2hsl = (h, s, v, l = v - v * s / 2, m = Math.min(l, 1 - l)) => [h, m ? (v - l) / m : 0, l];
+        const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
 
-        function showPM(selection) {
-            var index = selection.selectedIndex;
-            addMarkerLayer(index);
-        }
+    function interpolate(a, b, fraction) {
+        return [
+            a[0] + (b[0] - a[0]) * fraction,
+            a[1] + (b[1] - a[1]) * fraction,
+            a[2] + (b[2] - a[2]) * fraction
+        ];
+    }
 
-        const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
-
-        const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-
-        var stationData;
-
-        async function fetchMarkerData() {
-            const response = await fetch("https://staging.api.luftdaten.at/v1/station/current/all");
-
-            stationData = [];
-
-            // Parse response CSV
-            const text = await response.text();
-            const items = text.split("\n");
-            for (let row in items) {
-                if (items[row].length == 0 || row == 0) continue;
-                var data = items[row].split(",");
-                const [stationID, lat, lon, pm1, pm25, pm10] = data;
-                const marker = {stationID, lat, lon, pm1, pm25, pm10};
-                stationData.push(marker);
+    function getColorForPM(value, colorSteps) {
+        if (isNaN(value)) return [0, 0, 0.7]; // Grau für ungültige Werte
+        for (let i = 0; i < colorSteps.length - 1; i++) {
+            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
+                const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
+                return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
             }
         }
+        return colorSteps[colorSteps.length - 1][1];
+    }
 
-        fetchMarkerData().then(() => {
-            addMarkerLayer(1);
+    function hsvToRgb(h, s, v) {
+        h = h % 360; // Ensure h is within 0-360 degrees
+        let c = v * s;
+        let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+        let m = v - c;
+        let rPrime, gPrime, bPrime;
+        
+        if (h < 60) {
+            rPrime = c; gPrime = x; bPrime = 0;
+        } else if (h < 120) {
+            rPrime = x; gPrime = c; bPrime = 0;
+        } else if (h < 180) {
+            rPrime = 0; gPrime = c; bPrime = x;
+        } else if (h < 240) {
+            rPrime = 0; gPrime = x; bPrime = c;
+        } else if (h < 300) {
+            rPrime = x; gPrime = 0; bPrime = c;
+        } else {
+            rPrime = c; gPrime = 0; bPrime = x;
+        }
+        
+        let r = Math.round((rPrime + m) * 255);
+        let g = Math.round((gPrime + m) * 255);
+        let b = Math.round((bPrime + m) * 255);
+        
+        return [r, g, b];
+    }
+
+    function getMean(arr) {
+        var acc = 0;
+        var count = 0;
+        for(let i = 0; i < arr.length; i++) {
+            if(isNaN(arr[i])) continue;
+            acc += Number(arr[i]);
+            count++;
+        }
+        if(count == 0) return NaN;
+        return acc / count;
+    }
+
+    function createLegend(pmTypeIndex, colorSteps) {
+        var legendDiv = document.getElementById('legend');
+    
+        // Clear legend
+        legendDiv.innerHTML = '';
+    
+        // Loop through the color steps
+        for (var i = 0; i < colorSteps.length; i++) {
+            var from = colorSteps[i][0];
+            var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+            var hsv = colorSteps[i][1];
+            var description = colorSteps[i][2]; // Health impact description
+    
+            const rgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
+            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+    
+            var item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.flexDirection = 'row';
+            item.style.alignItems = 'center';
+            item.style.marginBottom = '4px';
+    
+            var colorBox = document.createElement('span');
+            colorBox.style.background = colorString;
+            colorBox.style.width = '18px';
+            colorBox.style.height = '18px';
+            colorBox.style.display = 'inline-block';
+            colorBox.style.marginRight = '8px';
+            colorBox.style.border = '1px solid #ccc';
+            colorBox.style.borderRadius = '50%';
+    
+            var labelText = document.createElement('span');
+            labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+            labelText.style.fontSize = '0.8rem';
+    
+            item.appendChild(colorBox);
+            item.appendChild(labelText);
+            legendDiv.appendChild(item);
+        }
+    }
+
+    function showPM(selection) {
+        var pmTypeIndex = selection.selectedIndex; // 0 for PM1.0, 1 for PM2.5, 2 for PM10.0
+        var colorSteps = colorStepsArray[pmTypeIndex];
+        addMarkerLayer(pmTypeIndex, colorSteps);
+        createLegend(pmTypeIndex, colorSteps);
+    }
+
+    const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
+
+    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var stationData;
+
+    async function fetchMarkerData() {
+        const response = await fetch("https://staging.api.luftdaten.at/v1/station/current/all");
+
+        stationData = [];
+
+        // Parse response CSV
+        const text = await response.text();
+        const items = text.split("\n");
+        for (let row in items) {
+            if (items[row].length == 0 || row == 0) continue;
+            var data = items[row].split(",");
+            const [stationID, lat, lon, pm1, pm25, pm10] = data;
+            const marker = {stationID, lat, lon, pm1, pm25, pm10};
+            stationData.push(marker);
+        }
+    }
+
+    fetchMarkerData().then(() => {
+        var defaultPmTypeIndex = 1; // Index for PM2.5
+        var defaultColorSteps = colorStepsArray[defaultPmTypeIndex];
+        addMarkerLayer(defaultPmTypeIndex, defaultColorSteps);
+        createLegend(defaultPmTypeIndex, defaultColorSteps);
+    });
+
+    var markerLayer;
+
+    // Add markers for 0: pm1, 1: pm25, 2: pm10
+    async function addMarkerLayer(pmTypeIndex, colorSteps) {
+        if (markerLayer != null) {
+            map.removeLayer(markerLayer);
+        }
+
+        // Marker layer
+        markerLayer = L.markerClusterGroup({
+            iconCreateFunction: function (cluster) {
+                const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
+                const colorArrayHSV = getColorForPM(meanPM, colorSteps);
+                const rgb = hsvToRgb(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
+                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+                const textColor = brightness > 125 ? "black" : "white";
+                const html = `<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border: 1px solid white;"><span style="color: ${textColor};">${isNaN(meanPM) ? '' : meanPM.toFixed(1)}</span></div>`;
+                return L.divIcon({iconSize: [40, 40], className: '', html: html});
+            },
+            showCoverageOnHover: false,
         });
 
-        function getMean(arr) {
-            var acc = 0;
-            var count = 0;
-            for(let i = 0; i < arr.length; i++) {
-                if(isNaN(arr[i])) continue;
-                acc += Number(arr[i]);
-                count++;
-            }
-            if(count == 0) return NaN;
-            return acc / count;
+        const markerList = [];
+
+        // Add markers for each station
+        for (let stationIndex in stationData) {
+            const station = stationData[stationIndex];
+            const pmValue = station[['pm1', 'pm25', 'pm10'][pmTypeIndex]];
+            const colorArrayHSV = getColorForPM(pmValue, colorSteps);
+            const rgb = hsvToRgb(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
+            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
+            const textColor = brightness > 125 ? "black" : "white";
+
+            const html = `
+                <a 
+                    class="hiddenlink clickable" 
+                    href="/stations/${station.stationID}" 
+                >
+                    <div style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;">
+                    <span style="color: ${textColor};">
+                        ${isNaN(pmValue) ? '' : Number(pmValue).toFixed(1)}
+                    </span>
+                    </div>
+                </a>`;
+
+            var marker = L.marker([station.lat, station.lon], {icon: L.divIcon({iconSize: [40, 40], className: '', html: html})});
+            marker.pm = pmValue; // Add a custom attribute to marker
+            markerList.push(marker);
         }
 
-        var markerLayer;
-
-        // Add markers for 0: pm1, 1: pm25, 2: pm10
-        async function addMarkerLayer(pmType) {
-
-            if (markerLayer != null) {
-                map.removeLayer(markerLayer);
-            }
-
-            // Marker layer
-            markerLayer = L.markerClusterGroup({
-                iconCreateFunction: function (cluster) {
-                    const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
-                    const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
-                    const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-                    const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
-                    const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                    const html = '<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"><span style="color: ' + textColor + ';">' + (isNaN(meanPM) ? '' : meanPM.toFixed(1)) + '</span></div>';
-                    return L.divIcon({iconSize: [40, 40], className: '', html: html});
-                },
-                showCoverageOnHover: false,
-            });
-
-            const markerList = [];
-
-            // Add markers for each station
-            for (let stationIndex in stationData) {
-                const station = stationData[stationIndex];
-                const pm = station[['pm1', 'pm25', 'pm10'][pmType]];
-                const colorArrayHSV = getColorForPM25(pm);
-                const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-                const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
-                const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                //const html = '<a class="hiddenlink clickable" onclick="requestStationData(\'' + station.stationID + '\')" href="#infobox"><div style="height: 3.5em; width: 3.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"><span style="color: ' + textColor + ';">' + (isNaN(pm) ? '' : Number(pm).toFixed(1)) + '</span></div></a>';
-
-                const html = `
-                            <a 
-                                class="hiddenlink clickable" 
-                                href="/stations/${station.stationID}" 
-                            >
-                                <div style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;">
-                                <span style="color: ${textColor};">
-                                    ${isNaN(pm) ? '' : Number(pm).toFixed(1)}
-                                </span>
-                                </div>
-                            </a>`;
-
-
-                var marker = L.marker([station.lat, station.lon], {icon: L.divIcon({iconSize: [40, 40], className: '', html: html})});
-                marker.pm = pm; // Add a custom attribute to marker
-                markerList.push(marker);
-            }
-
-            // Add markers to map
-            markerLayer.addLayers(markerList);
-            map.addLayer(markerLayer);
-        };
+        // Add markers to map
+        markerLayer.addLayers(markerList);
+        map.addLayer(markerLayer);
+    }
     </script>
     {% endif %}
 {% endblock content %}
