@@ -95,6 +95,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'main.context_processor.api_url'
             ],
         },
     },
@@ -113,7 +114,7 @@ DATABASES = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "postgres",
         "USER": "postgres",
-        "PASSWORD": "postgres",
+        "PASSWORD": "password",
         "HOST": "db",
         "PORT": 5432, 
     }
