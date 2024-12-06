@@ -8,6 +8,9 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css" />
 
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
 {% endblock styles %}
 
 {% block content %}
@@ -119,29 +122,34 @@
     </div>
 </div>
 
-<!-- Lade die erforderlichen JS-Dateien -->
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
-
 <!-- JavaScript-Code zur Initialisierung der Karte und Diagramme -->
 <script>
 // Initialisierung der Leaflet-Karte
-var map = L.map('map').setView([{{ station.coordinates.1 }}, {{ station.coordinates.0 }}], 13); // Beispielkoordinaten (Wien)
+var map = L.map('map').setView([{{ station.coordinates.1|stringformat:"f" }}, {{ station.coordinates.0|stringformat:"f" }}], 13); // Beispielkoordinaten (Wien)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 // Marker hinzufügen
-L.marker([{{ station.coordinates.1 }}, {{ station.coordinates.0 }}]).addTo(map)
+L.marker([{{ station.coordinates.1|stringformat:"f" }}, {{ station.coordinates.0|stringformat:"f" }}]).addTo(map)
   .bindPopup('Station {{ station.id }}')
   .openPopup();
 
-// Daten für die Diagramme
 var labels = [];
+var now = new Date(); // Aktuelle Zeit
+
+
 for (var i = 48; i > 0; i--) {
-  labels.push(i + 'h');
+  var pastTime = new Date(now.getTime() - i * 60 * 60 * 1000); // Subtrahiere i Stunden
+
+  var day = pastTime.getDate().toString().padStart(2, '0'); // Tag
+  var month = (pastTime.getMonth() + 1).toString().padStart(2, '0'); // Monat
+  var hours = pastTime.getHours().toString().padStart(2, '0'); // Stunden
+
+  var formattedLabel = `${day}.${month}. ${hours}:00`; // Format TT.MM. HH
+  labels.push(formattedLabel);
 }
+
 
 var dataPM25 = [];
 var dataPM10 = [];
@@ -176,8 +184,8 @@ dataHumidity = {{ station.data_48h.6 }}
           display: false
         },
         ticks: {
-          maxRotation: 90,
-          minRotation: 90,
+          maxRotation: 35,
+          minRotation: 35,
           autoSkip: true,
           maxTicksLimit: 10
         }
