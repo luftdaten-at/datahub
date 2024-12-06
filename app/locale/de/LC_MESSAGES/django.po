@@ -6,17 +6,18 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-06 21:55+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2024-12-06 22:32+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
 
 #: campaign/forms.py:15 templates/devices/my.html:13
 #: templates/workshops/my.html:13
@@ -41,35 +42,24 @@ msgid "Public"
 msgstr "Öffentlich"
 
 #: campaign/forms.py:22
-#, fuzzy
-#| msgid "Enter the title of the workshop."
 msgid "Enter the name of the campaign."
-msgstr "Gibt einen aussagekräftigen Titel ein."
+msgstr "Gibt einen Namen für die Messkampagne ein."
 
 #: campaign/forms.py:23
-#, fuzzy
-#| msgid ""
-#| "Write some lines about the workshop. Where does it take place? Is it "
-#| "associated with an event or a project? Who can participate?"
 msgid ""
 "Write some lines about the Campaign. Where does it take place? Is it "
 "associated with an event or a project? Who can participate?"
 msgstr ""
-"Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er mit "
-"einer Veranstaltung oder einem Projekt verbunden? Wer kann teilnehmen?"
+"Schreibe einige Zeilen über die Messkampagne. Wo findet sie statt? Ist sie "
+"mit einer Veranstaltung oder einem Projekt verbunden? Wer kann teilnehmen?"
 
 #: campaign/forms.py:24
-#, fuzzy
-#| msgid ""
-#| "Should the workshop be publicly available on the Datahub? If not, only "
-#| "logged-in users with set permissions can see the results."
 msgid ""
 "Should the Campaign be publicly available on the Datahub? If not, only "
 "logged-in users with set permissions can see the results."
 msgstr ""
-"Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
-"können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
-"Ergebnisse sehen."
+"Soll die Messkampagne öffentlich auf dem Datahub verfügbar sein? Wenn "
+"nicht, können nur zugewiesene Benutzer Ergebnisse sehen."
 
 #: main/settings.py:152
 msgid "English"
@@ -93,10 +83,8 @@ msgid "Workshops"
 msgstr "Workshops"
 
 #: templates/_base.html:29
-#, fuzzy
-#| msgid "Actions"
 msgid "Stations"
-msgstr "Aktionen"
+msgstr "Stationen"
 
 #: templates/_base.html:30
 msgid "Cities"
@@ -108,15 +96,11 @@ msgid "Devices"
 msgstr "Geräte"
 
 #: templates/_base.html:43 templates/campaigns/my.html:6
-#, fuzzy
-#| msgid "Campaigns"
 msgid "My campaigns"
 msgstr "Meine Messkampagnen"
 
 #: templates/_base.html:44 templates/devices/my.html:5
 #: templates/devices/my.html:9
-#, fuzzy
-#| msgid "Devices"
 msgid "My devices"
 msgstr "Meine Geräte"
 
@@ -152,7 +136,8 @@ msgstr "Impressum"
 #, python-format
 msgid ""
 "\\\n"
-"You're receiving this e-mail because user %(user_display)s has given your\\\n"
+"You're receiving this e-mail because user %(user_display)s has given "
+"your\\\n"
 "e-mail address to register an account on %(site_domain)s.\n"
 "To confirm this is correct, go to %(activate_url)s\\\n"
 msgstr ""
@@ -209,7 +194,7 @@ msgstr ""
 #: templates/campaigns/confirm_delete.html:5
 #: templates/workshops/confirm_delete.html:5
 msgid "Do you really want to delete"
-msgstr "Möchtest du wirklich "
+msgstr "Möchtest du wirklich löschen"
 
 #: templates/campaigns/confirm_delete.html:8
 #: templates/workshops/confirm_delete.html:8
@@ -222,8 +207,6 @@ msgid "Cancel"
 msgstr "Abbrechen"
 
 #: templates/campaigns/form.html:10
-#, fuzzy
-#| msgid "Campaigns"
 msgid "Campaign"
 msgstr "Messkampagne"
 
@@ -236,10 +219,8 @@ msgid "Campaigns"
 msgstr "Messkampagnen"
 
 #: templates/campaigns/my.html:10
-#, fuzzy
-#| msgid "Campaigns"
 msgid "Campaign name"
-msgstr "Messkampagnenname"
+msgstr "Name der Messkampagne"
 
 #: templates/campaigns/my.html:11 templates/workshops/my.html:14
 msgid "Start date"
@@ -269,14 +250,10 @@ msgid "Delete"
 msgstr "Löschen"
 
 #: templates/campaigns/my.html:32
-#, fuzzy
-#| msgid "No workshops found."
 msgid "No campaigns found."
 msgstr "Keine Messkampagnen gefunden."
 
 #: templates/campaigns/my.html:37
-#, fuzzy
-#| msgid "Campaigns"
 msgid "Create campaign"
 msgstr "Messkampagne erstellen"
 
@@ -289,8 +266,6 @@ msgid "Cities and municipalities"
 msgstr "Städte und Gemeinden"
 
 #: templates/devices/form.html:7
-#, fuzzy
-#| msgid "Devices"
 msgid "Edit Device"
 msgstr "Gerät bearbeiten"
 
@@ -315,10 +290,8 @@ msgid "Last status update"
 msgstr ""
 
 #: templates/devices/list.html:31 templates/devices/my.html:29
-#, fuzzy
-#| msgid "No workshops found."
 msgid "No devices found."
-msgstr "Keine Workshops gefunden."
+msgstr "Keine Geräte gefunden."
 
 #: templates/home.html:30
 msgid "Air quality"
@@ -326,8 +299,6 @@ msgstr "Luftqualität"
 
 #: templates/home.html:32 templates/home.html:33 templates/home.html:34
 #: templates/home.html:69
-#, fuzzy
-#| msgid "Particulate Matter (PM1)"
 msgid "Particulate Matter"
 msgstr "Feinstaub"
 
@@ -360,10 +331,8 @@ msgid "Hazardous"
 msgstr "Gefährlich"
 
 #: templates/stations/detail.html:21
-#, fuzzy
-#| msgid "Actions"
 msgid "Station"
-msgstr "Aktionen"
+msgstr "Station"
 
 #: templates/stations/detail.html:63
 msgid "48-hour overview"
@@ -399,16 +368,12 @@ msgid "Download data"
 msgstr ""
 
 #: templates/stations/detail.html:110
-#, fuzzy
-#| msgid "Start date"
 msgid "Start date:"
-msgstr "Startdatum"
+msgstr "Startdatum:"
 
 #: templates/stations/detail.html:114
-#, fuzzy
-#| msgid "End date"
 msgid "End date:"
-msgstr "Enddatum"
+msgstr "Enddatum:"
 
 #: templates/stations/detail.html:117
 msgid "Download measurements as CSV"
@@ -419,16 +384,12 @@ msgid "Stations overview"
 msgstr "Übersicht über Stationen"
 
 #: templates/stations/list.html:40
-#, fuzzy
-#| msgid "Top 10 stations with the highest values for PM2.5"
 msgid "Top 10 with the highest values for PM2.5"
-msgstr "Top 10 Stationen mit den höchsten Werten für PM2.5"
+msgstr "Top 10 mit den höchsten Werten für PM2.5"
 
 #: templates/stations/list.html:54
-#, fuzzy
-#| msgid "Top 10 stations with the lowest values for PM2.5"
 msgid "Top 10 with the lowest values for PM2.5"
-msgstr "Top 10 Stationen mit den niedrigsten Werten für PM2.5"
+msgstr "Top 10 mit den niedrigsten Werten für PM2.5"
 
 #: templates/workshops/detail.html:69
 msgid "Messwerte"
@@ -551,10 +512,8 @@ msgid "Running workshops"
 msgstr "Laufende Workshops"
 
 #: templates/workshops/list.html:20
-#, fuzzy
-#| msgid "Start Date"
 msgid "Start:"
-msgstr "Startdatum"
+msgstr "Startdatum:"
 
 #: templates/workshops/list.html:28
 msgid "No running workshops."
@@ -566,7 +525,7 @@ msgstr "Vergangene Workshops"
 
 #: templates/workshops/list.html:42
 msgid "End:"
-msgstr "Ende"
+msgstr "Ende:"
 
 #: templates/workshops/list.html:50
 msgid "No past workshops."
