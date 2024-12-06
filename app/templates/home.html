@@ -38,6 +38,7 @@
                     <option value="10">{% trans "Particulate Matter" %} PM10</option>
                 </select>
                 <div id="legend" style="margin-top: 1rem;"></div>
+                <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: AQI by U.S. EPA NAAQS" %}</a></span>
             </div>
         </div>
         <div id="map">
@@ -88,7 +89,8 @@
             [9,  [60, 1, 1],     "{% trans 'Moderate' %}"],                              // Gelb
             [35, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],  // Orange
             [55, [0, 1, 1],      "{% trans 'Unhealthy' %}"],                           // Rot
-            [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]                      // Violett
+            [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],                      // Violett
+            [250.5,[330, 1, 0.5],  "{% trans 'Hazardous' %}"]                         // Dunkelrot/Braun
         ];
 
         const colorStepsPM25 = [
@@ -96,7 +98,8 @@
             [9,  [60, 1, 1],     "{% trans 'Moderate' %}"],                          
             [35, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],  
             [55, [0, 1, 1],      "{% trans 'Unhealthy' %}"],                   
-            [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]
+            [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],
+            [250.5,[330, 1, 0.5],  "{% trans 'Hazardous' %}"]
         ];
 
         const colorStepsPM10 = [
@@ -104,7 +107,8 @@
             [54,   [60, 1, 1],     "{% trans 'Moderate' %}"],
             [154,  [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],
             [254,  [0, 1, 1],      "{% trans 'Unhealthy' %}"],
-            [354,  [300, 1, 0.7],  "{% trans 'Very unhealthy' %}"]
+            [354,  [300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],
+            [424,  [330, 1, 0.5],  "{% trans 'Hazardous' %}"],
         ];
 
         const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
