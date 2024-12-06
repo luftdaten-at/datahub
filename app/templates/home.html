@@ -230,7 +230,8 @@
     var stationData;
 
     async function fetchMarkerData() {
-        const response = await fetch("https://staging.api.luftdaten.at/v1/station/current/all");
+        const api_url = "{{API_URL}}";
+        const response = await fetch(`${api_url}/station/current/all`);
 
         stationData = [];
 
