@@ -27,6 +27,7 @@
                   {% else %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'workshops-list' %}">{% trans "Workshops" %}</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'stations-list' %}">{% trans "Stations" %}</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'cities-list' %}">{% trans "Cities" %}</a></li>
                     {% if user.is_authenticated and user.is_superuser %}
                     <li class="nav-item"><a class="nav-link" href="{% url 'device-list' %}">{% trans "Devices" %}</a></li>
                     {% endif %}

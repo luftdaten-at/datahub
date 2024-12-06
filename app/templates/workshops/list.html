@@ -5,52 +5,50 @@
 {% block title %}{% trans "Workshops" %}{% endblock title %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">{% trans "Workshops" %}</h2>
-    <p>{% trans "We continuously host workshops where air quality is measured together. On this page, the results of all public workshops are listed." %}</p>
+<h2 class="mb-4">{% trans "Workshops" %}</h2>
+<p>{% trans "We continuously host workshops where air quality is measured together. On this page, the results of all public workshops are listed." %}</p>
 
-    <!-- Laufende Workshops -->
-    <div class="mb-5">
-        <h3 class="mb-3">{% trans "Running workshops" %}</h3>
-        {% if upcoming_workshops %}
-            <div class="list-group">
-                {% for workshop in upcoming_workshops %}
-                    <a href="{% url 'workshop-detail' workshop.pk %}" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ workshop.title }}</h5>
-                            <small class="text-muted">{% trans "Start:" %} {{ workshop.start_date }}</small>
-                        </div>
-                        <p class="mb-1">{{ workshop.description|truncatewords:20 }}</p>
-                    </a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                {% trans "No running workshops." %}
-            </div>
-        {% endif %}
-    </div>
+<!-- Laufende Workshops -->
+<div class="mb-5">
+    <h3 class="mb-3">{% trans "Running workshops" %}</h3>
+    {% if upcoming_workshops %}
+        <div class="list-group">
+            {% for workshop in upcoming_workshops %}
+                <a href="{% url 'workshop-detail' workshop.pk %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ workshop.title }}</h5>
+                        <small class="text-muted">{% trans "Start:" %} {{ workshop.start_date }}</small>
+                    </div>
+                    <p class="mb-1">{{ workshop.description|truncatewords:20 }}</p>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% trans "No running workshops." %}
+        </div>
+    {% endif %}
+</div>
 
-    <!-- Vergangene Workshops -->
-    <div>
-        <h3 class="mb-3">{% trans "Past workshops" %}</h3>
-        {% if past_workshops %}
-            <div class="list-group">
-                {% for workshop in past_workshops %}
-                    <a href="{% url 'workshop-detail' workshop.pk %}" class="list-group-item list-group-item-action">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">{{ workshop.title }}</h5>
-                            <small class="text-muted">{% trans "End:" %} {{ workshop.end_date }}</small>
-                        </div>
-                        <p class="mb-1">{{ workshop.description|truncatewords:20 }}</p>
-                    </a>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                {% trans "No past workshops." %}
-            </div>
-        {% endif %}
-    </div>
+<!-- Vergangene Workshops -->
+<div>
+    <h3 class="mb-3">{% trans "Past workshops" %}</h3>
+    {% if past_workshops %}
+        <div class="list-group">
+            {% for workshop in past_workshops %}
+                <a href="{% url 'workshop-detail' workshop.pk %}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">{{ workshop.title }}</h5>
+                        <small class="text-muted">{% trans "End:" %} {{ workshop.end_date }}</small>
+                    </div>
+                    <p class="mb-1">{{ workshop.description|truncatewords:20 }}</p>
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% trans "No past workshops." %}
+        </div>
+    {% endif %}
 </div>
 {% endblock content %}

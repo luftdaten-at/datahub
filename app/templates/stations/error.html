@@ -1,0 +1,18 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}Error{% endblock title %}
+
+{% block styles %}
+{% endblock styles %}
+
+{% block content %}
+<div class="alert alert-danger" role="alert">
+    <h1 class="display-4">An error occurred</h1>
+    <p class="lead">{{ error }}</p>
+    <hr class="my-4">
+    <p>Please try again later or contact support if the issue persists.</p>
+    <a class="btn btn-primary btn-lg" href="/" role="button">Go Back to Home</a>
+</div>
+{% endblock content %}
