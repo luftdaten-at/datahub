@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-12-06 13:51+0100\n"
+"POT-Creation-Date: 2024-12-06 21:55+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,11 +71,11 @@ msgstr ""
 "können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."
 
-#: main/settings.py:150
+#: main/settings.py:152
 msgid "English"
 msgstr "Englisch"
 
-#: main/settings.py:151
+#: main/settings.py:153
 msgid "German"
 msgstr "Deutsch"
 
@@ -88,7 +88,7 @@ msgid "Luftdaten.at Datahub"
 msgstr "Luftdaten.at Datahub"
 
 #: templates/_base.html:28 templates/workshops/list.html:5
-#: templates/workshops/list.html:9
+#: templates/workshops/list.html:8
 msgid "Workshops"
 msgstr "Workshops"
 
@@ -98,49 +98,53 @@ msgstr "Workshops"
 msgid "Stations"
 msgstr "Aktionen"
 
-#: templates/_base.html:31 templates/devices/list.html:5
+#: templates/_base.html:30
+msgid "Cities"
+msgstr ""
+
+#: templates/_base.html:32 templates/devices/list.html:5
 #: templates/devices/list.html:9
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:42 templates/campaigns/my.html:6
+#: templates/_base.html:43 templates/campaigns/my.html:6
 #, fuzzy
 #| msgid "Campaigns"
 msgid "My campaigns"
 msgstr "Meine Messkampagnen"
 
-#: templates/_base.html:43 templates/devices/my.html:5
+#: templates/_base.html:44 templates/devices/my.html:5
 #: templates/devices/my.html:9
 #, fuzzy
 #| msgid "Devices"
 msgid "My devices"
 msgstr "Meine Geräte"
 
-#: templates/_base.html:45 templates/workshops/my.html:6
+#: templates/_base.html:46 templates/workshops/my.html:6
 msgid "My workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:47
+#: templates/_base.html:48
 msgid "Change password"
 msgstr "Passwort ändern"
 
-#: templates/_base.html:49
+#: templates/_base.html:50
 msgid "Log out"
 msgstr "Abmelden"
 
-#: templates/_base.html:53
+#: templates/_base.html:54
 msgid "Log in"
 msgstr "Anmelden"
 
-#: templates/_base.html:54
+#: templates/_base.html:55
 msgid "Sign up"
 msgstr "Registrieren"
 
-#: templates/_base.html:71
+#: templates/_base.html:72
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:72
+#: templates/_base.html:73
 msgid "About us"
 msgstr "Impressum"
 
@@ -276,6 +280,14 @@ msgstr "Keine Messkampagnen gefunden."
 msgid "Create campaign"
 msgstr "Messkampagne erstellen"
 
+#: templates/cities/detail.html:5
+msgid "City/municipality"
+msgstr "Stadt/Gemeinde"
+
+#: templates/cities/list.html:5 templates/cities/list.html:11
+msgid "Cities and municipalities"
+msgstr "Städte und Gemeinden"
+
 #: templates/devices/form.html:7
 #, fuzzy
 #| msgid "Devices"
@@ -308,97 +320,97 @@ msgstr ""
 msgid "No devices found."
 msgstr "Keine Workshops gefunden."
 
-#: templates/home.html:34
+#: templates/home.html:30
 msgid "Air quality"
 msgstr "Luftqualität"
 
-#: templates/home.html:36 templates/home.html:37 templates/home.html:38
-#: templates/home.html:73
+#: templates/home.html:32 templates/home.html:33 templates/home.html:34
+#: templates/home.html:69
 #, fuzzy
 #| msgid "Particulate Matter (PM1)"
 msgid "Particulate Matter"
 msgstr "Feinstaub"
 
-#: templates/home.html:41
+#: templates/home.html:37
 msgid "Method: AQI by U.S. EPA NAAQS"
 msgstr "Methode: AQI nach U.S. EPA NAAQS"
 
-#: templates/home.html:88 templates/home.html:97 templates/home.html:106
+#: templates/home.html:84 templates/home.html:93 templates/home.html:102
 msgid "Good"
 msgstr "Gut"
 
-#: templates/home.html:89 templates/home.html:98 templates/home.html:107
+#: templates/home.html:85 templates/home.html:94 templates/home.html:103
 msgid "Moderate"
 msgstr "Mäßig"
 
-#: templates/home.html:90 templates/home.html:99 templates/home.html:108
+#: templates/home.html:86 templates/home.html:95 templates/home.html:104
 msgid "Unhealthy for sensitive groups"
 msgstr "Ungesund für empfindliche Gruppen"
 
-#: templates/home.html:91 templates/home.html:100 templates/home.html:109
+#: templates/home.html:87 templates/home.html:96 templates/home.html:105
 msgid "Unhealthy"
 msgstr "Ungesund"
 
-#: templates/home.html:92 templates/home.html:101 templates/home.html:110
+#: templates/home.html:88 templates/home.html:97 templates/home.html:106
 msgid "Very unhealthy"
 msgstr "Sehr ungesund"
 
-#: templates/home.html:93 templates/home.html:102 templates/home.html:111
+#: templates/home.html:89 templates/home.html:98 templates/home.html:107
 msgid "Hazardous"
 msgstr "Gefährlich"
 
-#: templates/stations/detail.html:17
+#: templates/stations/detail.html:21
 #, fuzzy
 #| msgid "Actions"
 msgid "Station"
 msgstr "Aktionen"
 
-#: templates/stations/detail.html:61
+#: templates/stations/detail.html:63
 msgid "48-hour overview"
 msgstr "48-Stunden Überblick"
 
-#: templates/stations/detail.html:65
+#: templates/stations/detail.html:67
 msgid "Particulate Matter (PM1)"
 msgstr "Feinstaub (PM1)"
 
-#: templates/stations/detail.html:72
+#: templates/stations/detail.html:74
 msgid "Particulate Matter (PM2.5)"
 msgstr "Feinstaub (PM2.5)"
 
-#: templates/stations/detail.html:79
+#: templates/stations/detail.html:81
 msgid "Particulate Matter (PM10)"
 msgstr "Feinstaub (PM10)"
 
-#: templates/stations/detail.html:86
+#: templates/stations/detail.html:88
 msgid "Temperature (°C)"
 msgstr "Temperatur (°C)"
 
-#: templates/stations/detail.html:93
+#: templates/stations/detail.html:95
 #, python-format
 msgid "Humidity (%%)"
 msgstr "Luftfeuchtigkeit (%%)"
 
-#: templates/stations/detail.html:102
+#: templates/stations/detail.html:104
 msgid "Surroundings"
 msgstr "Umgebung"
 
-#: templates/stations/detail.html:105
+#: templates/stations/detail.html:107
 msgid "Download data"
 msgstr ""
 
-#: templates/stations/detail.html:108
+#: templates/stations/detail.html:110
 #, fuzzy
 #| msgid "Start date"
 msgid "Start date:"
 msgstr "Startdatum"
 
-#: templates/stations/detail.html:112
+#: templates/stations/detail.html:114
 #, fuzzy
 #| msgid "End date"
 msgid "End date:"
 msgstr "Enddatum"
 
-#: templates/stations/detail.html:115
+#: templates/stations/detail.html:117
 msgid "Download measurements as CSV"
 msgstr "Download Messwerte als CSV"
 
@@ -406,12 +418,16 @@ msgstr "Download Messwerte als CSV"
 msgid "Stations overview"
 msgstr "Übersicht über Stationen"
 
-#: templates/stations/list.html:41
-msgid "Top 10 stations with the highest values for PM2.5"
+#: templates/stations/list.html:40
+#, fuzzy
+#| msgid "Top 10 stations with the highest values for PM2.5"
+msgid "Top 10 with the highest values for PM2.5"
 msgstr "Top 10 Stationen mit den höchsten Werten für PM2.5"
 
-#: templates/stations/list.html:55
-msgid "Top 10 stations with the lowest values for PM2.5"
+#: templates/stations/list.html:54
+#, fuzzy
+#| msgid "Top 10 stations with the lowest values for PM2.5"
+msgid "Top 10 with the lowest values for PM2.5"
 msgstr "Top 10 Stationen mit den niedrigsten Werten für PM2.5"
 
 #: templates/workshops/detail.html:69
@@ -446,73 +462,73 @@ msgstr "Device"
 msgid "Alle Geräte"
 msgstr "All devices"
 
-#: templates/workshops/detail.html:305
+#: templates/workshops/detail.html:306
 msgid "Konzenration (µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:362 templates/workshops/detail.html:369
+#: templates/workshops/detail.html:363 templates/workshops/detail.html:370
 msgid "Gut (<5 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:363 templates/workshops/detail.html:370
+#: templates/workshops/detail.html:364 templates/workshops/detail.html:371
 msgid "Befriedigend (5-15 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:365 templates/workshops/detail.html:372
+#: templates/workshops/detail.html:366 templates/workshops/detail.html:373
 msgid "Schlecht (15-25 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:366 templates/workshops/detail.html:373
+#: templates/workshops/detail.html:367 templates/workshops/detail.html:374
 msgid "Sehr schlecht (>25 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:376
+#: templates/workshops/detail.html:377
 msgid "Gut (<15 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:377
+#: templates/workshops/detail.html:378
 msgid "Befriedigend (15-45 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:379
+#: templates/workshops/detail.html:380
 msgid "Schlecht (45-60 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:380
+#: templates/workshops/detail.html:381
 msgid "Sehr schlecht (>60 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:384
+#: templates/workshops/detail.html:385
 msgid "Kalt (<0°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:385
+#: templates/workshops/detail.html:386
 msgid "Kühl (0-10°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:386
+#: templates/workshops/detail.html:387
 msgid "Mild (10-20°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:387
+#: templates/workshops/detail.html:388
 msgid "Warm (20-30°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:388
+#: templates/workshops/detail.html:389
 msgid "Heiß (>30°C)"
-msgstr ""
-
-#: templates/workshops/detail.html:392
-#, python-format
-msgid "Trocken (<30%%)"
 msgstr ""
 
 #: templates/workshops/detail.html:393
 #, python-format
-msgid "Mittel (30-70%%)"
+msgid "Trocken (<30%%)"
 msgstr ""
 
 #: templates/workshops/detail.html:394
+#, python-format
+msgid "Mittel (30-70%%)"
+msgstr ""
+
+#: templates/workshops/detail.html:395
 #, python-format
 msgid "Feucht (>70%%)"
 msgstr ""
@@ -521,7 +537,7 @@ msgstr ""
 msgid "Workshop"
 msgstr "Workshop"
 
-#: templates/workshops/list.html:10
+#: templates/workshops/list.html:9
 msgid ""
 "We continuously host workshops where air quality is measured together. On "
 "this page, the results of all public workshops are listed."
@@ -530,29 +546,29 @@ msgstr ""
 "Luftqualität gemessen wird. Auf dieser Seite sind die Ergebnisse aller "
 "öffentlichen Workshops aufgelistet."
 
-#: templates/workshops/list.html:14
+#: templates/workshops/list.html:13
 msgid "Running workshops"
 msgstr "Laufende Workshops"
 
-#: templates/workshops/list.html:21
+#: templates/workshops/list.html:20
 #, fuzzy
 #| msgid "Start Date"
 msgid "Start:"
 msgstr "Startdatum"
 
-#: templates/workshops/list.html:29
+#: templates/workshops/list.html:28
 msgid "No running workshops."
 msgstr "Keine laufenden Workshops."
 
-#: templates/workshops/list.html:36
+#: templates/workshops/list.html:35
 msgid "Past workshops"
 msgstr "Vergangene Workshops"
 
-#: templates/workshops/list.html:43
+#: templates/workshops/list.html:42
 msgid "End:"
 msgstr "Ende"
 
-#: templates/workshops/list.html:51
+#: templates/workshops/list.html:50
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
