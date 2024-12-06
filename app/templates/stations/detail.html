@@ -16,113 +16,110 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container">
 <div class="row">
-    <div class="col-lg-12">
-        <h1>{% trans "Station" %} {{ station.id }}</h1>
-        <!-- 
-        <div>
-          <div>
-            <h5>Letzte Messung</h5>
-            <small class="text-muted">Gemessen am {{ measurement.time }}</small>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-sm-4">
-                <div class="card text-center">
-                  <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">PM1</h6>
-                    <p class="card-text display-4">12 µg/m³</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <div class="card text-center">
-                  <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">PM2.5</h6>
-                    <p class="card-text display-4">15 µg/m³</p>
-                  </div>
-                </div>
-              </div>
-              <div class="col-sm-4">
-                <div class="card text-center">
-                  <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">PM10</h6>
-                    <p class="card-text display-4">25 µg/m³</p>
-                  </div>
-                </div>
+  <div class="col-lg-12">
+    <h1>{% trans "Station" %} {{ station.id }}</h1>
+    <!-- 
+    <div>
+      <div>
+        <h5>Letzte Messung</h5>
+        <small class="text-muted">Gemessen am {{ measurement.time }}</small>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-sm-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">PM1</h6>
+                <p class="card-text display-4">12 µg/m³</p>
               </div>
             </div>
           </div>
-        </div> -->
-    </div>
-</div>    
-
-<!-- Content Block -->
-
-    <div class="row">
-      <!-- Linke Spalte: Chart.js Diagramme -->
-      <div class="col-lg-6 col-md-12">
-        <h3>{% trans "48-hour overview" %}</h3>
-
-        {% if station.data_48h.2|length > 0 %}
-        <div class="mb-4">
-          <h5>{% trans "Particulate Matter (PM1)" %}</h5>
-          <canvas id="chart-pm1" style="height: 100px;"></canvas>
-        </div>
-        {% endif %}
-        
-        {% if station.data_48h.3|length > 0 %}
-        <div class="mb-4">
-          <h5>{% trans "Particulate Matter (PM2.5)" %}</h5>
-          <canvas id="chart-pm25" style="height: 100px;"></canvas>
-        </div>
-        {% endif %}
-
-        {% if station.data_48h.5|length > 0 %}
-        <div class="mb-4">
-          <h5>{% trans "Particulate Matter (PM10)" %}</h5>
-          <canvas id="chart-pm10" style="height: 100px;"></canvas>
-        </div>
-        {% endif %}
-        
-        {% if station.data_48h.7|length > 0 %}
-        <div class="mb-4">
-          <h5>{% trans "Temperature (°C)" %}</h5>
-          <canvas id="chart-temperature" class="chart-height"></canvas>
-        </div>
-        {% endif %}
-        
-        {% if station.data_48h.6|length > 0 %}
-        <div class="mb-4">
-          <h5>{% trans "Humidity (%)" %}</h5>
-          <canvas id="chart-humidity" class="chart-height"></canvas>
-        </div>
-        {% endif %}
-
-    </div>
-        
-      <!-- Rechte Spalte: Leaflet-Karte -->
-      <div class="col-lg-6 col-md-12 mb-4">
-        <h3>{% trans "Surroundings" %}</h3>
-        <div id="map" style="width: 100%; height: 400px;"></div>
-        <div class="mt-3">
-            <h5>{% trans "Download data" %}</h5>
-            <form method="get" action="" class="form-inline mb-2" id="dateForm">
-              <div class="form-group mr-2">
-                  <label for="startDate" class="mr-2">{% trans "Start date:" %}</label>
-                  <input type="date" class="form-control" id="startDate" name="start_date" required>
+          <div class="col-sm-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">PM2.5</h6>
+                <p class="card-text display-4">15 µg/m³</p>
               </div>
-              <div class="form-group mr-2">
-                  <label for="endDate" class="mr-2">{% trans "End date:" %}</label>
-                  <input type="date" class="form-control" id="endDate" name="end_date" required>
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="card text-center">
+              <div class="card-body">
+                <h6 class="card-subtitle mb-2 text-muted">PM10</h6>
+                <p class="card-text display-4">25 µg/m³</p>
               </div>
-              <button type="submit" class="btn btn-primary">{% trans "Download measurements as CSV" %}</button>
-          </form>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </div> -->
+  </div>
 </div>
+
+<div class="row">
+  <!-- Linke Spalte: Chart.js Diagramme -->
+  <div class="col-lg-6 col-md-12">
+    <h3>{% trans "48-hour overview" %}</h3>
+
+    {% if station.data_48h.2|length > 0 %}
+    <div class="mb-4">
+      <h5>{% trans "Particulate Matter (PM1)" %}</h5>
+      <canvas id="chart-pm1" style="height: 100px;"></canvas>
+    </div>
+    {% endif %}
+    
+    {% if station.data_48h.3|length > 0 %}
+    <div class="mb-4">
+      <h5>{% trans "Particulate Matter (PM2.5)" %}</h5>
+      <canvas id="chart-pm25" style="height: 100px;"></canvas>
+    </div>
+    {% endif %}
+
+    {% if station.data_48h.5|length > 0 %}
+    <div class="mb-4">
+      <h5>{% trans "Particulate Matter (PM10)" %}</h5>
+      <canvas id="chart-pm10" style="height: 100px;"></canvas>
+    </div>
+    {% endif %}
+    
+    {% if station.data_48h.7|length > 0 %}
+    <div class="mb-4">
+      <h5>{% trans "Temperature (°C)" %}</h5>
+      <canvas id="chart-temperature" class="chart-height"></canvas>
+    </div>
+    {% endif %}
+    
+    {% if station.data_48h.6|length > 0 %}
+    <div class="mb-4">
+      <h5>{% trans "Humidity (%)" %}</h5>
+      <canvas id="chart-humidity" class="chart-height"></canvas>
+    </div>
+    {% endif %}
+
+</div>
+    
+  <!-- Rechte Spalte: Leaflet-Karte -->
+  <div class="col-lg-6 col-md-12 mb-4">
+    <h3>{% trans "Surroundings" %}</h3>
+    <div id="map" style="width: 100%; height: 400px;"></div>
+    <div class="mt-3">
+        <h5>{% trans "Download data" %}</h5>
+        <form method="get" action="" class="form-inline mb-2" id="dateForm">
+          <div class="form-group mr-2">
+              <label for="startDate" class="mr-2">{% trans "Start date:" %}</label>
+              <input type="date" class="form-control" id="startDate" name="start_date" required>
+          </div>
+          <div class="form-group mr-2">
+              <label for="endDate" class="mr-2">{% trans "End date:" %}</label>
+              <input type="date" class="form-control" id="endDate" name="end_date" required>
+          </div>
+          <button type="submit" class="btn btn-primary">{% trans "Download measurements as CSV" %}</button>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 <!-- JavaScript-Code zur Initialisierung der Karte und Diagramme -->
 <script>
@@ -166,131 +163,129 @@ dataTemperature = {{ station.data_48h.7 }};
 dataHumidity = {{ station.data_48h.6 }}
 
 
-  // Gemeinsame Optionen für alle Diagramme
-  var commonOptions = {
-    responsive: true,
-    aspectRatio: 5,
-    plugins: {
-      legend: {
-        display: false // Legende ausblenden
+// Gemeinsame Optionen für alle Diagramme
+var commonOptions = {
+  responsive: true,
+  aspectRatio: 5,
+  plugins: {
+    legend: {
+      display: false // Legende ausblenden
+    }
+  },
+  scales: {
+    x: {
+      display: true,
+      title: {
+        display: false,
+        text: ''
+      },
+      grid: {
+        display: false
+      },
+      ticks: {
+        maxRotation: 35,
+        minRotation: 35,
+        autoSkip: true,
+        maxTicksLimit: 10
       }
     },
-    scales: {
-      x: {
+    y: {
+      beginAtZero: true,
+      title: {
         display: true,
-        title: {
-          display: false,
-          text: ''
-        },
-        grid: {
-          display: false
-        },
-        ticks: {
-          maxRotation: 35,
-          minRotation: 35,
-          autoSkip: true,
-          maxTicksLimit: 10
-        }
-      },
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: '' // Wird individuell gesetzt
-        }
+        text: '' // Wird individuell gesetzt
       }
     }
-  };
-
- // Funktion zum Erstellen eines Diagramms
- function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
-    var options = JSON.parse(JSON.stringify(commonOptions)); // Kopie der gemeinsamen Optionen
-    options.scales.y.title.text = yAxisLabel;
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: label,
-          data: data,
-          backgroundColor: backgroundColor,
-          borderColor: borderColor,
-          borderWidth: 0,
-          barPercentage: 1.0,
-          categoryPercentage: 1.0
-        }]
-      },
-      options: options
-    });
   }
+};
 
- // Diagramme erstellen
- createChart(
-    document.getElementById('chart-pm25').getContext('2d'),
-    'PM2.5 (µg/m³)',
-    dataPM25,
-    'Konzentration (µg/m³)',
-    'rgba(54, 162, 235, 0.5)',
-    'rgba(54, 162, 235, 1)'
-  );
-
- createChart(
-    document.getElementById('chart-pm10').getContext('2d'),
-    'PM10 (µg/m³)',
-    dataPM10,
-    'Konzentration (µg/m³)',
-    'rgba(255, 99, 132, 0.5)',
-    'rgba(255, 99, 132, 1)'
-  );
-
-  createChart(
-    document.getElementById('chart-pm1').getContext('2d'),
-    'PM1 (µg/m³)',
-    dataPM1,
-    'Konzentration (µg/m³)',
-    'rgba(75, 192, 192, 0.5)',
-    'rgba(75, 192, 192, 1)'
-  );
-
-  createChart(
-    document.getElementById('chart-temperature').getContext('2d'),
-    'Temperatur (°C)',
-    dataTemperature,
-    'Temperatur (°C)',
-    'rgba(255, 159, 64, 0.5)',
-    'rgba(255, 159, 64, 1)'
-  );
-
-  createChart(
-    document.getElementById('chart-humidity').getContext('2d'),
-    'Luftfeuchtigkeit (%)',
-    dataHumidity,
-    'Relative Luftfeuchtigkeit (%)',
-    'rgba(153, 102, 255, 0.5)',
-    'rgba(153, 102, 255, 1)'
-  );
-  // messwerte herunterladen
-  document.getElementById("dateForm").addEventListener("submit", function(event) {
-      // Prevent the form from submitting normally
-      event.preventDefault();
-
-      // Extract the station ID from the current URL (e.g., /stations/34106)
-      const pathname = window.location.pathname;
-
-      // Get the values from the form fields
-      const startDate = document.getElementById("startDate").value;
-      const endDate = document.getElementById("endDate").value;
-
-      const stationId = window.location.pathname.split("/").filter(i => i).pop();
-      // Build the URL with the query parameters
-      const api_url = "{{API_URL}}";
-      const url = `${api_url}/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
-
-      // Redirect the browser to the constructed URL
-      window.location.href = url;
+// Funktion zum Erstellen eines Diagramms
+function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
+  var options = JSON.parse(JSON.stringify(commonOptions)); // Kopie der gemeinsamen Optionen
+  options.scales.y.title.text = yAxisLabel;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        borderWidth: 0,
+        barPercentage: 1.0,
+        categoryPercentage: 1.0
+      }]
+    },
+    options: options
   });
+}
+
+// Diagramme erstellen
+createChart(
+  document.getElementById('chart-pm25').getContext('2d'),
+  'PM2.5 (µg/m³)',
+  dataPM25,
+  'Konzentration (µg/m³)',
+  'rgba(54, 162, 235, 0.5)',
+  'rgba(54, 162, 235, 1)'
+);
+
+createChart(
+  document.getElementById('chart-pm10').getContext('2d'),
+  'PM10 (µg/m³)',
+  dataPM10,
+  'Konzentration (µg/m³)',
+  'rgba(255, 99, 132, 0.5)',
+  'rgba(255, 99, 132, 1)'
+);
+
+createChart(
+  document.getElementById('chart-pm1').getContext('2d'),
+  'PM1 (µg/m³)',
+  dataPM1,
+  'Konzentration (µg/m³)',
+  'rgba(75, 192, 192, 0.5)',
+  'rgba(75, 192, 192, 1)'
+);
+
+createChart(
+  document.getElementById('chart-temperature').getContext('2d'),
+  'Temperatur (°C)',
+  dataTemperature,
+  'Temperatur (°C)',
+  'rgba(255, 159, 64, 0.5)',
+  'rgba(255, 159, 64, 1)'
+);
+
+createChart(
+  document.getElementById('chart-humidity').getContext('2d'),
+  'Luftfeuchtigkeit (%)',
+  dataHumidity,
+  'Relative Luftfeuchtigkeit (%)',
+  'rgba(153, 102, 255, 0.5)',
+  'rgba(153, 102, 255, 1)'
+);
+// messwerte herunterladen
+document.getElementById("dateForm").addEventListener("submit", function(event) {
+    // Prevent the form from submitting normally
+    event.preventDefault();
+
+    // Extract the station ID from the current URL (e.g., /stations/34106)
+    const pathname = window.location.pathname;
+
+    // Get the values from the form fields
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+
+    const stationId = window.location.pathname.split("/").filter(i => i).pop();
+    // Build the URL with the query parameters
+    const api_url = "{{API_URL}}";
+    const url = `${api_url}/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
+
+    // Redirect the browser to the constructed URL
+    window.location.href = url;
+});
 
 </script>
-
-
 {% endblock content %}
