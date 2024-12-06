@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AirQualityRecord, AirQualityDatapoint, Measurement
+from .models import AirQualityRecord, AirQualityDatapoint, MeasurementAPI
 from workshops.models import Workshop
 from devices.models import Device, DeviceStatus, Sensor
 
@@ -68,7 +68,7 @@ class DeviceStatusSerializer(serializers.ModelSerializer):
 
 class MeasurementSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Measurement
+        model = MeasurementAPI
         fields = ['sensor', 'pm1', 'pm25', 'pm10', 'temperature', 'humidity', 'voc_index', 'nox_index', 'co2', 'o3', 'iaq_index', 'iaq_acc', 'iaq_static', 'pressure']
 
     def validate_sensor(self, value):
@@ -88,7 +88,7 @@ class AirQualityDatapointSerializer(serializers.ModelSerializer):
         datapoint = AirQualityDatapoint.objects.create(**validated_data)
         for measurement_data in measurements_data:
             measurement_data['sensor'] = self.fields['measurements'].child.fields['sensor'].run_validation(measurement_data['sensor'])
-            Measurement.objects.create(datapoint=datapoint, **measurement_data)
+            MeasurementAPI.objects.create(datapoint=datapoint, **measurement_data)
         return datapoint
 
 

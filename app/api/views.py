@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 
-from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement
+from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, MeasurementAPI
 from workshops.models import Participant, Workshop
 from devices.models import Device
 

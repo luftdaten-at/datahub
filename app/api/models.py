@@ -30,7 +30,7 @@ class AirQualityDatapoint(models.Model):
     mode = models.ForeignKey(MobilityMode, on_delete=models.SET_NULL, null=True, blank=True)
 
 
-class Measurement(models.Model):
+class MeasurementAPI(models.Model):
     """
     Single Measurement with one specific sensor.
     """
@@ -78,7 +78,7 @@ class AirQualityRecord(models.Model):
     mode = models.ForeignKey(MobilityMode, on_delete=models.CASCADE, null=True, blank=True)
 
 
-class Measurement(models.Model):
+class MeasurementAPI(models.Model):
     """
     Measurement taken by a device in a room.
     """
@@ -100,7 +100,7 @@ class Values(models.Model):
     id = models.IntegerField(primary_key=True)
     dimension = models.IntegerField()
     value = models.FloatField()
-    measurement = models.ForeignKey(Measurement, on_delete=models.CASCADE)
+    measurement = models.ForeignKey(MeasurementAPI, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'Value {self.id} for Measurement {self.measurement.id}'
