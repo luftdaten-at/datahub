@@ -273,7 +273,8 @@ dataHumidity = {{ station.data_48h.6 }}
 
       const stationId = window.location.pathname.split("/").filter(i => i).pop();
       // Build the URL with the query parameters
-      const url = `https://staging.api.luftdaten.at/v1/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
+      const api_url = "{{API_URL}}";
+      const url = `${api_url}/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
 
       // Redirect the browser to the constructed URL
       window.location.href = url;
