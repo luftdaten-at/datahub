@@ -64,10 +64,11 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
     'campaign.apps.CampaignConfig',
+    'cities.apps.CitiesConfig',
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
-    'workshops.apps.WorkshopsConfig',
     'stations.apps.StationsConfig',
+    'workshops.apps.WorkshopsConfig',
 ]
 
 MIDDLEWARE = [

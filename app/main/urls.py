@@ -26,6 +26,7 @@ urlpatterns = [
     path("", include("pages.urls")),
     path("api/", include("api.urls")),
     path("campaigns/", include("campaign.urls")),
+    path("cities/", include("cities.urls")),
     path("devices/", include("devices.urls")),
     path("stations/", include("stations.urls")),
     path("workshops/", include("workshops.urls")),

@@ -1,0 +1,17 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Cities and municipalities" %}{% endblock title %}
+
+{% block styles %}
+{% endblock styles %}
+
+{% block content %}
+<h2>{% trans "Cities and municipalities" %}</h2>
+<p>
+    {% for city in cities %}
+        <a href="/cities/{{ city.slug }}">{{ city.name }}</a> ({{ city.country.name }}){% if not forloop.last %}, {% endif %}
+    {% endfor %}
+</p>
+{% endblock content %}
