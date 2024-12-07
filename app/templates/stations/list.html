@@ -41,9 +41,7 @@
         <ul class="list-group">
             {% for station in top_stations %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="/stations/{{ station.0 }}" class="station-link">
-                        {{ station.0 }}  <!-- Station name or device -->
-                    </a>
+                    <a href="/stations/{{ station.0 }}" class="station-link">Station {{ station.0 }}</a>
                     <span class="badge bg-danger rounded-pill">{{ station.3 }} µg/m³</span> <!-- Value -->
                 </li>
             {% endfor %}
@@ -55,9 +53,7 @@
         <ul class="list-group">
             {% for station in lowest_stations %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="/stations/{{ station.0 }}" class="station-link">
-                        {{ station.0 }}  <!-- Station name or device -->
-                    </a>
+                    <a href="/stations/{{ station.0 }}" class="station-link">Station {{ station.0 }}</a>
                     <span class="badge bg-success rounded-pill">{{ station.3 }} µg/m³</span> <!-- Value -->
                 </li>
             {% endfor %}
