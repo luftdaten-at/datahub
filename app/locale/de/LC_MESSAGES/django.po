@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-06 21:55+0100\n"
-"PO-Revision-Date: 2024-12-06 22:32+0100\n"
+"PO-Revision-Date: 2024-12-07 01:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -88,7 +88,7 @@ msgstr "Stationen"
 
 #: templates/_base.html:30
 msgid "Cities"
-msgstr ""
+msgstr "Städte"
 
 #: templates/_base.html:32 templates/devices/list.html:5
 #: templates/devices/list.html:9
@@ -141,6 +141,12 @@ msgid ""
 "e-mail address to register an account on %(site_domain)s.\n"
 "To confirm this is correct, go to %(activate_url)s\\\n"
 msgstr ""
+"\\\n"
+"Sie erhalten diese E-Mail, weil Benutzer %(user_display)s Ihre E-Mail-"
+"Adresse angegeben hat\n"
+"e-Mail-Adresse angegeben hat, um ein Konto auf %(site_domain)s zu "
+"registrieren.\n"
+"Um zu bestätigen, dass dies korrekt ist, gehen Sie zu %(activate_url)s\\\n"
 
 #: templates/account/email/email_confirmation_subject.txt:3
 msgid "Confirm Your Sign Up"
@@ -158,6 +164,9 @@ msgid ""
 "address for user\n"
 "%(user_display)s."
 msgstr ""
+"Bitte bestätigen Sie, dass <a href=\"mailto:%(email)s\">%(email)s</a> eine "
+"E-Mail-Adresse für den Benutzer\n"
+"%(user_display)s."
 
 #: templates/account/email_confirm.html:11
 msgid "Confirm"
@@ -169,6 +178,8 @@ msgid ""
 "This e-mail confirmation link expired or is invalid. Please <a "
 "href=\"%(email_url)s\">issue a new e-mail confirmation request</a>.\\\n"
 msgstr ""
+"Dieser E-Mail-Bestätigungslink ist abgelaufen oder ungültig. Bitte <a "
+"href=\"%(email_url)s\">fordern Sie eine neue E-Mail-Bestätigung an</a>.\\\n"
 
 #: templates/account/password_change.html:13
 msgid "Forgot Password?"
@@ -365,7 +376,7 @@ msgstr "Umgebung"
 
 #: templates/stations/detail.html:107
 msgid "Download data"
-msgstr ""
+msgstr "Daten herunterladen"
 
 #: templates/stations/detail.html:110
 msgid "Start date:"
