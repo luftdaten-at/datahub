@@ -7,6 +7,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('devices', '0003_remove_device_name_device_device_name_and_more'),
+        ('api', '0001_initial')
     ]
 
     operations = [
@@ -49,12 +50,6 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='sensor',
-            name='id',
-            field=models.AutoField(default=None, primary_key=True, serialize=False),
-            preserve_default=False,
-        ),
-        migrations.AddField(
-            model_name='sensor',
             name='product_type',
             field=models.CharField(blank=True, max_length=100),
         ),
@@ -79,10 +74,19 @@ class Migration(migrations.Migration):
             name='id',
             field=models.CharField(max_length=255, primary_key=True, serialize=False),
         ),
+        migrations.RunSQL(
+            "ALTER TABLE api_measurement DROP CONSTRAINT api_measurement_sensor_id_8039993a_fk_devices_sensor_name;",  # PostgreSQL example
+            "ALTER TABLE api_measurement ADD CONSTRAINT api_measurement_sensor_id_8039993a_fk_devices_sensor_name FOREIGN KEY (sensor) REFERENCES devices_sensor(name);"
+        ),
         migrations.AlterField(
             model_name='sensor',
             name='name',
             field=models.CharField(max_length=100),
+        ),
+        migrations.AddField(
+            model_name='sensor',
+            name='id',
+            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
         ),
         migrations.DeleteModel(
             name='DeviceModel',
