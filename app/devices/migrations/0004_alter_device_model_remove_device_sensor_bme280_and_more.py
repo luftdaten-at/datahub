@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sensor',
             name='id',
-            field=models.CharField(max_length=255, primary_key=True),
+            field=models.AutoField(primary_key=True),
         ),
         migrations.DeleteModel(
             name='DeviceModel',
