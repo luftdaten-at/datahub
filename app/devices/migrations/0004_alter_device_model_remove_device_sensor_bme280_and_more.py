@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='device',
             name='model',
-            field=models.CharField(blank=True, default=None, max_length=255),
+            field=models.CharField(blank=True, max_length=255, null=True),
             preserve_default=False,
         ),
         migrations.RemoveField(
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='device',
             name='device_name',
-            field=models.CharField(blank=True, default=None, max_length=255),
+            field=models.CharField(blank=True, max_length=255, null=True),
             preserve_default=False,
         ),
         migrations.AlterField(
@@ -86,7 +86,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='sensor',
             name='id',
-            field=models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID'),
+            field=models.CharField(max_length=255, primary_key=True),
         ),
         migrations.DeleteModel(
             name='DeviceModel',

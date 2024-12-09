@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ('api', '0002_alter_fk'),
         ('campaign', '0002_alter_campaign_id_alter_campaign_name_organization_and_more'),
-        ('devices', '0005_alter_sensor_id'),
+        ('devices', '0004_alter_device_model_remove_device_sensor_bme280_and_more'),
     ]
 
     operations = [
