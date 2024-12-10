@@ -23,7 +23,8 @@ class Campaign(models.Model):
     organization = models.ForeignKey(
         'Organization',
         on_delete=models.CASCADE,
-        related_name='campaigns'
+        related_name='campaigns',
+        null = True
     )
 
     def __str__(self):

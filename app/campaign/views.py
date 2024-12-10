@@ -44,8 +44,9 @@ class CampaignsDetailView(DetailView):
         """
         This method is overridden to only include campaigns that are public.
         """
+        user = self.request.user
         # Only fetch Campaigns that are public.
-        return Campaign.objects.filter(public=True)
+        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
     
     def get_object(self, queryset=None):
         """
