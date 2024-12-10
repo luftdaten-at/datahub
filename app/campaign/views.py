@@ -70,6 +70,11 @@ class CampaignsCreateView(CreateView):
     template_name = 'campaigns/form.html'
     success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
+
     def form_valid(self, form):
         form.instance.owner = self.request.user  # Set the owner to the current user
         return super().form_valid(form)
