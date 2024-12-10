@@ -12,7 +12,7 @@ from django.conf import settings
 class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
-        fields = ['name', 'description', 'start_date', 'end_date', 'public', 'organization']
+        fields = ['name', 'description', 'start_date', 'end_date', 'public', 'organization', 'users']
         labels = {
             'name': _('Name'),
             'description': _('Description'),
@@ -20,6 +20,7 @@ class CampaignForm(forms.ModelForm):
             'end_date': _('End Date'),
             'public': _('Public'),
             'organization': _('Organization'),
+            'users': _('Users'),
         }
         help_texts = {
             'name': _('Enter the name of the campaign.'),
