@@ -35,6 +35,7 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
         # Return the Device queryset ordered by 'name' in ascending order
         return Campaign.objects.all().order_by('name')
 
+'''
 class CampaignsDetailView(DetailView):
     model = Campaign
     context_object_name = 'campaign'
@@ -62,6 +63,32 @@ class CampaignsDetailView(DetailView):
             raise Http404("No campaign found matching the query")
 
         return obj
+'''
+
+class CampaignsDetailView(DetailView):
+    model = Campaign
+    context_object_name = 'campaign'
+    template_name = 'campaigns/detail.html'
+
+    def get_queryset(self):
+        """
+        This method is overridden to only include campaigns that are public or owned by the current user.
+        """
+        user = self.request.user
+        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
+    
+    def get_object(self, queryset=None):
+        """
+        This method is overridden to provide additional checks for the Campaign's visibility.
+        If the requested Campaign is not public, it raises a 404.
+        """
+        queryset = self.get_queryset() if queryset is None else queryset
+        obj = super().get_object(queryset=queryset)
+        
+        if not obj.public and obj.owner != self.request.user:
+            raise Http404("No campaign found matching the query")
+
+        return obj
 
 
 class CampaignsCreateView(CreateView):
@@ -84,6 +111,11 @@ class CampaignsUpdateView(UpdateView):
     model = Campaign
     form_class = CampaignForm
     template_name = 'campaigns/form.html'  # Reuse the form template
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
 
     def get_success_url(self):
         return reverse_lazy('campaigns-my')  # Redirect to the campaign list after update
