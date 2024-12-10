@@ -2,6 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 
 from .models import Campaign, Organization
+from accounts.models import CustomUser
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -13,6 +14,7 @@ class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
         fields = ['name', 'description', 'start_date', 'end_date', 'public', 'organization', 'users']
+        users = forms.ModelMultipleChoiceField(queryset=CustomUser.objects.all(), required=False, widget=forms.CheckboxSelectMultiple)
         labels = {
             'name': _('Name'),
             'description': _('Description'),
@@ -36,12 +38,12 @@ class CampaignForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Get the user from the passed arguments (initial data)
-        user = kwargs.get('initial', {}).get('user', None)
+        self.user = kwargs.get('initial', {}).get('user', None)
         
         # If a user is provided, filter the organizations based on the user's membership
-        print(user.organizations.all())
-        if user:
-            self.fields['organization'].queryset = user.organizations.all()  # Only show organizations the user belongs to
+        print(self.user.organizations.all())
+        if self.user:
+            self.fields['organization'].queryset = self.user.organizations.all()  # Only show organizations the user belongs to
         else:
             self.fields['organization'].queryset = Organization.objects.none()  # If no user, don't display any organizations
             

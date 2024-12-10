@@ -32,10 +32,12 @@
     <h3>Teilnehmer der Kampagne</h3>
     <ul class="list-group">
         {% for user in campaign.users.all %}
-            <li class="list-group-item">{{ user.get_full_name }}</li>
+            <li class="list-group-item">{{ user.username }}</li>
         {% empty %}
             <li class="list-group-item">Es sind noch keine Teilnehmer in dieser Kampagne.</li>
         {% endfor %}
     </ul>
+    <br>
+    <a href="{% url 'campaigns-my' %}" class="btn btn-primary">Back to my Campaigns</a>
 </div>
 {% endblock content %}
