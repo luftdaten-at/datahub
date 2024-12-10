@@ -13,6 +13,8 @@ class Campaign(models.Model):
     end_date = models.DateTimeField()
     public = models.BooleanField(default=True)
     id_token = models.CharField(max_length=8, null=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='campaign')
+    
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -51,6 +53,8 @@ class Organization(models.Model):
     """
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='organization')
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -59,31 +63,3 @@ class Organization(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class UserOrganization(models.Model):
-    """
-    Represents the many-to-many relationship between users and organizations.
-    """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('user', 'organization')
-
-    def __str__(self):
-        return f'{self.user} in {self.organization}'
-
-
-class UserCampaign(models.Model):
-    """
-    Represents the many-to-many relationship between users and campaigns.
-    """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('user', 'campaign')
-
-    def __str__(self):
-        return f'{self.user} in {self.campaign}'
