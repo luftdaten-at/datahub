@@ -7,7 +7,6 @@ class Campaign(models.Model):
     """
     Represents a campaign.
     """
-    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     start_date = models.DateTimeField()
@@ -49,7 +48,6 @@ class Organization(models.Model):
     """
     Represents an organization that owns campaigns and users can be part of.
     """
-    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     owner = models.ForeignKey(

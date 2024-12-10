@@ -82,7 +82,6 @@ class MeasurementNew(models.Model):
     """
     Measurement taken by a device in a room.
     """
-    id = models.IntegerField(primary_key=True)
     time_received = models.DateTimeField()
     time_measured = models.DateTimeField()
     sensor_model = models.IntegerField()
@@ -97,7 +96,6 @@ class Values(models.Model):
     """
     Values associated with a measurement.
     """
-    id = models.IntegerField(primary_key=True)
     dimension = models.IntegerField()
     value = models.FloatField()
     measurement = models.ForeignKey(MeasurementNew, on_delete=models.CASCADE)
@@ -110,7 +108,6 @@ class DeviceLogs(models.Model):
     """
     Logs for each device.
     """
-    id = models.IntegerField(primary_key=True)
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
     timestamp = models.DateTimeField()
     level = models.IntegerField()
