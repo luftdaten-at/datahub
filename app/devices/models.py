@@ -7,8 +7,8 @@ class Device(models.Model):
     Device model.
     """
     id = models.CharField(max_length=255, primary_key=True)
-    device_name = models.CharField(max_length=255, blank=True)
-    model = models.CharField(max_length=255, blank=True)
+    device_name = models.CharField(max_length=255, blank=True, null=True)
+    model = models.CharField(max_length=255, blank=True, null=True)
     firmware = models.CharField(max_length=12, blank=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)

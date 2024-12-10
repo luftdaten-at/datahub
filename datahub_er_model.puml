@@ -1,0 +1,103 @@
+@startuml
+entity "Device" as Device {
+    + id : String [PK]
+    + device_name : String
+    + model : String
+    + firmware : String
+    + btmac_address : String
+    + last_update : DateTime
+    + notes : Text
+}
+
+entity "Measurement" as Measurement {
+    + id : Integer [PK]
+    + time_received : DateTime
+    + time_measured : DateTime
+    + sensor_model : Integer
+    --
+    + device_id : String [FK]
+    + room_id : Integer [FK]
+}
+
+entity "Values" as Values {
+    + id : Integer [PK]
+    + dimension : Integer
+    + value : Float
+    --
+    + measurement_id : Integer [FK]
+}
+
+entity "DeviceLogs" as DeviceLogs {
+    + id : Integer [PK]
+    + device_id : String [FK]
+    + timestamp : DateTime
+    + level : Integer
+    + message : String
+    --
+    + device_id : String [FK]
+}
+
+entity "Room" as Room {
+    + campaign_id : Integer [PK, FK]
+    + name : String [PK]
+    --
+    + campaign_id : Integer [FK]
+}
+
+entity "Campaign" as Campaign {
+    + id : Integer [PK]
+    + name : String
+    + description : Text
+    + start_date : DateTime
+    + end_date : DateTime
+    + public : Boolean
+    + id_token : String [unique]
+    + owner_id : Integer [FK]
+    --
+    + owner_id : Integer [FK]
+}
+
+entity "DeviceStatus" as DeviceStatus {
+    + id : Integer [PK]
+    + time_received : DateTime
+    + battery_voltage : Float
+    + battery_soc : Float
+    + sensors : JSON
+    --
+    + device_id : String [FK]
+}
+
+entity "Organization" as Organization {
+    + id : Integer [PK]
+    + name : String
+    + description : Text
+    --
+    + owner_id : Integer [FK]
+}
+
+entity "UserOrganization" as UserOrganization {
+    + id : Integer [PK]
+    --
+    + user_id : Integer [FK]
+    + organization_id : Integer [FK]
+}
+
+entity "UserCampaign" as UserCampaign {
+    + id : Integer [PK]
+    --
+    + user_id : Integer [FK]
+    + campaign_id : Integer [FK]
+}
+
+Device ||--o{ Measurement : "records"
+Measurement ||--o{ Values : "has"
+Device ||--o{ DeviceLogs : "logs"
+Device ||--o{ DeviceStatus : "has status"
+Measurement ||--o{ Room : "takes place in"
+Campaign ||--o{ Room : "contains"
+UserOrganization ||--o{ User : "user is part of"
+UserOrganization ||--o{ Organization : "organization has users"
+UserCampaign ||--o{ User : "user participates in"
+UserCampaign ||--o{ Campaign : "campaign has users"
+Campaign ||--o{ Organization : "organization has campaigns"
+@enduml
