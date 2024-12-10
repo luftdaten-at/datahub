@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CampaignsHomeView, CampaignsMyView, CampaignsCreateView, CampaignsDetailView, CampaignsUpdateView, CampaignsDeleteView
+from .views import CampaignsHomeView, CampaignsMyView, CampaignsCreateView, CampaignsDetailView, CampaignsUpdateView, CampaignsDeleteView, RoomDetailView
 
 urlpatterns = [
     path('', CampaignsHomeView.as_view(), name='campaigns-home'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('<str:pk>/', CampaignsDetailView.as_view(), name='campaigns-detail'),
     path('<str:pk>/update/', CampaignsUpdateView.as_view(), name='campaigns-update'),
     path('<str:pk>/delete/', CampaignsDeleteView.as_view(), name='campaigns-delete'),
+    path('rooms/<int:pk>/', RoomDetailView.as_view(), name='room-detail'),
 ]

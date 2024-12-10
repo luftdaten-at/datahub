@@ -4,7 +4,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 
-from .models import Campaign
+from .models import Campaign, Room
 from .forms import CampaignForm
 
 
@@ -135,3 +135,9 @@ class CampaignsDeleteView(DeleteView):
         if not self.request.user.is_superuser:
             queryset = queryset.filter(owner=self.request.user)
         return queryset
+
+
+class RoomDetailView(DetailView):
+    model = Room
+    template_name = 'campaigns/room/detail.html'
+    context_object_name = 'room'

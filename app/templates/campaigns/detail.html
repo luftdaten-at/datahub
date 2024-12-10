@@ -4,94 +4,38 @@
 
 {% block title %}{{ campaign.name }}{% endblock title %}
 
-{% block styles %}
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
-<link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
-
-<!-- Leaflet JS -->
-<script src="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet-src.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet.min.css">
-<script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
-
-<!-- Plotly JS -->
-<script src="{% static 'js/plotly-2.27.0.min.js' %}" charset="utf-8"></script>
-
-<style>
-    .info {
-        padding: 6px 8px;
-        font: 14px/16px Arial, Helvetica, sans-serif;
-        background: white;
-        background: rgba(255,255,255,0.8);
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        border-radius: 5px;
-    }
-    .info i {
-        width: 18px;
-        height: 18px;
-        float: left;
-        margin-right: 8px;
-        opacity: 0.7;
-    }
-    .legend {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        margin: 0 10px;
-    }
-
-    .legend-item i {
-        width: 18px;
-        height: 18px;
-        margin-right: 5px;
-    }
-
-    .leaflet-center {
-        left: 50%;
-        transform: translate(-50%, 0%);
-    }
-</style>
-{% endblock styles %}
-
-{% block map %}
-{% endblock map %}
-
 {% block content %}
-    <div class="container mt-3">
-        <!-- Campaign Details -->
-        <h2>{{ campaign.name }}</h2>
-        <p>{{ campaign.description }}</p>
-        <p><strong>{{ campaign.organization.name }}</strong></p>
-        <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} bis {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
+<div class="container mt-3">
+    <!-- Campaign Details -->
+    <h2>{{ campaign.name }}</h2>
+    <p>{{ campaign.description }}</p>
+    <p><strong>{{ campaign.organization.name }}</strong></p>
+    <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} bis {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
 
-        <hr>
+    <hr>
 
-        <!-- Rooms List -->
-        <h3>Rooms</h3>
-        <ul class="list-group">
-            {% for room in campaign.rooms.all %}
-                <li class="list-group-item">{{ room.name }}</li>
-            {% empty %}
-                <li class="list-group-item">Keine Räume für diese Kampagne verfügbar.</li>
-            {% endfor %}
-        </ul>
+    <!-- Rooms List -->
+    <h3>Rooms</h3>
+    <ul class="list-group">
+        {% for room in campaign.rooms.all %}
+            <li class="list-group-item">
+                <a href="{% url 'room-detail' room.pk %}" class="text-decoration-none">{{ room.name }}</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Keine Räume für diese Kampagne verfügbar.</li>
+        {% endfor %}
+    </ul>
 
-        <hr>
+    <hr>
 
-        <!-- Users List -->
-        <h3>Teilnehmer der Kampagne</h3>
-        <ul class="list-group">
-            {% for user in campaign.users.all %}
-                <li class="list-group-item">{{ user.get_full_name }}</li>
-            {% empty %}
-                <li class="list-group-item">Es sind noch keine Teilnehmer in dieser Kampagne.</li>
-            {% endfor %}
-        </ul>
-    </div>
+    <!-- Users List -->
+    <h3>Teilnehmer der Kampagne</h3>
+    <ul class="list-group">
+        {% for user in campaign.users.all %}
+            <li class="list-group-item">{{ user.get_full_name }}</li>
+        {% empty %}
+            <li class="list-group-item">Es sind noch keine Teilnehmer in dieser Kampagne.</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock content %}
