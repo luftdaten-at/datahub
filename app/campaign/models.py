@@ -13,7 +13,7 @@ class Campaign(models.Model):
     end_date = models.DateTimeField()
     public = models.BooleanField(default=True)
     id_token = models.CharField(max_length=8, null=True)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='campaign')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='campaigns')
     
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -53,7 +53,7 @@ class Organization(models.Model):
     """
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='organization')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='organizations')
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
