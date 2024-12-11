@@ -2,10 +2,10 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
 from .models import Campaign, Room
-from .forms import CampaignForm
+from .forms import CampaignForm, CampaignUserForm
 
 
 class CampaignsHomeView(ListView):
@@ -35,35 +35,6 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
         # Return the Device queryset ordered by 'name' in ascending order
         return Campaign.objects.all().order_by('name')
 
-'''
-class CampaignsDetailView(DetailView):
-    model = Campaign
-    context_object_name = 'campaign'
-    template_name = 'campaigns/detail.html'
-
-    def get_queryset(self):
-        """
-        This method is overridden to only include campaigns that are public.
-        """
-        user = self.request.user
-        # Only fetch Campaigns that are public.
-        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
-    
-    def get_object(self, queryset=None):
-        """
-        This method is overridden to provide additional checks for the Campaign's visibility.
-        If the requested Campaign is not public, it raises a 404.
-        """
-        # Use the filtered queryset from get_queryset to ensure we're only considering public Campaigns.
-        queryset = self.get_queryset() if queryset is None else queryset
-        obj = super().get_object(queryset=queryset)  # This gets the object using the queryset we provided.
-        
-        # If the Campaign is not public and the user is not the owner, raise a 404 error.
-        if not obj.public and obj.owner != self.request.user:
-            raise Http404("No campaign found matching the query")
-
-        return obj
-'''
 
 class CampaignsDetailView(DetailView):
     model = Campaign
@@ -122,7 +93,29 @@ class CampaignsUpdateView(UpdateView):
 
     def form_valid(self, form):
         return super().form_valid(form)
-    
+
+
+class CampaignAddUserView(UpdateView):
+    model = Campaign
+    form_class = CampaignUserForm
+    template_name = 'campaigns/add_user_to_campaign.html'
+
+    def get_form_kwargs(self):
+        """Pass the campaign instance to the form."""
+        kwargs = super().get_form_kwargs()
+        kwargs['campaign'] = self.object  # Pass the campaign object
+        return kwargs
+
+    def form_valid(self, form):
+        """Add the selected users to the campaign."""
+        users = form.cleaned_data['users']
+        self.object.users.add(*users)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        """Redirect to the campaign detail page upon success."""
+        return reverse_lazy('campaigns-detail')  # Redirect to the campaign list after update
+
 
 class CampaignsDeleteView(DeleteView):
     model = Campaign

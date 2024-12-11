@@ -37,6 +37,16 @@
             <li class="list-group-item">Es sind noch keine Teilnehmer in dieser Kampagne.</li>
         {% endfor %}
     </ul>
+
+    <hr>
+
+    <!-- Add New User Button -->
+    <div class="d-flex justify-content-end">
+        <a href="{% url 'add-user-to-campaign' campaign.pk %}" class="btn btn-outline-primary">
+            <i class="bi bi-person-plus"></i> Teilnehmer hinzufügen
+        </a>
+    </div>
+
     <br>
     <a href="{% url 'campaigns-my' %}" class="btn btn-primary">Back to my Campaigns</a>
 </div>
