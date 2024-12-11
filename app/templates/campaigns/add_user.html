@@ -1,0 +1,25 @@
+{% extends "_base.html" %}
+{% load static %}
+{% load i18n %}
+
+{{ block.super }}
+<script type="text/javascript" src="{% url 'django-admin:jsi18n' %}"></script>
+
+{% block title %}Add Users to Campaign{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>Add Users to Campaign</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Render the form -->
+        <div class="form-group">
+            {{ form.as_p }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Users</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .models import Campaign, Organization
 from accounts.models import CustomUser
@@ -60,41 +61,45 @@ class CampaignForm(forms.ModelForm):
         
         return campaign 
 
+'''
+class FooForm(forms.Form):
+    linked_bars = forms.ModelMultipleChoiceField(queryset=Bar.objects.all(),
+                         widget=widgets.FilteredSelectMultiple(Bar._meta.verbose_name_plural, False))
+'''
 
-class CampaignUserForm(forms.ModelForm):
-    search_query = forms.CharField(
-        required=False,
-        label="Search Users",
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Search for users...'})
-    )
+
+
+
+class CampaignUserForm(forms.Form):
     users = forms.ModelMultipleChoiceField(
-        queryset=None,  # Initially no queryset
-        widget=forms.CheckboxSelectMultiple(),
-        label="Select Users",
+        queryset=None,  # Placeholder queryset
+        widget=FilteredSelectMultiple("Users", False),  # Use FilteredSelectMultiple
+        required=False
     )
-
-    class Meta:
-        model = Campaign
-        fields = []  # We are not modifying Campaign fields here, just adding users
 
     def __init__(self, *args, **kwargs):
-        """
-        Accept the campaign object via kwargs and use it to set the correct queryset for users.
-        """
-        self.campaign = kwargs.pop('campaign', None)  # The campaign is passed to the form
+        campaign = kwargs.pop('campaign', None)  # Accept the campaign instance via kwargs
+        super().__init__(*args, **kwargs)
+        if campaign and campaign.organization:
+            # Restrict the queryset to users in the campaign's organization
+            self.fields['users'].queryset = campaign.organization.users.all()
+
+
+'''
+class CampaignAddUserForm(forms.ModelForm):
+    class Meta:
+        model = Campaign
+        fields = ['users']  # Assuming 'users' is a ManyToManyField in the Campaign model
+        widgets = {
+            'users': FilteredSelectMultiple(verbose_name='Users', is_stacked=True),
+        }
+
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if self.campaign:
-            # Exclude users who are already in the campaign
-            self.fields['users'].queryset = self.campaign.organization.users.all()
-
-    def save(self, commit=True):
-        """
-        Save the selected users to the campaign.
-        """
-        campaign = super().save(commit=False)  # We don't save the campaign yet
-        users = self.cleaned_data['users']  # Get the selected users
-        campaign.users.add(*users)  # Add users to the campaign's many-to-many relationship
-        if commit:
-            campaign.save()  # Save the campaign (if commit=True)
-        return campaign
+        # Ensure that we only show users from the associated organization
+        campaign = kwargs.get('instance')
+        if campaign and campaign.organization:
+            print(campaign.organization.users.all())
+            self.fields['users'].queryset = campaign.organization.users.all()
+'''

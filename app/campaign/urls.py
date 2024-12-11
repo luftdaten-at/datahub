@@ -9,5 +9,6 @@ urlpatterns = [
     path('<str:pk>/update/', CampaignsUpdateView.as_view(), name='campaigns-update'),
     path('<str:pk>/delete/', CampaignsDeleteView.as_view(), name='campaigns-delete'),
     path('rooms/<int:pk>/', RoomDetailView.as_view(), name='room-detail'),
-    path('campaigns/<int:pk>/add-user/', CampaignAddUserView.as_view(), name='add-user-to-campaign'),
+    #path('campaigns/<int:pk>/add-user/', CampaignAddUserView.as_view(), name='add-user-to-campaign'),
+    path('campaigns/<int:pk>/add-user/', CampaignAddUserView.as_view(), name='campaign-add-user'),
 ]

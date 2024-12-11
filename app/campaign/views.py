@@ -1,3 +1,4 @@
+from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -95,26 +96,28 @@ class CampaignsUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-class CampaignAddUserView(UpdateView):
-    model = Campaign
+
+class CampaignAddUserView(FormView):
+    template_name = 'campaigns/add_user.html'
     form_class = CampaignUserForm
-    template_name = 'campaigns/add_user_to_campaign.html'
 
     def get_form_kwargs(self):
-        """Pass the campaign instance to the form."""
         kwargs = super().get_form_kwargs()
-        kwargs['campaign'] = self.object  # Pass the campaign object
+        kwargs['campaign'] = Campaign.objects.get(pk=self.kwargs['pk'])  # Pass the campaign instance
         return kwargs
 
     def form_valid(self, form):
-        """Add the selected users to the campaign."""
-        users = form.cleaned_data['users']
-        self.object.users.add(*users)
+        # Add the selected users to the campaign
+        campaign = Campaign.objects.get(pk=self.kwargs['pk'])
+        print(f'DEBUG: {campaign}')
+        selected_users = form.cleaned_data['users']
+        campaign.users.add(*selected_users)  # Add users to the campaign
         return super().form_valid(form)
 
     def get_success_url(self):
-        """Redirect to the campaign detail page upon success."""
-        return reverse_lazy('campaigns-detail')  # Redirect to the campaign list after update
+        # Redirect to the campaign detail page
+        print(f'DEBUG: {self.kwargs['pk']}')
+        return reverse_lazy('campaigns-detail')
 
 
 class CampaignsDeleteView(DeleteView):
