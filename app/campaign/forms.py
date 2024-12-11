@@ -1,6 +1,8 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.template.loader import render_to_string
+from django.contrib import admin
 
 from .models import Campaign, Organization
 from accounts.models import CustomUser
@@ -61,45 +63,26 @@ class CampaignForm(forms.ModelForm):
         
         return campaign 
 
-'''
-class FooForm(forms.Form):
-    linked_bars = forms.ModelMultipleChoiceField(queryset=Bar.objects.all(),
-                         widget=widgets.FilteredSelectMultiple(Bar._meta.verbose_name_plural, False))
-'''
-
-
-
-
-class CampaignUserForm(forms.Form):
+class CampaignUserForm(forms.ModelForm):
     users = forms.ModelMultipleChoiceField(
-        queryset=None,  # Placeholder queryset
-        widget=FilteredSelectMultiple("Users", False),  # Use FilteredSelectMultiple
-        required=False
+        queryset=None,
+        widget=FilteredSelectMultiple("Users", False),
+        label="Add Users to Campaign"
     )
 
-    def __init__(self, *args, **kwargs):
-        campaign = kwargs.pop('campaign', None)  # Accept the campaign instance via kwargs
-        super().__init__(*args, **kwargs)
-        if campaign and campaign.organization:
-            # Restrict the queryset to users in the campaign's organization
-            self.fields['users'].queryset = campaign.organization.users.all()
-
-
-'''
-class CampaignAddUserForm(forms.ModelForm):
     class Meta:
         model = Campaign
-        fields = ['users']  # Assuming 'users' is a ManyToManyField in the Campaign model
-        widgets = {
-            'users': FilteredSelectMultiple(verbose_name='Users', is_stacked=True),
-        }
-
+        fields = ['users']
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        # Get the user from the passed arguments (initial data)
+        self.campaign = kwargs.get('initial', {}).get('campaign', None)
 
-        # Ensure that we only show users from the associated organization
-        campaign = kwargs.get('instance')
-        if campaign and campaign.organization:
-            print(campaign.organization.users.all())
-            self.fields['users'].queryset = campaign.organization.users.all()
-'''
+        if self.campaign:
+            self.fields['users'].queryset = self.campaign.organization.users.all()
+        
+        # Initialize form helper
+        self.helper = FormHelper(self)
+        self.helper.add_input(Submit('submit', 'Save'))

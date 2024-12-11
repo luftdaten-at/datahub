@@ -96,28 +96,18 @@ class CampaignsUpdateView(UpdateView):
         return super().form_valid(form)
 
 
-
-class CampaignAddUserView(FormView):
-    template_name = 'campaigns/add_user.html'
+class CampaignAddUserView(UpdateView):
+    model = Campaign
     form_class = CampaignUserForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['campaign'] = Campaign.objects.get(pk=self.kwargs['pk'])  # Pass the campaign instance
-        return kwargs
-
-    def form_valid(self, form):
-        # Add the selected users to the campaign
-        campaign = Campaign.objects.get(pk=self.kwargs['pk'])
-        print(f'DEBUG: {campaign}')
-        selected_users = form.cleaned_data['users']
-        campaign.users.add(*selected_users)  # Add users to the campaign
-        return super().form_valid(form)
+    template_name = 'campaigns/add_user.html'
 
     def get_success_url(self):
-        # Redirect to the campaign detail page
-        print(f'DEBUG: {self.kwargs['pk']}')
-        return reverse_lazy('campaigns-detail')
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.pk})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['campaign'] = self.object # Pass the logged-in user to the form's initial data
+        return initial
 
 
 class CampaignsDeleteView(DeleteView):
