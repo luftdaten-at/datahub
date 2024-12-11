@@ -13,15 +13,12 @@ from django.conf import settings
 class CampaignForm(forms.ModelForm):
     class Meta:
         model = Campaign
-        fields = ['name', 'description', 'start_date', 'end_date', 'public', 'organization', 'users']
+        fields = ['name', 'description', 'start_date', 'end_date']
         labels = {
             'name': _('Name'),
             'description': _('Description'),
             'start_date': _('Start Date'),
             'end_date': _('End Date'),
-            'public': _('Public'),
-            'organization': _('Organization'),
-            'users': _('Users'),
         }
         help_texts = {
             'name': _('Enter the name of the campaign.'),
@@ -37,16 +34,8 @@ class CampaignForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         
         # Get the user from the passed arguments (initial data)
-        user = kwargs.get('initial', {}).get('user', None)
+        self.user = kwargs.get('initial', {}).get('user', None)
         
-        # If a user is provided, filter the organizations based on the user's membership
-        if user:
-            self.fields['organization'].initial = user.organizations.first()  # Only show organizations the user belongs to
-            if user.organizations.first():
-                self.fields['users'].queryset = user.organizations.first().users.all()
-        else:
-            self.fields['organization'].queryset = Organization.objects.none()  # If no user, don't display any organizations
-            
         # Initialize form helper
         self.helper = FormHelper(self)
         self.helper.add_input(Submit('submit', 'Save'))
@@ -54,3 +43,19 @@ class CampaignForm(forms.ModelForm):
         # Ensure the input formats match the widget format
         self.fields['start_date'].input_formats = ('%Y-%m-%dT%H:%M',)
         self.fields['end_date'].input_formats = ('%Y-%m-%dT%H:%M',)
+
+    def save(self, commit=True):
+        # Get the instance but don't save to the database yet
+        campaign = super().save(commit=False)
+
+        # Set the `public` field to False
+        campaign.public = False
+        campaign.owner = self.user
+        campaign.users.add(self.user)
+        campaign.organization = self.user.organizations.first()
+
+        # Save to the database if commit is True
+        if commit:
+            campaign.save()
+        
+        return campaign 
