@@ -1,8 +1,6 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
-from django.template.loader import render_to_string
-from django.contrib import admin
 
 from .models import Campaign, Organization
 from accounts.models import CustomUser
@@ -64,15 +62,22 @@ class CampaignForm(forms.ModelForm):
         return campaign 
 
 class CampaignUserForm(forms.ModelForm):
-    users = forms.ModelMultipleChoiceField(
-        queryset=None,
-        widget=FilteredSelectMultiple("Users", False),
-        label="Add Users to Campaign"
-    )
+    users = (forms.ModelMultipleChoiceField(label='Users',
+             queryset=CustomUser.objects.none(),
+             widget=FilteredSelectMultiple(
+                verbose_name='Multis',
+                is_stacked=False,
+             ),
+             required=False))
 
     class Meta:
         model = Campaign
         fields = ['users']
+    
+    class Media:
+        css = {
+            'all': ('/static/admin/css/widgets.css', '/static/css/adminoverrides.css', ),
+        } # custom css
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
