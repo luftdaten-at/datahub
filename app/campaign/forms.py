@@ -62,10 +62,10 @@ class CampaignForm(forms.ModelForm):
         return campaign 
 
 class CampaignUserForm(forms.ModelForm):
-    users = (forms.ModelMultipleChoiceField(label='Users',
+    users = (forms.ModelMultipleChoiceField(label='',
              queryset=CustomUser.objects.none(),
              widget=FilteredSelectMultiple(
-                verbose_name='Multis',
+                verbose_name='Users',
                 is_stacked=False,
              ),
              required=False))
