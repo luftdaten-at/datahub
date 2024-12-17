@@ -46,6 +46,8 @@
         <p>{% trans "You are not a member of any organizations." %}</p>
     {% endif %}
 </div>
+<a href="{% url 'organization-create' %}" class="btn btn-primary">{%trans "Create Organization" %}</a>
+
 {% endblock content %}
 
 {% block styles %}
