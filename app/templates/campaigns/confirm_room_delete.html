@@ -5,7 +5,7 @@
     <form method="post">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Yes, please delete.</button>
-        <a href="{% url 'campaigns-my' %}" class="btn btn-secondary">Cancel</a>
+        <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
 {% endblock %}

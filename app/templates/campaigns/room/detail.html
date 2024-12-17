@@ -1,0 +1,10 @@
+{% extends "_base.html" %}
+{% block title %}{{ room.name }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-3">
+    <h2>Room: {{ room.name }}</h2>
+    <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
+    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
+</div>
+{% endblock content %}

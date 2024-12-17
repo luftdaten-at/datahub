@@ -1,11 +1,12 @@
+from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
-from .models import Campaign
-from .forms import CampaignForm
+from .models import Campaign, Room
+from .forms import CampaignForm, CampaignUserForm
 
 
 class CampaignsHomeView(ListView):
@@ -35,6 +36,7 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
         # Return the Device queryset ordered by 'name' in ascending order
         return Campaign.objects.all().order_by('name')
 
+
 class CampaignsDetailView(DetailView):
     model = Campaign
     context_object_name = 'campaign'
@@ -42,21 +44,19 @@ class CampaignsDetailView(DetailView):
 
     def get_queryset(self):
         """
-        This method is overridden to only include campaigns that are public.
+        This method is overridden to only include campaigns that are public or owned by the current user.
         """
-        # Only fetch Campaigns that are public.
-        return Campaign.objects.filter(public=True)
+        user = self.request.user
+        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
     
     def get_object(self, queryset=None):
         """
         This method is overridden to provide additional checks for the Campaign's visibility.
         If the requested Campaign is not public, it raises a 404.
         """
-        # Use the filtered queryset from get_queryset to ensure we're only considering public Campaigns.
         queryset = self.get_queryset() if queryset is None else queryset
-        obj = super().get_object(queryset=queryset)  # This gets the object using the queryset we provided.
+        obj = super().get_object(queryset=queryset)
         
-        # If the Campaign is not public and the user is not the owner, raise a 404 error.
         if not obj.public and obj.owner != self.request.user:
             raise Http404("No campaign found matching the query")
 
@@ -69,6 +69,11 @@ class CampaignsCreateView(CreateView):
     template_name = 'campaigns/form.html'
     success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
+
     def form_valid(self, form):
         form.instance.owner = self.request.user  # Set the owner to the current user
         return super().form_valid(form)
@@ -79,12 +84,31 @@ class CampaignsUpdateView(UpdateView):
     form_class = CampaignForm
     template_name = 'campaigns/form.html'  # Reuse the form template
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
+
     def get_success_url(self):
         return reverse_lazy('campaigns-my')  # Redirect to the campaign list after update
 
     def form_valid(self, form):
         return super().form_valid(form)
-    
+
+
+class CampaignAddUserView(UpdateView):
+    model = Campaign
+    form_class = CampaignUserForm
+    template_name = 'campaigns/add_user.html'
+
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.pk})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['campaign'] = self.object # Pass the logged-in user to the form's initial data
+        return initial
+
 
 class CampaignsDeleteView(DeleteView):
     model = Campaign
@@ -97,3 +121,58 @@ class CampaignsDeleteView(DeleteView):
         if not self.request.user.is_superuser:
             queryset = queryset.filter(owner=self.request.user)
         return queryset
+
+
+class RoomDetailView(DetailView):
+    model = Room
+    template_name = 'campaigns/room/detail.html'
+    context_object_name = 'room'
+
+
+class RoomDeleteView(DeleteView):
+    model = Room
+    template_name = 'campaigns/confirm_room_delete.html'
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.campaign.pk})
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_superuser:
+            queryset = queryset.filter(campaign__owner=self.request.user)
+        return queryset
+
+
+class RoomCreateView(CreateView):
+    model = Room
+    fields = ['name']  # Exclude 'campaign' from the form fields
+    template_name = 'campaigns/room_form.html'  # Specify your template
+
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign_pk = kwargs.get('campaign_pk')
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        campaign = Campaign.objects.get(pk=self.campaign_pk)
+        form.instance.campaign = campaign
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign_pk})
+
+ 
+'''
+class CampaignsCreateView(CreateView):
+    model = Campaign
+    form_class = CampaignForm
+    template_name = 'campaigns/form.html'
+    success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # Set the owner to the current user
+        return super().form_valid(form)
+'''
