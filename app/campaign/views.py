@@ -127,3 +127,52 @@ class RoomDetailView(DetailView):
     model = Room
     template_name = 'campaigns/room/detail.html'
     context_object_name = 'room'
+
+
+class RoomDeleteView(DeleteView):
+    model = Room
+    template_name = 'campaigns/confirm_room_delete.html'
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.campaign.pk})
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_superuser:
+            queryset = queryset.filter(campaign__owner=self.request.user)
+        return queryset
+
+
+class RoomCreateView(CreateView):
+    model = Room
+    fields = ['name']  # Exclude 'campaign' from the form fields
+    template_name = 'campaigns/room_form.html'  # Specify your template
+
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign_pk = kwargs.get('campaign_pk')
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        campaign = Campaign.objects.get(pk=self.campaign_pk)
+        form.instance.campaign = campaign
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign_pk})
+
+ 
+'''
+class CampaignsCreateView(CreateView):
+    model = Campaign
+    form_class = CampaignForm
+    template_name = 'campaigns/form.html'
+    success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
+        return initial
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user  # Set the owner to the current user
+        return super().form_valid(form)
+'''

@@ -2,7 +2,7 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
-from .models import Campaign, Organization
+from .models import Campaign, Organization, Room
 from accounts.models import CustomUser
 
 from crispy_forms.helper import FormHelper
@@ -59,7 +59,7 @@ class CampaignForm(forms.ModelForm):
         if commit:
             campaign.save()
         
-        return campaign 
+        return campaign
 
 class CampaignUserForm(forms.ModelForm):
     users = (forms.ModelMultipleChoiceField(label='',
