@@ -10,12 +10,15 @@
     {% if owned_organizations %}
         {% for organization in owned_organizations %}
             <div class="col-md-4">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ organization.name }}</h5>
-                        <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                <a href="{% url 'organization-detail' pk=organization.pk %}" class="card-link">
+                    <div class="card mb-4">
+                        <img src="{% static 'path/to/your/image.jpg' %}" class="card-img-top" alt="{{ organization.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ organization.name }}</h5>
+                            <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         {% endfor %}
     {% else %}
@@ -28,12 +31,15 @@
     {% if member_organizations %}
         {% for organization in member_organizations %}
             <div class="col-md-4">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ organization.name }}</h5>
-                        <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                <a href="{% url 'organization-detail' pk=organization.pk %}" class="card-link">
+                    <div class="card mb-4">
+                        <img src="{% static 'path/to/your/image.jpg' %}" class="card-img-top" alt="{{ organization.name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ organization.name }}</h5>
+                            <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
         {% endfor %}
     {% else %}
@@ -41,3 +47,36 @@
     {% endif %}
 </div>
 {% endblock content %}
+
+{% block styles %}
+<style>
+    .card-link {
+        text-decoration: none; /* Remove underline */
+        display: block; /* Make the entire card clickable */
+        background-color: #ffffff; /* Light background color */
+        border: 1px solid #ddd; /* Subtle border */
+        border-radius: 8px; /* Rounded corners */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    }
+
+    .card-link:hover {
+        background-color: #f0f0f0; /* Slightly darker background on hover */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+    }
+
+    .card-body {
+        padding: 15px;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #333; /* Dark text color */
+    }
+
+    .card-text {
+        font-size: 1rem;
+        color: #666; /* Medium text color */
+    }
+</style>
+{% endblock styles %}

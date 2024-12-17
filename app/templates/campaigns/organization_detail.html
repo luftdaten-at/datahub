@@ -1,0 +1,21 @@
+{% extends '_base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block styles %}
+<!-- Add any additional styles here -->
+{% endblock styles %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ organization.name }}</h2>
+    <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
+    <h3>{% trans "Users:" %}</h3>
+    <ul>
+        {% for user in organization.users.all %}
+            <li>{{ user.username }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'organizations-my' %}" class="btn btn-primary">{% trans "Back to Organizations" %}</a>
+</div>
+{% endblock content %}

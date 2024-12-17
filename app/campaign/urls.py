@@ -15,5 +15,5 @@ urlpatterns = [
     path('room/create/<int:campaign_pk>/', RoomCreateView.as_view(), name='room-create'),
     path('organizations/my', OrganizationsView.as_view(), name='organizations-my'),
     path('organization/create', OrganizationCreateView.as_view(), name='organization-create'),
-     
+    path('organizations/<int:pk>', OrganizationDetailView.as_view(), name='organization-detail'),
 ]

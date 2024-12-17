@@ -189,3 +189,13 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
         organization.users.add(self.request.user)
         form.save_m2m()  # Save the many-to-many relationships
         return super().form_valid(form)
+
+
+class OrganizationDetailView(DetailView):
+    model = Organization
+    template_name = 'campaigns/organization_detail.html'
+    context_object_name = 'organization'
+
+    def get_success_url(self):
+        # and 'self.object.pk' with the primary key of the newly created object
+        return reverse_lazy('organizations-my', kwargs={'pk': self.object.pk})
