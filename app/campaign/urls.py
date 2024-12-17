@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import CampaignsHomeView, CampaignsMyView, CampaignsCreateView, CampaignsDetailView, CampaignsUpdateView, CampaignsDeleteView, RoomDetailView, CampaignAddUserView, RoomDeleteView, RoomCreateView
+from .views import *
 
 urlpatterns = [
     path('', CampaignsHomeView.as_view(), name='campaigns-home'),
@@ -13,4 +13,7 @@ urlpatterns = [
     path('campaigns/<int:pk>/add-user/', CampaignAddUserView.as_view(), name='campaign-add-user'),
     path('rooms/<int:pk>/delete/', RoomDeleteView.as_view(), name='room-delete'),
     path('room/create/<int:campaign_pk>/', RoomCreateView.as_view(), name='room-create'),
+    path('organizations/my', OrganizationsView.as_view(), name='organizations-my'),
+    path('organization/create', OrganizationCreateView.as_view(), name='organization-create'),
+     
 ]

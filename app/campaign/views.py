@@ -5,8 +5,8 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 
-from .models import Campaign, Room
-from .forms import CampaignForm, CampaignUserForm
+from .models import Campaign, Room, Organization
+from .forms import CampaignForm, CampaignUserForm, OrganizationForm
 
 
 class CampaignsHomeView(ListView):
@@ -159,20 +159,33 @@ class RoomCreateView(CreateView):
     def get_success_url(self):
         return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign_pk})
 
- 
-'''
-class CampaignsCreateView(CreateView):
-    model = Campaign
-    form_class = CampaignForm
-    template_name = 'campaigns/form.html'
-    success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
-        return initial
+class OrganizationsView(LoginRequiredMixin, ListView):
+    model = Organization
+    template_name = 'campaigns/my_organizations.html'
+    context_object_name = 'owned_organizations'
+
+    def get_queryset(self):
+        # Return organizations where the user is the owner
+        return Organization.objects.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add organizations where the user is a member
+        context['member_organizations'] = Organization.objects.filter(users=self.request.user)
+        return context
+
+
+class OrganizationCreateView(LoginRequiredMixin, CreateView):
+    model = Organization
+    form_class = OrganizationForm
+    template_name = 'campaigns/create_organization.html'
+    success_url = reverse_lazy('organizations-my')  # Redirect to a list view or another page
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user  # Set the owner to the current user
+        organization = form.save(commit=False)
+        organization.owner = self.request.user  # Set the current user as the owner
+        organization.save()
+        organization.users.add(self.request.user)
+        form.save_m2m()  # Save the many-to-many relationships
         return super().form_valid(form)
-'''

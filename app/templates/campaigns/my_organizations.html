@@ -1,0 +1,43 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "My Organizations" %}{% endblock title %}
+
+{% block content %}
+<h2>{% trans "Organizations I Own" %}</h2>
+<div class="row">
+    {% if owned_organizations %}
+        {% for organization in owned_organizations %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ organization.name }}</h5>
+                        <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>{% trans "You do not own any organizations." %}</p>
+    {% endif %}
+</div>
+
+<h2>{% trans "Organizations I Belong To" %}</h2>
+<div class="row">
+    {% if member_organizations %}
+        {% for organization in member_organizations %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ organization.name }}</h5>
+                        <p class="card-text">{{ organization.description|truncatewords:20 }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>{% trans "You are not a member of any organizations." %}</p>
+    {% endif %}
+</div>
+{% endblock content %}
