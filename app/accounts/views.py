@@ -11,12 +11,11 @@ class SignupPageView(generic.CreateView):
     success_url = reverse_lazy("login")
     template_name = "registration/signup.html"
 
-    def handle_post_registration(self, user):
-        # search for pending invitations
-        pending_invitations = OrganizationInvitation.objects.filter(email = user.email).all()
-        for invitation in pending_invitations:
-            # check if not already expired
-            if invitation.expiring_date > datetime.datetime.now():
-                invitation.organization.users.add(user)
-            # delete invitation
-            invitation.delete()
+    def form_valid(self, form):
+        print('form_valid called')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        print('form_invalid called')
+        print(form.errors)
+        return super().form_invalid(form)
