@@ -7,8 +7,10 @@ from django.urls import reverse_lazy, reverse
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
+from django.core.mail import send_mail
 
-from .models import Campaign, Room, Organization
+from main import settings
+from .models import Campaign, Room, Organization, OrganizationInvitation
 from .forms import CampaignForm, CampaignUserForm, OrganizationForm
 from accounts.models import CustomUser
 
@@ -218,3 +220,40 @@ def remove_user_from_organization(request, org_id, user_id):
     organization.users.remove(user)
     messages.success(request, f"User {user.username} has been removed.")
     return redirect('organization-detail', pk=org_id)
+
+
+@login_required
+def invite_user_to_organization(request, org_id):
+    if request.method != 'POST':
+        return redirect(f"organization-detail", pk=org_id)
+
+    organization = get_object_or_404(Organization, id=org_id)
+    email = request.POST.get('email')
+    
+    if request.user != organization.owner:
+        messages.error(request, "You do not have permission to invite users to this organization.")
+        return redirect(f"organization-detail", pk=org_id)
+
+    user = CustomUser.objects.filter(email = email).first()
+
+    if user:
+        organization.users.add(user)
+    else:
+        # create invitation
+        invitation = OrganizationInvitation(
+            expiring_date = None,
+            email = email,
+            organization = organization,
+        )
+        invitation.save()
+        # send invitation email
+        # TODO add link to register
+        send_mail(
+            subject=f"You've been invited to join {organization.name}",
+            message=f"Visit this link to register and join {organization.name}: <registration_link>",
+            from_email=settings.EMAIL_BACKEND,
+            recipient_list=[email],
+        )
+        messages.success(request, f"An invitation has been sent to {email}.")
+
+    return redirect(f"organization-detail", pk=org_id)

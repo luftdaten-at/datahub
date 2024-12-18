@@ -75,7 +75,7 @@ class OrganizationInvitation(models.Model):
     user u gets added to all organizations where there
     exists an invitation. -> invitations get deleted
     """
-    expiring_date = models.DateField()
+    expiring_date = models.DateField(null=True)
     email = models.EmailField() 
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='invitations')
     
