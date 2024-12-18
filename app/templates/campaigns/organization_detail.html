@@ -11,11 +11,23 @@
     <h2>{{ organization.name }}</h2>
     <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
     <h3>{% trans "Users:" %}</h3>
-    <ul>
-        {% for user in organization.users.all %}
-            <li>{{ user.username }}</li>
-        {% endfor %}
-    </ul>
+    <table class="table table-striped">
+        <thead>
+            <th>Username</th>
+        </thead>
+        <tbody>
+            {% for user in organization.users.all %}
+                <tr>
+                    <td>
+                        {{ user.username }}
+                    </td>
+                    <td>
+                        <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     <a href="{% url 'organizations-my' %}" class="btn btn-primary">{% trans "Back to Organizations" %}</a>
 </div>
 {% endblock content %}

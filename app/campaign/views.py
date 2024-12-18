@@ -4,9 +4,13 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib import messages
 
 from .models import Campaign, Room, Organization
 from .forms import CampaignForm, CampaignUserForm, OrganizationForm
+from accounts.models import CustomUser
 
 
 class CampaignsHomeView(ListView):
@@ -199,3 +203,18 @@ class OrganizationDetailView(DetailView):
     def get_success_url(self):
         # and 'self.object.pk' with the primary key of the newly created object
         return reverse_lazy('organizations-my', kwargs={'pk': self.object.pk})
+
+
+@login_required
+def remove_user_from_organization(request, org_id, user_id):
+    organization = get_object_or_404(Organization, id=org_id)
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    # Ensure the user performing the action has permission
+    if request.user != organization.owner:
+        messages.error(request, "You do not have permission to remove users from this organization.")
+        return redirect('organization-detail', pk=org_id)
+
+    organization.users.remove(user)
+    messages.success(request, f"User {user.username} has been removed.")
+    return redirect('organization-detail', pk=org_id)

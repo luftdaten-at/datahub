@@ -16,4 +16,5 @@ urlpatterns = [
     path('organizations/my', OrganizationsView.as_view(), name='organizations-my'),
     path('organization/create', OrganizationCreateView.as_view(), name='organization-create'),
     path('organizations/<int:pk>', OrganizationDetailView.as_view(), name='organization-detail'),
+    path('organizations/<int:org_id>/remove-user/<int:user_id>', remove_user_from_organization, name='remove-user-from-organization'),
 ]
