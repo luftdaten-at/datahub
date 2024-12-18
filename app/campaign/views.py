@@ -239,19 +239,22 @@ def invite_user_to_organization(request, org_id):
     if user:
         organization.users.add(user)
     else:
-        # create invitation
-        invitation = OrganizationInvitation(
-            expiring_date = None,
-            email = email,
-            organization = organization,
-        )
+        # check if invitation already exists
+        invitation = OrganizationInvitation.objects.filter(email=email, organization__pk = organization.pk).first()
+        if invitation == None:
+            # create invitation
+            invitation = OrganizationInvitation(
+                expiring_date = None,
+                email = email,
+                organization = organization,
+            )
         invitation.save()
         # send invitation email
         # TODO add link to register
         send_mail(
             subject=f"You've been invited to join {organization.name}",
             message=f"Visit this link to register and join {organization.name}: <registration_link>",
-            from_email=settings.EMAIL_BACKEND,
+            from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
         )
         messages.success(request, f"An invitation has been sent to {email}.")
