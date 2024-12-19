@@ -12,10 +12,12 @@ class SignupPageView(generic.CreateView):
     template_name = "account/signup.html"
 
     def form_valid(self, form):
-        print('form_valid called')
+        user = form.instance
+        invitations = OrganizationInvitation.objects.filter(email=user.email).all()
+        time_now = datetime.datetime.now(datetime.timezone.utc)
+        user.save()
+        for invitation in invitations:
+            if not invitation.expiring_date or time_now < invitation.expiring_date:
+                invitation.organization.users.add(user)
+            invitation.delete()
         return super().form_valid(form)
-
-    def form_invalid(self, form):
-        print('form_invalid called')
-        print(form.errors)
-        return super().form_invalid(form)
