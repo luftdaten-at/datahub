@@ -91,3 +91,12 @@ class CampaignUserForm(forms.ModelForm):
         # Initialize form helper
         self.helper = FormHelper(self)
         self.helper.add_input(Submit('submit', 'Save'))
+
+
+class OrganizationForm(forms.ModelForm):
+    class Meta:
+        model = Organization
+        fields = ['name', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+        }

@@ -1,0 +1,50 @@
+{% extends '_base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block styles %}
+<!-- Add any additional styles here -->
+{% endblock styles %}
+
+{% block content %}
+<div class="container">
+    <h2>{{ organization.name }}</h2>
+    <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
+    <h3>{% trans "Users:" %}</h3>
+    <table class="table table-striped">
+        <thead>
+            <th>{% trans "Username" %}</th>
+            <th>{% trans "Actions" %}</th>
+        </thead>
+        <tbody>
+            {% for user in organization.users.all %}
+                <tr>
+                    <td>{{ user.username }}</td>
+                    <td>
+                        <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>{% trans "Invite a User" %}</h3>
+    <form method="post" action="{% url 'invite-user-to-organization' organization.pk %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="invite-email">{% trans "User Email" %}</label>
+            <input
+                type="email"
+                id="invite-email"
+                name="email"
+                class="form-control"
+                placeholder="{% trans 'Enter user email' %}"
+                required
+            />
+        </div>
+        <button type="submit" class="btn btn-success mt-2">{% trans "Send Invitation" %}</button>
+    </form>
+
+    <a href="{% url 'organizations-my' %}" class="btn btn-primary mt-3">{% trans "Back to Organizations" %}</a>
+</div>
+{% endblock content %}
