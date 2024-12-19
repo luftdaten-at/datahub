@@ -8,8 +8,8 @@ from campaign.models import OrganizationInvitation
 
 class SignupPageView(generic.CreateView):
     form_class = CustomUserCreationForm
-    success_url = reverse_lazy("login")
-    template_name = "registration/signup.html"
+    success_url = reverse_lazy("account_login")
+    template_name = "account/signup.html"
 
     def form_valid(self, form):
         print('form_valid called')
