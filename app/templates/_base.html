@@ -40,6 +40,7 @@
                         {{ user.username }}
                       </a>
                       <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="{% url 'organizations-my' %}">{% trans "My orgnizations" %}</a></li>
                         <li><a class="dropdown-item" href="{% url 'campaigns-my' %}">{% trans "My campaigns" %}</a></li>
                         <li><a class="dropdown-item" href="{% url 'devices-my' %}">{% trans "My devices" %}</a></li>
                         {% if host != "arbeitsplatz.luftdaten.at" %}
