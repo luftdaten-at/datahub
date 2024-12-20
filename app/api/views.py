@@ -1,12 +1,13 @@
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
+from rest_framework.exceptions import ValidationError
 
-from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement
+from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
@@ -129,3 +130,31 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         records = AirQualityRecord.objects.filter(workshop__name=pk)
         serializer = AirQualityRecordSerializer(records, many=True)
         return Response(serializer.data)
+
+
+class CreateStationStatusAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        station_data = request.data.get('station')
+        status_list = request.data.get('status_list', [])
+
+        if not station_data or not status_list:
+            raise ValidationError("Both 'station' and 'status_list' are required.")
+
+        # Get or create the station
+        station, created = Device.objects.get_or_create(id=station_data['id'])
+
+        try:
+            with transaction.atomic():
+                for status_data in status_list:
+                    # Manually create and save the DeviceLogs object
+                    DeviceLogs.objects.create(
+                        device=station,
+                        timestamp=status_data['time'],
+                        level=status_data.get('level', 1),  # Default level 1 if not provided
+                        message=status_data.get('message', '')  # Default empty message if not provided
+                    )
+
+            return Response({"status": "success"}, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
