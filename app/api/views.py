@@ -1,3 +1,4 @@
+import datetime
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 
@@ -6,9 +7,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError
+from django.http import JsonResponse
 
 from main.util import get_or_create_station
-from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs
+from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs, Values, MeasurementNew
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
@@ -162,3 +164,66 @@ class CreateStationStatusAPIView(APIView):
 
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CreateStationDataAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Parse the incoming JSON data
+        try:
+            station_data = request.data.get('station')
+            sensors_data = request.data.get('sensors')
+
+            if not station_data or not sensors_data:
+                raise ValidationError("Both 'station' and 'sensors' are required.")
+
+            # Use the get_or_create_station function to get or create the station
+            station = get_or_create_station(station_data)
+
+            # Record the time when the request was received
+            time_received = datetime.datetime.now(datetime.timezone.utc)
+
+            try:
+                with transaction.atomic():
+                    # Iterate through all sensors
+                    for sensor_id, sensor_data in sensors_data.items():
+                        # Check if the measurement already exists in the database
+                        existing_measurement = MeasurementNew.objects.filter(
+                            device=station,
+                            time_measured=station_data['time'],
+                            sensor_model=sensor_data['type']
+                        ).first()
+
+                        if existing_measurement:
+                            return JsonResponse(
+                                {"status": "error", "detail": "Measurement already in Database"},
+                                status=422
+                            )
+
+                        # If no existing measurement, create a new one
+                        measurement = MeasurementNew(
+                            sensor_model=sensor_data['type'],
+                            device=station,
+                            time_measured=station_data['time'],
+                            time_received=time_received,
+                        )
+                        measurement.save()
+
+                        # Add values (dimension, value) for the measurement
+                        for dimension, value in sensor_data['data'].items():
+                            Values.objects.create(
+                                dimension=dimension,
+                                value=value,
+                                measurement=measurement
+                            )
+
+                    # Update the station's last active time
+                    station.last_update = station_data['time']
+                    station.save()
+
+                    return JsonResponse({"status": "success"}, status=201)
+
+            except Exception as e:
+                return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=400)

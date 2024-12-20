@@ -86,7 +86,7 @@ class MeasurementNew(models.Model):
     time_measured = models.DateTimeField()
     sensor_model = models.IntegerField()
     device = models.ForeignKey(Device, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f'Measurement {self.id} from Device {self.device.id}'
