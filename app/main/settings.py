@@ -37,7 +37,7 @@ ALLOWED_HOSTS = [
     "staging.arbeitsplatz.luftdaten.at",
     "localhost",
     "127.0.0.1",
-    "172.18.0.*"
+    "172.18.0.*",
 ]
 
 
