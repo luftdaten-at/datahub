@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError
 
+from main.util import get_or_create_station
 from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs
 from workshops.models import Participant, Workshop
 from devices.models import Device
@@ -141,9 +142,10 @@ class CreateStationStatusAPIView(APIView):
             raise ValidationError("Both 'station' and 'status_list' are required.")
 
         # Get or create the station
-        station, created = Device.objects.get_or_create(device_name=station_data['device'])
+        station = get_or_create_station(station_info=station_data)
 
-        #if not created and station.api_key != 
+        if station.api_key != station_data.get('apikey'):
+            raise ValidationError("Wrong API Key")
 
         try:
             with transaction.atomic():
@@ -153,12 +155,10 @@ class CreateStationStatusAPIView(APIView):
                         device=station,
                         timestamp=status_data['time'],
                         level=status_data.get('level', 1),  # Default level 1 if not provided
-                        message=status_data.get('message', '')  # Default empty message if not provided
+                        message=status_data.get('message', ''),  # Default empty message if not provided
                     )
 
             return Response({"status": "success"}, status=status.HTTP_201_CREATED)
 
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-
