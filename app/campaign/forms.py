@@ -52,12 +52,12 @@ class CampaignForm(forms.ModelForm):
         # Set the `public` field to False
         campaign.public = False
         campaign.owner = self.user
-        campaign.users.add(self.user)
         campaign.organization = self.user.organizations.first()
+        campaign.save()
+        campaign.users.add(self.user)
 
         # Save to the database if commit is True
-        if commit:
-            campaign.save()
+        campaign.save()
         
         return campaign
 

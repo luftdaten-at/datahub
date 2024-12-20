@@ -141,7 +141,7 @@ class CreateStationStatusAPIView(APIView):
             raise ValidationError("Both 'station' and 'status_list' are required.")
 
         # Get or create the station
-        station, created = Device.objects.get_or_create(id=station_data['id'])
+        station, created = Device.objects.get_or_create(device_name=station_data['device'])
 
         try:
             with transaction.atomic():
