@@ -143,6 +143,8 @@ class CreateStationStatusAPIView(APIView):
         # Get or create the station
         station, created = Device.objects.get_or_create(device_name=station_data['device'])
 
+        #if not created and station.api_key != 
+
         try:
             with transaction.atomic():
                 for status_data in status_list:

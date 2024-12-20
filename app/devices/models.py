@@ -13,6 +13,7 @@ class Device(models.Model):
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+    api_key = models.CharField(max_length=64, null=True)
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
@@ -29,7 +30,6 @@ class Sensor(models.Model):
     firmware = models.CharField(max_length=50, blank=True)  # Für die Firmware-Version
     hardware = models.CharField(max_length=50, blank=True)  # Für die Hardware-Version
     protocol = models.CharField(max_length=50, blank=True)  # Für die Protokoll-Version
-    api_key = models.CharField(max_length=64, null=True)
 
     def __str__(self):
         return self.name
