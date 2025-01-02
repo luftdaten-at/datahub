@@ -161,7 +161,7 @@ class CreateStationStatusAPIView(APIView):
                         message=status_data.get('message', ''),  # Default empty message if not provided
                     )
 
-            return Response({"status": "success"}, status=status.HTTP_201_CREATED)
+            return Response({"status": "success"}, status=200)
 
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -180,6 +180,9 @@ class CreateStationDataAPIView(APIView):
 
             # Use the get_or_create_station function to get or create the station
             station = get_or_create_station(station_data)
+
+            if station.api_key != station_data.get('apikey'):
+                raise ValidationError("Wrong API Key")
 
             # Record the time when the request was received
             time_received = datetime.datetime.now(datetime.timezone.utc)
@@ -222,7 +225,7 @@ class CreateStationDataAPIView(APIView):
                     station.last_update = station_data['time']
                     station.save()
 
-                    return JsonResponse({"status": "success"}, status=201)
+                    return JsonResponse({"status": "success"}, status=200)
 
             except Exception as e:
                 return JsonResponse({"status": "error", "message": str(e)}, status=400)
