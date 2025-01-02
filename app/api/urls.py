@@ -1,5 +1,4 @@
 from django.urls import include, path
-from .views import AirQualityDataAddView, DeviceDetailView, DeviceDataAddView, WorkshopDetailView, WorkshopAirQualityDataView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [

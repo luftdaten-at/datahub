@@ -9,10 +9,11 @@ class Device(models.Model):
     id = models.CharField(max_length=255, primary_key=True)
     device_name = models.CharField(max_length=255, blank=True, null=True)
     model = models.CharField(max_length=255, blank=True, null=True)
-    firmware = models.CharField(max_length=12, blank=True)
+    firmware = models.CharField(max_length=255, blank=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
+    api_key = models.CharField(max_length=64, null=True)
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
