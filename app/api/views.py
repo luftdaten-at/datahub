@@ -137,6 +137,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
 
 class CreateStationStatusAPIView(APIView):
     def post(self, request, *args, **kwargs):
+        print(request)
         station_data = request.data.get('station')
         status_list = request.data.get('status_list', [])
 
@@ -168,6 +169,7 @@ class CreateStationStatusAPIView(APIView):
 
 class CreateStationDataAPIView(APIView):
     def post(self, request, *args, **kwargs):
+        print(request)
         # Parse the incoming JSON data
         try:
             station_data = request.data.get('station')
