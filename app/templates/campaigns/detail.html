@@ -4,75 +4,98 @@
 
 {% block title %}{{ campaign.name }}{% endblock title %}
 
+{% block styles %}
+<style>
+.badge-custom-green {
+    background-color: #28a745;
+    color: #fff;
+}
+</style>
+{% endblock styles %}
+
 {% block content %}
 <div class="container mt-3">
-    <!-- Campaign Details -->
     <h2>{{ campaign.name }}</h2>
     <p>{{ campaign.description }}</p>
     <p><strong>{{ campaign.organization.name }}</strong></p>
-    <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} bis {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
+    <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} {% trans "until" %} {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
 
-    <hr>
-
-    <!-- Rooms List -->
-    <h3>Rooms</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>{% trans "Room name" %}</th>
-                <th>{% trans "Actions" %}</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="mb-0">{% trans "Rooms" %}</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                    <th>{% trans "Room name" %}</th>
+                    <th>{% trans "Current measurements" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+              </thead>
+              <tbody>
             {% for room in campaign.rooms.all %}
-            <tr>
-                <td>{{ room.name }}</td>
-                <td>
-                    <a href="{% url 'room-detail' room.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
-                    <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
-                </td>
-            </tr>
+                <tr>
+                    <td>{{ room.name }}</td>
+                    <td>
+                        <span class="badge badge-custom-green">Temp 21,3°C</span>
+                        <span class="badge badge-custom-green">PM2.5 3.70 µg/m³</span>
+                        <span class="badge badge-custom-green">CO₂ 584ppm</span>
+                        <span class="badge badge-custom-green">TVOC 18ppb</span>
+                    </td>
+                    <td>
+                        <a href="{% url 'room-detail' room.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                        <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
+                    </td>
+                </tr>
             {% empty %}
-            <tr>
-                <td colspan="2">Keine Räume für diese Kampagne verfügbar.</td>
-            </tr>
+                <tr>
+                    <td colspan="2">Keine Räume für diese Kampagne verfügbar.</td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    <a href="{% url 'room-create' campaign.pk %}" class="btn btn-outline-primary">Create Room</a>
+              </tbody>
+            </table>
+          </div>
+          <a href="{% url 'room-create' campaign.pk %}" class="btn btn-outline-primary mt-3">{% trans "Create Room" %}</a>
+        </div>
+    </div>
 
-    <hr>
-
-    <!-- Users List -->
-    <h3>Teilnehmer der Kampagne</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>{% trans "First Name" %}</th>
-                <th>{% trans "Last Name" %}</th>
-                <th>{% trans "Email" %}</th>
-                <th>{% trans "Username" %}</th>
-            </tr>
-        </thead>
-        <tbody>
+    <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="mb-0">{% trans "Participants" %}</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr>
+                    <th>{% trans "Name" %}</th>
+                    <th>{% trans "Email" %}</th>
+                    <th>{% trans "Actions" %}</th>
+                </tr>
+              </thead>
+              <tbody>
             {% for user in campaign.users.all %}
-            <tr>
-                <td>{{ user.first_name }}</td>
-                <td>{{ user.last_name }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.username }}</td>
-            </tr>
+                <tr>
+                    <td>{{ user.first_name }} {{ user.last_name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        <a href="" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                        <a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
+                    </td>
+                </tr>
             {% empty %}
-            <tr>
-                <td colspan="4">{% trans "There are no participants in this campaign yet." %}</td>
-            </tr>
+                <tr>
+                    <td colspan="3">{% trans "There are no participants in this campaign yet." %}</td>
+                </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    <br>
-    <!-- Add New User Button -->
-    <a href="{% url 'campaign-add-user' campaign.pk %}" class="btn btn-outline-primary">Teilnehmer hinzufügen</a>
-    <hr>
-    <a href="{% url 'campaigns-my' %}" class="btn btn-primary">Back to my Campaigns</a>
+              </tbody>
+            </table>
+          </div>
+          <a href="{% url 'campaign-add-user' campaign.pk %}" class="btn btn-outline-primary mt-3">{% trans "Add Participant" %}</a>
+        </div>
+    </div>
+    <a href="{% url 'campaigns-my' %}" class="btn btn-outline-secondary">Back to my Campaigns</a>
 </div>
 {% endblock content %}
