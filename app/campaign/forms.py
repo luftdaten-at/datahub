@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .models import Campaign, Organization, Room
+from devices.models import Device
 from accounts.models import CustomUser
 
 from crispy_forms.helper import FormHelper
@@ -100,3 +101,38 @@ class OrganizationForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class RoomDeviceForm(forms.ModelForm):
+    current_devices = (forms.ModelMultipleChoiceField(label='',
+             queryset=Device.objects.none(),
+             widget=FilteredSelectMultiple(
+                verbose_name='Users',
+                is_stacked=False,
+             ),
+             required=False))
+
+    class Meta:
+        model = Room 
+        fields = ['current_devices']
+    
+    class Media:
+        css = {
+            'all': ('/static/admin/css/widgets.css', '/static/css/adminoverrides.css', ),
+        } # custom css
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Get the user from the passed arguments (initial data)
+        self.room = kwargs.get('initial', {}).get('room', None)
+
+        if self.room:
+            #self.room.campaign.organization.campaigns
+            pass
+            # query set should be a list of all devices in the same organisation as the room is
+            #self.fields['current_devices'].queryset = self.room.organization.users.all()
+        
+        # Initialize form helper
+        self.helper = FormHelper(self)
+        self.helper.add_input(Submit('submit', 'Save'))

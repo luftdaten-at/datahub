@@ -1,15 +1,23 @@
 {% extends "_base.html" %}
+{% load i18n %}
+
 {% block title %}{{ room.name }}{% endblock title %}
 
 {% block content %}
 <div class="container mt-3">
     <h2>Room: {{ room.name }}</h2>
     <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
-    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
 
     <h3>{% trans "Devices" %}</h3>
     <ul class="list-group">
-
+        {% for device in room.current_devices.all %}
+            <li class="list-group-item">{{ device.device_name }}</li>
+        {% empty %}
+            <li class="list-group-item">{% trans "No Device found" %}</li>
+        {% endfor %}
     </ul>
+    <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
+    <hr>
+    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
 </div>
-{% endblock content %}
+{% endblock %}

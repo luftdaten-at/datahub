@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 
 from main import settings
 from .models import Campaign, Room, Organization, OrganizationInvitation
-from .forms import CampaignForm, CampaignUserForm, OrganizationForm
+from .forms import CampaignForm, CampaignUserForm, OrganizationForm, RoomDeviceForm
 from accounts.models import CustomUser
 
 
@@ -112,7 +112,21 @@ class CampaignAddUserView(UpdateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial['campaign'] = self.object # Pass the logged-in user to the form's initial data
+        initial['campaign'] = self.object
+        return initial
+
+
+class RoomAddDeviceView(UpdateView):
+    model = Room 
+    form_class = RoomDeviceForm
+    template_name = 'campaigns/room/add_device.html'
+
+    def get_success_url(self):
+        return reverse_lazy('room-detail', kwargs={'pk': self.object.pk})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['room'] = self.object
         return initial
 
 
