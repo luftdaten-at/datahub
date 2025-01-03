@@ -151,7 +151,8 @@ from django.utils.translation import gettext_lazy as _
 LANGUAGE_CODE = 'en'  # Default language
 
 LANGUAGES = [
-    ('en', 'English'),
+    ('en', _('English')),
+    ('de', _('German')),
     # Add more languages here
 ]
 

@@ -94,10 +94,10 @@
                         </ul>
                     </div>
                     <div class="col text-end">
-                        <form action="{% url 'set_language' %}" method="post">
+                        <form action="{% url 'set_language' %}" method="post" class="d-flex align-items-center justify-content-end">
                             {% csrf_token %}
                             <input name="next" type="hidden" value="{{ request.path }}">
-                            <select name="language" onchange="this.form.submit()" class="">
+                            <select name="language" onchange="this.form.submit()" class="form-select w-auto">
                                 {% get_current_language as LANGUAGE_CODE %}
                                 {% get_available_languages as LANGUAGES %}
                                 {% for code, name in LANGUAGES %}
