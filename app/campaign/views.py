@@ -68,7 +68,7 @@ class CampaignsDetailView(DetailView):
         queryset = self.get_queryset() if queryset is None else queryset
         obj = super().get_object(queryset=queryset)
         
-        if not obj.public and obj.owner != self.request.user:
+        if not self.request.user.is_superuser and not obj.public and obj.owner != self.request.user:
             raise Http404("No campaign found matching the query")
 
         return obj
