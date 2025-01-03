@@ -107,7 +107,7 @@ class RoomDeviceForm(forms.ModelForm):
     current_devices = (forms.ModelMultipleChoiceField(label='',
              queryset=Device.objects.none(),
              widget=FilteredSelectMultiple(
-                verbose_name='Users',
+                verbose_name='Devices',
                 is_stacked=False,
              ),
              required=False))
@@ -128,10 +128,8 @@ class RoomDeviceForm(forms.ModelForm):
         self.room = kwargs.get('initial', {}).get('room', None)
 
         if self.room:
-            #self.room.campaign.organization.campaigns
-            pass
             # query set should be a list of all devices in the same organisation as the room is
-            #self.fields['current_devices'].queryset = self.room.organization.users.all()
+            self.fields['current_devices'].queryset = self.room.campaign.organization.current_devices.all()
         
         # Initialize form helper
         self.helper = FormHelper(self)

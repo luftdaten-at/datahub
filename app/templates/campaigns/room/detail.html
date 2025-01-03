@@ -16,6 +16,7 @@
             <li class="list-group-item">{% trans "No Device found" %}</li>
         {% endfor %}
     </ul>
+    <br>
     <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
     <hr>
     <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
