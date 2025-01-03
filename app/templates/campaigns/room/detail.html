@@ -35,7 +35,7 @@
 
         <!-- VOC Display -->
         <div class="col-3">
-            <div style="background-color: rgb({{ pm2_5_color.0 }}, {{ pm2_5_color.1 }}, {{ pm2_5_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+            <div style="background-color: rgb({{ tvoc_color.0 }}, {{ tvoc_color.1 }}, {{ tvoc_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
                 <strong>{% trans "Current VOC: " %}</strong>{{ current_tvoc }} µg/m³
             </div>
         </div>
@@ -45,6 +45,13 @@
     <h2>{% trans "Room: " %}{{ room.name }}</h2>
     <p><strong>{% trans "Campaign: " %}</strong>{{ room.campaign.name }}</p>
 
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{% trans "24-hour overview" %}</h3>
+            <canvas id="chart-24h" style="height: 100px;"></canvas>      
+        </div>
+    </div>
+    
     <h3>{% trans "Devices" %}</h3>
     <table class="table table-striped">
         <thead>
@@ -67,25 +74,17 @@
         </tbody>
     </table>
 
-    <div class="row">
-        <div class="col-md-12">
-            <h3>{% trans "24-hour overview" %}</h3>
-            <canvas id="chart-24h" style="height: 100px;"></canvas>      
-        </div>
-    </div>
-    
-
     <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
     <hr>
     <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">{% trans "Back to Campaign" %}</a>
 </div>
 
 <script>
-    {% comment %} var dataTemperature = {{ station.data_24h.1 }};
-    var dataCO2         = {{ station.data_24h.2 }};
-    var labels          = {{ station.data_24h.0 }}; {% endcomment %}
+    var dataTemperature = {{ data_24h.1 }};
+    var dataCO2         = {{ data_24h.2 }};
+    var labels          = {{ data_24h.0 }}; 
 
-    // Beispiel-Labels für 24 Stunden
+    {% comment %} // Beispiel-Labels für 24 Stunden
     // (können z. B. Uhrzeiten sein)
     var labels = [
         "00:00", "01:00", "02:00", "03:00", 
@@ -116,7 +115,7 @@
         1000, 1010, 1015, 1020,
         1030, 1045, 1050, 1060,
         1070, 1080, 1085, 1090
-    ];
+    ]; {% endcomment %}
 
     // Erstelle das Chart
     new Chart(document.getElementById('chart-24h'), {

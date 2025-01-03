@@ -167,24 +167,43 @@ class RoomDetailView(DetailView):
         ]
 
         def get_current_mean(dimension):
-            return statistics.mean(
-                statistics.mean(
-                    val.value for val in m.values.all() 
-                    if val.dimension == dimension
-                ) for m in measurements
-            )
+            """
+            Gibt den Durchschnittswert über alle neuesten Measurements für eine gegebene Dimension zurück.
+            Wenn keine Werte vorliegen, wird None zurückgegeben.
+            """
+            # Für jedes Measurement sammeln wir alle Values der gesuchten Dimension
+            # und bilden einen Mittelwert für dieses Measurement.
+            # Anschließend bilden wir aus diesen Mittelwerten den Gesamtmittelwert.
+            measurement_means = []
+            for m in measurements:
+                dim_values = [val.value for val in m.values.all() if val.dimension == dimension]
+                if dim_values:  # Nur wenn tatsächlich Werte vorhanden sind
+                    measurement_means.append(statistics.mean(dim_values))
 
+            # Falls keine Werte gefunden, None zurückgeben
+            if measurement_means:
+                return statistics.mean(measurement_means)
+            return None
+
+        # Temperatur
         current_temperature = get_current_mean(Dimension.TEMPERATURE)
-        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature)
+        if current_temperature is not None:
+            temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature)
+        else:
+            temperature_color = None  # Oder ein Fallback, z.B. "#999999"
 
+        # PM2.5
         current_pm2_5 = get_current_mean(Dimension.PM2_5)
-        pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
+        if current_pm2_5 is not None:
+            pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
+        else:
+            pm2_5_color = None
 
+        # Werte ins Context-Objekt packen
         context['current_temperature'] = current_temperature
         context['temperature_color'] = temperature_color
-
-        context['current_pm2_5'] = get_current_mean(Dimension.PM2_5)
-        context['pm2_5_color'] = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
+        context['current_pm2_5'] = current_pm2_5
+        context['pm2_5_color'] = pm2_5_color
 
         return context
 
