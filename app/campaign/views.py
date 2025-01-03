@@ -1,4 +1,7 @@
 import statistics
+
+from datetime import datetime, timedelta
+from collections import defaultdict
 from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -201,6 +204,32 @@ class RoomDetailView(DetailView):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
+        # data 24h
+        now = datetime.utcnow()
+        points = defaultdict(list)
+
+        measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
+        for m in measurements:
+            points[m.time_measured].append(m)
+        
+        print([t.strftime("%H:%M") for t in points.keys()])
+        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
+
+        for time_measured, measurements in points.items():
+
+            data = [
+                [val.value
+                    for m in measurements
+                        for val in m.values.all()
+                            if val.dimension == target_dim
+                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
+            ]
+            for i, x in enumerate(data):
+                data_24h[i + 1].append(statistics.mean(x) if x else 0)
+            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
+
+        # group by time measured mean over dim
+
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}'
         context['temperature_color'] = temperature_color
@@ -209,7 +238,8 @@ class RoomDetailView(DetailView):
         context['current_co2'] = f'{current_co2:.2f}'
         context['co2_color'] = co2_color  
         context['current_tvoc'] = f'{current_tvoc:.2f}'
-        context['tvoc_color'] = tvoc_color  
+        context['tvoc_color'] = tvoc_color
+        context['data_24h'] = data_24h
 
         return context
 

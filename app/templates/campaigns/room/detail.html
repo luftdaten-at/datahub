@@ -81,8 +81,8 @@
 
 <script>
     var dataTemperature = {{ data_24h.1 }};
-    var dataCO2         = {{ data_24h.2 }};
-    var labels          = {{ data_24h.0 }}; 
+    var dataCO2         = {{ data_24h.3 }};
+    var labels          = {{ data_24h.0|safe }}; 
 
     {% comment %} // Beispiel-Labels für 24 Stunden
     // (können z. B. Uhrzeiten sein)
