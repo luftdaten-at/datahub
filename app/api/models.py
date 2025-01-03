@@ -98,7 +98,7 @@ class Values(models.Model):
     """
     dimension = models.IntegerField()
     value = models.FloatField()
-    measurement = models.ForeignKey(MeasurementNew, on_delete=models.CASCADE)
+    measurement = models.ForeignKey(MeasurementNew, on_delete=models.CASCADE, related_name='values')
 
     def __str__(self):
         return f'Value {self.id} for Measurement {self.measurement.id}'
