@@ -6,5 +6,10 @@
     <h2>Room: {{ room.name }}</h2>
     <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
     <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
+
+    <h3>{% trans "Devices" %}</h3>
+    <ul class="list-group">
+
+    </ul>
 </div>
 {% endblock content %}
