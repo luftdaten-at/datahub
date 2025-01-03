@@ -9,14 +9,27 @@
     <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
 
     <h3>{% trans "Devices" %}</h3>
-    <ul class="list-group">
-        {% for device in room.current_devices.all %}
-            <li class="list-group-item">{{ device.device_name }}</li>
-        {% empty %}
-            <li class="list-group-item">{% trans "No Device found" %}</li>
-        {% endfor %}
-    </ul>
-    <br>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% trans "Device ID" %}</th>
+                <th>{% trans "Device Name" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in room.current_devices.all %}
+            <tr>
+                <td>{{ device.id }}</td>
+                <td>{{ device.device_name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">{% trans "No Device found" %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
     <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
     <hr>
     <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
