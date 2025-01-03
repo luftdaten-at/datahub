@@ -1,10 +1,190 @@
 {% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
 {% block title %}{{ room.name }}{% endblock title %}
+
+{% block styles %}
+<script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
+{% endblock styles %}
 
 {% block content %}
 <div class="container mt-3">
-    <h2>Room: {{ room.name }}</h2>
-    <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
-    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
+    <!-- Row for Temperature and PM2.5 Display -->
+    <div class="row mb-3">
+        <!-- Temperature Display -->
+        <div class="col-3">
+            <div style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current Temperature: " %}</strong>{{ current_temperature }}&deg;C
+            </div>
+        </div>
+
+        <!-- PM2.5 Display -->
+        <div class="col-3">
+            <div style="background-color: rgb({{ pm2_5_color.0 }}, {{ pm2_5_color.1 }}, {{ pm2_5_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current PM2.5: " %}</strong>{{ current_pm2_5 }} µg/m³
+            </div>
+        </div>
+
+        <!-- CO2 Display -->
+        <div class="col-3">
+            <div style="background-color: rgb({{ co2_color.0 }}, {{ co2_color.1 }}, {{ co2_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current CO2: " %}</strong>{{ current_co2 }} ppm
+            </div>
+        </div>
+
+        <!-- VOC Display -->
+        <div class="col-3">
+            <div style="background-color: rgb({{ tvoc_color.0 }}, {{ tvoc_color.1 }}, {{ tvoc_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current VOC: " %}</strong>{{ current_tvoc }} µg/m³
+            </div>
+        </div>
+    </div>
+
+    <!-- Room and Campaign Information -->
+    <h2>{% trans "Room: " %}{{ room.name }}</h2>
+    <p><strong>{% trans "Campaign: " %}</strong>{{ room.campaign.name }}</p>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{% trans "24-hour overview" %}</h3>
+            <canvas id="chart-24h" style="height: 100px;"></canvas>      
+        </div>
+    </div>
+    
+    <h3>{% trans "Devices" %}</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>{% trans "Device ID" %}</th>
+                <th>{% trans "Device Name" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in room.current_devices.all %}
+            <tr>
+                <td>{{ device.id }}</td>
+                <td>{{ device.device_name }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">{% trans "No Device found" %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
+    <hr>
+    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">{% trans "Back to Campaign" %}</a>
 </div>
-{% endblock content %}
+
+<script>
+    var dataTemperature = {{ data_24h.1 }};
+    var dataCO2         = {{ data_24h.3 }};
+    var labels          = {{ data_24h.0|safe }}; 
+
+    {% comment %} // Beispiel-Labels für 24 Stunden
+    // (können z. B. Uhrzeiten sein)
+    var labels = [
+        "00:00", "01:00", "02:00", "03:00", 
+        "04:00", "05:00", "06:00", "07:00", 
+        "08:00", "09:00", "10:00", "11:00", 
+        "12:00", "13:00", "14:00", "15:00", 
+        "16:00", "17:00", "18:00", "19:00", 
+        "20:00", "21:00", "22:00", "23:00"
+    ];
+
+    // Beispielwerte für Temperatur (24 Werte)
+    // z. B. in °C
+    var dataTemperature = [
+        16.3, 15.8, 15.5, 15.2,
+        15.0, 14.8, 15.1, 16.7,
+        18.9, 20.2, 22.1, 24.0,
+        25.3, 26.8, 27.2, 26.0,
+        24.8, 23.5, 22.1, 20.9,
+        19.5, 18.2, 17.6, 17.0
+    ];
+
+    // Beispielwerte für CO₂ (24 Werte)
+    // z. B. in ppm
+    var dataCO2 = [
+        780, 790, 805, 815,
+        820, 830, 850, 880,
+        920, 950, 980, 990,
+        1000, 1010, 1015, 1020,
+        1030, 1045, 1050, 1060,
+        1070, 1080, 1085, 1090
+    ]; {% endcomment %}
+
+    // Erstelle das Chart
+    new Chart(document.getElementById('chart-24h'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperatur (°C)',
+                    data: dataTemperature,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)', // z.B. leicht transparent für den Flächen-Hintergrund
+                    fill: false,           // auf 'true' stellen, wenn du eine Fläche unter der Linie wünschst
+                    borderWidth: 2,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'CO₂ (ppm)',
+                    data: dataCO2,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,
+                    borderWidth: 2,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 3,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 35,
+                        minRotation: 35,
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Temperatur (°C)'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'CO₂ (ppm)'
+                    },
+                    grid: {
+                        drawOnChartArea: false // Gitter-Linien für die rechte Achse ausblenden
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

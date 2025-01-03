@@ -210,6 +210,7 @@ class CreateStationDataAPIView(APIView):
                             device=station,
                             time_measured=station_data['time'],
                             time_received=time_received,
+                            room = station.current_room,
                         )
                         measurement.save()
 

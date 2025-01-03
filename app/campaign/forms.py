@@ -3,6 +3,7 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
 from .models import Campaign, Organization, Room
+from devices.models import Device
 from accounts.models import CustomUser
 
 from crispy_forms.helper import FormHelper
@@ -100,3 +101,57 @@ class OrganizationForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
         }
+
+
+class RoomDeviceForm(forms.ModelForm):
+    current_devices = (forms.ModelMultipleChoiceField(label='',
+             queryset=Device.objects.none(),
+             widget=FilteredSelectMultiple(
+                verbose_name='Devices',
+                is_stacked=False,
+             ),
+             required=False))
+
+    class Meta:
+        model = Room 
+        fields = ['current_devices']
+    
+    class Media:
+        css = {
+            'all': ('/static/admin/css/widgets.css', '/static/css/adminoverrides.css', ),
+        } # custom css
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Get the user from the passed arguments (initial data)
+        self.room = kwargs.get('initial', {}).get('room', None)
+
+        if self.room:
+            # query set should be a list of all devices in the same organisation as the room is
+            self.fields['current_devices'].queryset = self.room.campaign.organization.current_devices.all()
+            self.initial['current_devices'] = self.room.current_devices.all()
+        
+        # Initialize form helper
+        self.helper = FormHelper(self)
+        self.helper.add_input(Submit('submit', 'Save'))
+
+    def save(self, commit=True):
+        # Save the room instance
+        room = super().save(commit=commit)
+
+        # Get the selected devices
+        selected_devices = self.cleaned_data['current_devices']
+
+        # Update the ForeignKey for the devices
+        if commit:
+            # Unassign the devices previously linked to the room
+            Device.objects.filter(current_room=room).update(current_room=None)
+
+            # Assign the selected devices to the current room
+            selected_devices.update(current_room=room)
+
+            # Save the room
+            room.save()
+
+        return room

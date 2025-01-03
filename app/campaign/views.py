@@ -1,3 +1,7 @@
+import statistics
+
+from datetime import datetime, timedelta
+from collections import defaultdict
 from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -11,8 +15,9 @@ from django.core.mail import send_mail
 
 from main import settings
 from .models import Campaign, Room, Organization, OrganizationInvitation
-from .forms import CampaignForm, CampaignUserForm, OrganizationForm
+from .forms import CampaignForm, CampaignUserForm, OrganizationForm, RoomDeviceForm
 from accounts.models import CustomUser
+from main.enums import Dimension
 
 
 class CampaignsHomeView(ListView):
@@ -63,7 +68,7 @@ class CampaignsDetailView(DetailView):
         queryset = self.get_queryset() if queryset is None else queryset
         obj = super().get_object(queryset=queryset)
         
-        if not obj.public and obj.owner != self.request.user:
+        if not self.request.user.is_superuser and not obj.public and obj.owner != self.request.user:
             raise Http404("No campaign found matching the query")
 
         return obj
@@ -112,7 +117,21 @@ class CampaignAddUserView(UpdateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        initial['campaign'] = self.object # Pass the logged-in user to the form's initial data
+        initial['campaign'] = self.object
+        return initial
+
+
+class RoomAddDeviceView(UpdateView):
+    model = Room 
+    form_class = RoomDeviceForm
+    template_name = 'campaigns/room/add_device.html'
+
+    def get_success_url(self):
+        return reverse_lazy('room-detail', kwargs={'pk': self.object.pk})
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['room'] = self.object
         return initial
 
 
@@ -133,6 +152,96 @@ class RoomDetailView(DetailView):
     model = Room
     template_name = 'campaigns/room/detail.html'
     context_object_name = 'room'
+
+    def get_context_data(self, **kwargs):
+        # Get the default context data
+        context = super().get_context_data(**kwargs)
+
+        # Add custom variables to the context
+        # context['custom_variable'] = 'Your custom value here'
+        # context['additional_data'] = Device.objects.filter(room=self.object)  # Example of another custom variable
+
+        room = self.object
+        measurements = room.measurements.all()
+
+        measurements = [
+            m for m in measurements
+            if m.time_measured == room.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
+        ]
+
+        def get_current_mean(dimension):
+            """
+            Gibt den Durchschnittswert über alle neuesten Measurements für eine gegebene Dimension zurück.
+            Wenn keine Werte vorliegen, wird None zurückgegeben.
+            """
+            # Für jedes Measurement sammeln wir alle Values der gesuchten Dimension
+            # und bilden einen Mittelwert für dieses Measurement.
+            # Anschließend bilden wir aus diesen Mittelwerten den Gesamtmittelwert.
+            measurement_means = []
+            for m in measurements:
+                dim_values = [val.value for val in m.values.all() if val.dimension == dimension]
+                if dim_values:  # Nur wenn tatsächlich Werte vorhanden sind
+                    measurement_means.append(statistics.mean(dim_values))
+
+            # Falls keine Werte gefunden, None zurückgeben
+            if measurement_means:
+                return statistics.mean(measurement_means)
+            return None
+
+        # Temperatur
+        current_temperature = get_current_mean(Dimension.TEMPERATURE)
+        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
+
+        # PM2.5
+        current_pm2_5 = get_current_mean(Dimension.PM2_5)
+        pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5) if current_pm2_5 else None
+
+        # CO2
+        current_co2 = get_current_mean(Dimension.CO2)
+        co2_color = Dimension.get_color(Dimension.CO2, current_co2) if current_co2 else None
+
+        # VOC Index
+        current_tvoc = get_current_mean(Dimension.TVOC)
+        tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
+
+        # data 24h
+        now = datetime.utcnow()
+        points = defaultdict(list)
+
+        measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
+        for m in measurements:
+            points[m.time_measured].append(m)
+        
+        print([t.strftime("%H:%M") for t in points.keys()])
+        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
+
+        for time_measured, measurements in points.items():
+
+            data = [
+                [val.value
+                    for m in measurements
+                        for val in m.values.all()
+                            if val.dimension == target_dim
+                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
+            ]
+            for i, x in enumerate(data):
+                data_24h[i + 1].append(statistics.mean(x) if x else 0)
+            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
+
+        # group by time measured mean over dim
+
+        # Werte ins Context-Objekt packen
+        context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
+        context['temperature_color'] = temperature_color
+        context['current_pm2_5'] = f'{current_pm2_5:.2f}' if current_pm2_5 else None
+        context['pm2_5_color'] = pm2_5_color
+        context['current_co2'] = f'{current_co2:.2f}' if current_co2 else None
+        context['co2_color'] = co2_color  
+        context['current_tvoc'] = f'{current_tvoc:.2f}' if current_tvoc else None
+        context['tvoc_color'] = tvoc_color
+        context['data_24h'] = data_24h
+
+        return context
 
 
 class RoomDeleteView(DeleteView):

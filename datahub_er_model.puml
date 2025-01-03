@@ -90,6 +90,8 @@ entity "UserCampaign" as UserCampaign {
 }
 
 Device ||--o{ Measurement : "records"
+Room ||--o{ Device : "is in"
+Organization ||--o{ Device : "is in"
 Measurement ||--o{ Values : "has"
 Device ||--o{ DeviceLogs : "logs"
 Device ||--o{ DeviceStatus : "has status"

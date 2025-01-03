@@ -31,6 +31,8 @@ SECRET_KEY = env("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 
 ALLOWED_HOSTS = [
+    # TODO: remove
+    "*",
     "datahub.luftdaten.at",
     "staging.datahub.luftdaten.at",
     "arbeitsplatz.luftdaten.at",
