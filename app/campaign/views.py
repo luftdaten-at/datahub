@@ -231,13 +231,13 @@ class RoomDetailView(DetailView):
         # group by time measured mean over dim
 
         # Werte ins Context-Objekt packen
-        context['current_temperature'] = f'{current_temperature:.2f}'
+        context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
         context['temperature_color'] = temperature_color
-        context['current_pm2_5'] = f'{current_pm2_5:.2f}'
+        context['current_pm2_5'] = f'{current_pm2_5:.2f}' if current_pm2_5 else None
         context['pm2_5_color'] = pm2_5_color
-        context['current_co2'] = f'{current_co2:.2f}'
+        context['current_co2'] = f'{current_co2:.2f}' if current_co2 else None
         context['co2_color'] = co2_color  
-        context['current_tvoc'] = f'{current_tvoc:.2f}'
+        context['current_tvoc'] = f'{current_tvoc:.2f}' if current_tvoc else None
         context['tvoc_color'] = tvoc_color
         context['data_24h'] = data_24h
 
