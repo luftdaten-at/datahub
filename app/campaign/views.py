@@ -162,8 +162,8 @@ class RoomDetailView(DetailView):
         measurements = room.measurements.all()
 
         measurements = [
-            m for m in measurements 
-            if m == room.measurements.filter(device=m.device).order_by('-time_measured').first()
+            m for m in measurements
+            if m.time_measured == room.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
         ]
 
         def get_current_mean(dimension):
@@ -187,23 +187,29 @@ class RoomDetailView(DetailView):
 
         # Temperatur
         current_temperature = get_current_mean(Dimension.TEMPERATURE)
-        if current_temperature is not None:
-            temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature)
-        else:
-            temperature_color = None  # Oder ein Fallback, z.B. "#999999"
+        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
 
         # PM2.5
         current_pm2_5 = get_current_mean(Dimension.PM2_5)
-        if current_pm2_5 is not None:
-            pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
-        else:
-            pm2_5_color = None
+        pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5) if current_pm2_5 else None
+
+        # CO2
+        current_co2 = get_current_mean(Dimension.CO2)
+        co2_color = Dimension.get_color(Dimension.CO2, current_co2) if current_co2 else None
+
+        # VOC Index
+        current_tvoc = get_current_mean(Dimension.TVOC)
+        tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = current_temperature
         context['temperature_color'] = temperature_color
         context['current_pm2_5'] = current_pm2_5
         context['pm2_5_color'] = pm2_5_color
+        context['current_co2'] = current_co2        
+        context['co2_color'] = co2_color  
+        context['current_tvoc'] = current_tvoc  
+        context['tvoc_color'] = tvoc_color  
 
         return context
 
