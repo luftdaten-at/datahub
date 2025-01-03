@@ -148,6 +148,17 @@ class RoomDetailView(DetailView):
     template_name = 'campaigns/room/detail.html'
     context_object_name = 'room'
 
+    def get_context_data(self, **kwargs):
+        # Get the default context data
+        context = super().get_context_data(**kwargs)
+
+        # Add custom variables to the context
+        # context['custom_variable'] = 'Your custom value here'
+        # context['additional_data'] = Device.objects.filter(room=self.object)  # Example of another custom variable
+
+        room = self.object
+        return context
+
 
 class RoomDeleteView(DeleteView):
     model = Room
