@@ -1,6 +1,21 @@
 from enum import Enum
 
 
+class Color():
+    # LED colors. Found experimentally, they do not correspond to accurate RGB values.
+    RED = (255, 0, 0)
+    GREEN = (0, 255, 0)
+    GREEN_LOW = (0, 50, 0)
+    BLUE = (0, 0, 255)
+    YELLOW = (255, 100, 0)
+    CYAN = (0, 255, 50)
+    MAGENTA = (255, 0, 20)
+    WHITE = (255, 150, 40)
+    ORANGE = (255, 70, 0)
+    PURPLE = (200, 0, 80)
+    OFF = (0, 0, 0)
+
+
 class Dimension():
     PM0_1 = 1
     PM1_0 = 2
@@ -20,6 +35,13 @@ class Dimension():
     NO2 = 16
     SGP40_RAW_GAS = 17
     SGP40_ADJUSTED_GAS = 18
+
+    thresholds = {
+        TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
+        PM2_5: ([5, 15], [Color.GREEN, Color.YELLOW, Color.RED]),
+        TVOC: ([220, 1430], [Color.GREEN, Color.YELLOW, Color.RED]),
+        CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED])
+    }
 
     # Dictionary für die Einheiten der Dimensionen
     _units = {
@@ -243,3 +265,4 @@ class OutputFormat(str, Enum):
 class Order(str, Enum):
     MIN="min"
     MAX="max"
+
