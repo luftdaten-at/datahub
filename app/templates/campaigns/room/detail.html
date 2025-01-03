@@ -9,7 +9,7 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container mt-3 mb-3">
     <!-- Room and Campaign Information -->
     <h2>{% trans "Room:" %} {{ room.name }}</h2>
     <p><strong>{% trans "Campaign:" %} </strong>{{ room.campaign.name }}</p>
@@ -94,7 +94,6 @@
         </div>
       </div>
     
-    <hr>
     <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-outline-secondary">{% trans "Back to Campaign" %}</a>
 </div>
 
