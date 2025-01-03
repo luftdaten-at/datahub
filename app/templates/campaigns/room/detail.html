@@ -5,14 +5,26 @@
 
 {% block content %}
 <div class="container mt-3">
-    <!-- Temperature Display with Background Color -->
-    <div style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 20px;">
-        <strong>{% trans "Current Temperature:" %} </strong>{{ current_temperature }}&deg;C
+    <!-- Row for Temperature and PM2.5 Display -->
+    <div class="row mb-3">
+        <!-- Temperature Display -->
+        <div class="col-6">
+            <div style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current Temperature: " %}</strong>{{ current_temperature }}&deg;C
+            </div>
+        </div>
+
+        <!-- PM2.5 Display -->
+        <div class="col-6">
+            <div style="background-color: rgb({{ pm2_5_color.0 }}, {{ pm2_5_color.1 }}, {{ pm2_5_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current PM2.5: " %}</strong>{{ current_pm2_5 }} µg/m³
+            </div>
+        </div>
     </div>
 
     <!-- Room and Campaign Information -->
-    <h2>Room: {{ room.name }}</h2>
-    <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
+    <h2>{% trans "Room: " %}{{ room.name }}</h2>
+    <p><strong>{% trans "Campaign: " %}</strong>{{ room.campaign.name }}</p>
 
     <h3>{% trans "Devices" %}</h3>
     <table class="table table-striped">
@@ -38,6 +50,6 @@
 
     <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
     <hr>
-    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">Back to Campaign</a>
+    <a href="{% url 'campaigns-detail' room.campaign.pk %}" class="btn btn-primary">{% trans "Back to Campaign" %}</a>
 </div>
 {% endblock %}

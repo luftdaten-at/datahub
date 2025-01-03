@@ -177,8 +177,14 @@ class RoomDetailView(DetailView):
         current_temperature = get_current_mean(Dimension.TEMPERATURE)
         temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature)
 
+        current_pm2_5 = get_current_mean(Dimension.PM2_5)
+        pm2_5_color = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
+
         context['current_temperature'] = current_temperature
         context['temperature_color'] = temperature_color
+
+        context['current_pm2_5'] = get_current_mean(Dimension.PM2_5)
+        context['pm2_5_color'] = Dimension.get_color(Dimension.PM2_5, current_pm2_5)
 
         return context
 
