@@ -202,13 +202,13 @@ class RoomDetailView(DetailView):
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
         # Werte ins Context-Objekt packen
-        context['current_temperature'] = current_temperature
+        context['current_temperature'] = f'{current_temperature:.2f}'
         context['temperature_color'] = temperature_color
-        context['current_pm2_5'] = current_pm2_5
+        context['current_pm2_5'] = f'{current_pm2_5:.2f}'
         context['pm2_5_color'] = pm2_5_color
-        context['current_co2'] = current_co2        
+        context['current_co2'] = f'{current_co2:.2f}'
         context['co2_color'] = co2_color  
-        context['current_tvoc'] = current_tvoc  
+        context['current_tvoc'] = f'{current_tvoc:.2f}'
         context['tvoc_color'] = tvoc_color  
 
         return context
