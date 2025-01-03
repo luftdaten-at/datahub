@@ -134,3 +134,23 @@ class RoomDeviceForm(forms.ModelForm):
         # Initialize form helper
         self.helper = FormHelper(self)
         self.helper.add_input(Submit('submit', 'Save'))
+
+    def save(self, commit=True):
+        # Save the room instance
+        room = super().save(commit=commit)
+
+        # Get the selected devices
+        selected_devices = self.cleaned_data['current_devices']
+
+        # Update the ForeignKey for the devices
+        if commit:
+            # Unassign the devices previously linked to the room
+            Device.objects.filter(current_room=room).update(current_room=None)
+
+            # Assign the selected devices to the current room
+            selected_devices.update(current_room=room)
+
+            # Save the room
+            room.save()
+
+        return room
