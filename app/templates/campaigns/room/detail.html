@@ -5,6 +5,12 @@
 
 {% block content %}
 <div class="container mt-3">
+    <!-- Temperature Display with Background Color -->
+    <div style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px; margin-bottom: 20px;">
+        <strong>{% trans "Current Temperature:" %} </strong>{{ current_temperature }}&deg;C
+    </div>
+
+    <!-- Room and Campaign Information -->
     <h2>Room: {{ room.name }}</h2>
     <p><strong>Campaign:</strong> {{ room.campaign.name }}</p>
 

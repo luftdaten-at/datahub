@@ -36,12 +36,20 @@ class Dimension():
     SGP40_RAW_GAS = 17
     SGP40_ADJUSTED_GAS = 18
 
-    thresholds = {
+    _thresholds = {
         TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
         PM2_5: ([5, 15], [Color.GREEN, Color.YELLOW, Color.RED]),
         TVOC: ([220, 1430], [Color.GREEN, Color.YELLOW, Color.RED]),
         CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED])
     }
+
+    @classmethod
+    def get_color(cls, dimension, value):
+        thresholds, colors = cls._thresholds[dimension]
+        thresholds = [-float('inf')] + thresholds + [float('inf')]
+        for i in range(0, len(thresholds) - 1):
+            if thresholds[i] <= value and value < thresholds[i + 1]:
+                return colors[i]
 
     # Dictionary für die Einheiten der Dimensionen
     _units = {

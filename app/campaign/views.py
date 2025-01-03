@@ -1,3 +1,4 @@
+import statistics
 from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -13,6 +14,7 @@ from main import settings
 from .models import Campaign, Room, Organization, OrganizationInvitation
 from .forms import CampaignForm, CampaignUserForm, OrganizationForm, RoomDeviceForm
 from accounts.models import CustomUser
+from main.enums import Dimension
 
 
 class CampaignsHomeView(ListView):
@@ -157,6 +159,27 @@ class RoomDetailView(DetailView):
         # context['additional_data'] = Device.objects.filter(room=self.object)  # Example of another custom variable
 
         room = self.object
+        measurements = room.measurements.all()
+
+        measurements = [
+            m for m in measurements 
+            if m == room.measurements.filter(device=m.device).order_by('-time_measured').first()
+        ]
+
+        def get_current_mean(dimension):
+            return statistics.mean(
+                statistics.mean(
+                    val.value for val in m.values.all() 
+                    if val.dimension == dimension
+                ) for m in measurements
+            )
+
+        current_temperature = get_current_mean(Dimension.TEMPERATURE)
+        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature)
+
+        context['current_temperature'] = current_temperature
+        context['temperature_color'] = temperature_color
+
         return context
 
 
