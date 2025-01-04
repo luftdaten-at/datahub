@@ -21,8 +21,9 @@
     <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
 
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">{% trans "Rooms" %}</h3>
+          <a href="{% url 'room-create' campaign.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Create Room" %}</a>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -57,13 +58,13 @@
               </tbody>
             </table>
           </div>
-          <a href="{% url 'room-create' campaign.pk %}" class="btn btn-outline-primary mt-3">{% trans "Create Room" %}</a>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">{% trans "Participants" %}</h3>
+          <a href="{% url 'campaign-add-user' campaign.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Participant" %}</a>
         </div>
         <div class="card-body">
           <div class="table-responsive">
@@ -93,7 +94,6 @@
               </tbody>
             </table>
           </div>
-          <a href="{% url 'campaign-add-user' campaign.pk %}" class="btn btn-outline-primary mt-3">{% trans "Add Participant" %}</a>
         </div>
     </div>
     <a href="{% url 'campaigns-my' %}" class="btn btn-outline-secondary">Back to my Campaigns</a>

@@ -59,8 +59,9 @@
     </div>
 
     <div class="card mb-4">
-        <div class="card-header">
+        <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">{% trans "Devices" %}</h3>
+          <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Device" %}</a>
         </div>
         <div class="card-body">
           <!-- Responsive Table-Wrapper; nur nötig, wenn es sehr viele Spalten gibt -->
@@ -89,8 +90,7 @@
                 {% endfor %}
               </tbody>
             </table>
-          </div>
-          <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary mt-3">{% trans "Add Device" %}</a>
+        </div>
         </div>
       </div>
     
