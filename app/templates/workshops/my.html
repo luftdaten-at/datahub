@@ -1,45 +1,30 @@
 {% extends "_base.html" %}
 {% load i18n %}
 
+{% block title %}{% trans "My Workshops" %}{% endblock title %}
+
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">{% trans "My workshops" %}</h2>
-
+    <h2 class="mb-4">{% trans "My Workshops" %}</h2>
     {% if workshops %}
-    <div class="table-responsive">
-        <table class="table table-striped table-hover">
-            <thead class="thead-dark">
-                <tr>
-                    <th>{% trans "Name" %}</th>
-                    <th>{% trans "Start date" %}</th>
-                    <th>{% trans "End date" %}</th>
-                    <th>{% trans "Public" %}</th>
-                    <th>{% trans "Actions" %}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for workshop in workshops %}
-                <tr>
-                    <td>{{ workshop.title }}</td>
-                    <td>{{ workshop.start_date|date:"d.m.Y H:i" }}</td>
-                    <td>{{ workshop.end_date|date:"d.m.Y H:i" }}</td>
-                    <td>
-                        {% if workshop.public %}
-                            <span class="badge bg-success">{% trans "Yes" %}</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{% trans "No" %}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
-                        <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a>
-                        <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>    
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+        <div class="list-group">
+            {% for workshop in workshops %}
+                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
+                    <div class="mb-2 mb-md-0">
+                        <h5 class="mb-1">{{ workshop.title }}</h5>
+                        <p class="mb-1">
+                            <strong>{% trans "Date:" %}</strong> {{ workshop.start_date|date:"d.m.Y H:i" }} – {{ workshop.end_date|date:"d.m.Y H:i" }}<br>
+                            <strong>{% trans "Public:" %}</strong> {{ workshop.public|yesno:"Ja,Nein" }}
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-info btn-sm mb-1">{% trans "Details" %}</a>
+                        <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-primary btn-sm mb-1">{% trans "Edit" %}</a>
+                        <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     {% else %}
     <div class="alert alert-warning" role="alert">
         {% trans "No workshops found." %}
