@@ -14,11 +14,11 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container mt-5">
     <h2>{{ campaign.name }}</h2>
     <p>{{ campaign.description }}</p>
     <p><strong>{{ campaign.organization.name }}</strong></p>
-    <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} {% trans "until" %} {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
+    <p><strong>{{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}</strong></p>
 
     <div class="card mb-4">
         <div class="card-header">
@@ -27,7 +27,7 @@
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover align-middle">
-              <thead class="table-light">
+              <thead>
                 <tr>
                     <th>{% trans "Room name" %}</th>
                     <th>{% trans "Current measurements" %}</th>
@@ -68,7 +68,7 @@
         <div class="card-body">
           <div class="table-responsive">
             <table class="table table-hover align-middle">
-              <thead class="table-light">
+              <thead>
                 <tr>
                     <th>{% trans "Name" %}</th>
                     <th>{% trans "Email" %}</th>

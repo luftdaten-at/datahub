@@ -2,49 +2,81 @@
 {% load i18n %}
 {% load static %}
 
-{% block styles %}
-<!-- Add any additional styles here -->
-{% endblock styles %}
-
 {% block content %}
-<div class="container">
-    <h2>{{ organization.name }}</h2>
-    <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
-    <h3>{% trans "Users:" %}</h3>
-    <table class="table table-striped">
-        <thead>
-            <th>{% trans "Username" %}</th>
-            <th>{% trans "Actions" %}</th>
-        </thead>
-        <tbody>
-            {% for user in organization.users.all %}
-                <tr>
-                    <td>{{ user.username }}</td>
-                    <td>
-                        <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h3>{% trans "Invite a User" %}</h3>
-    <form method="post" action="{% url 'invite-user-to-organization' organization.pk %}">
-        {% csrf_token %}
-        <div class="form-group">
-            <label for="invite-email">{% trans "User Email" %}</label>
-            <input
-                type="email"
-                id="invite-email"
-                name="email"
-                class="form-control"
-                placeholder="{% trans 'Enter user email' %}"
-                required
-            />
+<div class="container mt-5 flex-grow-1">
+    <div class="row">
+        <div class="col-12">
+            <h2>{{ organization.name }}</h2>
+            <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
         </div>
-        <button type="submit" class="btn btn-success mt-2">{% trans "Send Invitation" %}</button>
-    </form>
+    </div>
 
-    <a href="{% url 'organizations-my' %}" class="btn btn-primary mt-3">{% trans "Back to Organizations" %}</a>
+    <!-- Users Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">{% trans "Users" %}</h3>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Username" %}</th>
+                            <th scope="col">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in organization.users.all %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm" title="{% trans 'Remove User' %}">
+                                        <i class="bi bi-trash"></i> {% trans "Remove" %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center">{% trans "No users found." %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invite User Card -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4 class="mb-0">{% trans "Invite a User" %}</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'invite-user-to-organization' organization.pk %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="invite-email" class="form-label">{% trans "User Email" %}</label>
+                    <input
+                        type="email"
+                        id="invite-email"
+                        name="email"
+                        class="form-control"
+                        placeholder="{% trans 'Enter user email' %}"
+                        required
+                    />
+                </div>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-envelope-fill"></i> {% trans "Send Invitation" %}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="d-flex">
+        <a href="{% url 'organizations-my' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> {% trans "Back to Organizations" %}
+        </a>
+    </div>
 </div>
 {% endblock content %}
