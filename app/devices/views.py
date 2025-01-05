@@ -1,11 +1,12 @@
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
-from django.contrib.auth.mixins import UserPassesTestMixin
-from django.urls import reverse_lazy
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.urls import reverse_lazy, reverse
 
-from .models import Device
-from .forms import DeviceForm
+
+from .models import Device, DeviceStatus
+from .forms import DeviceForm, DeviceNotesForm
 
 class DeviceListView(UserPassesTestMixin, ListView):
     model = Device
@@ -28,6 +29,12 @@ class DeviceDetailView(UserPassesTestMixin, DetailView):
     def test_func(self):
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Fetch all DeviceStatus entries related to this Device, ordered by most recent
+        context['device_statuses'] = DeviceStatus.objects.filter(device=self.object).order_by('-time_received')
+        return context
+
 
 class DeviceMyView(UserPassesTestMixin, ListView):
     model = Device
@@ -41,7 +48,7 @@ class DeviceMyView(UserPassesTestMixin, ListView):
         # Return the Device queryset ordered by 'id' in ascending order
         return Device.objects.all().order_by('id')
 
-class DeviceUpdateView(UpdateView):
+class DeviceEditView(UpdateView):
     model = Device
     form_class = DeviceForm
     template_name = 'devices/form.html'
@@ -55,6 +62,34 @@ class DeviceUpdateView(UpdateView):
         """
         queryset = super().get_queryset()
         return queryset
+
+class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
+    model = Device
+    form_class = DeviceNotesForm
+    template_name = 'devices/edit_notes.html'
+
+    def get_success_url(self):
+        """
+        After successfully updating the notes, redirect to the device's detail page.
+        """
+        return reverse('device-detail', kwargs={'pk': self.object.pk})
+    
+    def test_func(self):
+        """
+        Define the condition that the user must meet to access this view.
+        For example, only superusers can edit notes.
+        Adjust this logic based on your application's requirements.
+        """
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_queryset(self):
+        """
+        Restrict the queryset to devices the user is allowed to edit.
+        For example, if users can only edit their own devices, filter accordingly.
+        Adjust the filter based on your application's logic.
+        """
+        return Device.objects.all()  # Modify as per your permission logic
+
 
 from django.db import transaction
 
@@ -70,3 +105,4 @@ def change_device_id(old_id, new_id):
         print("Device with the specified ID does not exist")
     except Exception as e:
         print(f"An error occurred: {e}")
+

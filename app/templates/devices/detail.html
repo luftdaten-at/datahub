@@ -1,15 +1,101 @@
 {% extends "_base.html" %}
+{% load i18n %}
 {% load static %}
 
 {% block title %}{{ device.id }}{% endblock title %}
 
+{% block styles %}
+<style>
+    /* Optional: Customize the Accordion for better visuals */
+    .accordion-button:focus {
+        box-shadow: none;
+    }
+    .accordion-button:hover {
+        background-color: #f8f9fa;
+    }
+    .accordion-item {
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        margin-bottom: .5rem;
+    }
+    .accordion-body {
+        background-color: #f8f9fa;
+    }
+</style>
+{% endblock styles %}
+
 {% block content %}
-    <h1>{{ device.id }}</h1>
-    <ul>
-        <li>Name: {{ device.device_name }}</li>
-        <li>Bluetooth MAC: {{ device.btmac_address }}</li>
-        <li>Sensor SEN5X: {{ device.sensor_sen5x }}</li>
-    </ul>        
-    
-    <a href="{% url 'device-list' %}">Back to list</a>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Device:" %} {{ device.id }}</h2>
+        <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+    </div>    
+    <div class="row">
+        <div class="col-md-6">
+            <ul class="list-group mb-3">
+                <li class="list-group-item"><strong>{% trans "Name:" %}</strong> {{ device.device_name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Model:" %}</strong> {{ device.model|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Firmware:" %}</strong> {{ device.firmware|default:_("N/A") }}</li>
+            </ul>
+
+            <ul class="list-group mb-3">
+                <li class="list-group-item"><strong>{% trans "Organization:" %}</strong> {{ device.current_organization|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Room:" %}</strong> {{ device.current_room|default:_("N/A") }}</li>
+            </ul>
+            <ul class="list-group">
+                <li class="list-group-item">
+                <strong>{% trans "Notes:" %}</strong>
+                <p>{{ device.notes|linebreaksbr|default:_("N/A") }}</p>
+                <!-- Edit Notes Button -->
+                <a href="{% url 'device-edit-notes' device.pk %}" class="btn btn-sm btn-outline-primary">
+                    {% trans "Edit Notes" %}
+                </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <hr class="my-5">
+
+    <h3 class="mb-4">{% trans "Device Statuses" %}</h3>
+
+    {% if device_statuses %}
+        <div class="accordion" id="deviceStatusAccordion">
+            {% for status in device_statuses %}
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                            {{ status.time_received|date:"DATETIME_FORMAT" }} - {% trans "Battery SOC" %}: {{ status.battery_soc|default:_("N/A") }}%
+                        </button>
+                    </h2>
+                    <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceStatusAccordion">
+                        <div class="accordion-body">
+                            <ul class="list-group">
+                                <li class="list-group-item"><strong>{% trans "Battery Voltage:" %}</strong> {{ status.battery_voltage|default:_("N/A") }} V</li>
+                                <li class="list-group-item"><strong>{% trans "Battery SOC:" %}</strong> {{ status.battery_soc|default:_("N/A") }}%</li>
+                                <li class="list-group-item"><strong>{% trans "Sensors:" %}</strong>
+                                    {% if status.sensors %}
+                                        <ul>
+                                            {% for key, value in status.sensors.items %}
+                                                <li><strong>{{ key|capfirst }}:</strong> {{ value }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% else %}
+                                        {% trans "No sensor data available." %}
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% trans "No status updates available for this device." %}
+        </div>
+    {% endif %}
+
+    <a href="{% url 'device-list' %}" class="btn btn-outline-secondary mt-4">{% trans "Back to List" %}</a>
+</div>
 {% endblock content %}

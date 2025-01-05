@@ -5,33 +5,110 @@
 {% block title %}{% trans "Devices" %}{% endblock title %}
 
 {% block content %}
-<div class="container mt-3">
-    <h2>{% trans "Devices" %}</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th scope="col">{% trans "Id"%}</th>
-                <th scope="col">{% trans "MAC adress" %}</th>
-                <th scope="col">{% trans "Firmware version" %}</th>
-                <th scope="col">{% trans "Last status update" %}</th>
-                <th scope="col">{% trans "Actions" %}</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for device in devices %}
-            <tr>
-                <td><a href="{% url 'device-detail' device.pk %}">{{ device.id }}</a></td>
-                <td>{{ device.btmac_address }}</td>
-                <td>{{ device.firmware_version }}</td>
-                <td>{{ device.last_update }}</td>
-                <td><a href="{% url 'device-update' device.pk %}" class="btn btn-primary btn-sm">{% trans "Edit" %}</a></td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">{% trans "No devices found." %}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Devices" %}</h2>
+    </div>
+    
+    {% if devices %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">{% trans "ID" %}</th>
+                        <th scope="col">{% trans "Model" %}</th>
+                        <th scope="col">{% trans "Firmware Version" %}</th>
+                        <th scope="col">{% trans "Last Status Update" %}</th>
+                        <th scope="col">{% trans "Organization" %}</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device in devices %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'device-detail' device.pk %}" class="link-primary">
+                                    {{ device.id }}
+                                </a>
+                            </td>
+                            <td>{{ device.model|default:_("N/A") }}</td>
+                            <td>{{ device.firmware|default:_("N/A") }}</td>
+                            <td>
+                                {% if device.last_update %}
+                                    {{ device.last_update }}
+                                {% else %}
+                                    {% trans "Never" %}
+                                {% endif %}
+                            </td>
+                            <td>{{ device.current_organization.name|default:_("N/A") }}</td>
+                            <td class="text-end">
+                                <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
+                                    <a href="{% url 'device-detail' device.pk %}" class="btn btn-info btn-sm" title="{% trans 'View Details' %}">
+                                        <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Detail" %}</span>
+                                    </a>
+                                    <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
+                                        <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination (if applicable) -->
+        {% if is_paginated %}
+            <nav aria-label="{% trans 'Device pagination' %}">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="{% trans 'Next' %}">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+        
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            {% trans "No devices found." %}
+        </div>
+    {% endif %}
 </div>
 {% endblock content %}
+
+{% block styles %}
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+{% endblock styles %}
