@@ -70,6 +70,7 @@
               <thead>
                 <tr>
                   <th>{% trans "Device ID" %}</th>
+                  <th>{% trans "Device name" %}</th>
                   <th>{% trans "Date added" %}</th>
                   <th>{% trans "Actions" %}</th>
                 </tr>
@@ -79,11 +80,12 @@
                   <tr>
                     <td>{{ device.id }}</td>
                     <td>{{ device.device_name }}</td>
-                    <td><a href="" class="btn btn-danger btn-sm">{% trans "Delete" %}</a></td>
+                    <td>{{ device.last_update }}</td>
+                    <td><a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a></td>
                   </tr>
                 {% empty %}
                   <tr>
-                    <td colspan="3" class="text-muted text-center">
+                    <td colspan="4" class="text-muted text-center">
                       {% trans "No Device found" %}
                     </td>
                   </tr>
