@@ -32,7 +32,7 @@
                 <tr>
                     <th>{% trans "Room name" %}</th>
                     <th>{% trans "Current measurements" %}</th>
-                    <th>{% trans "Actions" %}</th>
+                    <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -45,7 +45,7 @@
                         <span class="badge badge-custom-green">CO₂ 584ppm</span>
                         <span class="badge badge-custom-green">TVOC 18ppb</span>
                     </td>
-                    <td>
+                    <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
                           <a href="{% url 'room-detail' room.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
                           <a href="" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
@@ -76,7 +76,7 @@
                 <tr>
                     <th>{% trans "Name" %}</th>
                     <th>{% trans "Email" %}</th>
-                    <th>{% trans "Actions" %}</th>
+                    <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -84,7 +84,7 @@
                 <tr>
                     <td>{{ user.first_name }} {{ user.last_name }}</td>
                     <td>{{ user.email }}</td>
-                    <td>
+                    <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
                           <a href="" class="btn btn-info btn-sm">{% trans "Details" %}</a>
                           <a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>

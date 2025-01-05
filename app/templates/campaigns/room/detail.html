@@ -71,7 +71,7 @@
                 <tr>
                   <th>{% trans "Device ID" %}</th>
                   <th>{% trans "Date added" %}</th>
-                  <th>{% trans "Actions" %}</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
@@ -79,7 +79,7 @@
                   <tr>
                     <td>{{ device.id }}</td>
                     <td>{{ device.device_name }}</td>
-                    <td><a href="" class="btn btn-danger btn-sm">{% trans "Delete" %}</a></td>
+                    <td class="text-end"><a href="" class="btn btn-danger btn-sm">{% trans "Delete" %}</a></td>
                   </tr>
                 {% empty %}
                   <tr>
