@@ -38,7 +38,7 @@
               <tbody>
             {% for room in campaign.rooms.all %}
                 <tr>
-                    <td>{{ room.name }}</td>
+                    <td><a href="{% url 'room-detail' room.pk %}">{{ room.name }}</a></td>
                     <td>
                         <span class="badge badge-custom-green">Temp 21,3°C</span>
                         <span class="badge badge-custom-green">PM2.5 3.70 µg/m³</span>
@@ -47,7 +47,7 @@
                     </td>
                     <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="{% url 'room-detail' room.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                          <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
                           <a href="" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
                           <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
                         </div>
@@ -82,11 +82,11 @@
               <tbody>
             {% for user in campaign.users.all %}
                 <tr>
-                    <td>{{ user.username }}</td>
+                    <td><a href="">{{ user.username }}</a></td>
                     <td>{{ user.email }}</td>
                     <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                          <a href="" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
                           <a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
                         </div>
                     </td>

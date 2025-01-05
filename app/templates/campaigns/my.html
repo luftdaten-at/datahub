@@ -5,13 +5,16 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">{% trans "My Campaigns" %}</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "My Campaigns" %}</h2>
+        <a href="{% url 'campaigns-create' %}" class="btn btn-outline-primary">{% trans "Create Campaign" %}</a>
+    </div>
     {% if campaigns %}
         <div class="list-group">
             {% for campaign in campaigns %}
                 <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
                     <div class="mb-2 mb-md-0">
-                        <h5 class="mb-1">{{ campaign.name }}</h5>
+                        <h5 class="mb-1"><a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a></h5>
                         <p class="mb-1">
                             <strong>{% trans "Date:" %}</strong> {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}<br>
                             <strong>{% trans "Public:" %}</strong> {{ campaign.public|yesno:"Ja,Nein" }}
@@ -19,7 +22,7 @@
                     </div>
                     <div>
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
                         <a href="{% url 'campaigns-update' campaign.pk %}" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
                         <a href="{% url 'campaigns-delete' campaign.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
                         </div>
@@ -32,6 +35,5 @@
             {% trans "No campaigns found." %}
         </div>
     {% endif %}
-    <a href="{% url 'campaigns-create' %}" class="btn btn-primary mt-3">{% trans "Create Campaign" %}</a>
 </div>
 {% endblock %}
