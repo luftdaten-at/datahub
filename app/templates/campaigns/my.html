@@ -18,9 +18,11 @@
                         </p>
                     </div>
                     <div>
-                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-info btn-sm mb-1">{% trans "Details" %}</a>
-                        <a href="{% url 'campaigns-update' campaign.pk %}" class="btn btn-primary btn-sm mb-1">{% trans "Edit" %}</a>
+                        <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
+                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-info btn-sm">{% trans "Details" %}</a>
+                        <a href="{% url 'campaigns-update' campaign.pk %}" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
                         <a href="{% url 'campaigns-delete' campaign.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
+                        </div>
                     </div>
                 </div>
             {% endfor %}
