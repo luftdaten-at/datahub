@@ -86,7 +86,7 @@
                     <td>{{ user.email }}</td>
                     <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
+                          <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
                           <a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
                         </div>
                     </td>
