@@ -84,34 +84,6 @@ class DeviceDetailView(RetrieveAPIView):
     serializer_class = DeviceSerializer
 
 
-class DeviceDataAddView(APIView):
-    """
-    Processes a POST request with sensor data.
-
-    """
-    def post(self, request, format=None):
-        serializer = AirQualityDatapointSerializer(data=request.data, many=True)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class DeviceStatusView(APIView):
-    """
-    Processes a POST request with a device status.
-    
-    """
-    def post(self, request, *args, **kwargs):
-        serializer = DeviceStatusSerializer(data=request.data, many=True)
-        
-        if serializer.is_valid():
-            serializer.save()  # This will use the create method in the serializer
-            return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class WorkshopDetailView(RetrieveAPIView):
     """
     Processes a GET request by returning the details of the requested Workshop as JSON.
