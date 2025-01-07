@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 
 from main.util import get_or_create_station
 from .models import AirQualityRecord, MobilityMode, DeviceLogs, Values, MeasurementNew
@@ -107,6 +108,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema(tags=['devices'])
 class CreateStationStatusAPIView(APIView):
     def post(self, request, *args, **kwargs):
         print(request)
@@ -139,6 +141,7 @@ class CreateStationStatusAPIView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(tags=['devices'])
 class CreateStationDataAPIView(APIView):
     def post(self, request, *args, **kwargs):
         print(request)
