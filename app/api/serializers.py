@@ -117,3 +117,13 @@ class StationInfoSerializer(serializers.Serializer):
 class StationDataSerializer(serializers.Serializer):
     station = StationInfoSerializer()
     sensors = serializers.DictField(child=SensorDataSerializer())
+
+
+class StationStatusDataSerializer(serializers.Serializer):
+    time = serializers.DateTimeField()
+    level = serializers.IntegerField()
+    message = serializers.CharField()
+
+
+class StationStatusSerializer(serializers.Serializer):
+    status_list = serializers.ListField(child=StationStatusDataSerializer())
