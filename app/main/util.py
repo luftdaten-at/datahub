@@ -11,6 +11,8 @@ def get_or_create_station(station_info: dict):
         station.firmware = station_info['firmware']
         station.last_update = datetime.datetime.now(datetime.timezone.utc)
         station.api_key = station_info['apikey']
+        station.model = station_info['model']
+        station.firmware = station_info['firmware']
     
     # add a new DeviceStatus
     station_status = DeviceStatus.objects.create(
