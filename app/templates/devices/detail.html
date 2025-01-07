@@ -1,27 +1,20 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load humanize %}
+{% load custom_tags %}
 
 {% block title %}{{ device.id }}{% endblock title %}
 
 {% block styles %}
+<script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
 <style>
-    /* Optional: Customize the Accordion for better visuals */
-    .accordion-button:focus {
-        box-shadow: none;
+    .chart-container {
+        position: relative;
+        height: 40vh;
+        width: 80vw;
     }
-    .accordion-button:hover {
-        background-color: #f8f9fa;
-    }
-    .accordion-item {
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
-        margin-bottom: .5rem;
-    }
-    .accordion-body {
-        background-color: #f8f9fa;
-    }
-</style>
+    </style>
 {% endblock styles %}
 
 {% block content %}
@@ -30,7 +23,9 @@
         <h2>{% trans "Device:" %} {{ device.id }}</h2>
         <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
     </div>    
+    
     <div class="row">
+        <!-- Device Information -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
                 <li class="list-group-item"><strong>{% trans "Name:" %}</strong> {{ device.device_name|default:_("N/A") }}</li>
@@ -39,83 +34,227 @@
                 <li class="list-group-item">
                     <strong>{% trans "Sensors:" %}</strong>
                     <ul>
-                        <li>Sensorname: Dimension 1, Dimension 2, Dimension 3</li>
-                        <li>Sensorname: Dimension 1, Dimension 2</li>
-                        <li>Sensorname: Dimension 2</li>
+                        {% for sensor in device.sensors.all %}
+                            <li>{{ sensor.name }}: 
+                                {% for dimension in sensor.dimensions.all %}
+                                    {{ dimension.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </li>
+                        {% empty %}
+                            <li>{% trans "No sensors available." %}</li>
+                        {% endfor %}
                     </ul>
                 </li>
                 <li class="list-group-item">
-                    <strong>{% trans "Last update:" %}</strong> 01.01.2025 13:00
+                    <strong>{% trans "Last update:" %}</strong> {{ device_status.first.time_received|naturaltime|default:_("N/A") }}
                 </li>
             </ul>
-
         </div>
+        
+        <!-- Device Organization and Room -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>{% trans "Organization:" %}</strong> {{ device.current_organization|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "Room:" %}</strong> {{ device.current_room|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Organization:" %}</strong> {{ device.current_organization.name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Room:" %}</strong> {{ device.current_room.name|default:_("N/A") }}</li>
             </ul>
+            
+            <!-- Notes Section -->
             <ul class="list-group">
                 <li class="list-group-item">
-                <strong>{% trans "Notes:" %}</strong>
-                <p>{{ device.notes|linebreaksbr|default:_("N/A") }}</p>
-                <!-- Edit Notes Button -->
-                <a href="{% url 'device-edit-notes' device.pk %}" class="btn btn-sm btn-outline-primary">
-                    {% trans "Edit Notes" %}
-                </a>
+                    <strong>{% trans "Notes:" %}</strong>
+                    <p>{{ device.notes|linebreaksbr|default:_("N/A") }}</p>
+                    <a href="{% url 'device-edit-notes' device.pk %}" class="btn btn-sm btn-outline-primary">
+                        {% trans "Edit Notes" %}
+                    </a>
                 </li>
             </ul>
         </div>
     </div>
+    
+    <!-- Battery Status Chart -->
+    <div class="row">
+        <h3 class="mt-4 mb-4">{% trans "Battery Status" %}</h3>
 
-    <hr class="my-5">
+        {% if battery_status %}
+            <div class="chart-container">
+                <canvas id="chart-battery"></canvas> 
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                {% trans "No battery status available for this device." %}
+            </div>
+        {% endif %}
+    </div>
 
-    <h3 class="mb-4">{% trans "Battery Status" %}</h3>
+    <!-- Device Logs -->
+    <h3 class="mt-4 mb-4">{% trans "Log" %}</h3>
 
-    {% if device_statuses %}
-        <div class="accordion" id="deviceStatusAccordion">
-            {% for status in device_statuses %}
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading{{ forloop.counter }}">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
-                            {{ status.time_received|date:"DATETIME_FORMAT" }} - {% trans "Battery SOC" %}: {{ status.battery_soc|default:_("N/A") }}%
-                        </button>
-                    </h2>
-                    <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#deviceStatusAccordion">
-                        <div class="accordion-body">
-                            <ul class="list-group">
-                                <li class="list-group-item"><strong>{% trans "Battery Voltage:" %}</strong> {{ status.battery_voltage|default:_("N/A") }} V</li>
-                                <li class="list-group-item"><strong>{% trans "Battery SOC:" %}</strong> {{ status.battery_soc|default:_("N/A") }}%</li>
-                                <li class="list-group-item"><strong>{% trans "Sensors:" %}</strong>
-                                    {% if status.sensors %}
-                                        <ul>
-                                            {% for key, value in status.sensors.items %}
-                                                <li><strong>{{ key|capfirst }}:</strong> {{ value }}</li>
-                                            {% endfor %}
-                                        </ul>
-                                    {% else %}
-                                        {% trans "No sensor data available." %}
-                                    {% endif %}
-                                </li>
-                            </ul>
-                        </div>
+    {% if device_logs %}
+        <ul class="list-group mb-3">
+            {% for log in device_logs %}
+                <li class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <small class="text-muted">{{ log.timestamp|naturaltime }}</small>
+                        <!-- Display log level with badge using the mapping -->
+                        {% with badge_class=level_badge_map|get:log.level %}
+                            {% if badge_class %}
+                                <span class="badge {{ badge_class }}">{{ log.get_level_display }}</span>
+                            {% else %}
+                                <span class="badge bg-light text-dark">{{ log.get_level_display }}</span>
+                            {% endif %}
+                        {% endwith %}
                     </div>
-                </div>
+                    <p class="mb-1">{{ log.message }}</p>
+                </li>
             {% endfor %}
-        </div>
+        </ul>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="{% trans 'Log pagination' %}">
+            <ul class="pagination justify-content-center">
+                {% if device_logs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ device_logs.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&laquo;</span>
+                    </li>
+                {% endif %}
+                
+                {% for num in device_logs.paginator.page_range %}
+                    {% if device_logs.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > device_logs.number|add:'-3' and num < device_logs.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if device_logs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ device_logs.next_page_number }}" aria-label="{% trans 'Next' %}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&raquo;</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     {% else %}
-        <div class="alert alert-info" role="alert">
-            {% trans "No status updates available for this device." %}
-        </div>
-    {% endif %}
-
-    <hr class="my-5">
-
-    <h3 class="mb-4">{% trans "Log" %}</h3>
         <div class="alert alert-info" role="alert">
             {% trans "No log updates available for this device." %}
         </div>
-
+    {% endif %}
+    <!-- Back Button -->
     <a href="{% url 'device-list' %}" class="btn btn-outline-secondary mt-4 mb-4">{% trans "Back to Devices" %}</a>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        {% if battery_status %}
+            const ctx = document.getElementById('chart-battery').getContext('2d');
+            const batteryChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ battery_times|safe }},
+                    datasets: [
+                        {
+                            label: '{% trans "Battery Charge (%)" %}',
+                            data: {{ battery_charges|safe }},
+                            fill: false,
+                            borderColor: '#28a745',  // Green
+                            backgroundColor: '#28a745',
+                            tension: 0.1,
+                            yAxisID: 'y1',
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                        },
+                        {
+                            label: '{% trans "Battery Voltage (V)" %}',
+                            data: {{ battery_voltages|safe }},
+                            fill: false,
+                            borderColor: '#007bff',  // Blue
+                            backgroundColor: '#007bff',
+                            tension: 0.1,
+                            yAxisID: 'y2',
+                            pointRadius: 3,
+                            pointHoverRadius: 5,
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        }
+                    },
+                    interaction: {
+                        mode: 'nearest',
+                        axis: 'x',
+                        intersect: false
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: '{% trans "Time" %}'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                autoSkip: true,
+                                maxTicksLimit: 20,
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: '{% trans "Charge (%)" %}'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100,
+                            grid: {
+                                drawOnChartArea: false,  // Only draw grid lines for y1
+                            },
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: '{% trans "Voltage (V)" %}'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 5,  // Adjust based on expected voltage range
+                            grid: {
+                                drawOnChartArea: false,  // Only draw grid lines for y2
+                            },
+                        }
+                    }
+                }
+            });
+        {% endif %}
+    });
+</script>
 {% endblock content %}
