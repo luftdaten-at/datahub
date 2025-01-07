@@ -14,7 +14,10 @@
             {% for campaign in campaigns %}
                 <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
                     <div class="mb-2 mb-md-0">
-                        <h5 class="mb-1"><a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a></h5>
+                        <h5 class="mb-1">
+                            <a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a>
+                            <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                        </h5>
                         <p class="mb-1">
                             <strong>{% trans "Date:" %}</strong> {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}<br>
                             <strong>{% trans "Public:" %}</strong> {{ campaign.public|yesno:"Ja,Nein" }}

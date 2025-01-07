@@ -2,6 +2,7 @@ import statistics
 
 from datetime import datetime, timedelta
 from collections import defaultdict
+from django.http import Http404
 from django.views.generic import View, FormView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
@@ -239,6 +240,99 @@ class RoomDetailView(DetailView):
         context['co2_color'] = co2_color  
         context['current_tvoc'] = f'{current_tvoc:.2f}' if current_tvoc else None
         context['tvoc_color'] = tvoc_color
+        context['data_24h'] = data_24h
+
+        return context
+
+
+class ParticipantDetailView(DetailView):
+    model = CustomUser
+    template_name = 'campaigns/participant/detail.html'
+    context_object_name = 'participant'
+    pk_url_kwarg = 'user'
+
+    def test_func(self):
+        # Define permission logic. For example, only superusers or campaign organizers can view.
+        user = self.request.user
+        return user.is_authenticated and user.is_superuser  # Adjust as needed
+
+    def get_queryset(self):
+        """
+        Optionally, restrict the queryset to users associated with the campaign.
+        This ensures that users not part of the campaign cannot access details.
+        """
+        campaign_pk = self.kwargs.get('pk')  # Campaign's pk from URL
+        return CustomUser.objects.filter(campaigns__pk=campaign_pk)  # Adjust the relationship as per your models
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        participant = self.object
+        measurements = participant.measurements.all()
+        
+
+        measurements = [
+            m for m in measurements
+            if m.time_measured == participant.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
+        ]
+
+        def get_current_mean(dimension):
+            """
+            Gibt den Durchschnittswert über alle neuesten Measurements für eine gegebene Dimension zurück.
+            Wenn keine Werte vorliegen, wird None zurückgegeben.
+            """
+            # Für jedes Measurement sammeln wir alle Values der gesuchten Dimension
+            # und bilden einen Mittelwert für dieses Measurement.
+            # Anschließend bilden wir aus diesen Mittelwerten den Gesamtmittelwert.
+            measurement_means = []
+            for m in measurements:
+                dim_values = [val.value for val in m.values.all() if val.dimension == dimension]
+                if dim_values:  # Nur wenn tatsächlich Werte vorhanden sind
+                    measurement_means.append(statistics.mean(dim_values))
+
+            # Falls keine Werte gefunden, None zurückgeben
+            if measurement_means:
+                return statistics.mean(measurement_means)
+            return None
+
+        # Temperatur
+        current_temperature = get_current_mean(Dimension.TEMPERATURE)
+        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
+
+        # VOC Index
+        current_uvi = get_current_mean(Dimension.UVI)
+        uvi_color = Dimension.get_color(Dimension.UVI, current_uvi) if current_uvi else None
+
+        # data 24h
+        now = datetime.utcnow()
+        points = defaultdict(list)
+
+        measurements = participant.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
+        for m in measurements:
+            points[m.time_measured].append(m)
+        
+        print([t.strftime("%H:%M") for t in points.keys()])
+        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
+
+        for time_measured, measurements in points.items():
+
+            data = [
+                [val.value
+                    for m in measurements
+                        for val in m.values.all()
+                            if val.dimension == target_dim
+                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
+            ]
+            for i, x in enumerate(data):
+                data_24h[i + 1].append(statistics.mean(x) if x else 0)
+            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
+
+        # group by time measured mean over dim
+
+        # Werte ins Context-Objekt packen
+        context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
+        context['temperature_color'] = temperature_color
+        context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi else None
+        context['uvi_color'] = uvi_color
         context['data_24h'] = data_24h
 
         return context
