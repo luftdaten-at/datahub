@@ -2,6 +2,7 @@ import datetime
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 
+from devices.models import DeviceLogs, Measurement, Values
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -11,7 +12,7 @@ from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
 
 from main.util import get_or_create_station
-from .models import AirQualityRecord, MobilityMode, DeviceLogs, Values, MeasurementNew
+from .models import AirQualityRecord, MobilityMode
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
@@ -169,7 +170,7 @@ class CreateStationDataAPIView(APIView):
                     # Iterate through all sensors
                     for sensor_id, sensor_data in sensors_data.items():
                         # Check if the measurement already exists in the database
-                        existing_measurement = MeasurementNew.objects.filter(
+                        existing_measurement = Measurement.objects.filter(
                             device=station,
                             time_measured=station_data['time'],
                             sensor_model=sensor_data['type']
@@ -182,7 +183,7 @@ class CreateStationDataAPIView(APIView):
                             )
 
                         # If no existing measurement, create a new one
-                        measurement = MeasurementNew(
+                        measurement = Measurement(
                             sensor_model=sensor_data['type'],
                             device=station,
                             time_measured=station_data['time'],
