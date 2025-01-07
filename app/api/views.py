@@ -10,11 +10,11 @@ from rest_framework.exceptions import ValidationError
 from django.http import JsonResponse
 
 from main.util import get_or_create_station
-from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs, Values, MeasurementNew
+from .models import AirQualityRecord, MobilityMode, DeviceLogs, Values, MeasurementNew
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, AirQualityDatapointSerializer, DeviceSerializer, WorkshopSerializer
+from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer
 
    
 class AirQualityDataAddView(APIView):
