@@ -96,17 +96,24 @@ class WorkshopSerializer(serializers.ModelSerializer):
 }
 }
 '''
-
-class StationDataSerializer(serializers.Serializer):
-    time = serializers.DateTimeField()
-    device = serializers.CharField()
-    firmware = serializers.CharField()
-    model = serializers.IntegerField()
-
 class SensorDataSerializer(serializers.Serializer):
     type = serializers.IntegerField()
     data = serializers.DictField(child=serializers.FloatField())
 
-class MainPayloadSerializer(serializers.Serializer):
-    station = StationDataSerializer()
+
+class BatteryDataSerializer(serializers.Serializer):
+    voltage = serializers.FloatField()
+    percentage = serializers.FloatField()
+
+
+class StationInfoSerializer(serializers.Serializer):
+    time = serializers.DateTimeField()
+    device = serializers.CharField()
+    firmware = serializers.CharField()
+    model = serializers.IntegerField()
+    battery = BatteryDataSerializer()
+
+
+class StationDataSerializer(serializers.Serializer):
+    station = StationInfoSerializer()
     sensors = serializers.DictField(child=SensorDataSerializer())

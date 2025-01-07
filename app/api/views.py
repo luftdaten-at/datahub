@@ -15,7 +15,7 @@ from .models import AirQualityRecord, MobilityMode, DeviceLogs, Values, Measurem
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer, MainPayloadSerializer
+from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer
 
 
 @extend_schema(tags=['workshops']) 
@@ -145,7 +145,7 @@ class CreateStationStatusAPIView(APIView):
 
 @extend_schema(tags=['devices'])
 class CreateStationDataAPIView(APIView):
-    serializer_class = MainPayloadSerializer 
+    serializer_class = StationDataSerializer 
     def post(self, request, *args, **kwargs):
         print(request)
         # Parse the incoming JSON data
