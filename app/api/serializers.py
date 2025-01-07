@@ -86,6 +86,7 @@ class WorkshopSerializer(serializers.ModelSerializer):
         "device": "string",
         "firmware": "string",
         "model": 0,
+        "apikey": "123",
         "battery": {
             "voltage": 0,
             "percentage": 0
@@ -112,6 +113,7 @@ class StationInfoSerializer(serializers.Serializer):
     firmware = serializers.CharField()
     model = serializers.IntegerField()
     battery = BatteryDataSerializer()
+    apikey = serializers.CharField()
 
 
 class StationDataSerializer(serializers.Serializer):
@@ -138,4 +140,5 @@ class StationStatusDataSerializer(serializers.Serializer):
 
 
 class StationStatusSerializer(serializers.Serializer):
+    station_info = StationInfoSerializer()
     status_list = serializers.ListField(child=StationStatusDataSerializer())
