@@ -1,0 +1,162 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ participant.name }}{% endblock title %}
+
+{% block styles %}
+<script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
+{% endblock styles %}
+
+{% block content %}
+<div class="container mt-3 mb-3">
+    <!-- Participant and Campaign Information -->
+    <h2>{% trans "Participant:" %} {{ participant.name }}</h2>
+    <p><strong>{% trans "Campaign:" %} </strong>{{ participant.campaign.name }}</p>
+
+    <div class="row mb-3">
+        <!-- Temperature Display -->
+        <div class="col-6">
+            <div style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current Temperature:" %} </strong>{{ current_temperature }}&deg;C
+            </div>
+        </div>
+
+        <!-- UV Index Display -->
+        <div class="col-6">
+            <div style="background-color: rgb({{ uvi_color.0 }}, {{ uvi_color.1 }}, {{ uvi_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
+                <strong>{% trans "Current UV Index:" %} </strong>{{ current_uvi }}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">{% trans "24-hour overview" %}</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="chart-24h" style="height: 100px;"></canvas>      
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h3 class="mb-0">{% trans "Devices" %}</h3>
+          <a href="{% url 'participant-add-device' participant.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Device" %}</a>
+        </div>
+        <div class="card-body">
+          <!-- Responsive Table-Wrapper; nur nötig, wenn es sehr viele Spalten gibt -->
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>{% trans "Device ID" %}</th>
+                  <th>{% trans "Device name" %}</th>
+                  <th>{% trans "Date added" %}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for device in participant.current_devices.all %}
+                  <tr>
+                    <td>{{ device.id }}</td>
+                    <td>{{ device.device_name }}</td>
+                    <td>{{ device.last_update }}</td>
+                    <td class="text-end"><a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a></td>
+                  </tr>
+                {% empty %}
+                  <tr>
+                    <td colspan="4" class="text-muted text-center">
+                      {% trans "No Device found" %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+        </div>
+        </div>
+      </div>
+    
+    <a href="{% url 'campaigns-detail' participant.campaign.pk %}" class="btn btn-outline-secondary">{% trans "Back to Campaign" %}</a>
+</div>
+
+<script>
+    var dataTemperature = {{ data_24h.1 }};
+    var dataUVI         = {{ data_24h.3 }};
+    var labels          = {{ data_24h.0|safe }}; 
+
+    // Erstelle das Chart
+    new Chart(document.getElementById('chart-24h'), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperatur (°C)',
+                    data: dataTemperature,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false,           // auf 'true' stellen, wenn du eine Fläche unter der Linie wünschst
+                    borderWidth: 2,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'UV Index',
+                    data: dataUVI,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false,
+                    borderWidth: 2,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            aspectRatio: 3,
+            plugins: {
+                legend: {
+                    display: true
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        maxRotation: 35,
+                        minRotation: 35,
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Temperatur (°C)'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'UV Index'
+                    },
+                    grid: {
+                        drawOnChartArea: false // Gitter-Linien für die rechte Achse ausblenden
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
