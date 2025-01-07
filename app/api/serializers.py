@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import AirQualityRecord
 from workshops.models import Workshop
 from devices.models import Device, DeviceStatus, Sensor
-
+from django.utils import timezone
 
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
