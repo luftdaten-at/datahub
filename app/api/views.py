@@ -2,21 +2,24 @@ import datetime
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 
+from devices.models import DeviceLogs, Measurement, Values
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError
 from django.http import JsonResponse
+from drf_spectacular.utils import extend_schema
 
 from main.util import get_or_create_station
-from .models import AirQualityRecord, AirQualityDatapoint, MobilityMode, Measurement, DeviceLogs, Values, MeasurementNew
+from .models import AirQualityRecord, MobilityMode
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, AirQualityDatapointSerializer, DeviceSerializer, WorkshopSerializer
+from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
 
-   
+
+@extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
     """
     Processes a POST request containing JSON data about air quality records. Each record includes information
@@ -84,34 +87,7 @@ class DeviceDetailView(RetrieveAPIView):
     serializer_class = DeviceSerializer
 
 
-class DeviceDataAddView(APIView):
-    """
-    Processes a POST request with sensor data.
-
-    """
-    def post(self, request, format=None):
-        serializer = AirQualityDatapointSerializer(data=request.data, many=True)
-        
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class DeviceStatusView(APIView):
-    """
-    Processes a POST request with a device status.
-    
-    """
-    def post(self, request, *args, **kwargs):
-        serializer = DeviceStatusSerializer(data=request.data, many=True)
-        
-        if serializer.is_valid():
-            serializer.save()  # This will use the create method in the serializer
-            return Response({'status': 'success'}, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+@extend_schema(tags=['workshops'])
 class WorkshopDetailView(RetrieveAPIView):
     """
     Processes a GET request by returning the details of the requested Workshop as JSON.
@@ -135,9 +111,10 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         return Response(serializer.data)
 
 
+@extend_schema(tags=['devices'])
 class CreateStationStatusAPIView(APIView):
+    serializer_class = StationStatusSerializer 
     def post(self, request, *args, **kwargs):
-        print(request)
         station_data = request.data.get('station')
         status_list = request.data.get('status_list', [])
 
@@ -167,9 +144,10 @@ class CreateStationStatusAPIView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema(tags=['devices'])
 class CreateStationDataAPIView(APIView):
+    serializer_class = StationDataSerializer 
     def post(self, request, *args, **kwargs):
-        print(request)
         # Parse the incoming JSON data
         try:
             station_data = request.data.get('station')
@@ -192,7 +170,7 @@ class CreateStationDataAPIView(APIView):
                     # Iterate through all sensors
                     for sensor_id, sensor_data in sensors_data.items():
                         # Check if the measurement already exists in the database
-                        existing_measurement = MeasurementNew.objects.filter(
+                        existing_measurement = Measurement.objects.filter(
                             device=station,
                             time_measured=station_data['time'],
                             sensor_model=sensor_data['type']
@@ -205,7 +183,7 @@ class CreateStationDataAPIView(APIView):
                             )
 
                         # If no existing measurement, create a new one
-                        measurement = MeasurementNew(
+                        measurement = Measurement(
                             sensor_model=sensor_data['type'],
                             device=station,
                             time_measured=station_data['time'],

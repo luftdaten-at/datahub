@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AirQualityRecord, AirQualityDatapoint, Measurement
+from .models import AirQualityRecord
 from workshops.models import Workshop
 from devices.models import Device, DeviceStatus, Sensor
 
@@ -66,32 +66,6 @@ class DeviceStatusSerializer(serializers.ModelSerializer):
         return device_status
 
 
-class MeasurementSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Measurement
-        fields = ['sensor', 'pm1', 'pm25', 'pm10', 'temperature', 'humidity', 'voc_index', 'nox_index', 'co2', 'o3', 'iaq_index', 'iaq_acc', 'iaq_static', 'pressure']
-
-    def validate_sensor(self, value):
-        # Try to get the sensor by name, create if does not exist
-        sensor, create = Sensor.objects.get_or_create(name=value)
-        return sensor
-
-class AirQualityDatapointSerializer(serializers.ModelSerializer):
-    measurements = MeasurementSerializer(many=True)
-
-    class Meta:
-        model = AirQualityDatapoint
-        fields = ['time', 'device', 'campaign', 'workshop', 'participant', 'lat', 'lon', 'location_precision', 'mode', 'measurements']
-
-    def create(self, validated_data):
-        measurements_data = validated_data.pop('measurements', [])
-        datapoint = AirQualityDatapoint.objects.create(**validated_data)
-        for measurement_data in measurements_data:
-            measurement_data['sensor'] = self.fields['measurements'].child.fields['sensor'].run_validation(measurement_data['sensor'])
-            Measurement.objects.create(datapoint=datapoint, **measurement_data)
-        return datapoint
-
-
 class AirQualityRecordSerializer(serializers.ModelSerializer):    
     class Meta:
         model = AirQualityRecord
@@ -102,3 +76,69 @@ class WorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop
         fields = '__all__'
+
+
+# devices/data
+'''JSON
+"station": {
+    {
+        "time": "2025-01-07T11:23:23.439Z",
+        "device": "string",
+        "firmware": "string",
+        "model": 0,
+        "apikey": "123",
+        "battery": {
+            "voltage": 0,
+            "percentage": 0
+        }
+    },
+"sensors": {
+    "1": { "type": 1, "data": { "2": 5.0, "3": 6.0, "5": 7.0, "6": 0.67, "7": 20.0, "8": 100 }},
+    "2": { "type": 6, "data": { "6": 0.72, "7": 20.1 }}
+}
+'''
+class SensorDataSerializer(serializers.Serializer):
+    type = serializers.IntegerField()
+    data = serializers.DictField(child=serializers.FloatField())
+
+
+class BatteryDataSerializer(serializers.Serializer):
+    voltage = serializers.FloatField()
+    percentage = serializers.FloatField()
+
+
+class StationInfoSerializer(serializers.Serializer):
+    time = serializers.DateTimeField()
+    device = serializers.CharField()
+    firmware = serializers.CharField()
+    model = serializers.IntegerField()
+    battery = BatteryDataSerializer()
+    apikey = serializers.CharField()
+
+
+class StationDataSerializer(serializers.Serializer):
+    station = StationInfoSerializer()
+    sensors = serializers.DictField(child=SensorDataSerializer())
+
+
+# devices/status
+'''JSON
+{
+  "status_list": [
+    {
+      "time": "2025-01-07T11:06:21.222Z",
+      "level": 0,
+      "message": "string"
+    }
+  ]
+}
+'''
+class StationStatusDataSerializer(serializers.Serializer):
+    time = serializers.DateTimeField()
+    level = serializers.IntegerField()
+    message = serializers.CharField()
+
+
+class StationStatusSerializer(serializers.Serializer):
+    station_info = StationInfoSerializer()
+    status_list = serializers.ListField(child=StationStatusDataSerializer())
