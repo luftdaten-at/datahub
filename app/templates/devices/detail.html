@@ -36,8 +36,21 @@
                 <li class="list-group-item"><strong>{% trans "Name:" %}</strong> {{ device.device_name|default:_("N/A") }}</li>
                 <li class="list-group-item"><strong>{% trans "Model:" %}</strong> {{ device.model|default:_("N/A") }}</li>
                 <li class="list-group-item"><strong>{% trans "Firmware:" %}</strong> {{ device.firmware|default:_("N/A") }}</li>
+                <li class="list-group-item">
+                    <strong>{% trans "Sensors:" %}</strong>
+                    <ul>
+                        <li>Sensorname: Dimension 1, Dimension 2, Dimension 3</li>
+                        <li>Sensorname: Dimension 1, Dimension 2</li>
+                        <li>Sensorname: Dimension 2</li>
+                    </ul>
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Last update:" %}</strong> 01.01.2025 13:00
+                </li>
             </ul>
 
+        </div>
+        <div class="col-md-6">
             <ul class="list-group mb-3">
                 <li class="list-group-item"><strong>{% trans "Organization:" %}</strong> {{ device.current_organization|default:_("N/A") }}</li>
                 <li class="list-group-item"><strong>{% trans "Room:" %}</strong> {{ device.current_room|default:_("N/A") }}</li>
@@ -57,7 +70,7 @@
 
     <hr class="my-5">
 
-    <h3 class="mb-4">{% trans "Device Statuses" %}</h3>
+    <h3 class="mb-4">{% trans "Battery Status" %}</h3>
 
     {% if device_statuses %}
         <div class="accordion" id="deviceStatusAccordion">
@@ -96,6 +109,13 @@
         </div>
     {% endif %}
 
-    <a href="{% url 'device-list' %}" class="btn btn-outline-secondary mt-4">{% trans "Back to List" %}</a>
+    <hr class="my-5">
+
+    <h3 class="mb-4">{% trans "Log" %}</h3>
+        <div class="alert alert-info" role="alert">
+            {% trans "No log updates available for this device." %}
+        </div>
+
+    <a href="{% url 'device-list' %}" class="btn btn-outline-secondary mt-4 mb-4">{% trans "Back to Devices" %}</a>
 </div>
 {% endblock content %}
