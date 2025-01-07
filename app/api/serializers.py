@@ -94,7 +94,6 @@ class WorkshopSerializer(serializers.ModelSerializer):
     "1": { "type": 1, "data": { "2": 5.0, "3": 6.0, "5": 7.0, "6": 0.67, "7": 20.0, "8": 100 }},
     "2": { "type": 6, "data": { "6": 0.72, "7": 20.1 }}
 }
-}
 '''
 class SensorDataSerializer(serializers.Serializer):
     type = serializers.IntegerField()
@@ -119,6 +118,18 @@ class StationDataSerializer(serializers.Serializer):
     sensors = serializers.DictField(child=SensorDataSerializer())
 
 
+# devices/status
+'''JSON
+{
+  "status_list": [
+    {
+      "time": "2025-01-07T11:06:21.222Z",
+      "level": 0,
+      "message": "string"
+    }
+  ]
+}
+'''
 class StationStatusDataSerializer(serializers.Serializer):
     time = serializers.DateTimeField()
     level = serializers.IntegerField()
