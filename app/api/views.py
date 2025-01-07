@@ -17,7 +17,8 @@ from devices.models import Device
 
 from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer
 
-   
+
+@extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
     """
     Processes a POST request containing JSON data about air quality records. Each record includes information
@@ -85,6 +86,7 @@ class DeviceDetailView(RetrieveAPIView):
     serializer_class = DeviceSerializer
 
 
+@extend_schema(tags=['workshops'])
 class WorkshopDetailView(RetrieveAPIView):
     """
     Processes a GET request by returning the details of the requested Workshop as JSON.
