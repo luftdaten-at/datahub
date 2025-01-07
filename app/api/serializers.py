@@ -81,13 +81,14 @@ class WorkshopSerializer(serializers.ModelSerializer):
 # devices/data
 '''JSON
 "station": {
-        "time": "2024-04-29T08:25:20.766Z",
-        "device": "00112233AABB",
-        "firmware": "1.2",
-        "location": {
-            "lat": 48.20194899118805,
-            "lon": 16.337324948208195,
-            "height": 5.3
+    {
+        "time": "2025-01-07T11:23:23.439Z",
+        "device": "string",
+        "firmware": "string",
+        "model": 0,
+        "battery": {
+            "voltage": 0,
+            "percentage": 0
         }
     },
 "sensors": {
