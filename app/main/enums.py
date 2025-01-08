@@ -16,6 +16,93 @@ class Color():
     OFF = (0, 0, 0)
 
 
+class SensorModel():
+    SEN5X = 1
+    BMP280 = 2
+    BME280 = 3
+    BME680 = 4
+    SCD4X = 5
+    AHT20 = 6
+    SHT30 = 7
+    SHT31 = 8
+    AGS02MA = 9
+    SHT4X = 10
+    SGP40 = 11
+    DHT22 = 12
+    SDS011 = 13
+    SHT35 = 14
+    SPS30 = 15
+    PMS5003 = 16
+    PMS7003 = 17
+    VIRTUAL_SENSOR = 18
+
+    _names = {
+        SEN5X: "SEN5X",
+        BMP280: "BMP280",
+        BME280: "BME280",
+        BME680: "BME680",
+        SCD4X: "SCD4X",
+        AHT20: "AHT20",
+        SHT30: "SHT30",
+        SHT31: "SHT31",
+        AGS02MA: "AGS02MA",
+        SHT4X: "SHT4X",
+        SGP40: "SGP40",
+        DHT22: "DHT22",
+        SDS011: "SDS011",
+        SHT35: "SHT35",
+        SPS30: "SPS30",
+        PMS5003: "PMS5003",
+        PMS7003: "PMS7003",
+        VIRTUAL_SENSOR: "VIRTUAL_SENSOR",
+    }
+
+    _manufacturer = {
+        SEN5X: "Sensirion",
+        BMP280: "Bosch Sensortec",
+        BME280: "Bosch Sensortec",
+        BME680: "Bosch Sensortec",
+        SCD4X: "Sensirion",
+        AHT20: "ASAIR",
+        SHT30: "Sensirion",
+        SHT31: "Sensirion",
+        AGS02MA: "ASAIR",
+        SHT4X: "Sensirion",
+        SGP40: "Sensirion",
+        DHT22: "ASAIR",
+        SDS011: "Nova Fitness",
+        SHT35: "Sensirion",
+        SPS30: "Sensirion",
+        PMS5003: "Plantower",
+        PMS7003: "Plantower",
+        VIRTUAL_SENSOR: "Luftdaten.at"
+    }
+
+    _pins = {
+        PMS5003: 1,
+        PMS7003: 1,
+        SDS011: 1,
+        SPS30: 1,
+        BME280: 11,
+        BME680: 11,
+        BMP280: 3,
+        DHT22: 7,
+        SHT30: 7,
+        SHT31: 7,
+        SHT35: 7,
+        SHT4X: 7,
+        SEN5X: 16
+    }
+
+    @classmethod
+    def get_pin(cls, model_id: str):
+        return cls._pins[model_id]
+
+    @classmethod
+    def get_sensor_name(cls, sensor_model):
+        return cls._names.get(sensor_model, "Unknown Sensor")
+
+
 class Dimension():
     PM0_1 = 1
     PM1_0 = 2
@@ -35,21 +122,14 @@ class Dimension():
     NO2 = 16
     SGP40_RAW_GAS = 17
     SGP40_ADJUSTED_GAS = 18
+    ADJUSTED_TEMP_CUBE = 19
 
-    _thresholds = {
+    thresholds = {
         TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
         PM2_5: ([5, 15], [Color.GREEN, Color.YELLOW, Color.RED]),
         TVOC: ([220, 1430], [Color.GREEN, Color.YELLOW, Color.RED]),
         CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED])
     }
-
-    @classmethod
-    def get_color(cls, dimension, value):
-        thresholds, colors = cls._thresholds[dimension]
-        thresholds = [-float('inf')] + thresholds + [float('inf')]
-        for i in range(0, len(thresholds) - 1):
-            if thresholds[i] <= value and value < thresholds[i + 1]:
-                return colors[i]
 
     # Dictionary für die Einheiten der Dimensionen
     _units = {
@@ -71,6 +151,7 @@ class Dimension():
         NO2: "ppb",
         SGP40_RAW_GAS: "Ω",
         SGP40_ADJUSTED_GAS: "Ω",
+        ADJUSTED_TEMP_CUBE: "°C",
     }
 
     _names = {
@@ -92,6 +173,11 @@ class Dimension():
         NO2: "Nitrogen Dioxide (NO2)",
         SGP40_RAW_GAS: "SGP40 Raw Gas",
         SGP40_ADJUSTED_GAS: "SGP40 Adjusted Gas",
+        ADJUSTED_TEMP_CUBE: "Adjusted Temperature Air Cube",
+    }
+
+    _required_sensors = {
+        ADJUSTED_TEMP_CUBE: set([SensorModel.AHT20, SensorModel.SHT4X, SensorModel.SEN5X])
     }
 
     _sensor_community_names = {
@@ -109,20 +195,9 @@ class Dimension():
         NO2: "no2_ppb",
     }
 
-    _sensor_community_names_import = {
-        PM0_1: "P01",
-        PM1_0: "P10",
-        PM2_5: "P2",
-        PM4_0: "P4",
-        PM10_0: "P1",
-        HUMIDITY: "humidity",
-        TEMPERATURE: "temperature",
-        PRESSURE: "pressure",
-        CO2: "co2_ppm",
-        O3: "ozone_ppb",
-        TVOC: "tvoc",
-        NO2: "no2_ppb",
-    }
+    @classmethod
+    def get_required_sensors(cls, dimension_id: int) -> set[SensorModel]:
+        return cls._required_sensors.get(dimension_id, None)
 
     @classmethod
     def get_unit(cls, dimension_id: int) -> str:
@@ -141,78 +216,11 @@ class Dimension():
         :return: Der zugehörige Name oder 'Unknown', wenn kein Name vorhanden ist
         """
         return cls._names.get(dimension_id, "Unknown")
-
-    @classmethod
-    def get_dimension_from_sensor_community_name(cls, sensor_community_name: str):
-        return {v:k for k, v in cls._sensor_community_names.items()}.get(sensor_community_name, None)
     
     @classmethod
-    def get_dimension_from_sensor_community_name_import(cls, sensor_community_name: str):
-        return {v:k for k, v in cls._sensor_community_names_import.items()}.get(sensor_community_name, None)
-
-
-class SensorModel():
-    SEN5X = 1
-    BMP280 = 2
-    BME280 = 3
-    BME680 = 4
-    SCD4X = 5
-    AHT20 = 6
-    SHT30 = 7
-    SHT31 = 8
-    AGS02MA = 9
-    SHT4X = 10
-    SGP40 = 11
-    DHT22 = 12
-    SDS011 = 13
-    SHT35 = 14
-    SPS30 = 15
-    PMS5003 = 16
-    PMS7003 = 17
-
-    _names = {
-        SEN5X: "SEN5X",
-        BMP280: "BMP280",
-        BME280: "BME280",
-        BME680: "BME680",
-        SCD4X: "SCD4X",
-        AHT20: "AHT20",
-        SHT30: "SHT30",
-        SHT31: "SHT31",
-        AGS02MA: "AGS02MA",
-        SHT4X: "SHT4X",
-        SGP40: "SGP40",
-        DHT22: "DHT22",
-        SDS011: "SDS011",
-        SHT35: "SHT35",
-        SPS30: "SPS30",
-        PMS5003: "PMS5003",
-        PMS7003: "PMS7003"
-    }
-
-    _manufacturer = {
-        SEN5X: "Sensirion",
-        BMP280: "Bosch Sensortec",
-        BME280: "Bosch Sensortec",
-        BME680: "Bosch Sensortec",
-        SCD4X: "Sensirion",
-        AHT20: "ASAIR",
-        SHT30: "Sensirion",
-        SHT31: "Sensirion",
-        AGS02MA: "ASAIR",
-        SHT4X: "Sensirion",
-        SGP40: "Sensirion",
-        DHT22: "ASAIR",
-        SDS011: "Nova Fitness",
-        SHT35: "Sensirion",
-        SPS30: "Sensirion",
-        PMS5003: "Plantower",
-        PMS7003: "Plantower"
-    }
-
-    @classmethod
-    def get_sensor_name(cls, sensor_model):
-        return cls._names.get(sensor_model, "Unknown Sensor")
+    def get_sensor_community_name(cls, dimension_id: int) -> str:
+        """Returns the sensor-community-specific name for the dimension ID or 'Unknown' if none."""
+        return cls._sensor_community_names.get(dimension_id, "Unknown")
 
 
 class LdProduct():

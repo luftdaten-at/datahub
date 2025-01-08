@@ -190,8 +190,9 @@ class RoomDetailView(DetailView):
             return None
 
         # Temperatur
-        current_temperature = get_current_mean(Dimension.TEMPERATURE)
-        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
+        # current_temperature = get_current_mean(Dimension.TEMPERATURE)
+        # temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
+        # 
 
         # PM2.5
         current_pm2_5 = get_current_mean(Dimension.PM2_5)
@@ -206,7 +207,6 @@ class RoomDetailView(DetailView):
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
         # data 24h
-        now = datetime.utcnow()
         points = defaultdict(list)
 
         measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
