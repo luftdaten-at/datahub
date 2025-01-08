@@ -34,10 +34,10 @@
                 <li class="list-group-item">
                     <strong>{% trans "Sensors:" %}</strong>
                     <ul>
-                        {% for sensor in device.sensors.all %}
-                            <li>{{ sensor.name }}: 
-                                {% for dimension in sensor.dimensions.all %}
-                                    {{ dimension.name }}{% if not forloop.last %}, {% endif %}
+                        {% for sensor, dimension_list in sensors.items %}
+                            <li>{{ sensor }}: 
+                                {% for dimension in dimension_list %}
+                                    {{ dimension }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                             </li>
                         {% empty %}

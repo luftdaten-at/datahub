@@ -1,3 +1,5 @@
+import json
+from collections import defaultdict
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView
@@ -6,10 +8,10 @@ from django.urls import reverse_lazy, reverse
 from django.utils import timezone
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
-import json
 
-from .models import Device, DeviceStatus, DeviceLogs
+from .models import Device, DeviceStatus, DeviceLogs, Measurement
 from .forms import DeviceForm, DeviceNotesForm
+from main.enums import SensorModel, Dimension
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
@@ -85,6 +87,15 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             3: 'bg-danger',      # ERROR
             4: 'bg-dark',        # CRITICAL
         }
+
+        sensors = defaultdict(list)
+        # add available sensors
+        for measurement in Measurement.objects.filter(device=device, time_measured=device.last_update).all():
+            print(measurement.sensor_model)
+            for value in measurement.values.all():
+                sensors[SensorModel.get_sensor_name(measurement.sensor_model)].append(Dimension.get_name(value.dimension))
+
+        context['sensors'] = dict(sensors)
 
         return context
 
