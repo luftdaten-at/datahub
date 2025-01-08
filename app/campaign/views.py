@@ -18,7 +18,7 @@ from main import settings
 from .models import Campaign, Room, Organization, OrganizationInvitation
 from .forms import CampaignForm, CampaignUserForm, OrganizationForm, RoomDeviceForm
 from accounts.models import CustomUser
-from main.enums import Dimension
+from main.enums import Dimension, SensorModel
 
 
 class CampaignsHomeView(ListView):
@@ -190,9 +190,21 @@ class RoomDetailView(DetailView):
             return None
 
         # Temperatur
-        # current_temperature = get_current_mean(Dimension.TEMPERATURE)
-        # temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
-        # 
+        measurements_adjusted_temp_cube = [
+            value.value 
+            for m in measurements
+                if m.sensor_model == SensorModel.VIRTUAL_SENSOR
+                    for value in m.values
+                        if value.dimension == Dimension.ADJUSTED_TEMP_CUBE
+        ]
+
+        current_temperature = None
+        # use ADJUSTED_TEMP_CUBE if found
+        if measurements_adjusted_temp_cube:
+            current_temperature = measurements_adjusted_temp_cube[0]
+        else:
+            current_temperature = get_current_mean(Dimension.TEMPERATURE)
+            temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
 
         # PM2.5
         current_pm2_5 = get_current_mean(Dimension.PM2_5)
