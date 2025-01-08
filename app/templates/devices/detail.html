@@ -93,14 +93,28 @@
         <ul class="list-group mb-3">
             {% for log in device_logs %}
                 <li class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
+                    <div class="d-flex w-100 justify-content-start">
                         <small class="text-muted">{{ log.timestamp|naturaltime }}</small>
                         <!-- Display log level with badge using the mapping -->
                         {% with badge_class=level_badge_map|get:log.level %}
                             {% if badge_class %}
-                                <span class="badge {{ badge_class }}">{{ log.get_level_display }}</span>
+                                <span class="badge {{ badge_class }} ms-2">
+                                    {% if log.level == 0 %}
+                                        <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                    {% elif log.level == 1 %}
+                                        <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                    {% elif log.level == 2 %}
+                                        <i class="bi bi-exclamation-triangle"></i> {{ level_map|get:log.level|capfirst }}
+                                    {% elif log.level == 3 %}
+                                        <i class="bi bi-exclamation-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                    {% elif log.level == 4 %}
+                                        <i class="bi bi-x-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                    {% else %}
+                                        {{ level_map|get:log.level|default:_("unknown") }}
+                                    {% endif %}
+                                </span>
                             {% else %}
-                                <span class="badge bg-light text-dark">{{ log.get_level_display }}</span>
+                                <span class="badge bg-light text-dark">{{ level_map|get:log.level|capfirst }}</span>
                             {% endif %}
                         {% endwith %}
                     </div>

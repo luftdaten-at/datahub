@@ -22,9 +22,12 @@
                     </div>
                     <div>
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                            <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
-                            <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
-                            <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
+                            <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-primary btn-sm">
+                                <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
+                            <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
+                                </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
+                            <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
+                                </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
                         </div>
                     </div>
                 </div>

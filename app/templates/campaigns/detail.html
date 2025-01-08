@@ -47,9 +47,12 @@
                     </td>
                     <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
-                          <a href="" class="btn btn-secondary btn-sm">{% trans "Edit" %}</a>
-                          <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">{% trans "Delete" %}</a>
+                          <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
+                        <a href="" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
+                            </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
+                        <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
+                            </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
                         </div>
                     </td>
                 </tr>
@@ -86,8 +89,10 @@
                     <td>{{ user.email }}</td>
                     <td class="text-end">
                         <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
-                          <a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a>
+                          <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
+                          <a href="" class="btn btn-danger btn-sm"><i class="bi bi-x-octagon">
+                            </i> <span class="d-none d-sm-inline">{% trans "Remove" %}</span></a>
                         </div>
                     </td>
                 </tr>
