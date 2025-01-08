@@ -88,6 +88,14 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             4: 'bg-dark',        # CRITICAL
         }
 
+        context['level_map'] = {
+            0: 'debug',
+            1: 'info',
+            2: 'warning',
+            3: 'error',
+            4: 'critical',
+        }
+
         sensors = defaultdict(list)
         # add available sensors
         for measurement in Measurement.objects.filter(device=device, time_measured=device.last_update).all():

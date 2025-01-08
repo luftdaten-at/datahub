@@ -98,9 +98,9 @@
                         <!-- Display log level with badge using the mapping -->
                         {% with badge_class=level_badge_map|get:log.level %}
                             {% if badge_class %}
-                                <span class="badge {{ badge_class }}">{{ log.level }}</span>
+                                <span class="badge {{ badge_class }}">{{ level_map|get:log.level }}</span>
                             {% else %}
-                                <span class="badge bg-light text-dark">{{ log.level }}</span>
+                                <span class="badge {{ badge_class }}">{{ level_map|get:log.level }}</span>
                             {% endif %}
                         {% endwith %}
                     </div>
