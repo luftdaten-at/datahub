@@ -194,7 +194,7 @@ class RoomDetailView(DetailView):
             value.value 
             for m in measurements
                 if m.sensor_model == SensorModel.VIRTUAL_SENSOR
-                    for value in m.values
+                    for value in m.values.all()
                         if value.dimension == Dimension.ADJUSTED_TEMP_CUBE
         ]
 
