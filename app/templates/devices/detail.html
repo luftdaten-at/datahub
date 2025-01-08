@@ -46,7 +46,7 @@
                     </ul>
                 </li>
                 <li class="list-group-item">
-                    <strong>{% trans "Last update:" %}</strong> {{ device_status.first.time_received|naturaltime|default:_("N/A") }}
+                    <strong>{% trans "Last update:" %}</strong> {{ device.last_update|naturaltime|default:_("N/A") }}
                 </li>
             </ul>
         </div>
