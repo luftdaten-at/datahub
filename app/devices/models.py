@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
-from campaign.models import Room, Organization
+from organizations.models import Organization
+from campaign.models import Room
 
 
 class Device(models.Model):

@@ -2,7 +2,9 @@ from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
-from .models import Campaign, Organization, Room
+from organizations.models import Organization
+
+from .models import Campaign, Room
 from devices.models import Device
 from accounts.models import CustomUser
 
