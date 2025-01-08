@@ -11,18 +11,19 @@ import json
 from .models import Device, DeviceStatus, DeviceLogs
 from .forms import DeviceForm, DeviceNotesForm
 
-class DeviceListView(UserPassesTestMixin, ListView):
+class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
     context_object_name = 'devices'
     template_name = 'devices/list.html'
+    paginate_by = 25
 
     def test_func(self):
+        # Only superusers can access this view
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
     def get_queryset(self):
-        # Return the Device queryset ordered by 'id' in ascending order
-        return Device.objects.all().order_by('id')
-
+        # Optimize queryset by selecting related 'current_organization'
+        return Device.objects.select_related('current_organization').all().order_by('id')
 
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
@@ -78,11 +79,11 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         # Define a level to badge class mapping
         context['level_badge_map'] = {
-            10: 'bg-secondary',  # DEBUG
-            20: 'bg-info',        # INFO
-            30: 'bg-warning',     # WARNING
-            40: 'bg-danger',      # ERROR
-            50: 'bg-dark',        # CRITICAL
+            0: 'bg-secondary',  # DEBUG
+            1: 'bg-info',        # INFO
+            2: 'bg-warning',     # WARNING
+            3: 'bg-danger',      # ERROR
+            4: 'bg-dark',        # CRITICAL
         }
 
         return context
