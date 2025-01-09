@@ -2,7 +2,7 @@ import statistics
 
 from datetime import datetime, timedelta
 from collections import defaultdict
-from django.http import Http404
+from django.core.exceptions import PermissionDenied
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
@@ -47,31 +47,20 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
         return context
 
 
-class CampaignsDetailView(DetailView):
+class CampaignsDetailView(LoginRequiredMixin, DetailView):
     model = Campaign
     context_object_name = 'campaign'
     template_name = 'campaigns/detail.html'
 
-    def get_queryset(self):
-        """
-        This method is overridden to only include campaigns that are public or owned by the current user.
-        """
+    def get_object(self, queryset = None): 
+        campaign = super().get_object(queryset)
         user = self.request.user
-        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
-    
-    def get_object(self, queryset=None):
-        """
-        This method is overridden to provide additional checks for the Campaign's visibility.
-        If the requested Campaign is not public, it raises a 404.
-        """
-        queryset = self.get_queryset() if queryset is None else queryset
-        obj = super().get_object(queryset=queryset)
-        
-        if not self.request.user.is_superuser and not obj.public and obj.owner != self.request.user:
-            raise Http404("No campaign found matching the query")
 
-        return obj
-
+        if user.is_superuser:
+            return campaign
+        if not campaign.users.filter(id=user.id).exists():
+            raise PermissionDenied('You are not allowed to view this Campaign')
+        return campaign
 
 class CampaignsCreateView(CreateView):
     model = Campaign
