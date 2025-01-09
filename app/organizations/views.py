@@ -74,24 +74,28 @@ def remove_user_from_organization(request, org_id, user_id):
     # Ensure the user performing the action has permission
     if request.user != organization.owner:
         messages.error(request, "You do not have permission to remove users from this organization.")
-        return redirect('organization-detail', pk=org_id)
+        return redirect('organizations-detail', pk=org_id)
+    
+    # the owner cannot be removed
+    if user == request.user:
+        messages.error(request, "The Owner of the Organization cannot be removed")
+        return redirect('organizations-detail', pk=org_id)
 
     organization.users.remove(user)
-    messages.success(request, f"User {user.username} has been removed.")
-    return redirect('organization-detail', pk=org_id)
+    return redirect('organizations-detail', pk=org_id)
 
 
 @login_required
 def invite_user_to_organization(request, org_id):
     if request.method != 'POST':
-        return redirect(f"organization-detail", pk=org_id)
+        return redirect(f"organizations-detail", pk=org_id)
 
     organization = get_object_or_404(Organization, id=org_id)
     email = request.POST.get('email')
     
     if request.user != organization.owner:
         messages.error(request, "You do not have permission to invite users to this organization.")
-        return redirect(f"organization-detail", pk=org_id)
+        return redirect(f"organizations-detail", pk=org_id)
 
     user = CustomUser.objects.filter(email = email).first()
 
@@ -118,4 +122,4 @@ def invite_user_to_organization(request, org_id):
         )
         messages.success(request, f"An invitation has been sent to {email}.")
 
-    return redirect(f"organization-detail", pk=org_id)
+    return redirect(f"organizations-detail", pk=org_id)

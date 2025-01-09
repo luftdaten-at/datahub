@@ -48,6 +48,14 @@
         </div>
     </div>
 
+    {% if messages %}
+    <div class="alert alert-danger">
+        {% for message in messages %}
+            <p>{{ message }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <!-- Invite User Card -->
     <div class="card mb-4">
         <div class="card-header">
