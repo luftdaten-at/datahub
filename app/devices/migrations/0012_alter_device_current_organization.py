@@ -4,6 +4,14 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def set_invalid_foreign_keys_to_null(apps, schema_editor):
+    Device = apps.get_model('devices', 'Device')
+    Organization = apps.get_model('organizations', 'Organization')
+    for device in Device.objects.all():
+        if not Organization.objects.filter(id=device.current_organization_id).exists():
+            device.current_organization = None
+            device.save()
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -12,6 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(set_invalid_foreign_keys_to_null),
         migrations.AlterField(
             model_name='device',
             name='current_organization',
