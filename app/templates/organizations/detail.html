@@ -48,13 +48,6 @@
         </div>
     </div>
 
-    {% if messages %}
-    <div class="alert alert-danger">
-        {% for message in messages %}
-            <p>{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- Invite User Card -->
     <div class="card mb-4">
@@ -81,6 +74,20 @@
             </form>
         </div>
     </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            {% if message.tags == 'error' %}
+            <div class="alert alert-danger">
+                <p>{{ message }}</p>
+            </div>
+            {% else %}
+            <div class="alert alert-success">
+                <p>{{ message }}</p>
+            </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
 
     <!-- Back Button -->
     <div class="d-flex">
