@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
+from django.http import Http404
 from django.contrib import messages
 from django.core.mail import send_mail
 
@@ -42,16 +43,13 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
         # Set the current user as the owner of the organization
         organization = form.save(commit=False)
         organization.owner = self.request.user
-        organization.save()
-
-        # Add the user to the organization as a member
         organization.users.add(self.request.user)
-        form.save_m2m()  # Save many-to-many relationships
+        organization.save()
 
         return super().form_valid(form)
 
 
-class OrganizationDetailView(DetailView):
+class OrganizationDetailView(LoginRequiredMixin, DetailView):
     model = Organization
     template_name = 'organizations/detail.html'
     context_object_name = 'organization'
@@ -59,6 +57,13 @@ class OrganizationDetailView(DetailView):
     def get_success_url(self):
         # and 'self.object.pk' with the primary key of the newly created object
         return reverse_lazy('organizations-my', kwargs={'pk': self.object.pk})
+    
+    
+    def get_object(self, queryset = None): 
+        organization = super().get_object(queryset)
+        if not organization.users.filter(id=self.request.user.id).exists():
+            raise Http404("Only members can view this Organization")
+        return organization
 
 
 @login_required

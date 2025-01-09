@@ -13,3 +13,11 @@ no = Organization.objects.create(
     owner = CustomUser.objects.filter(username = 'nik').first()
 )
 no.users.add(a)
+no.save()
+
+noo = Organization.objects.create(
+    name = 'a is not member',
+    description = 'a is not member',
+    owner = CustomUser.objects.filter(username = 'nik').first()
+)
+noo.save()
