@@ -32,6 +32,7 @@ urlpatterns = [
     path("devices/", include("devices.urls")),
     path("stations/", include("stations.urls")),
     path("workshops/", include("workshops.urls")),
+    path("organizations/", include("organizations.urls")),
 ] + i18n_patterns(
     # Your URLs that require localization
     # Include set_language URL

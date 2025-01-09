@@ -1,5 +1,3 @@
-import statistics
-
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView
 from django.views.generic.list import ListView
@@ -13,28 +11,26 @@ from django.core.mail import send_mail
 from main import settings
 from accounts.models import CustomUser
 from organizations.models import Organization, OrganizationInvitation
+from organizations.forms import OrganizationForm
 
 
 class OrganizationsView(LoginRequiredMixin, ListView):
     model = Organization
-    template_name = 'campaigns/my_organizations.html'
+    template_name = 'organizations/my.html'
     context_object_name = 'owned_organizations'
-
-    def get_queryset(self):
-        # Return organizations where the user is the owner
-        return Organization.objects.filter(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Add organizations where the user is a member
         context['member_organizations'] = Organization.objects.filter(users=self.request.user)
+        context['owner_organizations'] = Organization.objects.filter(owner=self.request.user)
         return context
 
 
 class OrganizationCreateView(LoginRequiredMixin, CreateView):
     model = Organization
     form_class = OrganizationForm
-    template_name = 'campaigns/create_organization.html'
+    template_name = 'organizations/create.html'
     success_url = reverse_lazy('organizations-my')  # Redirect to a list view or another page
 
     def form_valid(self, form):
@@ -57,7 +53,7 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
 
 class OrganizationDetailView(DetailView):
     model = Organization
-    template_name = 'campaigns/organization_detail.html'
+    template_name = 'organizations/detail.html'
     context_object_name = 'organization'
 
     def get_success_url(self):

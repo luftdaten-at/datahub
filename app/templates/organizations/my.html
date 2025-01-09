@@ -11,14 +11,21 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "My Organisations" %}</h2>
-        <a href="{% url 'organizations-create' %}" class="btn btn-outline-primary">{%trans "Create Organization" %}</a>
+        <a href="{% url 'organizations-create' %}" class="btn btn-outline-primary">{% trans "Create Organization" %}</a>
     </div>
     {% if member_organizations %}
     <div class="list-group">
         {% for organization in member_organizations %}
             <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
                 <div class="mb-2 mb-md-0">
-                    <h5 class="mb-1"><a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> <span class="badge bg-secondary">{% trans "Owner" %}</span></h5>
+                    <h5 class="mb-1">
+                        <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
+                        {% if organization in owner_organizations %}
+                            <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{% trans "Member" %}</span>
+                        {% endif %}
+                    </h5>
                     <p class="mb-1">
                         {{ organization.description|truncatewords:20 }}
                     </p>
