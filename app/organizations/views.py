@@ -1,5 +1,5 @@
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.http import Http404
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.db.models import Q
 
 from main import settings
 from accounts.models import CustomUser
@@ -25,6 +26,8 @@ class OrganizationsView(LoginRequiredMixin, ListView):
         # Add organizations where the user is a member
         context['member_organizations'] = Organization.objects.filter(users=self.request.user)
         context['owner_organizations'] = Organization.objects.filter(owner=self.request.user)
+        context['organizations'] = context['member_organizations'] if not self.request.user.is_superuser else Organization.objects.all()
+
         return context
 
 
@@ -65,6 +68,17 @@ class OrganizationDetailView(LoginRequiredMixin, DetailView):
             raise Http404("Only members can view this Organization")
         return organization
 
+
+class OrganizationDeleteView(LoginRequiredMixin, DeleteView):
+    model = Organization
+    template_name = 'organizations/confirm_delete.html'
+    success_url = reverse_lazy('organizations-my')
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(owner = self.request.user)
+
+        return queryset
 
 @login_required
 def remove_user_from_organization(request, org_id, user_id):

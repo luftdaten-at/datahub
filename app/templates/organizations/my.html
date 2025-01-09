@@ -15,15 +15,17 @@
     </div>
     {% if member_organizations %}
     <div class="list-group">
-        {% for organization in member_organizations %}
+        {% for organization in organizations %}
             <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
                 <div class="mb-2 mb-md-0">
                     <h5 class="mb-1">
                         <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
                         {% if organization in owner_organizations %}
                             <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                        {% else %}
+                        {% elif organization in member_organizations %}
                             <span class="badge bg-secondary">{% trans "Member" %}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{% trans "Other" %}</span>
                         {% endif %}
                     </h5>
                     <p class="mb-1">
