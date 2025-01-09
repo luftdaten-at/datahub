@@ -62,40 +62,44 @@ class CampaignsDetailView(LoginRequiredMixin, DetailView):
             raise PermissionDenied('You are not allowed to view this Campaign')
         return campaign
 
-class CampaignsCreateView(CreateView):
+class CampaignsCreateView(LoginRequiredMixin, CreateView):
     model = Campaign
     form_class = CampaignForm
     template_name = 'campaigns/form.html'
     success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
-        return initial
-
     def form_valid(self, form):
-        form.instance.owner = self.request.user  # Set the owner to the current user
-        return super().form_valid(form)
-    
+        # Get the instance but don't save to the database yet
+        campaign = form.save(commit=False)
+        # Set the `public` field to False
+        campaign.public = False
+        campaign.owner = self.request.user
+        campaign.organization = self.request.user.organizations.first()
+        campaign.save()
+        campaign.users.add(self.request.user)
+        campaign.save()
 
-class CampaignsUpdateView(UpdateView):
+        return super().form_valid(form)
+
+
+class CampaignsUpdateView(LoginRequiredMixin, UpdateView):
     model = Campaign
     form_class = CampaignForm
-    template_name = 'campaigns/form.html'  # Reuse the form template
+    template_name = 'campaigns/form.html'
+    success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
-        return initial
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
-    def get_success_url(self):
-        return reverse_lazy('campaigns-my')  # Redirect to the campaign list after update
 
-    def form_valid(self, form):
-        return super().form_valid(form)
-
-
-class CampaignAddUserView(UpdateView):
+class CampaignAddUserView(LoginRequiredMixin, UpdateView):
     model = Campaign
     form_class = CampaignUserForm
     template_name = 'campaigns/add_user.html'
@@ -107,6 +111,16 @@ class CampaignAddUserView(UpdateView):
         initial = super().get_initial()
         initial['campaign'] = self.object
         return initial
+
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
 
 class RoomAddDeviceView(UpdateView):
@@ -120,7 +134,7 @@ class RoomAddDeviceView(UpdateView):
     def get_initial(self):
         initial = super().get_initial()
         initial['room'] = self.object
-        return initial
+        return initial 
 
 
 class CampaignsDeleteView(DeleteView):

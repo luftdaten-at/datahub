@@ -36,10 +36,6 @@ class CampaignForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
-        # Get the user from the passed arguments (initial data)
-        self.user = kwargs.get('initial', {}).get('user', None)
-        
         # Initialize form helper
         self.helper = FormHelper(self)
         self.helper.add_input(Submit('submit', 'Save'))
@@ -48,21 +44,6 @@ class CampaignForm(forms.ModelForm):
         self.fields['start_date'].input_formats = ('%Y-%m-%dT%H:%M',)
         self.fields['end_date'].input_formats = ('%Y-%m-%dT%H:%M',)
 
-    def save(self, commit=True):
-        # Get the instance but don't save to the database yet
-        campaign = super().save(commit=False)
-
-        # Set the `public` field to False
-        campaign.public = False
-        campaign.owner = self.user
-        campaign.organization = self.user.organizations.first()
-        campaign.save()
-        campaign.users.add(self.user)
-
-        # Save to the database if commit is True
-        campaign.save()
-        
-        return campaign
 
 class CampaignUserForm(forms.ModelForm):
     users = (forms.ModelMultipleChoiceField(label='',
