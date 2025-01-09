@@ -1,14 +1,13 @@
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, DeleteView
+from django.views.generic.edit import CreateView, DeleteView, UpdateView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect
-from django.http import Http404
 from django.contrib import messages
 from django.core.mail import send_mail
-from django.db.models import Q
+from django.core.exceptions import PermissionDenied
 
 from main import settings
 from accounts.models import CustomUser
@@ -46,10 +45,26 @@ class OrganizationCreateView(LoginRequiredMixin, CreateView):
         # Set the current user as the owner of the organization
         organization = form.save(commit=False)
         organization.owner = self.request.user
+        organization.save()
         organization.users.add(self.request.user)
         organization.save()
 
         return super().form_valid(form)
+
+
+class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
+    model = Organization
+    form_class = OrganizationForm
+    template_name = 'organizations/create.html'
+    success_url = reverse_lazy('organizations-my')  # Redirect to a list view or another page
+
+    def get_object(self, queryset = None):
+        organisation = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return organisation
+        if self.request.user != organisation.owner:
+            raise PermissionDenied('You are not allowed to edite this Organization')
+        return organisation
 
 
 class OrganizationDetailView(LoginRequiredMixin, DetailView):
@@ -64,8 +79,10 @@ class OrganizationDetailView(LoginRequiredMixin, DetailView):
     
     def get_object(self, queryset = None): 
         organization = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return organization
         if not organization.users.filter(id=self.request.user.id).exists():
-            raise Http404("Only members can view this Organization")
+            raise PermissionDenied("Only members can view this Organization")
         return organization
 
 
@@ -74,11 +91,14 @@ class OrganizationDeleteView(LoginRequiredMixin, DeleteView):
     template_name = 'organizations/confirm_delete.html'
     success_url = reverse_lazy('organizations-my')
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(owner = self.request.user)
+    def get_object(self, queryset = None): 
+        organization = super().get_object(queryset) 
+        if self.request.user.is_superuser:
+            return organization
+        if self.request.user != organization.owner:
+            raise PermissionDenied('You are not allowd to delete this Organization')
+        return organization
 
-        return queryset
 
 @login_required
 def remove_user_from_organization(request, org_id, user_id):
