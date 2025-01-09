@@ -36,12 +36,15 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
     template_name = 'campaigns/my.html'
     context_object_name = 'campaigns'
 
-    def test_func(self):
-        return self.request.user.is_authenticated 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
 
-    def get_queryset(self):
-        # Return the Device queryset ordered by 'name' in ascending order
-        return Campaign.objects.all().order_by('name')
+        context['member_campaigns'] = Campaign.objects.filter(users=user)
+        context['owner_campaigns'] = Campaign.objects.filter(owner=user)
+        context['campaigns'] = Campaign.objects.all() if user.is_superuser else context['member_campaigns']
+
+        return context
 
 
 class CampaignsDetailView(DetailView):

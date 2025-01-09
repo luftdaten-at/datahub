@@ -16,7 +16,13 @@
                     <div class="mb-2 mb-md-0">
                         <h5 class="mb-1">
                             <a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a>
+                            {% if campaign in owner_campaigns %}
                             <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                            {% elif campaign in member_campaigns %}
+                                <span class="badge bg-secondary">{% trans "Member" %}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{% trans "Other" %}</span>
+                            {% endif %}
                         </h5>
                         <p class="mb-1">
                             <strong>{% trans "Date:" %}</strong> {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}<br>
