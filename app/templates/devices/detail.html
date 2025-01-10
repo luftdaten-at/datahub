@@ -72,19 +72,17 @@
     </div>
     
     <!-- Battery Status Chart -->
-    <div class="row">
-        <h3 class="mt-4 mb-4">{% trans "Battery Status" %}</h3>
+    <h3 class="mt-4 mb-4">{% trans "Battery Status" %}</h3>
 
-        {% if battery_status %}
-            <div class="chart-container">
-                <canvas id="chart-battery"></canvas> 
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                {% trans "No battery status available for this device." %}
-            </div>
-        {% endif %}
-    </div>
+    {% if battery_status %}
+        <div class="chart-container">
+            <canvas id="chart-battery"></canvas> 
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% trans "No battery status available for this device." %}
+        </div>
+    {% endif %}
 
     <!-- Device Logs -->
     <h3 class="mt-4 mb-4">{% trans "Log" %}</h3>
