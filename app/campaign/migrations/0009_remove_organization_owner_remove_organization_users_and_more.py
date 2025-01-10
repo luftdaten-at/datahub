@@ -4,6 +4,13 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def set_invalid_foreign_keys_to_null(apps, schema_editor):
+    Campaign = apps.get_model('campaign', 'Campaign')
+    for campaign in Campaign.objects.all():
+        campaign.organization = None
+        campaign.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -13,6 +20,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(set_invalid_foreign_keys_to_null),
         migrations.RemoveField(
             model_name='organization',
             name='owner',
