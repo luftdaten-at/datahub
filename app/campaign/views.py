@@ -144,26 +144,39 @@ class RoomAddDeviceView(LoginRequiredMixin, UpdateView):
             return room
         if user != room.campaign.owner:
             raise PermissionDenied('You are not allowed to update this Campaign')
-        return room 
+        return room
 
 
-class CampaignsDeleteView(DeleteView):
+class CampaignsDeleteView(LoginRequiredMixin, DeleteView):
     model = Campaign
     template_name = 'campaigns/confirm_delete.html'  # Confirmation page template
     success_url = reverse_lazy('campaigns-my')  # Redirect here after deletion
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        # Optional: restrict deletion to the owner or admin
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(owner=self.request.user)
-        return queryset
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
 
-class RoomDetailView(DetailView):
+class RoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
     template_name = 'campaigns/room/detail.html'
     context_object_name = 'room'
+
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if not room.campaign.users.filter(id=user.id).exists():
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room 
 
     def get_context_data(self, **kwargs):
         # Get the default context data
@@ -268,7 +281,7 @@ class RoomDetailView(DetailView):
         return context
 
 
-class ParticipantDetailView(DetailView):
+class ParticipantDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = 'campaigns/participant/detail.html'
     context_object_name = 'participant'
@@ -361,32 +374,65 @@ class ParticipantDetailView(DetailView):
         return context
 
 
-class RoomDeleteView(DeleteView):
+class RoomDeleteView(LoginRequiredMixin, DeleteView):
     model = Room
     template_name = 'campaigns/confirm_room_delete.html'
+
     def get_success_url(self):
         return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.campaign.pk})
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(campaign__owner=self.request.user)
-        return queryset
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if user != room.campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room
 
 
-class RoomCreateView(CreateView):
+class RoomCreateView(LoginRequiredMixin, CreateView):
     model = Room
     fields = ['name']  # Exclude 'campaign' from the form fields
     template_name = 'campaigns/room_form.html'  # Specify your template
 
     def dispatch(self, request, *args, **kwargs):
-        self.campaign_pk = kwargs.get('campaign_pk')
+        self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if self.request.user != self.campaign.owner:
+            raise PermissionDenied("You are not allowed to create a Room")
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        campaign = Campaign.objects.get(pk=self.campaign_pk)
-        form.instance.campaign = campaign
-        return super().form_valid(form)
+        room = form.save(commit=False)
+        campaign = self.campaign
+        room.campaign = campaign
+        room.save()
 
+        return super().form_valid(form)
+    
     def get_success_url(self):
-        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign_pk})
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
+
+
+class RoomUpdateView(LoginRequiredMixin, UpdateView):
+    model = Room
+    fields = ['name']  # Exclude 'campaign' from the form fields
+    template_name = 'campaigns/room_form.html'  # Specify your template
+
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if self.request.user != self.campaign.owner:
+            raise PermissionDenied("You are not allowed to create a Room")
+
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})

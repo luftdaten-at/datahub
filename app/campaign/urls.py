@@ -13,5 +13,6 @@ urlpatterns = [
     path('rooms/<int:pk>/', RoomDetailView.as_view(), name='room-detail'),
     path('rooms/<int:pk>/delete/', RoomDeleteView.as_view(), name='room-delete'),
     path('rooms/<int:pk>/add-device/', RoomAddDeviceView.as_view(),name='room-add-device'),
-    path('rooms/create/<int:campaign_pk>/', RoomCreateView.as_view(), name='room-create'),
+    path('<str:campaign_pk>/rooms/create/', RoomCreateView.as_view(), name='room-create'),
+    path('<str:campaign_pk>/rooms/<int:pk>/update/', RoomUpdateView.as_view(), name='room-update'),
 ]
