@@ -226,6 +226,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         # use ADJUSTED_TEMP_CUBE if found
         if measurements_adjusted_temp_cube:
             current_temperature = measurements_adjusted_temp_cube[0]
+            temperature_color = Dimension.get_color(Dimension.ADJUSTED_TEMP_CUBE, current_temperature) if current_temperature else None
         else:
             current_temperature = get_current_mean(Dimension.TEMPERATURE)
             temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None

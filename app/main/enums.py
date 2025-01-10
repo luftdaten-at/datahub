@@ -128,7 +128,8 @@ class Dimension():
         TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
         PM2_5: ([5, 15], [Color.GREEN, Color.YELLOW, Color.RED]),
         TVOC: ([220, 1430], [Color.GREEN, Color.YELLOW, Color.RED]),
-        CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED])
+        CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED]),
+        ADJUSTED_TEMP_CUBE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
     }
 
     # Dictionary für die Einheiten der Dimensionen
@@ -221,7 +222,15 @@ class Dimension():
     def get_sensor_community_name(cls, dimension_id: int) -> str:
         """Returns the sensor-community-specific name for the dimension ID or 'Unknown' if none."""
         return cls._sensor_community_names.get(dimension_id, "Unknown")
-
+    
+    @classmethod
+    def get_color(cls, dimension_id: int, val: float):
+        th, colors = cls.thresholds.get(dimension_id)
+        th = [-float('inf')] + th + [float('inf')]
+        for i in range(len(th)):
+            if th[i] <= val < th[i + 1]:
+                return colors[i]
+ 
 
 class LdProduct():
     AIR_AROUND = 1
