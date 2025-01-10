@@ -410,6 +410,11 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         room = form.save(commit=False)
         campaign = self.campaign
+
+        if self.campaign.rooms.filter(name=room.name).exists():
+            form.add_error('name', "A room with this name already exists in the campaign.")
+            return self.form_invalid(form)
+
         room.campaign = campaign
         room.save()
 
