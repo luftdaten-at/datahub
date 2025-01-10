@@ -123,7 +123,7 @@ class CampaignAddUserView(LoginRequiredMixin, UpdateView):
         return campaign
 
 
-class RoomAddDeviceView(UpdateView):
+class RoomAddDeviceView(LoginRequiredMixin, UpdateView):
     model = Room 
     form_class = RoomDeviceForm
     template_name = 'campaigns/room/add_device.html'
@@ -135,6 +135,16 @@ class RoomAddDeviceView(UpdateView):
         initial = super().get_initial()
         initial['room'] = self.object
         return initial 
+    
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if user != room.campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room 
 
 
 class CampaignsDeleteView(DeleteView):
