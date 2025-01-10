@@ -2,21 +2,16 @@ import statistics
 
 from datetime import datetime, timedelta
 from collections import defaultdict
-from django.http import Http404
-from django.views.generic import View, FormView
+from django.core.exceptions import PermissionDenied
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy, reverse
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib import messages
-from django.core.mail import send_mail
+from django.urls import reverse_lazy
 
-from main import settings
-from .models import Campaign, Room, Organization, OrganizationInvitation
-from .forms import CampaignForm, CampaignUserForm, OrganizationForm, RoomDeviceForm
+
+from .models import Campaign, Room
+from .forms import CampaignForm, CampaignUserForm, RoomDeviceForm
 from accounts.models import CustomUser
 from main.enums import Dimension, SensorModel
 
@@ -41,74 +36,70 @@ class CampaignsMyView(LoginRequiredMixin, ListView):
     template_name = 'campaigns/my.html'
     context_object_name = 'campaigns'
 
-    def test_func(self):
-        return self.request.user.is_authenticated 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
 
-    def get_queryset(self):
-        # Return the Device queryset ordered by 'name' in ascending order
-        return Campaign.objects.all().order_by('name')
+        context['member_campaigns'] = Campaign.objects.filter(users=user)
+        context['owner_campaigns'] = Campaign.objects.filter(owner=user)
+        context['campaigns'] = Campaign.objects.all() if user.is_superuser else context['member_campaigns']
+
+        return context
 
 
-class CampaignsDetailView(DetailView):
+class CampaignsDetailView(LoginRequiredMixin, DetailView):
     model = Campaign
     context_object_name = 'campaign'
     template_name = 'campaigns/detail.html'
 
-    def get_queryset(self):
-        """
-        This method is overridden to only include campaigns that are public or owned by the current user.
-        """
+    def get_object(self, queryset = None): 
+        campaign = super().get_object(queryset)
         user = self.request.user
-        return Campaign.objects.filter(public=True) | Campaign.objects.filter(owner=user)
-    
-    def get_object(self, queryset=None):
-        """
-        This method is overridden to provide additional checks for the Campaign's visibility.
-        If the requested Campaign is not public, it raises a 404.
-        """
-        queryset = self.get_queryset() if queryset is None else queryset
-        obj = super().get_object(queryset=queryset)
-        
-        if not self.request.user.is_superuser and not obj.public and obj.owner != self.request.user:
-            raise Http404("No campaign found matching the query")
 
-        return obj
+        if user.is_superuser:
+            return campaign
+        if not campaign.users.filter(id=user.id).exists():
+            raise PermissionDenied('You are not allowed to view this Campaign')
+        return campaign
 
-
-class CampaignsCreateView(CreateView):
+class CampaignsCreateView(LoginRequiredMixin, CreateView):
     model = Campaign
     form_class = CampaignForm
     template_name = 'campaigns/form.html'
     success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
-        return initial
-
     def form_valid(self, form):
-        form.instance.owner = self.request.user  # Set the owner to the current user
-        return super().form_valid(form)
-    
+        # Get the instance but don't save to the database yet
+        campaign = form.save(commit=False)
+        # Set the `public` field to False
+        campaign.public = False
+        campaign.owner = self.request.user
+        campaign.organization = self.request.user.organizations.first()
+        campaign.save()
+        campaign.users.add(self.request.user)
+        campaign.save()
 
-class CampaignsUpdateView(UpdateView):
+        return super().form_valid(form)
+
+
+class CampaignsUpdateView(LoginRequiredMixin, UpdateView):
     model = Campaign
     form_class = CampaignForm
-    template_name = 'campaigns/form.html'  # Reuse the form template
+    template_name = 'campaigns/form.html'
+    success_url = reverse_lazy('campaigns-my')  # Redirect after a successful creation
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial['user'] = self.request.user  # Pass the logged-in user to the form's initial data
-        return initial
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
-    def get_success_url(self):
-        return reverse_lazy('campaigns-my')  # Redirect to the campaign list after update
 
-    def form_valid(self, form):
-        return super().form_valid(form)
-
-
-class CampaignAddUserView(UpdateView):
+class CampaignAddUserView(LoginRequiredMixin, UpdateView):
     model = Campaign
     form_class = CampaignUserForm
     template_name = 'campaigns/add_user.html'
@@ -121,8 +112,18 @@ class CampaignAddUserView(UpdateView):
         initial['campaign'] = self.object
         return initial
 
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
-class RoomAddDeviceView(UpdateView):
+
+class RoomAddDeviceView(LoginRequiredMixin, UpdateView):
     model = Room 
     form_class = RoomDeviceForm
     template_name = 'campaigns/room/add_device.html'
@@ -133,26 +134,49 @@ class RoomAddDeviceView(UpdateView):
     def get_initial(self):
         initial = super().get_initial()
         initial['room'] = self.object
-        return initial
+        return initial 
+    
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if user != room.campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room
 
 
-class CampaignsDeleteView(DeleteView):
+class CampaignsDeleteView(LoginRequiredMixin, DeleteView):
     model = Campaign
     template_name = 'campaigns/confirm_delete.html'  # Confirmation page template
     success_url = reverse_lazy('campaigns-my')  # Redirect here after deletion
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        # Optional: restrict deletion to the owner or admin
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(owner=self.request.user)
-        return queryset
+    def get_object(self, queryset = None):
+        campaign = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return campaign
+        if user != campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return campaign
 
 
-class RoomDetailView(DetailView):
+class RoomDetailView(LoginRequiredMixin, DetailView):
     model = Room
     template_name = 'campaigns/room/detail.html'
     context_object_name = 'room'
+
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if not room.campaign.users.filter(id=user.id).exists():
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room 
 
     def get_context_data(self, **kwargs):
         # Get the default context data
@@ -257,7 +281,7 @@ class RoomDetailView(DetailView):
         return context
 
 
-class ParticipantDetailView(DetailView):
+class ParticipantDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = 'campaigns/participant/detail.html'
     context_object_name = 'participant'
@@ -350,128 +374,70 @@ class ParticipantDetailView(DetailView):
         return context
 
 
-class RoomDeleteView(DeleteView):
+class RoomDeleteView(LoginRequiredMixin, DeleteView):
     model = Room
     template_name = 'campaigns/confirm_room_delete.html'
+
     def get_success_url(self):
         return reverse_lazy('campaigns-detail', kwargs={'pk': self.object.campaign.pk})
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        if not self.request.user.is_superuser:
-            queryset = queryset.filter(campaign__owner=self.request.user)
-        return queryset
+    def get_object(self, queryset = None):
+        room = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return room
+        if user != room.campaign.owner:
+            raise PermissionDenied('You are not allowed to update this Campaign')
+        return room
 
 
-class RoomCreateView(CreateView):
+class RoomCreateView(LoginRequiredMixin, CreateView):
     model = Room
     fields = ['name']  # Exclude 'campaign' from the form fields
     template_name = 'campaigns/room_form.html'  # Specify your template
 
     def dispatch(self, request, *args, **kwargs):
-        self.campaign_pk = kwargs.get('campaign_pk')
+        self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if self.request.user != self.campaign.owner:
+            raise PermissionDenied("You are not allowed to create a Room")
+
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        campaign = Campaign.objects.get(pk=self.campaign_pk)
-        form.instance.campaign = campaign
+        room = form.save(commit=False)
+        campaign = self.campaign
+
+        if self.campaign.rooms.filter(name=room.name).exists():
+            form.add_error('name', "A room with this name already exists in the campaign.")
+            return self.form_invalid(form)
+
+        room.campaign = campaign
+        room.save()
+
         return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign_pk})
-
-
-class OrganizationsView(LoginRequiredMixin, ListView):
-    model = Organization
-    template_name = 'campaigns/my_organizations.html'
-    context_object_name = 'owned_organizations'
-
-    def get_queryset(self):
-        # Return organizations where the user is the owner
-        return Organization.objects.filter(owner=self.request.user)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # Add organizations where the user is a member
-        context['member_organizations'] = Organization.objects.filter(users=self.request.user)
-        return context
-
-
-class OrganizationCreateView(LoginRequiredMixin, CreateView):
-    model = Organization
-    form_class = OrganizationForm
-    template_name = 'campaigns/create_organization.html'
-    success_url = reverse_lazy('organizations-my')  # Redirect to a list view or another page
-
-    def form_valid(self, form):
-        organization = form.save(commit=False)
-        organization.owner = self.request.user  # Set the current user as the owner
-        organization.save()
-        organization.users.add(self.request.user)
-        form.save_m2m()  # Save the many-to-many relationships
-        return super().form_valid(form)
-
-
-class OrganizationDetailView(DetailView):
-    model = Organization
-    template_name = 'campaigns/organization_detail.html'
-    context_object_name = 'organization'
-
-    def get_success_url(self):
-        # and 'self.object.pk' with the primary key of the newly created object
-        return reverse_lazy('organizations-my', kwargs={'pk': self.object.pk})
-
-
-@login_required
-def remove_user_from_organization(request, org_id, user_id):
-    organization = get_object_or_404(Organization, id=org_id)
-    user = get_object_or_404(CustomUser, id=user_id)
-
-    # Ensure the user performing the action has permission
-    if request.user != organization.owner:
-        messages.error(request, "You do not have permission to remove users from this organization.")
-        return redirect('organization-detail', pk=org_id)
-
-    organization.users.remove(user)
-    messages.success(request, f"User {user.username} has been removed.")
-    return redirect('organization-detail', pk=org_id)
-
-
-@login_required
-def invite_user_to_organization(request, org_id):
-    if request.method != 'POST':
-        return redirect(f"organization-detail", pk=org_id)
-
-    organization = get_object_or_404(Organization, id=org_id)
-    email = request.POST.get('email')
     
-    if request.user != organization.owner:
-        messages.error(request, "You do not have permission to invite users to this organization.")
-        return redirect(f"organization-detail", pk=org_id)
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
 
-    user = CustomUser.objects.filter(email = email).first()
 
-    if user:
-        organization.users.add(user)
-    else:
-        # check if invitation already exists
-        invitation = OrganizationInvitation.objects.filter(email=email, organization__pk = organization.pk).first()
-        if invitation == None:
-            # create invitation
-            invitation = OrganizationInvitation(
-                expiring_date = None,
-                email = email,
-                organization = organization,
-            )
-        invitation.save()
-        # send invitation email
-        # TODO add link to register
-        send_mail(
-            subject=f"You've been invited to join {organization.name}",
-            message=f"Visit this link to register and join {organization.name}: <registration_link>",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-        )
-        messages.success(request, f"An invitation has been sent to {email}.")
+class RoomUpdateView(LoginRequiredMixin, UpdateView):
+    model = Room
+    fields = ['name']  # Exclude 'campaign' from the form fields
+    template_name = 'campaigns/room_form.html'  # Specify your template
 
-    return redirect(f"organization-detail", pk=org_id)
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if self.request.user != self.campaign.owner:
+            raise PermissionDenied("You are not allowed to create a Room")
+
+        return super().dispatch(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})

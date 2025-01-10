@@ -1,4 +1,5 @@
 import datetime
+from django.core.exceptions import PermissionDenied
 
 from devices.models import Device, DeviceStatus
 

@@ -3,7 +3,7 @@ from django.urls import reverse_lazy
 from django.views import generic
 
 from .forms import CustomUserCreationForm
-from campaign.models import OrganizationInvitation
+from organizations.models import OrganizationInvitation
 
 
 class SignupPageView(generic.CreateView):

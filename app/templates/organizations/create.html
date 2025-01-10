@@ -13,4 +13,15 @@
     {{ form|crispy }}
     <button class="btn btn-success" type="submit">{% trans "Save" %}</button>
 </form>
+
+<br>
+
+{% if messages %}
+<div class="alert alert-danger">
+    {% for message in messages %}
+        <p>{{ message }}</p>
+    {% endfor %}
+</div>
+{% endif %}
+
 {% endblock %}
