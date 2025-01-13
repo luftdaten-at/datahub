@@ -45,15 +45,21 @@
                         <span class="badge badge-custom-green">CO₂ 584ppm</span>
                         <span class="badge badge-custom-green">TVOC 18ppb</span>
                     </td>
-                    <td class="text-end">
-                        <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
-                        <a href="{% url 'room-update' campaign.pk room.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
-                            </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
-                        <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
-                            </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
-                        </div>
+                    <td>
+                      <div class="d-flex flex-column flex-md-row gap-2 justify-content-end">
+                        <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i>
+                            <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                        </a>
+                        <a href="{% url 'room-update' campaign.pk room.pk %}" class="btn btn-secondary btn-sm">
+                            <i class="bi bi-pencil-square"></i>
+                            <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                        </a>
+                        <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                            <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
+                        </a>
+                    </div>
                     </td>
                 </tr>
             {% empty %}
@@ -87,13 +93,17 @@
                 <tr>
                     <td><a href="">{{ user.username }}</a></td>
                     <td>{{ user.email }}</td>
-                    <td class="text-end">
-                        <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                          <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
-                          <a href="" class="btn btn-danger btn-sm"><i class="bi bi-x-octagon">
-                            </i> <span class="d-none d-sm-inline">{% trans "Remove" %}</span></a>
-                        </div>
+                    <td>
+                      <div class="text-end d-flex flex-column flex-md-row gap-2 justify-content-end">
+                        <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-eye"></i>
+                            <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                        </a>
+                        <a href="" class="btn btn-danger btn-sm">
+                            <i class="bi bi-x-octagon"></i>
+                            <span class="d-none d-sm-inline">{% trans "Remove" %}</span>
+                        </a>
+                    </div>
                     </td>
                 </tr>
             {% empty %}
