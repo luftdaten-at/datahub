@@ -18,7 +18,7 @@ from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import JavaScriptCatalog
 
-from accounts.views import dashboard
+from accounts.views import DashboardView
 
 urlpatterns = [
     path('campaign/admin/jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Add this line
@@ -26,7 +26,7 @@ urlpatterns = [
     path('backend/', admin.site.urls),
     # User management
     path('accounts/', include('accounts.urls')),
-    path('dashboard/', dashboard, name='dashboard'),
+    path('dashboard/', DashboardView, name='dashboard'),
     # Local apps
     path('', include('pages.urls')),
     path('api/', include('api.urls')),
