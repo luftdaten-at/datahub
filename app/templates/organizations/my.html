@@ -8,47 +8,45 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{% trans "My Organisations" %}</h2>
-        <a href="{% url 'organizations-create' %}" class="btn btn-outline-primary">{% trans "Create Organization" %}</a>
-    </div>
-    {% if member_organizations %}
-    <div class="list-group">
-        {% for organization in organizations %}
-            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                <div class="mb-2 mb-md-0">
-                    <h5 class="mb-1">
-                        <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
-                        {% if organization in owner_organizations %}
-                            <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                        {% elif organization in member_organizations %}
-                            <span class="badge bg-secondary">{% trans "Member" %}</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{% trans "Other" %}</span>
-                        {% endif %}
-                    </h5>
-                    <p class="mb-1">
-                        {{ organization.description|truncatewords:20 }}
-                    </p>
-                </div>
-                <div class="d-flex flex-column flex-md-row">
-                    <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                        <a href="{% url 'organizations-detail' organization.pk %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
-                        <a href="{% url 'organizations-update' organization.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
-                            </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
-                        <a href="{% url 'organizations-delete' organization.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
-                            </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
-                    </div>
+<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+    <h2>{% trans "My Organisations" %}</h2>
+    <a href="{% url 'organizations-create' %}" class="btn btn-outline-primary">{% trans "Create Organization" %}</a>
+</div>
+{% if member_organizations %}
+<div class="list-group">
+    {% for organization in organizations %}
+        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
+            <div class="mb-2 mb-md-0">
+                <h5 class="mb-1">
+                    <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
+                    {% if organization in owner_organizations %}
+                        <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                    {% elif organization in member_organizations %}
+                        <span class="badge bg-secondary">{% trans "Member" %}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{% trans "Other" %}</span>
+                    {% endif %}
+                </h5>
+                <p class="mb-1">
+                    {{ organization.description|truncatewords:20 }}
+                </p>
+            </div>
+            <div class="d-flex flex-column flex-md-row">
+                <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
+                    <a href="{% url 'organizations-detail' organization.pk %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
+                    <a href="{% url 'organizations-update' organization.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
+                        </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
+                    <a href="{% url 'organizations-delete' organization.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
+                        </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
                 </div>
             </div>
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="alert alert-warning" role="alert">
-        {% trans "You are not a member of any organizations." %}
-    </div>
-    {% endif %}
+        </div>
+    {% endfor %}
 </div>
+{% else %}
+<div class="alert alert-warning" role="alert">
+    {% trans "You are not a member of any organizations." %}
+</div>
+{% endif %}
 {% endblock content %}

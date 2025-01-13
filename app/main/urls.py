@@ -18,21 +18,24 @@ from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import JavaScriptCatalog
 
+from accounts.views import DashboardView
+
 urlpatterns = [
     path('campaign/admin/jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Add this line
     # Django admin
-    path("backend/", admin.site.urls),
+    path('backend/', admin.site.urls),
     # User management
-    path("accounts/", include("accounts.urls")),
+    path('accounts/', include('accounts.urls')),
+    path('dashboard/', DashboardView, name='dashboard'),
     # Local apps
-    path("", include("pages.urls")),
-    path("api/", include("api.urls")),
-    path("campaigns/", include("campaign.urls")),
-    path("cities/", include("cities.urls")),
-    path("devices/", include("devices.urls")),
-    path("stations/", include("stations.urls")),
-    path("workshops/", include("workshops.urls")),
-    path("organizations/", include("organizations.urls")),
+    path('', include('pages.urls')),
+    path('api/', include('api.urls')),
+    path('campaigns/', include('campaign.urls')),
+    path('cities/', include('cities.urls')),
+    path('devices/', include('devices.urls')),
+    path('stations/', include('stations.urls')),
+    path('workshops/', include('workshops.urls')),
+    path('organizations/', include('organizations.urls')),
 ] + i18n_patterns(
     # Your URLs that require localization
     # Include set_language URL

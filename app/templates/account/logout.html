@@ -1,14 +1,15 @@
 {% extends "_base.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}Abmelden{% endblock %}
+{% block title %}{% trans "Log out" %}{% endblock %}
 
 {% block content %}
-    <h1>Abmelden</h1>
-    <p>Möchtest du dich wirklich abmelden?</p>
+    <h2 class="mt-5">{% trans "Log out" %}</h2>
+    <p>{% trans "Do you really want to log out?" %}</p>
     <form method="post" action="{% url 'account_logout' %}">
         {% csrf_token %}
         {{ form|crispy }}
-        <button class="btn btn-danger" type="submit">Abmelden</button>
+        <button class="btn btn-danger" type="submit">{% trans "Log out" %}</button>
     </form>
 {% endblock content %}

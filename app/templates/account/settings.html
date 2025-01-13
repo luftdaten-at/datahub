@@ -1,0 +1,24 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Settings" %}{% endblock title %}
+
+{% block content %}
+<h2 class="mb-4 mt-5">{% trans "Settings" %}</h2>
+
+<h3>{% trans "Change Password" %}</h3>
+<a class="btn btn-outline-primary" href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a>
+
+<h3 class="mt-5">{% trans "Delete Data" %}</h3>
+<p>Your account is connected to 123 measurements. Doy you really want to delete these?</p>
+
+<a class="btn btn-outline-danger" href="">{% trans "Delete Data" %}</a>
+
+<h3 class="mt-5">{% trans "Delete Account" %}</h3>
+<p> Your account is currently an owner in these organizations: aa, bb, cc.
+You must remove yourself, transfer ownership, or delete these organizations before you can delete your user.</p>
+
+<a class="btn btn-outline-danger" href="{% url 'account-delete' %}">{% trans "Delete Account" %}</a>
+
+{% endblock content %}

@@ -1,13 +1,14 @@
 {% extends "_base.html" %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 
-{% block title %}Registrieren{% endblock title %}
+{% block title %}{% trans "Registrieren" %}{% endblock title %}
 
 {% block content %}
-    <h2>Registrieren</h2>
+    <h2 class="mt-5">{% trans "Registrieren" %}</h2>
     <form method="post">
         {% csrf_token %}
         {{ form|crispy }}
-        <button class="btn btn-success" type="submit">Registrieren</button>
+        <button class="btn btn-success" type="submit">{% trans "Registrieren" %}</button>
     </form>
 {% endblock content %}
