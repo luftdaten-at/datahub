@@ -1,0 +1,13 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Dashboard" %}{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{% trans "Welcome," %} {{ user.username }}</h2>
+    <p>{% trans "This is your dashboard overview." %}</p>
+    <!-- Add more dashboard elements as needed -->
+</div>
+{% endblock content %}
