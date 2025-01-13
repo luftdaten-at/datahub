@@ -5,81 +5,153 @@
 {% block title %}{% trans "Dashboard" %}{% endblock title %}
 
 {% block content %}
-<h2 class="mb-4 mt-5">{% trans "Welcome," %} {{ user.username }}</h2>
-<p>{% trans "This is your dashboard overview." %}</p>
-<!-- Add more dashboard elements as needed -->
+<div class="container mt-5">
+    <h2 class="mb-4">{% trans "Welcome," %} {{ user.username }}</h2>
 
-<div class="row mb-4">
-    <div class="col-6">
-        <h3>{% trans "My Campaigns" %}</h3>
-    {% if campaigns %}
-        <div class="list-group">
-            {% for campaign in campaigns %}
-                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                    <div class="mb-2 mb-md-0">
-                        <h5 class="mb-1">
-                            <a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a>
-                            {% if campaign in owner_campaigns %}
-                            <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                            {% elif campaign in member_campaigns %}
-                                <span class="badge bg-secondary">{% trans "Member" %}</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{% trans "Other" %}</span>
-                            {% endif %}
-                        </h5>
-                        <p class="mb-1">
-                            <strong>{% trans "Date:" %}</strong> {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}<br>
-                        </p>
-                    </div>
+    <!-- Summary Cards Row -->
+    <div class="row mb-4">
+        <!-- Example Card: My Campaigns Count -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-flag-fill"></i> {% trans "My Campaigns" %}
+                    </h5>
+                    <p class="display-6">{{ campaigns|length }}</p>
+                    <a href="{% url 'campaigns-my' %}" class="btn btn-outline-primary btn-sm mt-2">
+                        {% trans "View Campaigns" %}
+                    </a>
                 </div>
-            {% endfor %}
+            </div>
         </div>
-    {% else %}
-        <div class="alert alert-warning" role="alert">
-            {% trans "No campaigns found." %}
+        <!-- Example Card: My Organizations Count -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-people-fill"></i> {% trans "My Organizations" %}
+                    </h5>
+                    <p class="display-6">{{ member_organizations|length }}</p>
+                    <a href="{% url 'organizations-my' %}" class="btn btn-outline-secondary btn-sm mt-2">
+                        {% trans "View Organizations" %}
+                    </a>
+                </div>
+            </div>
         </div>
-    {% endif %}
+        <!-- Example Card: Add more stats or summary here (optional) -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-clipboard-data"></i> {% trans "Measurements" %}
+                    </h5>
+                    <p class="display-6">3764</p>
+                    <a href="#" class="btn btn-outline-secondary btn-sm mt-2">
+                        {% trans "Manage Data" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Example Card: Another optional summary -->
+        <div class="col-md-6 col-lg-3 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-calendar-week"></i> {% trans "Days measured" %}
+                    </h5>
+                    <p class="display-6">5</p>
+                    <a href="#" class="btn btn-outline-secondary btn-sm mt-2">
+                        {% trans "View Timeline" %}
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="col-6">
-        <h3>{% trans "My Organisation" %}</h3>
-        {% if member_organizations %}
-        <div class="list-group">
-            {% for organization in organizations %}
-                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                    <div class="mb-2 mb-md-0">
-                        <h5 class="mb-1">
-                            <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
-                            {% if organization in owner_organizations %}
-                                <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                            {% elif organization in member_organizations %}
-                                <span class="badge bg-secondary">{% trans "Member" %}</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{% trans "Other" %}</span>
-                            {% endif %}
-                        </h5>
-                        <p class="mb-1">
-                            {{ organization.description|truncatewords:20 }}
-                        </p>
-                    </div>
+    <!-- Row for My Campaigns and My Organizations details -->
+    <div class="row mb-4">
+        <!-- My Campaigns Column -->
+        <div class="col-lg-6 mb-4">
+            <h3>
+                <i class="bi bi-flag-fill"></i> {% trans "My Campaigns" %}
+            </h3>
+            {% if campaigns %}
+                <div class="list-group">
+                    {% for campaign in campaigns %}
+                        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
+                            <div class="mb-2 mb-md-0">
+                                <h5 class="mb-1">
+                                    <a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a>
+                                    {% if campaign in owner_campaigns %}
+                                        <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                                    {% elif campaign in member_campaigns %}
+                                        <span class="badge bg-secondary">{% trans "Member" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans "Other" %}</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-1">
+                                    <strong>{% trans "Date:" %}</strong>
+                                    {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            {% else %}
+                <div class="alert alert-warning mt-3" role="alert">
+                    {% trans "No campaigns found." %}
+                </div>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="alert alert-warning" role="alert">
-            {% trans "You are not a member of any organizations." %}
+
+        <!-- My Organizations Column -->
+        <div class="col-lg-6 mb-4">
+            <h3>
+                <i class="bi bi-people-fill"></i> {% trans "My Organizations" %}
+            </h3>
+            {% if member_organizations %}
+                <div class="list-group">
+                    {% for organization in organizations %}
+                        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
+                            <div class="mb-2 mb-md-0">
+                                <h5 class="mb-1">
+                                    <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a>
+                                    {% if organization in owner_organizations %}
+                                        <span class="badge bg-secondary">{% trans "Owner" %}</span>
+                                    {% elif organization in member_organizations %}
+                                        <span class="badge bg-secondary">{% trans "Member" %}</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{% trans "Other" %}</span>
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-1">
+                                    {{ organization.description|truncatewords:20 }}
+                                </p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-warning mt-3" role="alert">
+                    {% trans "You are not a member of any organizations." %}
+                </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
-</div>
-<div class="row">
-    <div class="col-6">
-        <h3>{% trans "Help" %}</h3>
-        <p>Some kind of help.</p>
-    </div>
-    <div class="col-6">
-        <h3>{% trans "Documentation" %}</h3>
-        <p>Some kind of documentation.</p>
+
+    <!-- Help and Documentation -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <h3><i class="bi bi-question-circle-fill"></i> {% trans "Help" %}</h3>
+            <p>{% trans "Here you can find FAQs and support if you run into issues." %}</p>
+            <a href="#" class="btn btn-outline-info">{% trans "View Help" %}</a>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <h3><i class="bi bi-book-fill"></i> {% trans "Documentation" %}</h3>
+            <p>{% trans "Read detailed guides and manuals to make the most out of our platform." %}</p>
+            <a href="#" class="btn btn-outline-info">{% trans "View Docs" %}</a>
+        </div>
     </div>
 </div>
 {% endblock content %}
