@@ -8,8 +8,7 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container mt-5">
-<h2>{% trans "Cities and municipalities" %}</h2>
+<h2 class="mb-4 mt-5">{% trans "Cities and municipalities" %}</h2>
 
 {% if error %}
   <div class="alert alert-danger" role="alert">
@@ -30,5 +29,4 @@
     </div>
   {% endif %}
 {% endif %}
-</div>
 {% endblock content %}

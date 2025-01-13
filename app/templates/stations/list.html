@@ -33,130 +33,128 @@
 {% endblock styles %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>{% trans "Stations overview" %}</h2>
+<h2 class="mb-4 mt-5">{% trans "Stations overview" %}</h2>
 
-    <!-- Display error message if present -->
-    {% if error %}
-        <div class="alert alert-danger" role="alert">
-            {{ error }}
-        </div>
-    {% endif %}
+<!-- Display error message if present -->
+{% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+{% else %}
+<div class="row">
+    <!-- Column 1: Top 10 with the highest values -->
+    <div class="col-md-6">
+        <h3 class="text-center">{% trans "Top 10 with the highest values for PM2.5" %}</h3>
+        <ul class="list-group">
+            {% for station in top_stations %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                        Station {{ station.0 }}
+                    </a>
+                    <span class="badge bg-danger rounded-pill">{{ station.3 }} µg/m³</span>
+                </li>
+            {% endfor %}
+        </ul>
 
-    <div class="row">
-        <!-- Column 1: Top 10 with the highest values -->
-        <div class="col-md-6">
-            <h3 class="text-center">{% trans "Top 10 with the highest values for PM2.5" %}</h3>
-            <ul class="list-group">
-                {% for station in top_stations %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
-                            Station {{ station.0 }}
-                        </a>
-                        <span class="badge bg-danger rounded-pill">{{ station.3 }} µg/m³</span>
-                    </li>
-                {% endfor %}
-            </ul>
-
-            {% if top_stations.has_other_pages %}
-                <nav aria-label="{% trans 'Top station pagination' %}">
-                    <ul class="pagination justify-content-center mt-2">
-                        {% if top_stations.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_top={{ top_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
+        {% if top_stations.has_other_pages %}
+            <nav aria-label="{% trans 'Top station pagination' %}">
+                <ul class="pagination justify-content-center mt-2">
+                    {% if top_stations.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_top={{ top_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in paginator_top.page_range %}
+                        {% if top_stations.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
                             </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                        {% elif num > top_stations.number|add:'-3' and num < top_stations.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_top={{ num }}">{{ num }}</a>
                             </li>
                         {% endif %}
-                        
-                        {% for num in paginator_top.page_range %}
-                            {% if top_stations.number == num %}
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% elif num > top_stations.number|add:'-3' and num < top_stations.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page_top={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if top_stations.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_top={{ top_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&raquo;</span>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% endif %}
-        </div>
+                    {% endfor %}
+                    
+                    {% if top_stations.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_top={{ top_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    </div>
 
-        <!-- Column 2: Top 10 with the lowest values -->
-        <div class="col-md-6">
-            <h3 class="text-center">{% trans "Top 10 with the lowest values for PM2.5" %}</h3>
-            <ul class="list-group">
-                {% for station in lowest_stations %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
-                            Station {{ station.0 }}
-                        </a>
-                        <span class="badge bg-success rounded-pill">{{ station.3 }} µg/m³</span>
-                    </li>
-                {% endfor %}
-            </ul>
+    <!-- Column 2: Top 10 with the lowest values -->
+    <div class="col-md-6">
+        <h3 class="text-center">{% trans "Top 10 with the lowest values for PM2.5" %}</h3>
+        <ul class="list-group">
+            {% for station in lowest_stations %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                        Station {{ station.0 }}
+                    </a>
+                    <span class="badge bg-success rounded-pill">{{ station.3 }} µg/m³</span>
+                </li>
+            {% endfor %}
+        </ul>
 
-            {% if lowest_stations.has_other_pages %}
-                <nav aria-label="{% trans 'Lowest station pagination' %}">
-                    <ul class="pagination justify-content-center mt-2">
-                        {% if lowest_stations.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_low={{ lowest_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                    <span aria-hidden="true">&laquo;</span>
-                                </a>
+        {% if lowest_stations.has_other_pages %}
+            <nav aria-label="{% trans 'Lowest station pagination' %}">
+                <ul class="pagination justify-content-center mt-2">
+                    {% if lowest_stations.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_low={{ lowest_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&laquo;</span>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in paginator_low.page_range %}
+                        {% if lowest_stations.number == num %}
+                            <li class="page-item active" aria-current="page">
+                                <span class="page-link">{{ num }}</span>
                             </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&laquo;</span>
+                        {% elif num > lowest_stations.number|add:'-3' and num < lowest_stations.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page_low={{ num }}">{{ num }}</a>
                             </li>
                         {% endif %}
-                        
-                        {% for num in paginator_low.page_range %}
-                            {% if lowest_stations.number == num %}
-                                <li class="page-item active" aria-current="page">
-                                    <span class="page-link">{{ num }}</span>
-                                </li>
-                            {% elif num > lowest_stations.number|add:'-3' and num < lowest_stations.number|add:'3' %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page_low={{ num }}">{{ num }}</a>
-                                </li>
-                            {% endif %}
-                        {% endfor %}
-                        
-                        {% if lowest_stations.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_low={{ lowest_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                    <span aria-hidden="true">&raquo;</span>
-                                </a>
-                            </li>
-                        {% else %}
-                            <li class="page-item disabled">
-                                <span class="page-link" aria-hidden="true">&raquo;</span>
-                            </li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            {% endif %}
-        </div>
+                    {% endfor %}
+                    
+                    {% if lowest_stations.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_low={{ lowest_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link" aria-hidden="true">&raquo;</span>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     </div>
 </div>
+{% endif %}
 {% endblock content %}
