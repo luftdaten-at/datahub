@@ -4,39 +4,37 @@
 {% block title %}{% trans "My Workshops" %}{% endblock title %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 mt-5">
     <h2>{% trans "My Workshops" %}</h2>
     <a href="{% url 'workshop-create' %}" class="btn btn-outline-primary mt-3">{% trans "Create workshop" %}</a>
-    </div>
-    {% if workshops %}
-        <div class="list-group">
-            {% for workshop in workshops %}
-                <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                    <div class="mb-2 mb-md-0">
-                        <h5 class="mb-1"><a href="{% url 'workshop-detail' workshop.pk %}">{{ workshop.title }}</a></h5>
-                        <p class="mb-1">
-                            <strong>{% trans "Date:" %}</strong> {{ workshop.start_date|date:"d.m.Y H:i" }} – {{ workshop.end_date|date:"d.m.Y H:i" }}<br>
-                            <strong>{% trans "Public:" %}</strong> {{ workshop.public|yesno:"Ja,Nein" }}
-                        </p>
-                    </div>
-                    <div>
-                        <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                            <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-primary btn-sm">
-                                <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
-                            <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
-                                </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
-                            <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
-                                </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-    <div class="alert alert-warning" role="alert">
-        {% trans "No workshops found." %}
-    </div>
-    {% endif %}
 </div>
+{% if workshops %}
+<div class="list-group">
+    {% for workshop in workshops %}
+        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
+            <div class="mb-2 mb-md-0">
+                <h5 class="mb-1"><a href="{% url 'workshop-detail' workshop.pk %}">{{ workshop.title }}</a></h5>
+                <p class="mb-1">
+                    <strong>{% trans "Date:" %}</strong> {{ workshop.start_date|date:"d.m.Y H:i" }} – {{ workshop.end_date|date:"d.m.Y H:i" }}<br>
+                    <strong>{% trans "Public:" %}</strong> {{ workshop.public|yesno:"Ja,Nein" }}
+                </p>
+            </div>
+            <div>
+                <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
+                    <a href="{% url 'workshop-detail' workshop.pk %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span></a>
+                    <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-secondary btn-sm"><i class="bi bi-pencil-square">
+                        </i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span></a>
+                    <a href="{% url 'workshop-delete' workshop.pk %}" class="btn btn-danger btn-sm"><i class="bi bi-trash">
+                        </i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span></a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-warning" role="alert">
+    {% trans "No workshops found." %}
+</div>
+{% endif %}
 {% endblock %}
