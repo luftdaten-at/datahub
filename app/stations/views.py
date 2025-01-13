@@ -1,10 +1,12 @@
 import requests
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from collections import defaultdict
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.http import Http404
 from django.conf import settings
-from main.enums import Dimension, SensorModel, OutputFormat, Precision, Order
+from main.enums import OutputFormat, Precision, Order
+from requests.exceptions import HTTPError, RequestException
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
@@ -61,33 +63,70 @@ def StationDetailView(request, pk):
 
 def StationListView(request):
     """
-    max_station: List[Tuple[device,time_measured,dimension,value]]
-    min_stations: List[Tuple[device,time_measured,dimension,value]]
+    Fetches two lists: stations with the highest PM2.5 values and 
+    stations with the lowest PM2.5 values.
     """
-
     url_min = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
     url_max = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
-    
-    resp_min = requests.get(url_min)
-    resp_max = requests.get(url_max)
 
-    # TODO: try catch
-    resp_min.raise_for_status()
-    resp_max.raise_for_status()
+    error_message = None
+    try:
+        resp_min = requests.get(url_min)
+        resp_max = requests.get(url_max)
 
-    min_stations = [
-        line.split(",") 
-        for i, line in enumerate(resp_min.text.splitlines())
+        # Raise HTTPError for bad responses
+        resp_min.raise_for_status()
+        resp_max.raise_for_status()
+
+        # Skip header line (i == 0)
+        min_stations = [
+            line.split(",") 
+            for i, line in enumerate(resp_min.text.splitlines())
             if i
-    ]
-
-    max_stations = [
-        line.split(",") 
-        for i, line in enumerate(resp_max.text.splitlines())
+        ]
+        max_stations = [
+            line.split(",") 
+            for i, line in enumerate(resp_max.text.splitlines())
             if i
-    ]
+        ]
 
-    return render(request, 'stations/list.html', {
-        'top_stations': max_stations,
-        'lowest_stations': min_stations,
-    })
+    except (HTTPError, RequestException) as e:
+        # Instead of raising a 404, store an error message in the context.
+        error_message = "There was an error fetching station data: 404."
+        # Optionally, you can log the error:
+        print(f"Error fetching station data: {e}")
+        min_stations = []
+        max_stations = []
+
+    # Paginate each list separately (example: 5 stations per page)
+    paginator_top = Paginator(max_stations, 5)
+    paginator_low = Paginator(min_stations, 5)
+
+    page_top = request.GET.get('page_top')
+    page_low = request.GET.get('page_low')
+
+    try:
+        top_stations_page = paginator_top.page(page_top)
+    except PageNotAnInteger:
+        top_stations_page = paginator_top.page(1)
+    except EmptyPage:
+        top_stations_page = paginator_top.page(paginator_top.num_pages)
+
+    try:
+        lowest_stations_page = paginator_low.page(page_low)
+    except PageNotAnInteger:
+        lowest_stations_page = paginator_low.page(1)
+    except EmptyPage:
+        lowest_stations_page = paginator_low.page(paginator_low.num_pages)
+
+    context = {
+        'top_stations': top_stations_page,
+        'lowest_stations': lowest_stations_page,
+        'paginator_top': paginator_top,
+        'paginator_low': paginator_low,
+        'page_top': top_stations_page,
+        'page_low': lowest_stations_page,
+        'error': error_message,
+    }
+
+    return render(request, 'stations/list.html', context)

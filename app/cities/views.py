@@ -50,18 +50,24 @@ def CitiesDetailView(request, pk):
 
 def CitiesListView(request):
     api_url = f"{settings.API_URL}/city/all"
-    
+    error_message = None
+    cities = []
+
     try:
         # Perform the GET request
         response = requests.get(api_url)
         response.raise_for_status()  # Raise an error for unsuccessful requests
         data = response.json()  # Parse JSON response
-        
+
         # Extract and sort the list of cities alphabetically by name
         cities = data.get("cities", [])
         cities = sorted(cities, key=lambda city: city.get("name", "").lower())  # Sort case-insensitively
-    
-    except requests.exceptions.HTTPError as err:
-        raise Http404(f"Cities not found.")
 
-    return render(request, "cities/list.html", {"cities": cities})
+    except requests.exceptions.HTTPError as err:
+        # Instead of raising a 404, store an error message to be shown in the template.
+        error_message = "There was an error fetching the city data: 404."
+    except requests.exceptions.RequestException as err:
+        # Catch any other request exceptions that might occur.
+        error_message = "There was an error fetching the city data."
+
+    return render(request, "cities/list.html", {"cities": cities, "error": error_message})
