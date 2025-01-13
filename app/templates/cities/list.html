@@ -8,10 +8,25 @@
 {% endblock styles %}
 
 {% block content %}
-<h2>{% trans "Cities and municipalities" %}</h2>
-<p>
-    {% for city in cities %}
-        <a href="/cities/{{ city.slug }}">{{ city.name }}</a> ({{ city.country.name }}){% if not forloop.last %}, {% endif %}
-    {% endfor %}
-</p>
+<h2 class="mb-4 mt-5">{% trans "Cities and municipalities" %}</h2>
+
+{% if error %}
+  <div class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+{% endif %}
+
+{% if cities %}
+  <p>
+      {% for city in cities %}
+          <a href="/cities/{{ city.slug }}">{{ city.name }}</a> ({{ city.country.name }}){% if not forloop.last %}, {% endif %}
+      {% endfor %}
+  </p>
+{% else %}
+  {% if not error %}
+    <div class="alert alert-info" role="alert">
+      {% trans "No cities available." %}
+    </div>
+  {% endif %}
+{% endif %}
 {% endblock content %}
