@@ -52,11 +52,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'cities-list' %}">{% trans "Cities" %}</a>
                         </li>
-                        {% if user.is_authenticated and user.is_superuser %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'device-list' %}">{% trans "Devices" %}</a>
-                            </li>
-                        {% endif %}
                     {% endif %}
                 </ul>
                 <!-- Right-side Navigation Items -->
@@ -90,11 +85,17 @@
                                     </a>
                                 </li>
                                 {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at"  %}
-                                    <li>
-                                        <a class="dropdown-item" href="{% url 'workshops-my' %}">
-                                            {% trans "My Workshops" %}
-                                        </a>
-                                    </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'workshops-my' %}">
+                                        {% trans "My Workshops" %}
+                                    </a>
+                                </li>
+                                {% endif %}
+                                {% if user.is_authenticated and user.is_superuser %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'device-list' %}">{% trans "Devices" %}</a>
+                                </li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
