@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
         {% block title %}
-            {% if host == "arbeitsplatz.luftdaten.at" %}
+            {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
                 {% trans "Clean air at the workplace" %}
             {% else %}
                 {% trans "Luftdaten.at Datahub" %}
@@ -26,7 +26,7 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
         <div class="container-fluid">
-            {% if host == "arbeitsplatz.luftdaten.at" %}
+            {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
                 <a class="navbar-brand" href="{% url 'home' %}">
                     {% trans "Clean air at the workplace" %}
                 </a>
@@ -42,7 +42,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    {% if host != "arbeitsplatz.luftdaten.at" %}
+                    {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at" %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'workshops-list' %}">{% trans "Workshops" %}</a>
                         </li>
@@ -89,7 +89,7 @@
                                         {% trans "My Campaigns" %}
                                     </a>
                                 </li>
-                                {% if host != "arbeitsplatz.luftdaten.at" %}
+                                {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at"  %}
                                     <li>
                                         <a class="dropdown-item" href="{% url 'workshops-my' %}">
                                             {% trans "My Workshops" %}

@@ -5,7 +5,7 @@
 {% block title %}Luftdaten.at Datahub{% endblock title %}
 
 {% block styles %}
-    {% if host == "arbeitsplatz.luftdaten.at" %}
+    {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
     {% else %}
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
@@ -21,7 +21,7 @@
 
 
 {% block map %}
-    {% if host == "arbeitsplatz.luftdaten.at" %}
+    {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
     {% else %}
     <div class=".container-fluid">
         <div class="position-absolute top-0 end-0 card"
@@ -44,7 +44,7 @@
 {% endblock map %}
 
 {% block content %}
-    {% if host == "arbeitsplatz.luftdaten.at" %}
+    {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
     <div class="row">
         <div class="col-md-9">
             <h2>Saubere Luft am Arbeitsplatz</h2>
