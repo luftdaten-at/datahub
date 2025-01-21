@@ -11,7 +11,7 @@ from django.urls import reverse_lazy
 
 
 from .models import Campaign, Room
-from .forms import CampaignForm, CampaignUserForm, RoomDeviceForm
+from .forms import CampaignForm, CampaignUserForm, RoomDeviceForm, UserDeviceForm
 from accounts.models import CustomUser
 from main.enums import Dimension, SensorModel
 
@@ -442,3 +442,28 @@ class RoomUpdateView(LoginRequiredMixin, UpdateView):
     
     def get_success_url(self):
         return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
+    
+
+class ParticipantsAddDevicesView(LoginRequiredMixin, UpdateView):
+    model = CustomUser
+    form_class = UserDeviceForm
+    template_name = 'campaigns/participants/add_device.html'
+
+    def get_success_url(self):
+        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
+    
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        if self.request.user != self.campaign.owner:
+            raise PermissionDenied("You are not allowed to create a Room")
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial['campaign'] = self.campaign
+        initial['user'] = self.object
+        return initial 
