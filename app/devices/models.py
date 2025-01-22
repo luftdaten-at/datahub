@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from organizations.models import Organization
 from campaign.models import Room
+from accounts.models import CustomUser
 
 
 class Device(models.Model):
@@ -16,8 +17,9 @@ class Device(models.Model):
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     api_key = models.CharField(max_length=64, null=True)
-    current_room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='current_devices', null=True)
-    current_organization = models.ForeignKey(Organization, on_delete=models.CASCADE, related_name='current_devices', null=True)
+    current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL)
+    current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL)
+    current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL)
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
@@ -80,6 +82,7 @@ class Measurement(models.Model):
     sensor_model = models.IntegerField()
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, related_name='measurements')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='measurements')
 
     def __str__(self):
         return f'Measurement {self.id} from Device {self.device.id}'

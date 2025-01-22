@@ -138,3 +138,57 @@ class RoomDeviceForm(forms.ModelForm):
             room.save()
 
         return room
+
+
+class UserDeviceForm(forms.ModelForm):
+    current_devices = (forms.ModelMultipleChoiceField(label='',
+             queryset=Device.objects.none(),
+             widget=FilteredSelectMultiple(
+                verbose_name='Devices',
+                is_stacked=False,
+             ),
+             required=False))
+
+    class Meta:
+        model = Room 
+        fields = ['current_devices']
+    
+    class Media:
+        css = {
+            'all': ('/static/admin/css/widgets.css', '/static/css/adminoverrides.css', ),
+        } # custom css
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Get the user from the passed arguments (initial data)
+        self.user = kwargs.get('initial', {}).get('user', None)
+        self.campaign = kwargs.get('initial', {}).get('campaign', None)
+
+        # query set should be a list of all devices in the same organisation as the room is
+        self.fields['current_devices'].queryset = self.campaign.organization.current_devices.all()
+        self.initial['current_devices'] = self.user.current_devices.all()
+        
+        # Initialize form helper
+        self.helper = FormHelper(self)
+        self.helper.add_input(Submit('submit', 'Save'))
+
+    def save(self, commit=True):
+        # Save the room instance
+        user = super().save(commit=commit)
+
+        # Get the selected devices
+        selected_devices = self.cleaned_data['current_devices']
+
+        # Update the ForeignKey for the devices
+        if commit:
+            # Unassign the devices previously linked to the room
+            Device.objects.filter(current_user=user).update(current_user=None)
+
+            # Assign the selected devices to the current room
+            selected_devices.update(current_user=user)
+
+            # Save the room
+            user.save()
+
+        return user
