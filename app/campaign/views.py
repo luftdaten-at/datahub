@@ -261,7 +261,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
                     for m in measurements
                         for val in m.values.all()
                             if val.dimension == target_dim
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.UVS)
+                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
             ]
             for i, x in enumerate(data):
                 data_24h[i + 1].append(statistics.mean(x) if x else 0)
@@ -358,7 +358,7 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
                     for m in measurements
                         for val in m.values.all()
                             if val.dimension == target_dim
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
+                ] for target_dim in (Dimension.TEMPERATURE, Dimension.UVS)
             ]
             for i, x in enumerate(data):
                 data_24h[i + 1].append(statistics.mean(x) if x else 0)
