@@ -453,7 +453,7 @@ class ParticipantsAddDevicesView(LoginRequiredMixin, UpdateView):
     template_name = 'campaigns/participants/add_device.html'
 
     def get_success_url(self):
-        return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
+        return reverse_lazy('participants-detail', kwargs={'pk': self.campaign.pk, 'user': self.object.pk})
     
     def dispatch(self, request, *args, **kwargs):
         self.campaign = Campaign.objects.get(pk=kwargs['campaign_pk'])
