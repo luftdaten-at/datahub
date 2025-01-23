@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'oauth2_provider',
+    'auditlog',
     # Local
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
