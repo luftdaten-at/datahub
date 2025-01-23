@@ -38,11 +38,13 @@ def DashboardView(request):
             'user': request.user,
             'member_campaigns': Campaign.objects.filter(users=request.user),
             'owner_campaigns': Campaign.objects.filter(owner=request.user),
-            'campaigns': Campaign.objects.all() if request.user.is_superuser else context['member_campaigns'],
             'member_organizations': Organization.objects.filter(users=request.user),
             'owner_organizations': Organization.objects.filter(owner=request.user),
-            'organizations': context['member_organizations'] if not request.user.is_superuser else Organization.objects.all()
         }
+
+        context['campaigns'] = Campaign.objects.all() if request.user.is_superuser else context['member_campaigns']
+        context['organizations'] = context['member_organizations'] if not request.user.is_superuser else Organization.objects.all()
+
         return render(request, "account/dashboard.html", context)
     else:
         # Process the login form for unauthenticated users
