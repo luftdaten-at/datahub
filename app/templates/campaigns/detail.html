@@ -95,7 +95,6 @@
                     <td>{{ user.email }}</td>
                     <td>
                       <div class="text-end d-flex flex-column flex-md-row gap-2 justify-content-end">
-                        <a href="{% url 'user-add-device' campaign.pk user.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Device" %}</a>
                         <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-eye"></i>
                             <span class="d-none d-sm-inline">{% trans "Details" %}</span>

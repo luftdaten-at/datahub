@@ -7,6 +7,7 @@ from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 
 
@@ -176,7 +177,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
             return room
         if not room.campaign.users.filter(id=user.id).exists():
             raise PermissionDenied('You are not allowed to update this Campaign')
-        return room 
+        return room
 
     def get_context_data(self, **kwargs):
         # Get the default context data
@@ -284,22 +285,22 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
 
 class ParticipantDetailView(LoginRequiredMixin, DetailView):
     model = CustomUser
-    template_name = 'campaigns/participant/detail.html'
+    template_name = 'campaigns/participants/detail.html'
     context_object_name = 'participant'
     pk_url_kwarg = 'user'
 
-    def test_func(self):
-        # Define permission logic. For example, only superusers or campaign organizers can view.
-        user = self.request.user
-        return user.is_authenticated and user.is_superuser  # Adjust as needed
 
-    def get_queryset(self):
-        """
-        Optionally, restrict the queryset to users associated with the campaign.
-        This ensures that users not part of the campaign cannot access details.
-        """
-        campaign_pk = self.kwargs.get('pk')  # Campaign's pk from URL
-        return CustomUser.objects.filter(campaigns__pk=campaign_pk)  # Adjust the relationship as per your models
+    def dispatch(self, request, *args, **kwargs):
+        self.campaign = get_object_or_404(Campaign, pk=kwargs['pk'])
+
+        if self.request.user.is_superuser:
+            return super().dispatch(request, *args, **kwargs)
+        # only users in campaign
+        if not self.campaign.users.filter(id = self.request.user.id).exists():
+            raise PermissionDenied("You are not allowed to create a Room")
+
+        return super().dispatch(request, *args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -336,8 +337,8 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
 
         # VOC Index
-        current_uvi = get_current_mean(Dimension.UVI)
-        uvi_color = Dimension.get_color(Dimension.UVI, current_uvi) if current_uvi else None
+        current_uvi = get_current_mean(Dimension.UVS)
+        uvi_color = Dimension.get_color(Dimension.UVS, current_uvi) if current_uvi else None
 
         # data 24h
         now = datetime.utcnow()
@@ -371,6 +372,8 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi else None
         context['uvi_color'] = uvi_color
         context['data_24h'] = data_24h
+
+        context['campaign'] = self.campaign
 
         return context
 
