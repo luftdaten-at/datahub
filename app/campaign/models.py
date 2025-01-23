@@ -1,7 +1,8 @@
-from django.db import models
-from django.conf import settings
 import string
 import random
+from django.db import models
+from django.conf import settings
+from auditlog.registry import auditlog
 
 class Campaign(models.Model):
     """
@@ -45,3 +46,7 @@ class Room(models.Model):
 
     def __str__(self):
         return f'{self.name} in {self.campaign}'
+
+
+auditlog.register(Campaign)
+auditlog.register(Room)
