@@ -3,6 +3,7 @@ import random
 from django.db import models
 from django.conf import settings
 from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
 
 class Campaign(models.Model):
     """
@@ -15,6 +16,7 @@ class Campaign(models.Model):
     public = models.BooleanField(default=True)
     id_token = models.CharField(max_length=8, null=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='campaigns')
+    history = AuditlogHistoryField()
     
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -40,6 +42,7 @@ class Room(models.Model):
     """
     campaign = models.ForeignKey('Campaign', on_delete=models.CASCADE, related_name='rooms')
     name = models.CharField(max_length=255)
+    history = AuditlogHistoryField()
 
     class Meta:
         unique_together = ('campaign', 'name')

@@ -86,6 +86,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',  # Tracks the actor
 ]
 
 ROOT_URLCONF = 'main.urls'
