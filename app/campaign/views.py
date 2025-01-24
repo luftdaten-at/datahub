@@ -9,6 +9,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.db.models import Max
 
 
 from .models import Campaign, Room
@@ -188,12 +189,12 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         # context['additional_data'] = Device.objects.filter(room=self.object)  # Example of another custom variable
 
         room = self.object
-        measurements = room.measurements.all()
 
-        measurements = [
-            m for m in measurements
-            if m.time_measured == room.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
-        ]
+        max_time_measured_per_device = room.measurements.values('device').annotate(max_time_measured=Max('time_measured'))
+
+        measurements = []
+        for entry in max_time_measured_per_device:
+            measurements.extend(room.measurements.filter(device = entry['device'], time_measured = entry['max_time_measured']).all())
 
         def get_current_mean(dimension):
             """
@@ -244,6 +245,8 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
+        data_24h = [[], [], [], [], []]
+        '''
         # data 24h
         points = defaultdict(list)
 
@@ -268,6 +271,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
             #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
 
         # group by time measured mean over dim
+        '''
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
