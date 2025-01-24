@@ -1,5 +1,7 @@
 from django.conf import settings
 from django.db import models
+from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
 
 
 class Organization(models.Model):
@@ -9,6 +11,7 @@ class Organization(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='organizations')
+    history = AuditlogHistoryField()
 
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -33,9 +36,13 @@ class OrganizationInvitation(models.Model):
     expiring_date = models.DateField(null=True)
     email = models.EmailField()
     organization = models.ForeignKey('Organization', on_delete=models.CASCADE, related_name='invitations')
+    history = AuditlogHistoryField()
 
     class Meta:
         unique_together = ('email', 'organization')
 
     def __str__(self):
         return f'{self.email} {self.organization.name} {self.expiring_date}'
+
+auditlog.register(Organization)
+auditlog.register(OrganizationInvitation)
