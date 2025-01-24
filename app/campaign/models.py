@@ -52,4 +52,5 @@ class Room(models.Model):
 
 
 auditlog.register(Campaign)
+auditlog.register(Campaign.users.through)
 auditlog.register(Room)

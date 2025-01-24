@@ -172,7 +172,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset = None):
         room = super().get_object(queryset)
         user = self.request.user
-        
+
         if user.is_superuser:
             return room
         if not room.campaign.users.filter(id=user.id).exists():
