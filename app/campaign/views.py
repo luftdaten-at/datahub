@@ -9,7 +9,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
-from django.db.models import Max
+from django.db.models import Max, Q
 
 
 from .models import Campaign, Room
@@ -245,33 +245,29 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
-        data_24h = [[], [], [], [], []]
-        '''
+
+        #data_24h = [[], [], [], [], []]
         # data 24h
         points = defaultdict(list)
 
         measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
+
         for m in measurements:
             points[m.time_measured].append(m)
         
-        print([t.strftime("%H:%M") for t in points.keys()])
         data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
 
         for time_measured, measurements in points.items():
-
             data = [
                 [val.value
                     for m in measurements
-                        for val in m.values.all()
-                            if val.dimension == target_dim
+                        for val in m.values.filter(dimension = target_dim).all()
                 ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
             ]
             for i, x in enumerate(data):
                 data_24h[i + 1].append(statistics.mean(x) if x else 0)
             #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
-
         # group by time measured mean over dim
-        '''
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
