@@ -316,17 +316,15 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
 
         return super().dispatch(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        participant = self.object
-        measurements = participant.measurements.all()
-        
+        user = self.object
 
-        measurements = [
-            m for m in measurements
-            if m.time_measured == participant.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
-        ]
+        max_time_measured_per_device = user.measurements.values('device').annotate(max_time_measured=Max('time_measured'))
+
+        measurements = []
+        for entry in max_time_measured_per_device:
+            measurements.extend(user.measurements.filter(device = entry['device'], time_measured = entry['max_time_measured']).all())
 
         def get_current_mean(dimension):
             """
@@ -355,37 +353,48 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         current_uvi = get_current_mean(Dimension.UVS)
         uvi_color = Dimension.get_color(Dimension.UVS, current_uvi) if current_uvi else None
 
-        # data 24h
-        now = datetime.utcnow()
-        points = defaultdict(list)
 
-        measurements = participant.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
-        for m in measurements:
-            points[m.time_measured].append(m)
+        # dimensions to be displayed
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVS)
+
+        all_values = Values.objects.filter(
+            measurement__user = user
+        ).filter(
+            # Get only the values with target dimension
+            reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
+        ).all()
+
+        # prepare a dict of all measurements to time measured
+        d = {}
+        # possible to filter just the measurements that have target dim ?
+        for m in user.measurements.all():
+            d[m.id] = m.time_measured
+
+        # dim, time, values
+        points = defaultdict(lambda: defaultdict(list))
+        times = set()
+
+        for val in all_values:
+            points[val.dimension][d[val.measurement_id]].append(val.value)
+            times.add(d[val.measurement_id])
+
+        times = list(sorted(times))
+        id_times = {time: i for i, time in enumerate(times)}
+        id_dim = {dim: i for i, dim in enumerate(target_dimensions)}
+
+        data_24h = [[0 for _ in range(len(times))] for _ in range(len(target_dimensions))]
         
-        print([t.strftime("%H:%M") for t in points.keys()])
-        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
+        for dim, dd in points.items():
+            for time, val_list in dd.items():
+                data_24h[id_dim[dim]][id_times[time]] = statistics.mean(val_list)
 
-        for time_measured, measurements in points.items():
-
-            data = [
-                [val.value
-                    for m in measurements
-                        for val in m.values.all()
-                            if val.dimension == target_dim
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.UVS)
-            ]
-            for i, x in enumerate(data):
-                data_24h[i + 1].append(statistics.mean(x) if x else 0)
-            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
-
-        # group by time measured mean over dim
+        data_24h = [[t.strftime("%H:%M") for t in times]] + data_24h
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
         context['temperature_color'] = temperature_color
-        context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi else None
-        context['uvi_color'] = uvi_color
+        context['current_tvoc'] = f'{current_uvi:.2f}' if current_uvi else None
+        context['tvoc_color'] = uvi_color 
         context['data_24h'] = data_24h
 
         context['campaign'] = self.campaign
