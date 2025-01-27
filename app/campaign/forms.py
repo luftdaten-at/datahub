@@ -185,7 +185,7 @@ class UserDeviceForm(forms.ModelForm):
         # Update the ForeignKey for the devices
         if commit:
             # Unassign the devices previously linked to the room
-            Device.objects.filter(current_user=user).update(current_user=None)
+            Device.objects.filter(current_user=user, current_campaign=self.campaign).update(current_user=None)
 
             # Assign the selected devices to the current room
             selected_devices.update(current_user=user)
