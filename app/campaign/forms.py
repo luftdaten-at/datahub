@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.contrib.admin.widgets import FilteredSelectMultiple
+from django.db.models import Q
 
 from organizations.models import Organization
 
@@ -70,11 +71,19 @@ class CampaignUserForm(forms.ModelForm):
         self.campaign = kwargs.get('initial', {}).get('campaign', None)
 
         if self.campaign:
-            self.fields['users'].queryset = self.campaign.organization.users.all()
+            self.fields['users'].queryset = self.campaign.organization.users.filter(~Q(id = self.campaign.owner.id)).all()
         
         # Initialize form helper
         self.helper = FormHelper(self)
         self.helper.add_input(Submit('submit', 'Save'))
+    
+    def save(self, commit=True):
+        campaign = super().save(commit=commit)
+                
+        # set owner to be member
+        self.campaign.users.add(self.campaign.owner)
+
+        return campaign
 
 
 class OrganizationForm(forms.ModelForm):
