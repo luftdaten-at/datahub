@@ -133,6 +133,8 @@ class RoomDeviceForm(forms.ModelForm):
 
             # Assign the selected devices to the current room
             selected_devices.update(current_room=room)
+            # Update campaign
+            selected_devices.update(current_campaign=room.campaign)
 
             # Save the room
             room.save()
@@ -165,7 +167,7 @@ class UserDeviceForm(forms.ModelForm):
         self.user = kwargs.get('initial', {}).get('user', None)
         self.campaign = kwargs.get('initial', {}).get('campaign', None)
 
-        # query set should be a list of all devices in the same organisation as the room is
+        # query set should be a list of all devices in the same organisation as the campaign is
         self.fields['current_devices'].queryset = self.campaign.organization.current_devices.all()
         self.initial['current_devices'] = self.user.current_devices.all()
         
@@ -187,6 +189,8 @@ class UserDeviceForm(forms.ModelForm):
 
             # Assign the selected devices to the current room
             selected_devices.update(current_user=user)
+            # Update campaign
+            selected_devices.update(current_campaign=self.campaign)
 
             # Save the room
             user.save()
