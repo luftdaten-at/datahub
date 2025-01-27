@@ -13,9 +13,11 @@ from django.db.models import Max, Q
 
 
 from .models import Campaign, Room
+from devices.models import Values
 from .forms import CampaignForm, CampaignUserForm, RoomDeviceForm, UserDeviceForm
 from accounts.models import CustomUser
 from main.enums import Dimension, SensorModel
+from functools import reduce
 
 
 class CampaignsHomeView(ListView):
@@ -246,28 +248,41 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
 
-        #data_24h = [[], [], [], [], []]
-        # data 24h
-        points = defaultdict(list)
+        # dimensions to be displayed
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
 
-        measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
+        all_values = Values.objects.filter(
+            measurement__room = room
+        ).filter(
+            # Get only the values with target dimension
+            reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
+        ).all()
 
-        for m in measurements:
-            points[m.time_measured].append(m)
+        # prepare a dict of all measurements to time measured
+        d = {}
+        # possible to filter just the measurements that have target dim ?
+        for m in room.measurements.all():
+            d[m.id] = m.time_measured
+
+        # dim, time, values
+        points = defaultdict(lambda: defaultdict(list))
+        times = set()
+
+        for val in all_values:
+            points[val.dimension][d[val.measurement_id]].append(val.value)
+            times.add(d[val.measurement_id])
+
+        times = list(sorted(times))
+        id_times = {time: i for i, time in enumerate(times)}
+        id_dim = {dim: i for i, dim in enumerate(target_dimensions)}
+
+        data_24h = [[0 for _ in range(len(times))] for _ in range(len(target_dimensions))]
         
-        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
+        for dim, dd in points.items():
+            for time, val_list in dd.items():
+                data_24h[id_dim[dim]][id_times[time]] = statistics.mean(val_list)
 
-        for time_measured, measurements in points.items():
-            data = [
-                [val.value
-                    for m in measurements
-                        for val in m.values.filter(dimension = target_dim).all()
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
-            ]
-            for i, x in enumerate(data):
-                data_24h[i + 1].append(statistics.mean(x) if x else 0)
-            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
-        # group by time measured mean over dim
+        data_24h = [[t.strftime("%H:%M") for t in times]] + data_24h
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None

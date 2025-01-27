@@ -42,6 +42,7 @@ def get_or_create_station(station_info: dict):
 
     # update firmware field
     station.firmware = station_info['firmware']
+    station.model = station_info['model']
     
     station.save()
     station_status.save()
