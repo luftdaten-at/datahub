@@ -45,14 +45,12 @@
                             </td>
                             <td>{{ device.current_organization.name|default:_("N/A") }}</td>
                             <td class="text-end">
-                                <div class="btn-group" role="group" aria-label="{% trans 'Actions' %}">
-                                    <a href="{% url 'device-detail' device.pk %}" class="btn btn-primary btn-sm" title="{% trans 'View Details' %}">
-                                        <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Detail" %}</span>
-                                    </a>
-                                    <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
-                                        <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
-                                    </a>
-                                </div>
+                                <a href="{% url 'device-detail' device.pk %}" class="btn btn-primary btn-sm" title="{% trans 'View Details' %}">
+                                    <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Detail" %}</span>
+                                </a>
+                                <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
+                                    <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}
