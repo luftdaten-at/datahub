@@ -352,6 +352,7 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         all_values = Values.objects.filter(
             measurement__time_measured__gt = start_time,
             measurement__user = user,
+            measurement__device__current_campaign = self.campaign
         ).filter(
             # Get only the values with target dimension
             reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
@@ -381,6 +382,7 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         context['labels'] = labels
 
         context['campaign'] = self.campaign
+        context['device_list'] = user.current_devices.filter(current_campaign=self.campaign)
 
         return context
 

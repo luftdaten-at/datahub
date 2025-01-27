@@ -61,7 +61,7 @@
                 </tr>
               </thead>
               <tbody>
-                {% for device in participant.current_devices.all %}
+                {% for device in device_list %}
                   <tr>
                     <td>{{ device.id }}</td>
                     <td>{{ device.device_name }}</td>
