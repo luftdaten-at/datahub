@@ -251,6 +251,13 @@ class LdProduct():
     AIR_BADGE = 4
     AIR_BIKE = 5
 
+    _names = {
+        AIR_AROUND: "Air Around",
+        AIR_CUBE: "Air Cube",
+        AIR_STATION: "Air Station",
+        AIR_BADGE: "Air Badge",
+        AIR_BIKE: "Air Bike",
+    }
 
 class Source():
     LD = 1
