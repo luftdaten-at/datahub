@@ -4,6 +4,8 @@ import string
 import random
 
 from devices.models import Device
+from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
 
 class Workshop(models.Model):
     name = models.CharField(max_length=6, unique=True, primary_key=True, blank=True, editable=False)
@@ -20,6 +22,9 @@ class Workshop(models.Model):
     mapbox_bottom_left_lon = models.FloatField(null=True, blank=True)
     mapbox_bottom_right_lat = models.FloatField(null=True, blank=True)
     mapbox_bottom_right_lon = models.FloatField(null=True, blank=True)
+
+    history = AuditlogHistoryField()
+
     owner = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -52,6 +57,10 @@ class Participant(models.Model):
     workshop = models.ForeignKey(Workshop, on_delete=models.SET_NULL, null=True)
     device = models.ForeignKey(Device, on_delete=models.SET_NULL, null=True)
 
+    history = AuditlogHistoryField()
+
     def __str__(self):
         return self.name
-    
+
+auditlog.register(Workshop) 
+auditlog.register(Participant)
