@@ -100,9 +100,9 @@
 </div>
 
 <script>
-    var dataTemperature = {{ data_24h.1 }};
-    var dataCO2         = {{ data_24h.3 }};
-    var labels          = {{ data_24h.0|safe }};
+    var dataTemperature = {{ data_24h.0|safe }};
+    var dataCO2         = {{ data_24h.2|safe }};
+    var labels          = {{ labels|safe }};
 
     // Erstelle das Chart
     new Chart(document.getElementById('chart-24h'), {

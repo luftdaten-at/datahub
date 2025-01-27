@@ -1,6 +1,7 @@
 import statistics
+import numpy as np
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from django.core.exceptions import PermissionDenied
 from django.views.generic.detail import DetailView
@@ -247,42 +248,37 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
+        # start of new version
 
         # dimensions to be displayed
         target_dimensions = (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
 
+        # TODO change to 1 day
+        time_range = timedelta(days=1)
+        start_time = datetime.now(timezone.utc) - time_range
+
         all_values = Values.objects.filter(
-            measurement__room = room
+            measurement__time_measured__gt = start_time,
+            measurement__room = room,
         ).filter(
             # Get only the values with target dimension
             reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
-        ).all()
+        ).values(
+            'dimension',
+            'value',
+            'measurement__time_measured'
+        )
 
-        # prepare a dict of all measurements to time measured
-        d = {}
-        # possible to filter just the measurements that have target dim ?
-        for m in room.measurements.all():
-            d[m.id] = m.time_measured
-
-        # dim, time, values
-        points = defaultdict(lambda: defaultdict(list))
-        times = set()
+        sum_24h = np.zeros((len(target_dimensions), int(time_range.total_seconds() // 60)))
+        cnt_24h = np.zeros_like(sum_24h)
+        dim_id = {dim: i for i, dim in enumerate(target_dimensions)}
 
         for val in all_values:
-            points[val.dimension][d[val.measurement_id]].append(val.value)
-            times.add(d[val.measurement_id])
-
-        times = list(sorted(times))
-        id_times = {time: i for i, time in enumerate(times)}
-        id_dim = {dim: i for i, dim in enumerate(target_dimensions)}
-
-        data_24h = [[0 for _ in range(len(times))] for _ in range(len(target_dimensions))]
+            sum_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += val['value']
+            cnt_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += 1
         
-        for dim, dd in points.items():
-            for time, val_list in dd.items():
-                data_24h[id_dim[dim]][id_times[time]] = statistics.mean(val_list)
-
-        data_24h = [[t.strftime("%H:%M") for t in times]] + data_24h
+        data_24h = sum_24h / cnt_24h
+        labels = [(start_time + timedelta(minutes=i)).strftime("%H:%M") for i in range(int(time_range.total_seconds() // 60))]
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
@@ -293,7 +289,9 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         context['co2_color'] = co2_color  
         context['current_tvoc'] = f'{current_tvoc:.2f}' if current_tvoc else None
         context['tvoc_color'] = tvoc_color
-        context['data_24h'] = data_24h
+        context['data_24h'] = np.nan_to_num(data_24h, nan=0).tolist()
+        context['labels'] = labels
+
 
         return context
 
@@ -356,6 +354,20 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
 
         # dimensions to be displayed
         target_dimensions = (Dimension.TEMPERATURE, Dimension.UVS)
+        
+        # TODO change to 1 day
+        time_range = datetime.utcnow() - timedelta(days=4)
+        q = Values.objects.filter(
+            measurement__time_measured__gte = time_range,
+            measurement__user = user,
+        ).filter(
+            # Get only the values with target dimension
+            reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
+        ).values(
+            'dimension',
+            'value',
+            'measurement__time_measured'
+        )
 
         all_values = Values.objects.filter(
             measurement__user = user

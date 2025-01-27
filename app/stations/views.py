@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from django.shortcuts import render
 from django.http import Http404
@@ -31,7 +31,7 @@ def StationDetailView(request, pk):
                 'coordinates': geometry.get('coordinates'),
                 'sensors': [],
             }
-            current_time = datetime.utcnow().replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
+            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
             time_minus_48h = current_time - timedelta(hours=47)
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')

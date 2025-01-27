@@ -47,3 +47,4 @@ uvicorn==0.31.1
 whitenoise==6.7.0
 django-auditlog
 django-debug-toolbar
+numpy
