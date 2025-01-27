@@ -1,6 +1,7 @@
 import statistics
+import numpy as np
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from django.core.exceptions import PermissionDenied
 from django.views.generic.detail import DetailView
@@ -9,12 +10,15 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.db.models import Max, Q
 
 
 from .models import Campaign, Room
+from devices.models import Values
 from .forms import CampaignForm, CampaignUserForm, RoomDeviceForm, UserDeviceForm
 from accounts.models import CustomUser
 from main.enums import Dimension, SensorModel
+from functools import reduce
 
 
 class CampaignsHomeView(ListView):
@@ -172,7 +176,7 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
     def get_object(self, queryset = None):
         room = super().get_object(queryset)
         user = self.request.user
-        
+
         if user.is_superuser:
             return room
         if not room.campaign.users.filter(id=user.id).exists():
@@ -183,17 +187,13 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         # Get the default context data
         context = super().get_context_data(**kwargs)
 
-        # Add custom variables to the context
-        # context['custom_variable'] = 'Your custom value here'
-        # context['additional_data'] = Device.objects.filter(room=self.object)  # Example of another custom variable
-
         room = self.object
-        measurements = room.measurements.all()
 
-        measurements = [
-            m for m in measurements
-            if m.time_measured == room.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
-        ]
+        max_time_measured_per_device = room.measurements.values('device').annotate(max_time_measured=Max('time_measured'))
+
+        measurements = []
+        for entry in max_time_measured_per_device:
+            measurements.extend(room.measurements.filter(device = entry['device'], time_measured = entry['max_time_measured']).all())
 
         def get_current_mean(dimension):
             """
@@ -244,30 +244,33 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
-        # data 24h
-        points = defaultdict(list)
+        # dimensions to be displayed
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
+        time_range = timedelta(days=1)
+        start_time = datetime.now(timezone.utc) - time_range
 
-        measurements = room.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
-        for m in measurements:
-            points[m.time_measured].append(m)
+        all_values = Values.objects.filter(
+            measurement__time_measured__gt = start_time,
+            measurement__room = room,
+        ).filter(
+            # Get only the values with target dimension
+            reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
+        ).values(
+            'dimension',
+            'value',
+            'measurement__time_measured'
+        )
+
+        sum_24h = np.zeros((len(target_dimensions), int(time_range.total_seconds() // 60)))
+        cnt_24h = np.zeros_like(sum_24h)
+        dim_id = {dim: i for i, dim in enumerate(target_dimensions)}
+
+        for val in all_values:
+            sum_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += val['value']
+            cnt_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += 1
         
-        print([t.strftime("%H:%M") for t in points.keys()])
-        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
-
-        for time_measured, measurements in points.items():
-
-            data = [
-                [val.value
-                    for m in measurements
-                        for val in m.values.all()
-                            if val.dimension == target_dim
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.PM2_5, Dimension.CO2, Dimension.TVOC)
-            ]
-            for i, x in enumerate(data):
-                data_24h[i + 1].append(statistics.mean(x) if x else 0)
-            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
-
-        # group by time measured mean over dim
+        data_24h = sum_24h / cnt_24h
+        labels = [(start_time + timedelta(minutes=i)).strftime("%H:%M") for i in range(int(time_range.total_seconds() // 60))]
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
@@ -278,7 +281,9 @@ class RoomDetailView(LoginRequiredMixin, DetailView):
         context['co2_color'] = co2_color  
         context['current_tvoc'] = f'{current_tvoc:.2f}' if current_tvoc else None
         context['tvoc_color'] = tvoc_color
-        context['data_24h'] = data_24h
+        context['data_24h'] = np.nan_to_num(data_24h, nan=0).tolist()
+        context['labels'] = labels
+
 
         return context
 
@@ -301,17 +306,15 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
 
         return super().dispatch(request, *args, **kwargs)
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        participant = self.object
-        measurements = participant.measurements.all()
-        
+        user = self.object
 
-        measurements = [
-            m for m in measurements
-            if m.time_measured == participant.measurements.filter(device=m.device).order_by('-time_measured').first().time_measured
-        ]
+        max_time_measured_per_device = user.measurements.values('device').annotate(max_time_measured=Max('time_measured'))
+
+        measurements = []
+        for entry in max_time_measured_per_device:
+            measurements.extend(user.measurements.filter(device = entry['device'], time_measured = entry['max_time_measured']).all())
 
         def get_current_mean(dimension):
             """
@@ -340,40 +343,46 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         current_uvi = get_current_mean(Dimension.UVS)
         uvi_color = Dimension.get_color(Dimension.UVS, current_uvi) if current_uvi else None
 
-        # data 24h
-        now = datetime.utcnow()
-        points = defaultdict(list)
 
-        measurements = participant.measurements.filter(time_measured__gt = datetime.utcnow() - timedelta(days=1)).all()
-        for m in measurements:
-            points[m.time_measured].append(m)
+        # dimensions to be displayed
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVS)
+        time_range = timedelta(days=1)
+        start_time = datetime.now(timezone.utc) - time_range
+
+        all_values = Values.objects.filter(
+            measurement__time_measured__gt = start_time,
+            measurement__user = user,
+            measurement__device__current_campaign = self.campaign
+        ).filter(
+            # Get only the values with target dimension
+            reduce(lambda a, b: a | b, [Q(dimension = dim) for dim in target_dimensions], Q())
+        ).values(
+            'dimension',
+            'value',
+            'measurement__time_measured'
+        )
+
+        sum_24h = np.zeros((len(target_dimensions), int(time_range.total_seconds() // 60)))
+        cnt_24h = np.zeros_like(sum_24h)
+        dim_id = {dim: i for i, dim in enumerate(target_dimensions)}
+
+        for val in all_values:
+            sum_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += val['value']
+            cnt_24h[dim_id[val['dimension']]][int((val['measurement__time_measured'] - start_time).total_seconds() // 60)] += 1
         
-        print([t.strftime("%H:%M") for t in points.keys()])
-        data_24h = [[t.strftime("%H:%M") for t in points.keys()], [], [], [], []]
-
-        for time_measured, measurements in points.items():
-
-            data = [
-                [val.value
-                    for m in measurements
-                        for val in m.values.all()
-                            if val.dimension == target_dim
-                ] for target_dim in (Dimension.TEMPERATURE, Dimension.UVS)
-            ]
-            for i, x in enumerate(data):
-                data_24h[i + 1].append(statistics.mean(x) if x else 0)
-            #data_24h.append(tuple(statistics.mean(x) if x else None for x in data))
-
-        # group by time measured mean over dim
+        data_24h = sum_24h / cnt_24h
+        labels = [(start_time + timedelta(minutes=i)).strftime("%H:%M") for i in range(int(time_range.total_seconds() // 60))]
 
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
         context['temperature_color'] = temperature_color
-        context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi else None
-        context['uvi_color'] = uvi_color
-        context['data_24h'] = data_24h
+        context['current_tvoc'] = f'{current_uvi:.2f}' if current_uvi else None
+        context['tvoc_color'] = uvi_color 
+        context['data_24h'] = np.nan_to_num(data_24h, nan=0).tolist()
+        context['labels'] = labels
 
         context['campaign'] = self.campaign
+        context['device_list'] = user.current_devices.filter(current_campaign=self.campaign)
 
         return context
 

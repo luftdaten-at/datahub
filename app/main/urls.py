@@ -17,8 +17,11 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
 from django.views.i18n import JavaScriptCatalog
+from django.conf import settings
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from accounts.views import DashboardView
+
 
 urlpatterns = [
     path('campaign/admin/jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Add this line
@@ -41,3 +44,6 @@ urlpatterns = [
     # Include set_language URL
     path('i18n/', include('django.conf.urls.i18n')),
 )
+
+if settings.DEBUG:
+    urlpatterns += debug_toolbar_urls()
