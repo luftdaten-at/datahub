@@ -85,9 +85,9 @@
 </div>
 
 <script>
-    var dataTemperature = {{ data_24h.1 }};
-    var dataUVI         = {{ data_24h.2 }};
-    var labels          = {{ data_24h.0|safe }};
+    var dataTemperature = {{ data_24h.0 }};
+    var dataUVI         = {{ data_24h.1 }};
+    var labels          = {{ labels|safe }};
 
     // Erstelle das Chart
     new Chart(document.getElementById('chart-24h'), {
