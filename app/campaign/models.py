@@ -51,6 +51,5 @@ class Room(models.Model):
         return f'{self.name} in {self.campaign}'
 
 
-auditlog.register(Campaign)
-auditlog.register(Campaign.users.through)
+auditlog.register(Campaign, m2m_fields={'users'})
 auditlog.register(Room)

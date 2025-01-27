@@ -3,6 +3,7 @@ from django.utils import timezone
 from organizations.models import Organization
 from campaign.models import Room
 from accounts.models import CustomUser
+from campaign.models import Campaign
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
 
@@ -22,6 +23,7 @@ class Device(models.Model):
     current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL)
     current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL)
     current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL)
+    current_campaign = models.ForeignKey(Campaign, null=True, related_name='current_devices', on_delete=models.SET_NULL)
     history = AuditlogHistoryField()
 
     def __str__(self):
