@@ -44,5 +44,5 @@ class OrganizationInvitation(models.Model):
     def __str__(self):
         return f'{self.email} {self.organization.name} {self.expiring_date}'
 
-auditlog.register(Organization)
+auditlog.register(Organization, m2m_fields={'users'})
 auditlog.register(OrganizationInvitation)
