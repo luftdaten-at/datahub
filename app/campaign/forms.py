@@ -169,7 +169,7 @@ class UserDeviceForm(forms.ModelForm):
 
         # query set should be a list of all devices in the same organisation as the campaign is
         self.fields['current_devices'].queryset = self.campaign.organization.current_devices.all()
-        self.initial['current_devices'] = self.user.current_devices.all()
+        self.initial['current_devices'] = self.user.current_devices.filter(current_campaign = self.campaign).all()
         
         # Initialize form helper
         self.helper = FormHelper(self)
