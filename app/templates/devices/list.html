@@ -51,6 +51,9 @@
                                 <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
                                     <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
                                 </a>
+                                <a href="{% url 'device-delete' device.pk %}" class="btn btn-danger btn-sm">
+                                    <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
+                                </a>
                             </td>
                         </tr>
                     {% endfor %}

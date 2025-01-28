@@ -2,12 +2,14 @@ import json
 from collections import defaultdict
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import UpdateView
+from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
-from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
+from django.db import transaction
 
 from .models import Device, DeviceStatus, DeviceLogs, Measurement
 from .forms import DeviceForm, DeviceNotesForm
@@ -120,6 +122,7 @@ class DeviceMyView(UserPassesTestMixin, ListView):
         # Return the Device queryset ordered by 'id' in ascending order
         return Device.objects.all().order_by('id')
 
+
 class DeviceEditView(UpdateView):
     model = Device
     form_class = DeviceForm
@@ -135,6 +138,7 @@ class DeviceEditView(UpdateView):
         queryset = super().get_queryset()
         return queryset
 
+
 class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
     model = Device
     form_class = DeviceNotesForm
@@ -148,9 +152,7 @@ class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
     
     def test_func(self):
         """
-        Define the condition that the user must meet to access this view.
-        For example, only superusers can edit notes.
-        Adjust this logic based on your application's requirements.
+        Only superusers can edit notes.
         """
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
@@ -160,10 +162,22 @@ class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
         For example, if users can only edit their own devices, filter accordingly.
         Adjust the filter based on your application's logic.
         """
-        return Device.objects.all()  # Modify as per your permission logic
+        return Device.objects.all()
+    
 
+class DeviceDeleteView(LoginRequiredMixin, DeleteView):
+    model = Device
+    template_name = 'devices/confirm_delete.html'  # Confirmation page template
+    success_url = reverse_lazy('device-list')  # Redirect here after deletion
 
-from django.db import transaction
+    def get_object(self, queryset = None):
+        device = super().get_object(queryset)
+        user = self.request.user
+        
+        if user.is_superuser:
+            return device
+        else:
+            raise PermissionDenied(_('You are not allowed to delete this device.'))
 
 def change_device_id(old_id, new_id):
     try:
