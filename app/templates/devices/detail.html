@@ -28,9 +28,9 @@
         <!-- Device Information -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>{% trans "Name:" %}</strong> {{ device.device_name|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "Model:" %}</strong> {{ device.model|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "Firmware:" %}</strong> {{ device.firmware|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Name" %}:</strong> {{ device.device_name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Model" %}:</strong> {{ device.model|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Firmware" %}:</strong> {{ device.firmware|default:_("N/A") }}</li>
                 <li class="list-group-item">
                     <strong>{% trans "Sensors:" %}</strong>
                     <ul>
@@ -46,7 +46,7 @@
                     </ul>
                 </li>
                 <li class="list-group-item">
-                    <strong>{% trans "Last update:" %}</strong> {{ device.last_update|naturaltime|default:_("N/A") }}
+                    <strong>{% trans "Last update" %}:</strong> {{ device.last_update|naturaltime|default:_("N/A") }}
                 </li>
             </ul>
         </div>
@@ -54,8 +54,9 @@
         <!-- Device Organization and Room -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>{% trans "Organization:" %}</strong> {{ device.current_organization.name|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "Room:" %}</strong> {{ device.current_room.name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Organization" %}:</strong> {{ device.current_organization.name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "Room" %}:</strong> {{ device.current_room.name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "User" %}:</strong> {{ device.current_user.name|default:_("N/A") }}</li>
             </ul>
             
             <!-- Notes Section -->
