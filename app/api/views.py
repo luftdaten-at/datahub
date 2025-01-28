@@ -165,7 +165,7 @@ class CreateStationDataAPIView(APIView):
             # Record the time when the request was received
             time_received = datetime.datetime.now(datetime.timezone.utc)
 
-            if sensors_data:
+            if sensors_data is None:
                 return JsonResponse({"status": "success, but no sensor data found"}, status=200)
 
             try:
