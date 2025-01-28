@@ -150,8 +150,8 @@ class CreateStationDataAPIView(APIView):
     def post(self, request, *args, **kwargs):
         # Parse the incoming JSON data
         try:
-            station_data = request.data.get('station')
-            sensors_data = request.data.get('sensors')
+            station_data = request.data.get('station', None)
+            sensors_data = request.data.get('sensors', None)
 
             if not station_data or not sensors_data:
                 raise ValidationError("Both 'station' and 'sensors' are required.")
@@ -164,6 +164,9 @@ class CreateStationDataAPIView(APIView):
 
             # Record the time when the request was received
             time_received = datetime.datetime.now(datetime.timezone.utc)
+
+            if sensor_data:
+                return JsonResponse({"status": "success, but no sensor data found"}, status=200)
 
             try:
                 with transaction.atomic():
