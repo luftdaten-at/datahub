@@ -153,7 +153,7 @@ class CreateStationDataAPIView(APIView):
             station_data = request.data.get('station', None)
             sensors_data = request.data.get('sensors', None)
 
-            if not station_data or not sensors_data:
+            if not station_data:
                 raise ValidationError("Both 'station' and 'sensors' are required.")
 
             # Use the get_or_create_station function to get or create the station
