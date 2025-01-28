@@ -154,5 +154,5 @@ dmypy.json
 cython_debug/
 
 # docker compose production environment
-docker-compose.prod.yml
+#docker-compose.prod.yml
 db_backup

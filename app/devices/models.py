@@ -3,6 +3,9 @@ from django.utils import timezone
 from organizations.models import Organization
 from campaign.models import Room
 from accounts.models import CustomUser
+from campaign.models import Campaign
+from auditlog.registry import auditlog
+from auditlog.models import AuditlogHistoryField
 
 
 class Device(models.Model):
@@ -20,6 +23,8 @@ class Device(models.Model):
     current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL)
     current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL)
     current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL)
+    current_campaign = models.ForeignKey(Campaign, null=True, related_name='current_devices', on_delete=models.SET_NULL)
+    history = AuditlogHistoryField()
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
@@ -50,6 +55,7 @@ class DeviceStatus(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='status_list')
     battery_voltage = models.FloatField(null=True, blank=True)
     battery_soc = models.FloatField(null=True, blank=True)
+    sensor_list = models.JSONField(null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if the instance is new
@@ -98,3 +104,6 @@ class Values(models.Model):
 
     def __str__(self):
         return f'Value {self.id} for Measurement {self.measurement.id}'
+
+
+auditlog.register(Device)

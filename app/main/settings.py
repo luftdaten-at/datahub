@@ -42,6 +42,15 @@ ALLOWED_HOSTS = [
     "172.18.0.*",
 ]
 
+INTERNAL_IPS = [
+    "172.18.0.*",
+    '127.0.0.1',
+    'localhost'
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True
+}
 
 # Application definition
 
@@ -63,6 +72,8 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'drf_spectacular_sidecar',
     'oauth2_provider',
+    'auditlog',
+    'debug_toolbar',
     # Local
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
@@ -79,12 +90,16 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.locale.LocaleMiddleware',
+    'auditlog.middleware.AuditlogMiddleware',  # Tracks the actor
 ]
 
 ROOT_URLCONF = 'main.urls'

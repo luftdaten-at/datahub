@@ -1,0 +1,53 @@
+services:
+  app:
+    image: luftdaten/datahub:0.4.3
+    command: >
+      sh -c "python manage.py collectstatic --noinput && uvicorn main.asgi:application --host 0.0.0.0 --port 8000"
+    restart: unless-stopped
+    volumes:
+      - static_volume:/usr/src/app/staticfiles
+    depends_on:
+      - db
+    env_file:
+      - .env
+    networks:
+      - internal
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    volumes:
+      - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
+      - db_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    networks:
+      - internal
+  nginx:
+    build: ./nginx
+    restart: unless-stopped
+    volumes:
+      - static_volume:/home/app/web/staticfiles
+    depends_on:
+      - app
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.luftdaten-datahub.entrypoints=https"
+      - "traefik.http.routers.luftdaten-datahub.rule=Host(`datahub.luftdaten.at`) || Host(`arbeitsplatz.luftdaten.at`)"
+      - "traefik.http.routers.luftdaten-datahub.tls=true"
+      - "traefik.http.routers.luftdaten-datahub.tls.certresolver=http"
+      - "traefik.http.routers.luftdaten-datahub.service=luftdaten-datahub"
+      - "traefik.http.services.luftdaten-datahub.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy"
+      - "traefik.http.routers.luftdaten-datahub.middlewares=default@file"
+    networks:
+      - proxy
+      - internal
+volumes:
+  static_volume:
+  db_data:
+networks:
+  internal:
+  proxy:
+    external: true

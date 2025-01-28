@@ -123,6 +123,12 @@ class Dimension():
     SGP40_RAW_GAS = 17
     SGP40_ADJUSTED_GAS = 18
     ADJUSTED_TEMP_CUBE = 19
+    UVS = 20
+    LIGHT = 21
+    ACCELERATION = 22
+    GYRO = 23
+    ALTITUDE = 24
+
 
     thresholds = {
         TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
@@ -153,6 +159,8 @@ class Dimension():
         SGP40_RAW_GAS: "Ω",
         SGP40_ADJUSTED_GAS: "Ω",
         ADJUSTED_TEMP_CUBE: "°C",
+        ACCELERATION: "m/s²",
+        GYRO: "radians/s"
     }
 
     _names = {
@@ -175,6 +183,10 @@ class Dimension():
         SGP40_RAW_GAS: "SGP40 Raw Gas",
         SGP40_ADJUSTED_GAS: "SGP40 Adjusted Gas",
         ADJUSTED_TEMP_CUBE: "Adjusted Temperature Air Cube",
+        UVS: "UVS",
+        LIGHT: "Light",
+        ACCELERATION: "acceleration",
+        GYRO: "gyro"
     }
 
     _required_sensors = {
@@ -222,7 +234,7 @@ class Dimension():
     def get_sensor_community_name(cls, dimension_id: int) -> str:
         """Returns the sensor-community-specific name for the dimension ID or 'Unknown' if none."""
         return cls._sensor_community_names.get(dimension_id, "Unknown")
-    
+
     @classmethod
     def get_color(cls, dimension_id: int, val: float):
         th, colors = cls.thresholds.get(dimension_id)
@@ -230,7 +242,7 @@ class Dimension():
         for i in range(len(th)):
             if th[i] <= val < th[i + 1]:
                 return colors[i]
- 
+
 
 class LdProduct():
     AIR_AROUND = 1
@@ -239,6 +251,13 @@ class LdProduct():
     AIR_BADGE = 4
     AIR_BIKE = 5
 
+    _names = {
+        AIR_AROUND: "Air Around",
+        AIR_CUBE: "Air Cube",
+        AIR_STATION: "Air Station",
+        AIR_BADGE: "Air Badge",
+        AIR_BIKE: "Air Bike",
+    }
 
 class Source():
     LD = 1

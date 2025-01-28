@@ -45,3 +45,6 @@ uritemplate==4.1.1
 urllib3==2.2.3
 uvicorn==0.31.1
 whitenoise==6.7.0
+django-auditlog
+django-debug-toolbar
+numpy
