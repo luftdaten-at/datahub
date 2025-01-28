@@ -55,6 +55,7 @@ class DeviceStatus(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='status_list')
     battery_voltage = models.FloatField(null=True, blank=True)
     battery_soc = models.FloatField(null=True, blank=True)
+    sensor_list = models.JSONField(null=True)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if the instance is new

@@ -16,6 +16,12 @@ def get_or_create_station(station_info: dict):
             "voltage": 0,
             "percentage": 0
         }
+        "sensor_list": [
+            {
+                "model_id": 1,
+                "dimension_list": [1, 2, 3]
+            }
+        ]
     }
 
     creates a station_status entry with the information in station_info
@@ -31,13 +37,14 @@ def get_or_create_station(station_info: dict):
         station.model = station_info['model']
         station.firmware = station_info['firmware']
         station.api_key = station_info['apikey']
-    
+
     # add a new DeviceStatus
     station_status = DeviceStatus.objects.create(
         time_received = datetime.datetime.now(datetime.timezone.utc),
         device = station,
-        battery_voltage = station_info['battery']['voltage'],
-        battery_soc = station_info['battery']['percentage'],
+        battery_voltage = station_info.get('battery', {}).get('voltage', None),
+        battery_soc = station_info.get('battery', {}).get('percentage', None),
+        sensor_list = station_info.get('sensor_list', None)
     )
 
     # update firmware field
