@@ -106,12 +106,12 @@ def remove_user_from_organization(request, org_id, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
 
     # Ensure the user performing the action has permission
-    if request.user != organization.owner:
+    if not request.user.is_superuser and request.user != organization.owner:
         messages.error(request, "You do not have permission to remove users from this organization.")
         return redirect('organizations-detail', pk=org_id)
     
     # the owner cannot be removed
-    if user == request.user:
+    if user == organization.owner:
         messages.error(request, "The Owner of the Organization cannot be removed")
         return redirect('organizations-detail', pk=org_id)
 
@@ -127,7 +127,7 @@ def invite_user_to_organization(request, org_id):
     organization = get_object_or_404(Organization, id=org_id)
     email = request.POST.get('email')
     
-    if request.user != organization.owner:
+    if not request.user.is_superuser and request.user != organization.owner:
         messages.error(request, "You do not have permission to invite users to this organization.")
         return redirect(f"organizations-detail", pk=org_id)
 
@@ -138,7 +138,7 @@ def invite_user_to_organization(request, org_id):
     else:
         # check if invitation already exists
         invitation = OrganizationInvitation.objects.filter(email=email, organization__pk = organization.pk).first()
-        if invitation == None:
+        if not invitation:
             # create invitation
             invitation = OrganizationInvitation(
                 expiring_date = None,
