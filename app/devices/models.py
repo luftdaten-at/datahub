@@ -20,10 +20,12 @@ class Device(models.Model):
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     api_key = models.CharField(max_length=64, null=True)
-    current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL)
-    current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL)
-    current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL)
-    current_campaign = models.ForeignKey(Campaign, null=True, related_name='current_devices', on_delete=models.SET_NULL)
+
+    current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
+    current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
+    current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL, blank=True)
+    current_campaign = models.ForeignKey(Campaign, null=True, related_name='current_devices', on_delete=models.SET_NULL, blank=True)
+
     history = AuditlogHistoryField()
 
     def __str__(self):
