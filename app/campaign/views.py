@@ -345,7 +345,7 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
 
 
         # dimensions to be displayed
-        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVS)
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVI)
         time_range = timedelta(days=1)
         start_time = datetime.now(timezone.utc) - time_range
 
