@@ -376,8 +376,8 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         # Werte ins Context-Objekt packen
         context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
         context['temperature_color'] = temperature_color
-        context['current_tvoc'] = f'{current_uvi:.2f}' if current_uvi else None
-        context['tvoc_color'] = uvi_color 
+        context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi else None
+        context['uvi_color'] = uvi_color 
         context['data_24h'] = np.nan_to_num(data_24h, nan=0).tolist()
         context['labels'] = labels
 
