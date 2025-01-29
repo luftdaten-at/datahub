@@ -340,8 +340,8 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
 
         # VOC Index
-        current_uvi = get_current_mean(Dimension.UVS)
-        uvi_color = Dimension.get_color(Dimension.UVS, current_uvi) if current_uvi else None
+        current_uvi = get_current_mean(Dimension.UVI)
+        uvi_color = Dimension.get_color(Dimension.UVI, current_uvi) if current_uvi else None
 
 
         # dimensions to be displayed
