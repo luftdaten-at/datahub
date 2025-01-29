@@ -66,6 +66,18 @@ class CampaignsDetailView(LoginRequiredMixin, DetailView):
         if not campaign.users.filter(id=user.id).exists():
             raise PermissionDenied('You are not allowed to view this Campaign')
         return campaign
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        campaign = self.object
+
+        room_current_values = {}
+        for room in campaign.rooms.all():
+            room_current_values[room.pk] = room_calculate_current_values(room)
+        
+        context['room_current_values'] = room_current_values
+
+        return context
 
 class CampaignsCreateView(LoginRequiredMixin, CreateView):
     model = Campaign

@@ -1,6 +1,7 @@
 {% extends "_base.html" %}
 {% load static %}
 {% load i18n %}
+{% load filters %}
 
 {% block title %}{{ campaign.name }}{% endblock title %}
 
@@ -40,10 +41,10 @@
                 <tr>
                     <td><a href="{% url 'room-detail' room.pk %}">{{ room.name }}</a></td>
                     <td>
-                        <span class="badge badge-custom-green">Temp 21,3°C</span>
-                        <span class="badge badge-custom-green">PM2.5 3.70 µg/m³</span>
-                        <span class="badge badge-custom-green">CO₂ 584ppm</span>
-                        <span class="badge badge-custom-green">TVOC 18ppb</span>
+                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:1|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:0 }}°C</span>
+                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:3|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:2 }}µg/m³</span>
+                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:5|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:4 }}ppm</span>
+                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:7|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:6 }}ppb</span>
                     </td>
                     <td>
                       <div class="d-flex flex-column flex-md-row gap-2 justify-content-end">
