@@ -337,15 +337,14 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
 
         # Temperatur
         current_temperature = get_current_mean(Dimension.TEMPERATURE)
-        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature else None
+        temperature_color = Dimension.get_color(Dimension.TEMPERATURE, current_temperature) if current_temperature is not None else None
 
         # VOC Index
-        current_uvi = get_current_mean(Dimension.UVS)
-        uvi_color = Dimension.get_color(Dimension.UVS, current_uvi) if current_uvi else None
-
+        current_uvi = get_current_mean(Dimension.UVI)
+        uvi_color = Dimension.get_color(Dimension.UVI, current_uvi) if current_uvi is not None else None
 
         # dimensions to be displayed
-        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVS)
+        target_dimensions = (Dimension.TEMPERATURE, Dimension.UVI)
         time_range = timedelta(days=1)
         start_time = datetime.now(timezone.utc) - time_range
 
@@ -374,10 +373,10 @@ class ParticipantDetailView(LoginRequiredMixin, DetailView):
         labels = [(start_time + timedelta(minutes=i)).strftime("%H:%M") for i in range(int(time_range.total_seconds() // 60))]
 
         # Werte ins Context-Objekt packen
-        context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature else None
+        context['current_temperature'] = f'{current_temperature:.2f}' if current_temperature is not None else None
         context['temperature_color'] = temperature_color
-        context['current_tvoc'] = f'{current_uvi:.2f}' if current_uvi else None
-        context['tvoc_color'] = uvi_color 
+        context['current_uvi'] = f'{current_uvi:.2f}' if current_uvi is not None else None
+        context['uvi_color'] = uvi_color 
         context['data_24h'] = np.nan_to_num(data_24h, nan=0).tolist()
         context['labels'] = labels
 
