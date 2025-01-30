@@ -77,13 +77,13 @@
                 <li class="list-group-item">
                     <strong>{% trans "QR-Code Text:" %}</strong>
                     <p>
-                        {{ device.auto_number }};Luftdaten.at-{{ device.get_ble_id }};{{ device.model }};1
+                        {{ device.get_device_name }};Luftdaten.at-{{ device.get_ble_id }};{{ device.model }};1
                     </p>
                     <strong>Text:</strong>
                     <br>
-                    {{ device.get_model_name }}
+                    {{ device.get_model_name}}
                     <br>
-                    {{ device.auto_number }}
+                    {{ device.get_device_name }}
                     <br>
                     <br>
                     {{ device.get_ble_id }}

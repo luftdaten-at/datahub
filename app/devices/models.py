@@ -53,9 +53,17 @@ class Device(models.Model):
         return self.id[:-3]
     
     def get_model_name(self):
-        print(self.model)
-        print(LdProduct._names)
+        '''returns the corresponding LdProduct name'''
         return LdProduct._names.get(self.model, 'Unknown Model')
+    
+    def get_device_name(self):
+        '''
+        returns a unique name for this device in this format: "{model name}{auto_number}"
+        for example "Air Cube 0001"
+        '''
+        if self.auto_number is None:
+            return f'{self.get_model_name()} {None}'
+        return f'{self.get_model_name()} {self.auto_number:04d}'
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
