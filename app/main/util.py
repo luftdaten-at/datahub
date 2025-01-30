@@ -115,7 +115,7 @@ def room_calculate_current_values(room):
         current_tvoc = get_current_mean(Dimension.TVOC)
         tvoc_color = Dimension.get_color(Dimension.TVOC, current_tvoc) if current_tvoc else None
 
-        return (
+        return [
             current_temperature, 
             temperature_color,
             current_pm2_5, 
@@ -124,4 +124,4 @@ def room_calculate_current_values(room):
             co2_color,
             current_tvoc,
             tvoc_color
-        )
+        ]

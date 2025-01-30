@@ -74,7 +74,14 @@ class CampaignsDetailView(LoginRequiredMixin, DetailView):
         room_current_values = {}
         for room in campaign.rooms.all():
             room_current_values[room.pk] = room_calculate_current_values(room)
-        
+
+            print(room_current_values[room.pk])
+            # for better dispaying set alle values that are None to '- '
+            for i in range(0, len(room_current_values[room.pk]), 2):
+                if room_current_values[room.pk][i] is None:
+                    room_current_values[room.pk][i] = '- '
+            print(room_current_values[room.pk])
+
         context['room_current_values'] = room_current_values
 
         return context
