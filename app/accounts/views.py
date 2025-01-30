@@ -1,6 +1,6 @@
 import datetime
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView
+from django.views.generic import CreateView, DeleteView, TemplateView
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import login
@@ -11,6 +11,7 @@ from .forms import CustomUserCreationForm
 from .models import CustomUser
 from organizations.models import Organization, OrganizationInvitation
 from campaign.models import Campaign
+from devices.models import Measurement
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
@@ -80,6 +81,7 @@ def SettingsView(request):
     If the user is not authenticated, display the login form.
     """
     if request.user.is_authenticated:
+        print(request.user.measurements.count())
         # Here, you can add additional context for the dashboard as needed
         context = {
             'user': request.user,
@@ -95,3 +97,15 @@ def SettingsView(request):
                 login(request, user)
                 return redirect("settings")
         return render(request, "account/login.html", {"form": form})
+    
+
+class DataDeleteView(TemplateView, LoginRequiredMixin):
+    template_name = 'account/data_confirm_delete.html'
+
+    def post(self, request, *args, **kwargs):
+        # delete all data that corresponds to the logged in user
+        user = self.request.user
+        user.measurements.all().delete()
+        messages.success(request, 'All Data that belongs to your account has been deleted')
+
+        return redirect('settings')
