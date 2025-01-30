@@ -14,5 +14,5 @@ def at(l, id):
 @register.filter
 def to_rgb(tup):
     if tup is None:
-        return None
+        return  '80, 80, 80'
     return ','.join([str(x) for x in tup])
