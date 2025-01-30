@@ -1,7 +1,8 @@
 # API test request for the endpoint /api/device/status
 # 
 
-POST http://localhost/api/v1/devices/data/ HTTP/1.1
+POST https://staging.datahub.luftdaten.at/api/device/status/ HTTP/1.1
+# POST http://localhost/api/v1/devices/data/ HTTP/1.1
 content-type: application/json
 
 {
