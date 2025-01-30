@@ -7,6 +7,8 @@ from campaign.models import Campaign
 from auditlog.registry import auditlog
 from auditlog.models import AuditlogHistoryField
 
+from main.enums import LdProduct
+
 
 class Device(models.Model):
     """
@@ -14,7 +16,7 @@ class Device(models.Model):
     """
     id = models.CharField(max_length=255, primary_key=True)
     device_name = models.CharField(max_length=255, blank=True, null=True)
-    model = models.CharField(max_length=255, blank=True, null=True)
+    model = models.IntegerField(null=True, blank=True)
     firmware = models.CharField(max_length=255, blank=True)
     btmac_address = models.CharField(max_length=12, null=True, blank=True)
     last_update = models.DateTimeField(null=True, blank=True)
@@ -45,14 +47,22 @@ class Device(models.Model):
             self.auto_number = counter.last_auto_number
         
         super().save(*args, **kwargs)
-
+    
+    def get_ble_id(self):
+        # cuts of the 3 last characters that are use for board identification
+        return self.id[:-3]
+    
+    def get_model_name(self):
+        print(self.model)
+        print(LdProduct._names)
+        return LdProduct._names.get(self.model, 'Unknown Model')
 
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
  
 
 class ModelCounter(models.Model):
-    model = models.CharField(max_length=255, primary_key=True)
+    model = models.IntegerField(primary_key=True)
     last_auto_number = models.IntegerField(default=0)
 
 
