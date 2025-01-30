@@ -1,0 +1,15 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Delete Your Account" %}{% endblock title %}
+
+{% block content %}
+<h2 class="mb-4 mt-5">{% trans "Delete Your Data" %}</h2>
+<p>{% trans "Are you sure you want to delete all your Data? This action cannot be undone." %}</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">{% trans "Confirm Delete" %}</button>
+    <a href="{% url 'settings' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+</form>
+{% endblock content %}
