@@ -29,7 +29,7 @@ class Device(models.Model):
     current_user = models.ForeignKey(CustomUser, null=True, related_name='current_devices', on_delete=models.SET_NULL, blank=True)
     current_campaign = models.ForeignKey(Campaign, null=True, related_name='current_devices', on_delete=models.SET_NULL, blank=True)
 
-    history = AuditlogHistoryField()
+    history = AuditlogHistoryField(pk_indexable=False)
 
     def save(self, *args, **kwargs):
         # if the model id is not set or the auto_number is already set we don't

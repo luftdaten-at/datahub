@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 
 from .models import Device, DeviceStatus, DeviceLogs, Measurement
+from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
 
@@ -64,6 +65,20 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                 if status.battery_soc is not None and status.battery_voltage is not None
             ]
 
+
+            from pprint import pprint
+            user_changes = device.history.filter(changes__icontains = '"current_user"').all().order_by('-timestamp')
+            change_log = []
+            for h in user_changes:
+                last_user = h.changes['current_user'][0]
+                current_user = h.changes['current_user'][1]
+                change_log.append({
+                    'timestamp': h.timestamp,
+                    'last_user': None if last_user == 'None' else CustomUser.objects.filter(id=last_user).first(),
+                    'current_user': None if current_user == 'None' else CustomUser.objects.filter(id=current_user).first(),
+                })
+            # pprint(change_log)
+
             # Serialize data to JSON format
             context['battery_times'] = json.dumps(battery_times, cls=DjangoJSONEncoder)
             context['battery_charges'] = json.dumps(battery_charges, cls=DjangoJSONEncoder)
@@ -101,7 +116,6 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         sensors = defaultdict(list)
         # add available sensors
         for measurement in Measurement.objects.filter(device=device, time_measured=device.last_update).all():
-            print(measurement.sensor_model)
             for value in measurement.values.all():
                 sensors[SensorModel.get_sensor_name(measurement.sensor_model)].append(Dimension.get_name(value.dimension))
 
