@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from organizations.models import Organization
 from campaign.models import Room
@@ -20,6 +20,7 @@ class Device(models.Model):
     last_update = models.DateTimeField(null=True, blank=True)
     notes = models.TextField(null=True, blank=True)
     api_key = models.CharField(max_length=64, null=True)
+    auto_number = models.IntegerField(null=True, blank=True)
 
     current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
     current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
@@ -28,9 +29,32 @@ class Device(models.Model):
 
     history = AuditlogHistoryField()
 
+    def save(self, *args, **kwargs):
+        # if the model id is not set or the auto_number is already set we don't
+        # need to update the auto_number
+        if self.model is None or self.auto_number is not None:
+            super().save(*args, **kwargs)
+            return
+
+        # update auto_number for the first time
+        with transaction.atomic():
+            counter, _ = ModelCounter.objects.get_or_create(model=self.model)
+            counter.last_auto_number += 1
+            counter.save()
+
+            self.auto_number = counter.last_auto_number
+        
+        super().save(*args, **kwargs)
+
+
     def __str__(self):
         return self.id or "Undefined Device"  # Added fallback for undefined IDs
-    
+ 
+
+class ModelCounter(models.Model):
+    model = models.CharField(max_length=255, primary_key=True)
+    last_auto_number = models.IntegerField(default=0)
+
 
 class Sensor(models.Model):
     """

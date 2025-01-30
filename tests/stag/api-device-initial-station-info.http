@@ -1,15 +1,15 @@
 # API test request for the endpoint /api/device/status
 # 
 
-POST https://staging.datahub.luftdaten.at/api/v1/devices/data/ HTTP/1.1
+POST http://localhost/api/v1/devices/data/ HTTP/1.1
 content-type: application/json
 
 {
     "station": {
         "time": "2025-01-07T11:23:23.439Z",
-        "device": "initial_station_info_test",
+        "device": "initial_station_info",
         "firmware": "string",
-        "model": 0,
+        "model": 4,
         "apikey": "initial_station_info_test",
         
         "sensor_list": [
