@@ -1,6 +1,7 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{% trans "Settings" %}{% endblock title %}
 
@@ -11,7 +12,7 @@
 <a class="btn btn-outline-primary" href="{% url 'account_change_password' %}">{% trans "Change Password" %}</a>
 
 <h3 class="mt-5">{% trans "Delete Data" %}</h3>
-<p>Your account is connected to {{ user.measurements.count }} measurements. Do you really want to delete these?</p>
+<p>Your account is connected to {{ user.measurements.count|intcomma }} measurements. Do you really want to delete these?</p>
 
 <a class="btn btn-outline-danger" href="{% url 'data-delete' %}">{% trans "Delete Data" %}</a>
 

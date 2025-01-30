@@ -1,6 +1,7 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{% trans "Dashboard" %}{% endblock title %}
 
@@ -10,8 +11,8 @@
 
     <!-- Summary Cards Row -->
     <div class="row mb-4">
-        <!-- Example Card: My Campaigns Count -->
-        <div class="col-md-6 col-lg-3 mb-3">
+        <!-- Card: My Campaigns Count -->
+        <div class="col-md-6 col-lg-6 mb-3">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">
@@ -24,45 +25,14 @@
                 </div>
             </div>
         </div>
-        <!-- Example Card: My Organizations Count -->
-        <div class="col-md-6 col-lg-3 mb-3">
+        <!-- Card: My measurements -->
+        <div class="col-md-6 col-lg-6 mb-3">
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title mb-3">
-                        <i class="bi bi-people-fill"></i> {% trans "Aaaa" %}
+                        <i class="bi bi-clipboard-data"></i> {% trans " My Measurements" %}
                     </h5>
-                    <p class="display-6">{{ member_organizations|length }}</p>
-                    <a href="" class="btn btn-outline-secondary btn-sm mt-2">
-                        {% trans "View Aaaa" %}
-                    </a>
-                </div>
-            </div>
-        </div>
-        <!-- Example Card: Add more stats or summary here (optional) -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="bi bi-clipboard-data"></i> {% trans "Measurements" %}
-                    </h5>
-                    <p class="display-6">3764</p>
-                    <a href="#" class="btn btn-outline-secondary btn-sm mt-2">
-                        {% trans "Manage Data" %}
-                    </a>
-                </div>
-            </div>
-        </div>
-        <!-- Example Card: Another optional summary -->
-        <div class="col-md-6 col-lg-3 mb-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="bi bi-calendar-week"></i> {% trans "Days measured" %}
-                    </h5>
-                    <p class="display-6">5</p>
-                    <a href="#" class="btn btn-outline-secondary btn-sm mt-2">
-                        {% trans "View Timeline" %}
-                    </a>
+                    <p class="display-6">{{ user.measurements.count|intcomma }}</p>
                 </div>
             </div>
         </div>
