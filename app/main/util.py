@@ -36,7 +36,6 @@ def get_or_create_station(station_info: dict):
         id = station_info['device']
     )
     if created:
-        station.device_name = station_info['device']
         station.model = station_info['model']
         station.firmware = station_info['firmware']
         station.api_key = station_info['apikey']
