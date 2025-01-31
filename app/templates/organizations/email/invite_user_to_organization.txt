@@ -1,0 +1,7 @@
+Hello,
+
+You've been invited to join {{ organization.name }}!
+
+Please visit the following link to join:
+{{ registration_link }}
+
