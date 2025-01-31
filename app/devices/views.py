@@ -15,6 +15,8 @@ from .models import Device, DeviceStatus, DeviceLogs, Measurement
 from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
+from organizations.models import Organization
+from campaign.models import Room
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
@@ -65,20 +67,45 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                 if status.battery_soc is not None and status.battery_voltage is not None
             ]
 
-
-            from pprint import pprint
+            # query changes
+            organization_changes = device.history.filter(changes__icontains = '"current_organization"').all().order_by('-timestamp')
+            room_changes = device.history.filter(changes__icontains = '"current_room"').all().order_by('-timestamp')
             user_changes = device.history.filter(changes__icontains = '"current_user"').all().order_by('-timestamp')
-            change_log = []
-            for h in user_changes:
-                last_user = h.changes['current_user'][0]
-                current_user = h.changes['current_user'][1]
-                change_log.append({
-                    'timestamp': h.timestamp,
-                    'last_user': None if last_user == 'None' else CustomUser.objects.filter(id=last_user).first(),
-                    'current_user': None if current_user == 'None' else CustomUser.objects.filter(id=current_user).first(),
-                })
-            # pprint(change_log)
+            
+            organization_change_log = []
+            room_change_log = []
+            user_change_log = []
 
+            # prepare changes
+            for h in organization_changes:
+                prev = h.changes['current_organization'][0]
+                next = h.changes['current_organization'][1]
+                organization_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else Organization.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else Organization.objects.filter(id=next).first(),
+                })
+            for h in room_changes:
+                prev = h.changes['current_room'][0]
+                next = h.changes['current_room'][1]
+                room_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else Room.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else Room.objects.filter(id=next).first(),
+                })
+            for h in user_changes:
+                prev = h.changes['current_user'][0]
+                next = h.changes['current_user'][1]
+                user_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else CustomUser.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else CustomUser.objects.filter(id=next).first(),
+                })
+
+            context['organization_change_log'] = organization_change_log 
+            context['room_change_log'] = room_change_log
+            context['user_change_log'] = user_change_log
+            
             # Serialize data to JSON format
             context['battery_times'] = json.dumps(battery_times, cls=DjangoJSONEncoder)
             context['battery_charges'] = json.dumps(battery_charges, cls=DjangoJSONEncoder)
