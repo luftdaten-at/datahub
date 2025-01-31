@@ -20,7 +20,7 @@
 {% block content %}
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{% trans "Device:" %} {{ device.id }}</h2>
+        <h2>{% trans "Device:" %} {{ device.device_name }}</h2>
         <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
     </div>    
     
@@ -28,7 +28,7 @@
         <!-- Device Information -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>{% trans "Name" %}:</strong> {{ device.device_name|default:_("N/A") }}</li>
+                <li class="list-group-item"><strong>{% trans "ID" %}:</strong> {{ device.id }}</li>
                 <li class="list-group-item"><strong>{% trans "Model" %}:</strong> {{ device.model|default:_("N/A") }}</li>
                 <li class="list-group-item"><strong>{% trans "Firmware" %}:</strong> {{ device.firmware|default:_("N/A") }}</li>
                 <li class="list-group-item">
