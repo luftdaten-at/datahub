@@ -8,6 +8,7 @@
 
 {% block styles %}
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 <style>
     .chart-container {
         position: relative;
@@ -49,14 +50,62 @@
                     <strong>{% trans "Last update" %}:</strong> {{ device.last_update|naturaltime|default:_("N/A") }}
                 </li>
             </ul>
+            <!-- QrCode Section -->
+            <ul class="list-group">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{% trans "QR-Code Text:" %}</strong>
+                        <p>
+                            {{ device.device_name }};Luftdaten.at-{{ device.get_ble_id }};{{ device.model }};1
+                        </p>
+                        <strong>Text:</strong>
+                        <br>
+                        {{ device.device_name }}
+                        <p></p>
+                        {{ device.get_ble_id }}
+                    </div>
+                    <div id="qrcode"></div>
+                </li>
+            </ul>
         </div>
         
         <!-- Device Organization and Room -->
         <div class="col-md-6">
             <ul class="list-group mb-3">
-                <li class="list-group-item"><strong>{% trans "Organization" %}:</strong> {{ device.current_organization.name|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "Room" %}:</strong> {{ device.current_room.name|default:_("N/A") }}</li>
-                <li class="list-group-item"><strong>{% trans "User" %}:</strong> {{ device.current_user.name|default:_("N/A") }}</li>
+                <li class="list-group-item">
+                    <strong>{% trans "Organization" %}:</strong> {{ device.current_organization.name|default:_("N/A") }}
+                    <!-- change log -->
+                    <ul class="list-group">
+                        {% for entry in organization_change_log %}
+                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "Organization changed from" %} {{ entry.prev }} {% trans "to" %}  {{ entry.next }}</li>
+                        {% empty %}
+                            <li class="list-group-item">{% trans "No logs available." %}</li>
+                        {% endfor %} 
+                    </ul>
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Room" %}:</strong> {{ device.current_room.name|default:_("N/A") }}
+                    <!-- change log -->
+                    <ul class="list-group">
+                        {% for entry in room_change_log %}
+                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "Room changed from" %} {{ entry.prev }} {% trans "to" %}  {{ entry.next }}</li>
+                        {% empty %}
+                            <li class="list-group-item">{% trans "No logs available." %}</li>
+                        {% endfor %} 
+                    </ul>
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "User" %}:</strong> {{ device.current_user.username|default:_("N/A") }}
+                    <!-- change log -->
+                    <ul class="list-group">
+                        {% for entry in user_change_log %}
+                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "User changed from" %} {{ entry.prev }} {% trans "to" %}  {{ entry.next }}</li>
+                        {% empty %}
+                            <li class="list-group-item">{% trans "No logs available." %}</li>
+                        {% endfor %} 
+                    </ul>
+                </li>
+                
             </ul>
             
             <!-- Notes Section -->
@@ -69,6 +118,7 @@
                     </a>
                 </li>
             </ul>
+
         </div>
     </div>
     
@@ -172,102 +222,116 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        {% if battery_status %}
-            const ctx = document.getElementById('chart-battery').getContext('2d');
-            const batteryChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: {{ battery_times|safe }},
-                    datasets: [
-                        {
-                            label: '{% trans "Battery Charge (%)" %}',
-                            data: {{ battery_charges|safe }},
-                            fill: false,
-                            borderColor: '#28a745',  // Green
-                            backgroundColor: '#28a745',
-                            tension: 0.1,
-                            yAxisID: 'y1',
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                        },
-                        {
-                            label: '{% trans "Battery Voltage (V)" %}',
-                            data: {{ battery_voltages|safe }},
-                            fill: false,
-                            borderColor: '#007bff',  // Blue
-                            backgroundColor: '#007bff',
-                            tension: 0.1,
-                            yAxisID: 'y2',
-                            pointRadius: 3,
-                            pointHoverRadius: 5,
-                        }
-                    ]
+document.addEventListener('DOMContentLoaded', function () {
+    {% if battery_status %}
+        const ctx = document.getElementById('chart-battery').getContext('2d');
+        const batteryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ battery_times|safe }},
+                datasets: [
+                    {
+                        label: '{% trans "Battery Charge (%)" %}',
+                        data: {{ battery_charges|safe }},
+                        fill: false,
+                        borderColor: '#28a745',  // Green
+                        backgroundColor: '#28a745',
+                        tension: 0.1,
+                        yAxisID: 'y1',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                    },
+                    {
+                        label: '{% trans "Battery Voltage (V)" %}',
+                        data: {{ battery_voltages|safe }},
+                        fill: false,
+                        borderColor: '#007bff',  // Blue
+                        backgroundColor: '#007bff',
+                        tension: 0.1,
+                        yAxisID: 'y2',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        tooltip: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        legend: {
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
                             display: true,
-                            position: 'top',
+                            text: '{% trans "Time" %}'
+                        },
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45,
+                            autoSkip: true,
+                            maxTicksLimit: 20,
                         }
                     },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: '{% trans "Charge (%)" %}'
+                        },
+                        suggestedMin: 0,
+                        suggestedMax: 100,
+                        grid: {
+                            drawOnChartArea: false,  // Only draw grid lines for y1
+                        },
                     },
-                    scales: {
-                        x: {
+                    y2: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
                             display: true,
-                            title: {
-                                display: true,
-                                text: '{% trans "Time" %}'
-                            },
-                            ticks: {
-                                maxRotation: 45,
-                                minRotation: 45,
-                                autoSkip: true,
-                                maxTicksLimit: 20,
-                            }
+                            text: '{% trans "Voltage (V)" %}'
                         },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: '{% trans "Charge (%)" %}'
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 100,
-                            grid: {
-                                drawOnChartArea: false,  // Only draw grid lines for y1
-                            },
+                        suggestedMin: 0,
+                        suggestedMax: 5,  // Adjust based on expected voltage range
+                        grid: {
+                            drawOnChartArea: false,  // Only draw grid lines for y2
                         },
-                        y2: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: '{% trans "Voltage (V)" %}'
-                            },
-                            suggestedMin: 0,
-                            suggestedMax: 5,  // Adjust based on expected voltage range
-                            grid: {
-                                drawOnChartArea: false,  // Only draw grid lines for y2
-                            },
-                        }
                     }
                 }
-            });
-        {% endif %}
+            }
+        });
+    {% endif %}
+});
+
+function generateQRCode() {
+    let qrDiv = document.getElementById("qrcode");
+    let text = "{{ device.device_name }};Luftdaten.at-{{ device.get_ble_id }};{{ device.model }};1";
+    
+    new QRCode(qrDiv, {
+        text: text,
+        width: 200,
+        height: 200
     });
+}
+
+// QR-Code beim Laden der Seite generieren
+window.onload = generateQRCode;
 </script>
 {% endblock content %}

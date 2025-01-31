@@ -12,8 +12,11 @@ from django.core.paginator import Paginator
 from django.db import transaction
 
 from .models import Device, DeviceStatus, DeviceLogs, Measurement
+from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
+from organizations.models import Organization
+from campaign.models import Room
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
@@ -64,6 +67,45 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                 if status.battery_soc is not None and status.battery_voltage is not None
             ]
 
+            # query changes
+            organization_changes = device.history.filter(changes__icontains = '"current_organization"').all().order_by('-timestamp')
+            room_changes = device.history.filter(changes__icontains = '"current_room"').all().order_by('-timestamp')
+            user_changes = device.history.filter(changes__icontains = '"current_user"').all().order_by('-timestamp')
+            
+            organization_change_log = []
+            room_change_log = []
+            user_change_log = []
+
+            # prepare changes
+            for h in organization_changes:
+                prev = h.changes['current_organization'][0]
+                next = h.changes['current_organization'][1]
+                organization_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else Organization.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else Organization.objects.filter(id=next).first(),
+                })
+            for h in room_changes:
+                prev = h.changes['current_room'][0]
+                next = h.changes['current_room'][1]
+                room_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else Room.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else Room.objects.filter(id=next).first(),
+                })
+            for h in user_changes:
+                prev = h.changes['current_user'][0]
+                next = h.changes['current_user'][1]
+                user_change_log.append({
+                    'timestamp': h.timestamp,
+                    'prev': None if prev == 'None' else CustomUser.objects.filter(id=prev).first(),
+                    'next': None if next == 'None' else CustomUser.objects.filter(id=next).first(),
+                })
+
+            context['organization_change_log'] = organization_change_log 
+            context['room_change_log'] = room_change_log
+            context['user_change_log'] = user_change_log
+            
             # Serialize data to JSON format
             context['battery_times'] = json.dumps(battery_times, cls=DjangoJSONEncoder)
             context['battery_charges'] = json.dumps(battery_charges, cls=DjangoJSONEncoder)
@@ -101,7 +143,6 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         sensors = defaultdict(list)
         # add available sensors
         for measurement in Measurement.objects.filter(device=device, time_measured=device.last_update).all():
-            print(measurement.sensor_model)
             for value in measurement.values.all():
                 sensors[SensorModel.get_sensor_name(measurement.sensor_model)].append(Dimension.get_name(value.dimension))
 
