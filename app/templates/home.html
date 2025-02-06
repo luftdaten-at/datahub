@@ -55,29 +55,37 @@
         </div>
     </div>
     {% else %}
-        <div class="row mt-3">
-            <div class="col-md-9">
-                <div>
-                    <h2>Luftdaten.at Datahub</h2>
-                    <p>Die angezeigten Daten stammen aus den Luftmessnetzen von Luftdaten.at und der Sensor.Community. Dabei 
-                    werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
-                    <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
-                </div>
-                
-            </div>
-            <div class="col-md-3">
-                <h3>{% trans "Particulate Matter" %}</h3>
-                <p>Feinstaub, auch bekannt als Particulate Matter (PM), bezeichnet eine Mischung aus winzigen Partikeln 
-                    und Tröpfchen in der Luft, die so klein sind, dass sie eingeatmet werden können. Diese Partikel 
-                    können aus verschiedenen Quellen stammen, einschließlich Autoabgasen, Industrieemissionen, Staub, 
-                    Pollen und Ruß. Feinstaub werden nach ihrer Größe unterteilt: PM10, das Partikel umfasst, die 
-                    kleiner als 10 Mikrometer sind, und PM2.5, das noch feinere Partikel umfasst, die kleiner als 2,5 
-                    Mikrometer sind. Diese kleinen Partikel können tief in die Lunge eindringen und gesundheitliche 
-                    Probleme verursachen, darunter Atemwegserkrankungen, Herz-Kreislauf-Erkrankungen und andere 
-                    ernsthafte Gesundheitsrisiken.</p>
+        <div class="row mt-4">
+            <div class="col-12">
+                <h2>Luftdaten.at Datahub</h2>
+                <p>Die angezeigten Daten stammen aus den Luftmessnetzen von Luftdaten.at und der Sensor.Community. Dabei 
+                werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
+                <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
             </div>
         </div>
 
+        {% comment %} <div class="row mt-3">
+            <div class="col-md-6 col-lg-6 mb-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-flag-fill"></i> {% trans "Stations in Austria" %}
+                        </h5>
+                        <p class="display-5">{{ station_number }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-6 mb-3">
+                <div class="card text-center shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-flag-fill"></i> {% trans "Cities and municipalities" %}
+                        </h5>
+                        <p class="display-5">{{ cities_number }}</p>
+                    </div>
+                </div>
+            </div>
+        </div> {% endcomment %}
     <script>
         // Define color steps for PM1.0
         const colorStepsPM1 = [
