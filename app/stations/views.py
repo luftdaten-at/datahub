@@ -66,8 +66,8 @@ def StationListView(request):
     Fetches two lists: stations with the highest PM2.5 values and 
     stations with the lowest PM2.5 values.
     """
-    url_min = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
-    url_max = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
+    url_min = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
+    url_max = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
 
     error_message = None
     try:
@@ -98,9 +98,9 @@ def StationListView(request):
         min_stations = []
         max_stations = []
 
-    # Paginate each list separately (example: 5 stations per page)
-    paginator_top = Paginator(max_stations, 5)
-    paginator_low = Paginator(min_stations, 5)
+    # Paginate each list separately
+    paginator_top = Paginator(max_stations, 10)
+    paginator_low = Paginator(min_stations, 10)
 
     page_top = request.GET.get('page_top')
     page_low = request.GET.get('page_low')
