@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 07:57+0100\n"
+"POT-Creation-Date: 2025-02-06 11:17+0100\n"
 "PO-Revision-Date: 2024-12-07 01:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -68,45 +68,45 @@ msgstr "Englisch"
 msgid "German"
 msgstr "Deutsch"
 
-#: templates/_base.html:11 templates/_base.html:31
+#: templates/_base.html:12 templates/_base.html:32
 msgid "Clean air at the workplace"
 msgstr "Saubere Luft am Arbeitsplatz"
 
-#: templates/_base.html:13 templates/_base.html:35
+#: templates/_base.html:14 templates/_base.html:36
 msgid "Luftdaten.at Datahub"
 msgstr "Luftdaten.at Datahub"
 
-#: templates/_base.html:40
+#: templates/_base.html:41
 msgid "Toggle navigation"
 msgstr ""
 
-#: templates/_base.html:47 templates/workshops/list.html:5
+#: templates/_base.html:48 templates/workshops/list.html:5
 #: templates/workshops/list.html:8
 msgid "Workshops"
 msgstr "Workshops"
 
-#: templates/_base.html:50
+#: templates/_base.html:51
 msgid "Stations"
 msgstr "Stationen"
 
-#: templates/_base.html:53
+#: templates/_base.html:54
 msgid "Cities"
 msgstr "Städte"
 
-#: templates/_base.html:68 templates/account/dashboard.html:6
+#: templates/_base.html:69 templates/account/dashboard.html:6
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: templates/_base.html:73 templates/account/settings.html:6
+#: templates/_base.html:74 templates/account/settings.html:6
 #: templates/account/settings.html:9
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: templates/_base.html:79 templates/organizations/my.html:5
+#: templates/_base.html:80 templates/organizations/my.html:5
 msgid "My Organizations"
 msgstr "Meine Organisation"
 
-#: templates/_base.html:84 templates/account/dashboard.html:19
+#: templates/_base.html:85 templates/account/dashboard.html:19
 #: templates/account/dashboard.html:43 templates/campaigns/my.html:4
 #: templates/campaigns/my.html:8
 #, fuzzy
@@ -114,54 +114,54 @@ msgstr "Meine Organisation"
 msgid "My Campaigns"
 msgstr "Meine Messkampagnen"
 
-#: templates/_base.html:90 templates/workshops/my.html:4
+#: templates/_base.html:91 templates/workshops/my.html:4
 #: templates/workshops/my.html:8
 #, fuzzy
 #| msgid "My workshops"
 msgid "My Workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:97 templates/campaigns/participants/detail.html:48
+#: templates/_base.html:98 templates/campaigns/participants/detail.html:48
 #: templates/campaigns/room/detail.html:63 templates/devices/list.html:5
 #: templates/devices/list.html:13 templates/organizations/detail.html:94
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:103
+#: templates/_base.html:104
 #, fuzzy
 #| msgid "Log out"
 msgid "Log Out"
 msgstr "Abmelden"
 
-#: templates/_base.html:110
+#: templates/_base.html:111
 #, fuzzy
 #| msgid "Log in"
 msgid "Log In"
 msgstr "Anmelden"
 
-#: templates/_base.html:113
+#: templates/_base.html:114
 #, fuzzy
 #| msgid "Sign up"
 msgid "Sign Up"
 msgstr "Registrieren"
 
-#: templates/_base.html:138
+#: templates/_base.html:139
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:141 templates/account/dashboard.html:118
+#: templates/_base.html:142 templates/account/dashboard.html:118
 #: templates/documentation.html:5 templates/documentation.html:11
 #, fuzzy
 #| msgid "Station"
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: templates/_base.html:144 templates/account/dashboard.html:113
+#: templates/_base.html:145 templates/account/dashboard.html:113
 #: templates/help.html:5 templates/help.html:11
 msgid "Help"
 msgstr "Hilfe"
 
-#: templates/_base.html:147
+#: templates/_base.html:148
 #, fuzzy
 #| msgid "About us"
 msgid "About Us"
@@ -177,6 +177,8 @@ msgstr "Lösche dein Benutzerkonto"
 msgid ""
 "Are you sure you want to delete your account? This action cannot be undone."
 msgstr ""
+"Möchtest du wirklich dein Nutzerkonto löschen? Dies kann nicht "
+"zurückgenommen werden."
 
 #: templates/account/account_confirm_delete.html:12
 #: templates/account/data_confirm_delete.html:12
@@ -232,7 +234,7 @@ msgstr "Meine Organisation"
 
 #: templates/account/dashboard.html:104 templates/organizations/my.html:50
 msgid "You are not a member of any organizations."
-msgstr ""
+msgstr "Du bist nicht Mitglied einer Organisation."
 
 #: templates/account/dashboard.html:114
 msgid "Here you can find FAQs and support if you run into issues."
@@ -240,7 +242,7 @@ msgstr ""
 
 #: templates/account/dashboard.html:115
 msgid "View Help"
-msgstr ""
+msgstr "Hilfe anschauen"
 
 #: templates/account/dashboard.html:119
 msgid "Read detailed guides and manuals to make the most out of our platform."
@@ -252,7 +254,7 @@ msgstr "Dokumentation anzeigen"
 
 #: templates/account/data_confirm_delete.html:8
 msgid "Delete Your Data"
-msgstr ""
+msgstr "Lösche deine Daten"
 
 #: templates/account/data_confirm_delete.html:9
 msgid ""
@@ -428,7 +430,7 @@ msgstr "Teilnehmer:in hinzufügen"
 
 #: templates/campaigns/detail.html:87 templates/organizations/detail.html:24
 msgid "Username"
-msgstr ""
+msgstr "Benutzername"
 
 #: templates/campaigns/detail.html:88 templates/organizations/detail.html:25
 msgid "Email"
@@ -484,11 +486,11 @@ msgstr "Messkampagne"
 #: templates/campaigns/participants/detail.html:21
 #: templates/campaigns/room/detail.html:22
 msgid "Current Temperature:"
-msgstr ""
+msgstr "Momentane Temperatur:"
 
 #: templates/campaigns/participants/detail.html:28
 msgid "Current UV Index:"
-msgstr ""
+msgstr "Momentaner UV-Index"
 
 #: templates/campaigns/participants/detail.html:37
 #: templates/campaigns/room/detail.html:52
@@ -545,19 +547,19 @@ msgstr "Zurück zur Messkampagne"
 
 #: templates/campaigns/room/detail.html:14
 msgid "Room:"
-msgstr ""
+msgstr "Raum:"
 
 #: templates/campaigns/room/detail.html:29
 msgid "Current PM2.5:"
-msgstr ""
+msgstr "Momentan PM2.5:"
 
 #: templates/campaigns/room/detail.html:36
 msgid "Current CO₂:"
-msgstr ""
+msgstr "Momentan CO₂:"
 
 #: templates/campaigns/room/detail.html:43
 msgid "Current TVOC:"
-msgstr ""
+msgstr "Momentan TVOC:"
 
 #: templates/cities/detail.html:5
 msgid "City/municipality"
@@ -569,7 +571,7 @@ msgstr "Städte und Gemeinden"
 
 #: templates/cities/list.html:28
 msgid "No cities available."
-msgstr ""
+msgstr "Keine Stadt verfügbar."
 
 #: templates/devices/detail.html:7 templates/devices/detail.html:24
 #, fuzzy
@@ -579,7 +581,7 @@ msgstr "Geräte"
 
 #: templates/devices/detail.html:32 templates/devices/list.html:21
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: templates/devices/detail.html:34 templates/devices/list.html:22
 #, fuzzy
@@ -603,53 +605,53 @@ msgstr "Firmware Version"
 
 #: templates/devices/detail.html:37
 msgid "Sensors:"
-msgstr ""
+msgstr "Sensoren:"
 
 #: templates/devices/detail.html:46
 msgid "No sensors available."
-msgstr ""
+msgstr "Keine Sensoren verfügbar."
 
 #: templates/devices/detail.html:58
 msgid "QR-Code Text:"
-msgstr ""
+msgstr "QR-Code Text:"
 
 #: templates/devices/detail.html:77 templates/devices/list.html:25
 msgid "Organization"
-msgstr ""
+msgstr "Organisation"
 
 #: templates/devices/detail.html:81
 msgid "Organization changed from"
-msgstr ""
+msgstr "Organisatino geändert von"
 
 #: templates/devices/detail.html:81 templates/devices/detail.html:92
 #: templates/devices/detail.html:103
 msgid "to"
-msgstr ""
+msgstr "zu"
 
 #: templates/devices/detail.html:83 templates/devices/detail.html:94
 #: templates/devices/detail.html:105
 msgid "No logs available."
-msgstr ""
+msgstr "Keine Logs verfügbar."
 
 #: templates/devices/detail.html:88
 msgid "Room"
-msgstr ""
+msgstr "Raum"
 
 #: templates/devices/detail.html:92
 msgid "Room changed from"
-msgstr ""
+msgstr "Raum geändert von"
 
 #: templates/devices/detail.html:99
 msgid "User"
-msgstr ""
+msgstr "Benutzer"
 
 #: templates/devices/detail.html:103
 msgid "User changed from"
-msgstr ""
+msgstr "Benutzer geändert von"
 
 #: templates/devices/detail.html:115
 msgid "Notes:"
-msgstr "Notizen"
+msgstr "Notizen:"
 
 #: templates/devices/detail.html:118
 msgid "Edit Notes"
@@ -657,11 +659,11 @@ msgstr "Notizen bearbeiten"
 
 #: templates/devices/detail.html:129
 msgid "Battery Status"
-msgstr ""
+msgstr "Batteriestatus"
 
 #: templates/devices/detail.html:137
 msgid "No battery status available for this device."
-msgstr ""
+msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
 
 #: templates/devices/detail.html:145
 #, fuzzy
@@ -671,11 +673,9 @@ msgstr "Anmelden"
 
 #: templates/devices/detail.html:168
 msgid "unknown"
-msgstr ""
+msgstr "unbekannt"
 
 #: templates/devices/detail.html:182
-#, fuzzy
-#| msgid "Log in"
 msgid "Log pagination"
 msgstr ""
 
@@ -691,7 +691,7 @@ msgstr "Nächste"
 
 #: templates/devices/detail.html:223
 msgid "No log updates available for this device."
-msgstr ""
+msgstr "Keine Logs verfügbar für dieses Gerät."
 
 #: templates/devices/detail.html:229
 #, fuzzy
