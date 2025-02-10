@@ -11,9 +11,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
     api_url = f"{settings.API_URL}/station/current?station_ids={pk}&last_active=3600&output_format=geojson"
-
+    params = {
+        'station_ids': pk,
+        'last_active': 3600,
+        'output_format': 'geojson',
+    }
     try:
-        response = requests.get(api_url)
+        response = requests.get(api_url, params=params)
         response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
         station_data = response.json()  # Daten im JSON-Format
 
@@ -36,9 +40,15 @@ def StationDetailView(request, pk):
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
             # api query
-            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format={OutputFormat.JSON.value}&precision={Precision.HOURLY.value}&start={formatted_time_minus_48h}&end={formatted_current_time}"
-            print(api_sensor_data_48h)
-            response = requests.get(api_sensor_data_48h)
+            api_sensor_data_48h = f"{settings.API_URL}/station/historical"
+            params = {
+                'station_ids': pk,
+                'output_format': OutputFormat.JSON.value,
+                'precision': Precision.HOURLY.value,
+                'start': formatted_time_minus_48h,
+                'end': formatted_current_time,
+            }
+            response = requests.get(api_sensor_data_48h, params=params)
             response.raise_for_status()
             data_48h = response.json()
             dim_hour_val = defaultdict(lambda: [0 for _ in range(48)])
@@ -46,7 +56,7 @@ def StationDetailView(request, pk):
                 hour = datetime.fromisoformat(data_hour["time_measured"])
                 for dim_val in data_hour["values"]:
                     dim = dim_val["dimension"]
-                    val = dim_val["value"]
+                    val = dim_val["value"],
                     dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
 
             station_info["data_48h"] = dim_hour_val
