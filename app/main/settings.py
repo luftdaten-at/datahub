@@ -49,7 +49,7 @@ INTERNAL_IPS = [
 ]
 
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: True
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG
 }
 
 # Application definition
