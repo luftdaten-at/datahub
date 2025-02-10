@@ -35,7 +35,7 @@ def StationDetailView(request, pk):
                 'coordinates': geometry.get('coordinates'),
                 'sensors': [],
             }
-            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
+            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
             time_minus_48h = current_time - timedelta(hours=47)
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
@@ -54,9 +54,10 @@ def StationDetailView(request, pk):
             dim_hour_val = defaultdict(lambda: [0 for _ in range(48)])
             for data_hour in data_48h:
                 hour = datetime.fromisoformat(data_hour["time_measured"])
+                hour = hour.replace(tzinfo=timezone.utc)
                 for dim_val in data_hour["values"]:
                     dim = dim_val["dimension"]
-                    val = dim_val["value"],
+                    val = dim_val["value"]
                     dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
 
             station_info["data_48h"] = dim_hour_val
