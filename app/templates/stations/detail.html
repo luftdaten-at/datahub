@@ -63,35 +63,35 @@
     <h3>{% trans "48-hour overview" %}</h3>
 
     {% if station.data_48h.2|length > 0 %}
-    <div class="mb-4">
+    <div id="chart-pm1-div" class="mb-4">
       <h5>{% trans "Particulate Matter (PM1)" %}</h5>
       <canvas id="chart-pm1" style="height: 100px;"></canvas>
     </div>
     {% endif %}
     
     {% if station.data_48h.3|length > 0 %}
-    <div class="mb-4">
+    <div id="chart-pm25-div" class="mb-4">
       <h5>{% trans "Particulate Matter (PM2.5)" %}</h5>
       <canvas id="chart-pm25" style="height: 100px;"></canvas>
     </div>
     {% endif %}
 
     {% if station.data_48h.5|length > 0 %}
-    <div class="mb-4">
+    <div id="chart-pm10-div" class="mb-4">
       <h5>{% trans "Particulate Matter (PM10)" %}</h5>
       <canvas id="chart-pm10" style="height: 100px;"></canvas>
     </div>
     {% endif %}
     
     {% if station.data_48h.7|length > 0 %}
-    <div class="mb-4">
+    <div id="chart-temperature-div" class="mb-4">
       <h5>{% trans "Temperature (°C)" %}</h5>
       <canvas id="chart-temperature" class="chart-height"></canvas>
     </div>
     {% endif %}
     
     {% if station.data_48h.6|length > 0 %}
-    <div class="mb-4">
+    <div id="chart-humidity-div" class="mb-4">
       <h5>{% trans "Humidity (%)" %}</h5>
       <canvas id="chart-humidity" class="chart-height"></canvas>
     </div>
@@ -222,50 +222,71 @@ function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor)
 }
 
 // Diagramme erstellen
-createChart(
-  document.getElementById('chart-pm25').getContext('2d'),
-  'PM2.5 (µg/m³)',
-  dataPM25,
-  'Konzentration (µg/m³)',
-  'rgba(54, 162, 235, 0.5)',
-  'rgba(54, 162, 235, 1)'
-);
+console.log(dataPM25);
+if(dataPM25 != false){
+  createChart(
+    document.getElementById('chart-pm25').getContext('2d'),
+    'PM2.5 (µg/m³)',
+    dataPM25,
+    'Konzentration (µg/m³)',
+    'rgba(54, 162, 235, 0.5)',
+    'rgba(54, 162, 235, 1)'
+  );
+}else{
+  document.getElementById('chart-pm25-div').remove();
+}
 
-createChart(
-  document.getElementById('chart-pm10').getContext('2d'),
-  'PM10 (µg/m³)',
-  dataPM10,
-  'Konzentration (µg/m³)',
-  'rgba(255, 99, 132, 0.5)',
-  'rgba(255, 99, 132, 1)'
-);
+if(dataPM10 != false){
+  createChart(
+    document.getElementById('chart-pm10').getContext('2d'),
+    'PM10 (µg/m³)',
+    dataPM10,
+    'Konzentration (µg/m³)',
+    'rgba(255, 99, 132, 0.5)',
+    'rgba(255, 99, 132, 1)'
+  );
+}else{
+  document.getElementById('chart-pm10-div').remove();
+}
 
-createChart(
-  document.getElementById('chart-pm1').getContext('2d'),
-  'PM1 (µg/m³)',
-  dataPM1,
-  'Konzentration (µg/m³)',
-  'rgba(75, 192, 192, 0.5)',
-  'rgba(75, 192, 192, 1)'
-);
+if(dataPM1 != false){
+  createChart(
+    document.getElementById('chart-pm1').getContext('2d'),
+    'PM1 (µg/m³)',
+    dataPM1,
+    'Konzentration (µg/m³)',
+    'rgba(75, 192, 192, 0.5)',
+    'rgba(75, 192, 192, 1)'
+  );
+}else{
+  document.getElementById('chart-pm1-div').remove();
+}
 
-createChart(
-  document.getElementById('chart-temperature').getContext('2d'),
-  'Temperatur (°C)',
-  dataTemperature,
-  'Temperatur (°C)',
-  'rgba(255, 159, 64, 0.5)',
-  'rgba(255, 159, 64, 1)'
-);
+if(dataTemperature != false){
+  createChart(
+    document.getElementById('chart-temperature').getContext('2d'),
+    'Temperatur (°C)',
+    dataTemperature,
+    'Temperatur (°C)',
+    'rgba(255, 159, 64, 0.5)',
+    'rgba(255, 159, 64, 1)'
+  );
+}else{
+  document.getElementById('chart-temperature-div').remove();
+}
 
-createChart(
-  document.getElementById('chart-humidity').getContext('2d'),
-  'Luftfeuchtigkeit (%)',
-  dataHumidity,
-  'Relative Luftfeuchtigkeit (%)',
-  'rgba(153, 102, 255, 0.5)',
-  'rgba(153, 102, 255, 1)'
-);
+if(dataHumidity != false){
+  createChart(
+    document.getElementById('chart-humidity').getContext('2d'),
+    'Luftfeuchtigkeit (%)',
+    dataHumidity,
+    'Relative Luftfeuchtigkeit (%)',
+    'rgba(153, 102, 255, 0.5)',
+    'rgba(153, 102, 255, 1)'
+  );
+}else{
+  document.getElementById('chart-humidity-div').remove();
+}
 // messwerte herunterladen
 document.getElementById("dateForm").addEventListener("submit", function(event) {
     // Prevent the form from submitting normally
