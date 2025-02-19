@@ -55,11 +55,17 @@ def StationDetailView(request, pk):
             for data_hour in data_48h:
                 hour = datetime.fromisoformat(data_hour["time_measured"])
                 hour = hour.replace(tzinfo=timezone.utc)
+
                 for dim_val in data_hour["values"]:
                     dim = dim_val["dimension"]
                     val = dim_val["value"]
                     dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
 
+            dims_for_display = [2, 3, 5, 6, 7]
+            for dim in dims_for_display:
+                dim = str(dim)
+                if dim not in dim_hour_val:
+                    dim_hour_val[dim] = 'false' 
             station_info["data_48h"] = dim_hour_val
         else:
             raise Http404(f"Station mit ID {pk} nicht gefunden.")
