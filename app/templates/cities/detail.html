@@ -28,7 +28,8 @@
   </div>
 </div>  
 <div class="row">
-  <h3>Aktuelle Durchschnittswerte</h3>
+  <h3>Aktuell sind {{ city.station_count }} Stationen aktiv</h3>
+  <h3>Durchschnittswerte der letzten Stunde</h3>
   {% for value in city.values %}
   {% if value.dimension in "PM1.0,PM2.5,PM10.0,Humidity,Temperature" %}
   <div class="col-sm-4 mb-4">
@@ -36,6 +37,7 @@
       <div class="card-body">
         <h6 class="card-subtitle mb-2 text-muted">{{ value.dimension }}</h6>
         <p class="card-text display-4">{{ value.value|floatformat:2 }} {{ value.unit }}</p>
+        <h6 class="card-subtitle mb-2 text-muted">Berechnung aus {{ value.value_count }} Werten von {{ value.station_count }} Stationen</h6>
       </div>
     </div>
   </div>
