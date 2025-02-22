@@ -16,7 +16,7 @@
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
 <script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
 <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+{% comment %} <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> {% endcomment %}
 {% endblock styles %}
 
 {% block content %}
@@ -68,7 +68,7 @@
   {% endif %}
   {% endfor %}
 </div>
-<div class="row mb-4">
+{% comment %} <div class="row mb-4">
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
@@ -87,7 +87,7 @@
             </div>
         </div>
     </div>
-</div>    
+</div>     {% endcomment %}
 
 <script>
     // Farbdefinitionen für die PM-Werte
