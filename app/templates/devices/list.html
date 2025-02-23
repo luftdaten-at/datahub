@@ -1,6 +1,7 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{% trans "Devices" %}{% endblock title %}
 
@@ -32,7 +33,7 @@
                         <th data-field="model" data-sortable="true">{% trans "Model" %}</th>
                         <th data-field="firmware" data-sortable="true">{% trans "Firmware" %}</th>
                         <th data-field="organisation" data-sortable="true">{% trans "Organisation" %}</th>
-                        <th data-field="status" data-sortable="true">{% trans "Status Update" %}</th>
+                        <th data-field="status" data-sortable="true">{% trans "Device registered" %}</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -44,7 +45,7 @@
                             <td>{{ device.model|default:_("N/A") }}</td>
                             <td>{{ device.firmware|default:_("N/A") }}</td>
                             <td>{{ device.current_organization.name|default:_("N/A") }}</td>
-                            <td>{{ device.last_update|default:_("N/A") }}</td>
+                            <td>{{ device.created_at|naturaltime }}</td>
                             <td class="text-end">
                                 <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
                                     <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
