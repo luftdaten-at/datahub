@@ -130,7 +130,7 @@
         for (let i = 0; i < colorSteps.length - 1; i++) {
             if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
                 const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
-                return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
+                return colorSteps[i][1];
             }
         }
         return colorSteps[colorSteps.length - 1][1];
