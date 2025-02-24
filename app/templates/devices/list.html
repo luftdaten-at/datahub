@@ -1,10 +1,14 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}{% trans "Devices" %}{% endblock title %}
 
 {% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
 {% endblock styles %}
 
 {% block content %}
@@ -14,40 +18,35 @@
     </div>
     
     {% if devices %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle">
+        
+            <table
+                id="table"
+                data-toggle="table"
+                data-search="true"
+                data-sortable="true"
+                data-pagination="true"
+                class="table">
                 <thead class="table-light">
                     <tr>
-                        <th scope="col">{% trans "ID" %}</th>
-                        <th scope="col">{% trans "Model" %}</th>
-                        <th scope="col">{% trans "Firmware Version" %}</th>
-                        <th scope="col">{% trans "Last Status Update" %}</th>
-                        <th scope="col">{% trans "Organization" %}</th>
-                        <th scope="col"></th>
+                        <th data-field="id" data-sortable="true">{% trans "ID" %}</th>
+                        <th data-field="name" data-sortable="true">{% trans "Name" %}</th>
+                        <th data-field="model" data-sortable="true">{% trans "Model" %}</th>
+                        <th data-field="firmware" data-sortable="true">{% trans "Firmware" %}</th>
+                        <th data-field="organisation" data-sortable="true">{% trans "Organisation" %}</th>
+                        <th data-field="status" data-sortable="true">{% trans "Device registered" %}</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for device in devices %}
                         <tr>
-                            <td>
-                                <a href="{% url 'device-detail' device.pk %}" class="link-primary">
-                                    {{ device.id }}
-                                </a>
-                            </td>
+                            <td><a href="{% url 'device-detail' device.pk %}" class="link-primary">{{ device.id }}</a></td>
+                            <td>{{ device.device_name|default:_("N/A") }}</td>
                             <td>{{ device.model|default:_("N/A") }}</td>
                             <td>{{ device.firmware|default:_("N/A") }}</td>
-                            <td>
-                                {% if device.last_update %}
-                                    {{ device.last_update }}
-                                {% else %}
-                                    {% trans "Never" %}
-                                {% endif %}
-                            </td>
                             <td>{{ device.current_organization.name|default:_("N/A") }}</td>
+                            <td>{{ device.created_at|naturaltime }}</td>
                             <td class="text-end">
-                                <a href="{% url 'device-detail' device.pk %}" class="btn btn-primary btn-sm" title="{% trans 'View Details' %}">
-                                    <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Detail" %}</span>
-                                </a>
                                 <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
                                     <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
                                 </a>
@@ -59,50 +58,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </div>
         
-        <!-- Pagination (if applicable) -->
-        {% if is_paginated %}
-            <nav aria-label="{% trans 'Device pagination' %}">
-                <ul class="pagination justify-content-center">
-                    {% if page_obj.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
-                    {% endif %}
-                    
-                    {% for num in paginator.page_range %}
-                        {% if page_obj.number == num %}
-                            <li class="page-item active" aria-current="page">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if page_obj.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
         
     {% else %}
         <div class="alert alert-warning" role="alert">
