@@ -22,7 +22,6 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
     context_object_name = 'devices'
     template_name = 'devices/list.html'
-    paginate_by = 25
 
     def test_func(self):
         # Only superusers can access this view
