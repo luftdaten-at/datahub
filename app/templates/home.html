@@ -234,18 +234,10 @@
     var stationData;
 
     async function fetchMarkerData() {
-        const api_url = "{{API_URL}}";
-        const response = await fetch(`${api_url}/station/current/all`);
-
+        data = {{ data|safe }}
         stationData = [];
-
-        // Parse response CSV
-        const text = await response.text();
-        const items = text.split("\n");
-        for (let row in items) {
-            if (items[row].length == 0 || row == 0) continue;
-            var data = items[row].split(",");
-            const [stationID, lat, lon, pm1, pm25, pm10] = data;
+        for (let i in data) {
+            const [stationID, lat, lon, pm1, pm25, pm10] = data[i];
             const marker = {stationID, lat, lon, pm1, pm25, pm10};
             stationData.push(marker);
         }
