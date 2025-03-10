@@ -44,8 +44,6 @@ class HomePageView(TemplateView):
         else:
             logger.log("Faild to query current enpoint")
 
-        from pprint import pprint
-        pprint(data) 
         context['data'] = data
         
         # # 1. Fetch the city data (JSON)

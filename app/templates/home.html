@@ -241,8 +241,6 @@
             const marker = {stationID, lat, lon, pm1, pm25, pm10};
             stationData.push(marker);
         }
-        //stationData = {{ data|safe }};
-        //console.log({data});
     }
 
     fetchMarkerData().then(() => {
