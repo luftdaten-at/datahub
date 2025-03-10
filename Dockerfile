@@ -7,9 +7,9 @@ RUN apk add --no-cache gcc musl-dev libffi-dev tzdata gettext
 ENV TZ=Europe/Vienna
 
 # Set environment variables
-ENV PYTHONUNBUFFERED 1
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Set work directory
 WORKDIR /usr/src/app
