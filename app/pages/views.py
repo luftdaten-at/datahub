@@ -42,7 +42,7 @@ class HomePageView(TemplateView):
                     str(values.get(enums.Dimension.PM10_0, None))
                 ])
         else:
-            logger.log("Faild to query current enpoint")
+            logger.log(logging.ERROR, "Failed to query current endpoint")
 
         context['data'] = data
         
