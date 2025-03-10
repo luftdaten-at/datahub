@@ -1,8 +1,11 @@
 import logging
 import requests
+import json
 
 from django.views.generic import TemplateView
 from django.conf import settings
+from main.settings import API_URL
+from main import enums
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +25,29 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['host'] = self.request.get_host()
 
+        # query new endpoint
+        query_url = f'{API_URL}/station/historical?end=current&precision=all&output_format=json&include_location=true'
+        resp = requests.get(query_url)
+
+        data = []
+        if resp.status_code == 200:
+            for j in json.loads(resp.text):
+                values = {d['dimension']: d['value'] for d in j['values']}
+                data.append([
+                    str(j['device']),
+                    str(j['location']['lat']),
+                    str(j['location']['lon']),
+                    str(values.get(enums.Dimension.PM1_0, None)),
+                    str(values.get(enums.Dimension.PM2_5, None)),
+                    str(values.get(enums.Dimension.PM10_0, None))
+                ])
+        else:
+            logger.log("Faild to query current enpoint")
+
+        from pprint import pprint
+        pprint(data) 
+        context['data'] = data
+        
         # # 1. Fetch the city data (JSON)
         # api_url_cities = f"{settings.API_URL}/city/all"
         # cities = []
