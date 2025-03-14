@@ -1,17 +1,17 @@
 import datetime
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, TemplateView
+from django.views.generic import CreateView, DeleteView, TemplateView, UpdateView
+from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, CustomUserEditForm
 from .models import CustomUser
 from organizations.models import Organization, OrganizationInvitation
 from campaign.models import Campaign
-from devices.models import Measurement
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
@@ -109,3 +109,31 @@ class DataDeleteView(TemplateView, LoginRequiredMixin):
         messages.success(request, 'All Data that belongs to your account has been deleted')
 
         return redirect('settings')
+
+
+class UsersUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = get_user_model()
+    form_class = CustomUserEditForm
+    template_name = 'account/users/edit.html'
+    pk_url_kwarg = 'user_id'  # Erwartet in der URL: /users/edit/<user_id>/
+
+    def get_success_url(self):
+        return reverse_lazy('users-list')
+
+    def test_func(self):
+        # Zugriff erlauben, wenn der angemeldete Benutzer ein Superuser ist
+        return self.request.user.is_superuser
+
+
+class UsersListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    model = CustomUser
+    context_object_name = 'users'
+    template_name = 'account/users/list.html'
+
+    def test_func(self):
+        # Only superusers can access this view
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_queryset(self):
+        # Optimize queryset by selecting related 'current_organization'
+        return CustomUser.objects.all().order_by('id')

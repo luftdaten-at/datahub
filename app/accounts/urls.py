@@ -1,7 +1,7 @@
 from django.urls import path, include
 
 #from .views import SignupPageView
-from accounts.views import AccountDeleteView, SettingsView, SignupPageView, DataDeleteView
+from accounts.views import AccountDeleteView, SettingsView, SignupPageView, DataDeleteView, UsersUpdateView, UsersListView
 
 
 urlpatterns = [
@@ -9,5 +9,7 @@ urlpatterns = [
     path('settings/', SettingsView, name='settings'),
     path("signup/", SignupPageView.as_view(), name="signup"),
     path('data-delete/', DataDeleteView.as_view(), name='data-delete'),
+    path('users/', UsersListView.as_view(), name='users-list'),
+    path('users/edit/<int:user_id>/', UsersUpdateView.as_view(), name='users-edit'),
     path("", include("allauth.urls")),
 ]
