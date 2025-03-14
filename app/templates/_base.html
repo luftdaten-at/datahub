@@ -95,7 +95,10 @@
                                 {% if user.is_authenticated and user.is_superuser %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item" href="{% url 'device-list' %}">{% trans "Devices" %}</a>
+                                    <a class="dropdown-item" href="{% url 'devices-list' %}">{% trans "Devices" %}</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'users-list' %}">{% trans "Users" %}</a>
                                 </li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>

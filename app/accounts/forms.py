@@ -11,6 +11,19 @@ class CustomUserCreationForm(UserCreationForm):
         )
 
 
+class CustomUserEditForm(UserChangeForm):
+    class Meta:
+        model = get_user_model()
+        fields = (
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'is_staff',
+            'is_superuser'
+        )
+
+
 class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = get_user_model()

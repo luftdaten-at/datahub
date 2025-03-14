@@ -1,0 +1,64 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Users" %}{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+{% endblock styles %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Users" %}</h2>
+    </div>
+    {% if users %}
+        <table
+            id="table"
+            data-toggle="table"
+            data-search="true"
+            data-sortable="true"
+            data-pagination="true"
+            data-page-size="50"
+            data-page-list="[50, 100, 200]"
+            class="table">
+        <thead class="table-light">
+            <tr>
+            <th data-field="id" data-sortable="true">{% trans "ID" %}</th>
+            <th data-field="username" data-sortable="true">{% trans "Username" %}</th>
+            <th data-field="is_staff" data-sortable="true">{% trans "Is Staff" %}</th>
+            <th data-field="is_superuser" data-sortable="true">{% trans "Is Superuser" %}</th>
+            <th data-field="date_joined" data-sortable="true">{% trans "Date joined" %}</th>
+            <th data-field="last_login" data-sortable="true">{% trans "Last login" %}</th>
+            <th data-field="actions" class="text-end">{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.is_staff|yesno:"Yes,No" }}</td>
+                <td>{{ user.is_superuser|yesno:"Yes,No" }}</td>
+                <td>{{ user.date_joined|naturaltime }}</td>
+                <td>{{ user.last_login|naturaltime }}</td>
+                <td class="text-end">
+                <a href="{% url 'users-edit' user.id %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit' %}">
+                    <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>  
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            {% trans "No users found." %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
