@@ -127,12 +127,24 @@ class WorkshopExportCsvView(View):
         response['Content-Disposition'] = f'attachment; filename="{workshop.name}_data.csv"'
 
         writer = csv.writer(response)
-        # Header: Dynamisch alle Feldnamen des Models abrufen
-        field_names = [field.name for field in AirQualityRecord._meta.fields]
-        writer.writerow(field_names)
+        header = ['id', 'time', 'pm1', 'pm25', 'pm10', 'temperature', 'humidity', 'device', 'participant', 'lat', 'lon', 'location_precision', 'mode']
+        writer.writerow(header)
 
-        # Für jeden Record werden die Werte der Felder als Zeile in die CSV geschrieben
         for record in records:
-            writer.writerow([getattr(record, field) for field in field_names])
+            writer.writerow([
+                record.id,
+                record.time,
+                record.pm1,
+                record.pm25,
+                record.pm10,
+                record.temperature,
+                record.humidity,
+                record.device,
+                record.participant,
+                record.lat,
+                record.lon,
+                record.location_precision,
+                record.mode
+            ])
 
         return response
