@@ -8,6 +8,7 @@ from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponse, Http404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Workshop
 from .forms import WorkshopForm
@@ -17,16 +18,37 @@ class WorkshopListView(ListView):
     model = Workshop
     context_object_name = 'workshops'
     template_name = 'workshops/list.html'
-
+    
     def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
         context = super().get_context_data(**kwargs)
         
-        # Filter workshops that are public and whose end_date is in the future
-        context['upcoming_workshops'] = Workshop.objects.filter(end_date__gt=timezone.now(), public=True).order_by('end_date')
-        
-        # Filter workshops that are public and whose end_date is in the past
-        context['past_workshops'] = Workshop.objects.filter(end_date__lte=timezone.now(), public=True).order_by('end_date')
+        # Upcoming workshops: those with end_date in the future, sorted descending (latest first)
+        upcoming_qs = Workshop.objects.filter(
+            end_date__gt=timezone.now(), public=True
+        ).order_by('-end_date')
+        paginator_upcoming = Paginator(upcoming_qs, 10)
+        page_upcoming = self.request.GET.get('page_upcoming')
+        try:
+            upcoming_page = paginator_upcoming.page(page_upcoming)
+        except PageNotAnInteger:
+            upcoming_page = paginator_upcoming.page(1)
+        except EmptyPage:
+            upcoming_page = paginator_upcoming.page(paginator_upcoming.num_pages)
+        context['upcoming_workshops'] = upcoming_page
+
+        # Past workshops: those with end_date in the past, sorted descending (most recent first)
+        past_qs = Workshop.objects.filter(
+            end_date__lte=timezone.now(), public=True
+        ).order_by('-end_date')
+        paginator_past = Paginator(past_qs, 10)
+        page_past = self.request.GET.get('page_past')
+        try:
+            past_page = paginator_past.page(page_past)
+        except PageNotAnInteger:
+            past_page = paginator_past.page(1)
+        except EmptyPage:
+            past_page = paginator_past.page(paginator_past.num_pages)
+        context['past_workshops'] = past_page
         
         return context
 

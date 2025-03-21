@@ -8,9 +8,9 @@
 <h2 class="mb-4 mt-5">{% trans "Workshops" %}</h2>
 <p>{% trans "We continuously host workshops where air quality is measured together. On this page, the results of all public workshops are listed." %}</p>
 
-<!-- Laufende Workshops -->
+<!-- Upcoming Workshops -->
 <div class="mb-5">
-    <h3 class="mb-3">{% trans "Running workshops" %}</h3>
+    <h3 class="mb-3">{% trans "Upcoming workshops" %}</h3>
     {% if upcoming_workshops %}
         <div class="list-group">
             {% for workshop in upcoming_workshops %}
@@ -23,15 +23,41 @@
                 </a>
             {% endfor %}
         </div>
+        <!-- Pagination for upcoming workshops -->
+        {% if upcoming_workshops.has_other_pages %}
+            <nav aria-label="Upcoming Workshops Pagination" class="mt-3">
+                <ul class="pagination">
+                    {% if upcoming_workshops.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_upcoming={{ upcoming_workshops.previous_page_number }}{% if request.GET.page_past %}&page_past={{ request.GET.page_past }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for num in upcoming_workshops.paginator.page_range %}
+                        <li class="page-item {% if upcoming_workshops.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page_upcoming={{ num }}{% if request.GET.page_past %}&page_past={{ request.GET.page_past }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if upcoming_workshops.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_upcoming={{ upcoming_workshops.next_page_number }}{% if request.GET.page_past %}&page_past={{ request.GET.page_past }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="alert alert-info" role="alert">
-            {% trans "No running workshops." %}
+            {% trans "No upcoming workshops." %}
         </div>
     {% endif %}
 </div>
 
-<!-- Vergangene Workshops -->
-<div>
+<!-- Past Workshops -->
+<div class="mb-5">
     <h3 class="mb-3">{% trans "Past workshops" %}</h3>
     {% if past_workshops %}
         <div class="list-group">
@@ -45,6 +71,32 @@
                 </a>
             {% endfor %}
         </div>
+        <!-- Pagination for past workshops -->
+        {% if past_workshops.has_other_pages %}
+            <nav aria-label="Past Workshops Pagination" class="mt-3">
+                <ul class="pagination">
+                    {% if past_workshops.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_past={{ past_workshops.previous_page_number }}{% if request.GET.page_upcoming %}&page_upcoming={{ request.GET.page_upcoming }}{% endif %}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                    {% for num in past_workshops.paginator.page_range %}
+                        <li class="page-item {% if past_workshops.number == num %}active{% endif %}">
+                            <a class="page-link" href="?page_past={{ num }}{% if request.GET.page_upcoming %}&page_upcoming={{ request.GET.page_upcoming }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if past_workshops.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page_past={{ past_workshops.next_page_number }}{% if request.GET.page_upcoming %}&page_upcoming={{ request.GET.page_upcoming }}{% endif %}" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
     {% else %}
         <div class="alert alert-info" role="alert">
             {% trans "No past workshops." %}
