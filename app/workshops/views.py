@@ -1,12 +1,17 @@
+import csv
+
 from django.utils import timezone
+from django.views import View
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
+from django.http import HttpResponse, Http404
 
 from .models import Workshop
 from .forms import WorkshopForm
+from api.models import AirQualityRecord
 
 class WorkshopListView(ListView):
     model = Workshop
@@ -42,14 +47,16 @@ class WorkshopDetailView(DetailView):
         """
         This method is overridden to provide additional checks for the workshop's visibility.
         If the requested workshop is not public, it raises a 404.
-        """
-        # Use the filtered queryset from get_queryset to ensure we're only considering public workshops.
-        queryset = self.get_queryset() if queryset is None else queryset
-        obj = super().get_object(queryset=queryset)  # This gets the object using the queryset we provided.
+        """        
+        try:
+            queryset = self.get_queryset() if queryset is None else queryset
+            obj = super().get_object(queryset=queryset)
         
-        # If the workshop is not public and the user is not the owner, raise a 404 error.
+        except Workshop.DoesNotExist:
+            raise Http404("Workshop nicht gefunden.")
+
         if not obj.public and obj.owner != self.request.user:
-            raise Http404("No workshop found matching the query")
+            raise Http404("Workshop nicht gefunden.")
 
         return obj
 
@@ -101,3 +108,31 @@ class WorkshopDeleteView(DeleteView):
         if not self.request.user.is_superuser:
             queryset = queryset.filter(owner=self.request.user)
         return queryset
+    
+
+class WorkshopExportCsvView(View):
+    def get(self, request, pk, *args, **kwargs):
+        try:
+            workshop = Workshop.objects.get(pk=pk)
+        except Workshop.DoesNotExist:
+            raise Http404("Workshop nicht gefunden.")
+
+        if not workshop.public and workshop.owner != request.user:
+            raise Http404("Workshop nicht gefunden.")
+
+        records = AirQualityRecord.objects.filter(workshop__name=pk)
+
+        # CSV-Antwort vorbereiten
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="{workshop.name}_data.csv"'
+
+        writer = csv.writer(response)
+        # Header: Dynamisch alle Feldnamen des Models abrufen
+        field_names = [field.name for field in AirQualityRecord._meta.fields]
+        writer.writerow(field_names)
+
+        # Für jeden Record werden die Werte der Felder als Zeile in die CSV geschrieben
+        for record in records:
+            writer.writerow([getattr(record, field) for field in field_names])
+
+        return response
