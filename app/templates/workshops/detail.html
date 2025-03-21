@@ -86,11 +86,14 @@
 {% endblock map %}
 
 {% block content %}
-    <div class="mt-3">
+    <div class="mt-3 mb-5">
         <h2>{{ workshop.title }}</h2>
         <p>{{ workshop.description }}</p>
         <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
         <p>Code: {{ workshop.name }}</p>
+        <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary mt-3">
+            {% trans "Download as CSV" %}
+        </a>
     </div>
     <script>
         const colorSteps = [
