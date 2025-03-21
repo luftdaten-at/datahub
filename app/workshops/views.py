@@ -87,12 +87,13 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
     model = Workshop
     template_name = 'workshops/my.html'
     context_object_name = 'workshops'
+    paginate_by = 10
     
     def get_queryset(self):
-        if self.request.user.is_superuser:  # Check if the user is an admin
-            return Workshop.objects.all()  # Admin sees all workshops
+        if self.request.user.is_superuser:
+            return Workshop.objects.all()
         else:
-            return Workshop.objects.filter(owner=self.request.user)  # Filter by owner
+            return Workshop.objects.filter(owner=self.request.user)
 
 
 class WorkshopCreateView(CreateView):
