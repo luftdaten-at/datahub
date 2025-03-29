@@ -9,7 +9,7 @@
     <a href="{% url 'workshop-create' %}" class="btn btn-outline-primary">{% trans "Create workshop" %}</a>
 </div>
 {% if workshops %}
-<div class="list-group mb-3">
+<div class="list-group">
     {% for workshop in workshops %}
         <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
             <div class="mb-2 mb-md-0">
@@ -41,7 +41,7 @@
 
 <!-- Pagination -->
 {% if is_paginated %}
-<nav aria-label="Page navigation" class="mt-4 mb-3">
+<nav aria-label="Page navigation" class="mt-4">
     <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
         <li class="page-item">
