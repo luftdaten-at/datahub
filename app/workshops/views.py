@@ -86,32 +86,18 @@ class WorkshopDetailView(DetailView):
 class WorkshopMyView(LoginRequiredMixin, ListView):
     model = Workshop
     template_name = 'workshops/my.html'
-    # context_object_name = 'workshops'
-    # paginate_by = 10
-    
-    def get_queryset(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    context_object_name = 'workshops'
+    paginate_by = 10 
 
+    def get_queryset(self):
         if self.request.user.is_superuser:
-            qs = Workshop.objects.filter(
+            return Workshop.objects.filter(
                 end_date__lte=timezone.now()
             ).order_by('-end_date')
         else:
-            qs = Workshop.objects.filter(
+            return Workshop.objects.filter(
                 end_date__lte=timezone.now(), owner=self.request.user
             ).order_by('-end_date')
-
-        paginator = Paginator(qs, 10)
-        page = self.request.GET.get('page')
-        try:
-            page = paginator.page(page)
-        except PageNotAnInteger:
-            page = paginator.page(1)
-        except EmptyPage:
-            page = paginator.page(paginator.num_pages)
-        context['workshops'] = page
-
-        return context
 
 
 class WorkshopCreateView(CreateView):
