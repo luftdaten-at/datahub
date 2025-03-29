@@ -89,7 +89,7 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
     context_object_name = 'workshops'
     paginate_by = 10
     
-    def get_queryset(self):
+    def get_queryset(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_superuser:
