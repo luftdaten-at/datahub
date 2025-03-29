@@ -86,8 +86,8 @@ class WorkshopDetailView(DetailView):
 class WorkshopMyView(LoginRequiredMixin, ListView):
     model = Workshop
     template_name = 'workshops/my.html'
-    context_object_name = 'workshops'
-    paginate_by = 10
+    # context_object_name = 'workshops'
+    # paginate_by = 10
     
     def get_queryset(self, **kwargs):
         context = super().get_context_data(**kwargs)
