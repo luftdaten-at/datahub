@@ -143,7 +143,10 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         # add available sensors
         q = Measurement.objects.filter(device=device, time_measured=device.last_update).all()
         if not q:
-            status = device.status_list.filter(sensor_list__isnull=False).latest('time_received')
+            try:
+                status = device.status_list.filter(sensor_list__isnull=False).latest('time_received')
+            except DeviceStatus.DoesNotExist:
+                status = None
             if status:
                 for data in status.sensor_list:
                     sensors[SensorModel.get_sensor_name(data['model_id'])].extend(Dimension.get_name(dim) for dim in data['dimension_list'])
