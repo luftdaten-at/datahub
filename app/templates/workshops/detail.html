@@ -91,6 +91,11 @@
         <p>{{ workshop.description }}</p>
         <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
         <p>Code: {{ workshop.name }}</p>
+
+        <h4>{% trans "Geräteübersicht" %}</h4>
+            <ul id="device-list"></ul>    
+
+        <h4>{% trans "Download Data" %}</h4>
         <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary mt-3">
             {% trans "Download as CSV" %}
         </a>
@@ -163,6 +168,27 @@
             }
         }
     
+        function showDeviceList() {
+            // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
+            const deviceCounts = {};
+            for (let i = 0; i < points.length; i++) {
+                const device = points[i].device;
+                if (!deviceCounts[device]) {
+                    deviceCounts[device] = 0;
+                }
+                deviceCounts[device]++;
+            }
+    
+            // 2. Füge die Daten in <ul id="device-list"> ein
+            const ul = document.getElementById("device-list");
+            ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
+            for (const device in deviceCounts) {
+                const li = document.createElement("li");
+                li.textContent = `${device}: ${deviceCounts[device]} Messpunkte`;
+                ul.appendChild(li);
+            }
+        }
+
         fetchMarkerData().then(() => {
             addMarkerLayer("pm25");
             const devices = new Set();
@@ -176,6 +202,7 @@
                 option.value = device;
                 select.add(option);
             }
+            showDeviceList();
         });
     
         function getMean(arr) {
