@@ -58,11 +58,11 @@ class WorkshopDetailView(DetailView):
     context_object_name = 'workshop'
     template_name = 'workshops/detail.html'
 
-    def get_queryset(self):
-        """
-        This method is overridden to only include workshops that are public.
-        """
-        return Workshop.objects.filter(public=True)
+    # def get_queryset(self):
+    #     """
+    #     This method is overridden to only include workshops that are public.
+    #     """
+    #     return Workshop.objects.filter(public=True)
     
     def get_object(self, queryset=None):
         """
