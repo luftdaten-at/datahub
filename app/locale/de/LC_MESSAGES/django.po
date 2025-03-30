@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-06 11:17+0100\n"
+"POT-Creation-Date: 2025-03-30 20:48+0200\n"
 "PO-Revision-Date: 2024-12-07 01:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -20,7 +20,7 @@ msgstr ""
 "X-Generator: Poedit 3.5\n"
 
 #: campaign/forms.py:23 templates/devices/detail.html:33
-#: templates/devices/my.html:13
+#: templates/devices/list.html:34 templates/devices/my.html:13
 msgid "Name"
 msgstr "Name"
 
@@ -56,7 +56,7 @@ msgstr ""
 "Soll die Messkampagne öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur zugewiesene Benutzer Ergebnisse sehen."
 
-#: devices/views.py:228
+#: devices/views.py:233
 msgid "You are not allowed to delete this device."
 msgstr ""
 
@@ -107,7 +107,7 @@ msgid "My Organizations"
 msgstr "Meine Organisation"
 
 #: templates/_base.html:85 templates/account/dashboard.html:19
-#: templates/account/dashboard.html:43 templates/campaigns/my.html:4
+#: templates/account/dashboard.html:42 templates/campaigns/my.html:4
 #: templates/campaigns/my.html:8
 #, fuzzy
 #| msgid "My campaigns"
@@ -122,46 +122,40 @@ msgid "My Workshops"
 msgstr "Meine Workshops"
 
 #: templates/_base.html:98 templates/campaigns/participants/detail.html:48
-#: templates/campaigns/room/detail.html:63 templates/devices/list.html:5
-#: templates/devices/list.html:13 templates/organizations/detail.html:94
+#: templates/campaigns/room/detail.html:66 templates/devices/list.html:6
+#: templates/devices/list.html:17 templates/organizations/detail.html:94
+#: templates/workshops/detail.html:95
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:104
+#: templates/_base.html:101 templates/account/users/list.html:6
+#: templates/account/users/list.html:17 templates/organizations/detail.html:17
+msgid "Users"
+msgstr "Nutzer:innen"
+
+#: templates/_base.html:107
 #, fuzzy
 #| msgid "Log out"
 msgid "Log Out"
 msgstr "Abmelden"
 
-#: templates/_base.html:111
+#: templates/_base.html:114
 #, fuzzy
 #| msgid "Log in"
 msgid "Log In"
 msgstr "Anmelden"
 
-#: templates/_base.html:114
+#: templates/_base.html:118
 #, fuzzy
 #| msgid "Sign up"
 msgid "Sign Up"
 msgstr "Registrieren"
 
-#: templates/_base.html:139
+#: templates/_base.html:143
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:142 templates/account/dashboard.html:118
-#: templates/documentation.html:5 templates/documentation.html:11
-#, fuzzy
-#| msgid "Station"
-msgid "Documentation"
-msgstr "Dokumentation"
-
-#: templates/_base.html:145 templates/account/dashboard.html:113
-#: templates/help.html:5 templates/help.html:11
-msgid "Help"
-msgstr "Hilfe"
-
-#: templates/_base.html:148
+#: templates/_base.html:146
 #, fuzzy
 #| msgid "About us"
 msgid "About Us"
@@ -202,53 +196,78 @@ msgstr "Willkommen,"
 msgid " My Measurements"
 msgstr "Meine Messwerte"
 
-#: templates/account/dashboard.html:53 templates/account/dashboard.html:88
+#: templates/account/dashboard.html:51 templates/account/dashboard.html:85
 #: templates/campaigns/my.html:19 templates/organizations/my.html:23
 msgid "Owner"
 msgstr ""
 
-#: templates/account/dashboard.html:55 templates/account/dashboard.html:90
+#: templates/account/dashboard.html:53 templates/account/dashboard.html:87
 #: templates/campaigns/my.html:21 templates/organizations/my.html:25
 msgid "Member"
 msgstr "Mitglied"
 
-#: templates/account/dashboard.html:57 templates/account/dashboard.html:92
+#: templates/account/dashboard.html:55 templates/account/dashboard.html:89
 #: templates/campaigns/my.html:23 templates/organizations/my.html:27
 msgid "Other"
 msgstr ""
 
-#: templates/account/dashboard.html:61 templates/campaigns/my.html:27
-#: templates/workshops/my.html:18
+#: templates/account/dashboard.html:59 templates/campaigns/my.html:27
+#: templates/workshops/my.html:23
 #, fuzzy
 #| msgid "End Date"
 msgid "Date:"
 msgstr "Enddatum:"
 
-#: templates/account/dashboard.html:70 templates/campaigns/my.html:50
+#: templates/account/dashboard.html:68 templates/campaigns/my.html:50
 msgid "No campaigns found."
 msgstr "Keine Messkampagnen gefunden."
 
-#: templates/account/dashboard.html:78
+#: templates/account/dashboard.html:70 templates/campaigns/my.html:9
+#, fuzzy
+#| msgid "Create campaign"
+msgid "Create Campaign"
+msgstr "Messkampagne erstellen"
+
+#: templates/account/dashboard.html:76
 msgid "My Organization"
 msgstr "Meine Organisation"
 
-#: templates/account/dashboard.html:104 templates/organizations/my.html:50
+#: templates/account/dashboard.html:101 templates/organizations/my.html:50
 msgid "You are not a member of any organizations."
 msgstr "Du bist nicht Mitglied einer Organisation."
 
-#: templates/account/dashboard.html:114
+#: templates/account/dashboard.html:103 templates/organizations/create.html:10
+#: templates/organizations/my.html:13
+#, fuzzy
+#| msgid "Create campaign"
+msgid "Create Organization"
+msgstr "Messkampagne erstellen"
+
+#: templates/account/dashboard.html:111 templates/help.html:5
+#: templates/help.html:11
+msgid "Help"
+msgstr "Hilfe"
+
+#: templates/account/dashboard.html:112
 msgid "Here you can find FAQs and support if you run into issues."
 msgstr ""
 
-#: templates/account/dashboard.html:115
+#: templates/account/dashboard.html:113
 msgid "View Help"
 msgstr "Hilfe anschauen"
 
-#: templates/account/dashboard.html:119
+#: templates/account/dashboard.html:116 templates/documentation.html:5
+#: templates/documentation.html:11
+#, fuzzy
+#| msgid "Station"
+msgid "Documentation"
+msgstr "Dokumentation"
+
+#: templates/account/dashboard.html:117
 msgid "Read detailed guides and manuals to make the most out of our platform."
 msgstr ""
 
-#: templates/account/dashboard.html:120
+#: templates/account/dashboard.html:118
 msgid "View Docs"
 msgstr "Dokumentation anzeigen"
 
@@ -383,6 +402,62 @@ msgstr "Löschen"
 msgid "Registrieren"
 msgstr ""
 
+#: templates/account/users/edit.html:8
+#, fuzzy
+#| msgid "Invite a User"
+msgid "Edit User"
+msgstr "Lade eine Nutzer:in ein"
+
+#: templates/account/users/edit.html:12 templates/campaigns/form.html:14
+#: templates/campaigns/room_form.html:14 templates/organizations/create.html:14
+#: templates/workshops/form.html:14
+msgid "Save"
+msgstr "Speichern"
+
+#: templates/account/users/list.html:31 templates/devices/detail.html:32
+#: templates/devices/list.html:33
+msgid "ID"
+msgstr "ID"
+
+#: templates/account/users/list.html:32 templates/campaigns/detail.html:87
+#: templates/organizations/detail.html:24
+msgid "Username"
+msgstr "Benutzername"
+
+#: templates/account/users/list.html:33
+msgid "Is Staff"
+msgstr ""
+
+#: templates/account/users/list.html:34
+msgid "Is Superuser"
+msgstr ""
+
+#: templates/account/users/list.html:35
+msgid "Date joined"
+msgstr ""
+
+#: templates/account/users/list.html:36
+msgid "Last login"
+msgstr "Letzter Login"
+
+#: templates/account/users/list.html:37 templates/devices/my.html:16
+msgid "Actions"
+msgstr "Aktionen"
+
+#: templates/account/users/list.html:50 templates/account/users/list.html:51
+#: templates/campaigns/detail.html:57 templates/campaigns/my.html:38
+#: templates/devices/detail.html:25 templates/devices/list.html:53
+#: templates/devices/my.html:25 templates/organizations/my.html:39
+#: templates/workshops/my.html:34
+msgid "Edit"
+msgstr "Bearbeiten"
+
+#: templates/account/users/list.html:60 templates/organizations/detail.html:42
+#, fuzzy
+#| msgid "No devices found."
+msgid "No users found."
+msgstr "Keine Nutzer:innen gefunden."
+
 #: templates/campaigns/detail.html:26
 msgid "Rooms"
 msgstr "Räume"
@@ -403,20 +478,13 @@ msgstr "Momentane Messwerte"
 
 #: templates/campaigns/detail.html:53 templates/campaigns/detail.html:101
 #: templates/campaigns/my.html:34 templates/devices/my.html:25
-#: templates/organizations/my.html:36 templates/workshops/my.html:25
+#: templates/organizations/my.html:36 templates/workshops/my.html:30
 msgid "Details"
 msgstr "Details"
 
-#: templates/campaigns/detail.html:57 templates/campaigns/my.html:38
-#: templates/devices/detail.html:25 templates/devices/list.html:52
-#: templates/devices/my.html:25 templates/organizations/my.html:39
-#: templates/workshops/my.html:29
-msgid "Edit"
-msgstr "Bearbeiten"
-
 #: templates/campaigns/detail.html:61 templates/campaigns/my.html:42
-#: templates/devices/list.html:55 templates/organizations/my.html:42
-#: templates/workshops/my.html:33
+#: templates/devices/list.html:56 templates/organizations/my.html:42
+#: templates/workshops/my.html:38
 msgid "Delete"
 msgstr "Löschen"
 
@@ -428,45 +496,30 @@ msgstr "Teilnehmer:innen"
 msgid "Add Participant"
 msgstr "Teilnehmer:in hinzufügen"
 
-#: templates/campaigns/detail.html:87 templates/organizations/detail.html:24
-msgid "Username"
-msgstr "Benutzername"
-
 #: templates/campaigns/detail.html:88 templates/organizations/detail.html:25
 msgid "Email"
 msgstr "E-Mail-Adresse"
 
 #: templates/campaigns/detail.html:105
 #: templates/campaigns/participants/detail.html:69
-#: templates/campaigns/room/detail.html:84
+#: templates/campaigns/room/detail.html:87
 #: templates/organizations/detail.html:36
 msgid "Remove"
 msgstr "Entfernen"
 
 #: templates/campaigns/detail.html:112
 msgid "There are no participants in this campaign yet."
-msgstr ""
+msgstr "Es sind noch keine Teilnehmer:innen in dieser Kampagne."
 
 #: templates/campaigns/form.html:10 templates/campaigns/room_form.html:10
 msgid "Campaign"
 msgstr "Messkampagne"
 
-#: templates/campaigns/form.html:14 templates/campaigns/room_form.html:14
-#: templates/organizations/create.html:14 templates/workshops/form.html:14
-msgid "Save"
-msgstr "Speichern"
-
 #: templates/campaigns/home.html:5 templates/campaigns/home.html:8
 msgid "Campaigns"
 msgstr "Messkampagnen"
 
-#: templates/campaigns/my.html:9
-#, fuzzy
-#| msgid "Create campaign"
-msgid "Create Campaign"
-msgstr "Messkampagne erstellen"
-
-#: templates/campaigns/my.html:28 templates/workshops/my.html:19
+#: templates/campaigns/my.html:28
 #, fuzzy
 #| msgid "Public"
 msgid "Public:"
@@ -477,14 +530,14 @@ msgid "Participant:"
 msgstr ""
 
 #: templates/campaigns/participants/detail.html:15
-#: templates/campaigns/room/detail.html:15
+#: templates/campaigns/room/detail.html:18
 #, fuzzy
 #| msgid "Campaign"
 msgid "Campaign:"
 msgstr "Messkampagne"
 
 #: templates/campaigns/participants/detail.html:21
-#: templates/campaigns/room/detail.html:22
+#: templates/campaigns/room/detail.html:25
 msgid "Current Temperature:"
 msgstr "Momentane Temperatur:"
 
@@ -493,21 +546,22 @@ msgid "Current UV Index:"
 msgstr "Momentaner UV-Index"
 
 #: templates/campaigns/participants/detail.html:37
-#: templates/campaigns/room/detail.html:52
+#: templates/campaigns/room/detail.html:55
 #, fuzzy
 #| msgid "48-hour overview"
 msgid "24-hour overview"
 msgstr "48-Stunden Überblick"
 
 #: templates/campaigns/participants/detail.html:49
-#: templates/campaigns/room/detail.html:64
+#: templates/campaigns/room/detail.html:16
+#: templates/campaigns/room/detail.html:67
 #, fuzzy
 #| msgid "Edit Device"
 msgid "Add Device"
 msgstr "Gerät bearbeiten"
 
 #: templates/campaigns/participants/detail.html:57
-#: templates/campaigns/room/detail.html:72
+#: templates/campaigns/room/detail.html:75
 #: templates/organizations/detail.html:102
 #, fuzzy
 #| msgid "Devices"
@@ -515,7 +569,7 @@ msgid "Device ID"
 msgstr "Geräte"
 
 #: templates/campaigns/participants/detail.html:58
-#: templates/campaigns/room/detail.html:73
+#: templates/campaigns/room/detail.html:76
 #: templates/organizations/detail.html:103
 #, fuzzy
 #| msgid "Devices"
@@ -523,7 +577,7 @@ msgid "Device name"
 msgstr "Geräte"
 
 #: templates/campaigns/participants/detail.html:59
-#: templates/campaigns/room/detail.html:74 templates/devices/detail.html:51
+#: templates/campaigns/room/detail.html:77 templates/devices/detail.html:51
 #: templates/organizations/detail.html:104
 #, fuzzy
 #| msgid "Start date"
@@ -531,7 +585,7 @@ msgid "Last update"
 msgstr "Startdatum"
 
 #: templates/campaigns/participants/detail.html:74
-#: templates/campaigns/room/detail.html:89
+#: templates/campaigns/room/detail.html:92
 #: templates/organizations/detail.html:117
 #, fuzzy
 #| msgid "No devices found."
@@ -539,31 +593,82 @@ msgid "No Device found"
 msgstr "Keine Geräte gefunden."
 
 #: templates/campaigns/participants/detail.html:84
-#: templates/campaigns/room/detail.html:99
+#: templates/campaigns/room/detail.html:102
 #, fuzzy
 #| msgid "Campaign"
 msgid "Back to Campaign"
 msgstr "Zurück zur Messkampagne"
 
-#: templates/campaigns/room/detail.html:14
+#: templates/campaigns/room/detail.html:15
 msgid "Room:"
 msgstr "Raum:"
 
-#: templates/campaigns/room/detail.html:29
+#: templates/campaigns/room/detail.html:32
 msgid "Current PM2.5:"
 msgstr "Momentan PM2.5:"
 
-#: templates/campaigns/room/detail.html:36
+#: templates/campaigns/room/detail.html:39
 msgid "Current CO₂:"
 msgstr "Momentan CO₂:"
 
-#: templates/campaigns/room/detail.html:43
+#: templates/campaigns/room/detail.html:46
 msgid "Current TVOC:"
 msgstr "Momentan TVOC:"
 
 #: templates/cities/detail.html:5
 msgid "City/municipality"
 msgstr "Stadt/Gemeinde"
+
+#: templates/cities/detail.html:29 templates/cities/detail.html:30
+#: templates/cities/detail.html:31 templates/home.html:30
+msgid "Air quality"
+msgstr "Luftqualität"
+
+#: templates/cities/detail.html:29 templates/cities/detail.html:30
+#: templates/cities/detail.html:31 templates/home.html:32
+#: templates/home.html:33 templates/home.html:34
+msgid "Particulate Matter"
+msgstr "Feinstaub"
+
+#: templates/cities/detail.html:40 templates/home.html:37
+msgid "Method: European Air Quality Index"
+msgstr "Methode: European Air Quality Index"
+
+#: templates/cities/detail.html:96 templates/cities/detail.html:104
+#: templates/cities/detail.html:112 templates/home.html:108
+#: templates/home.html:116 templates/home.html:124
+msgid "Good"
+msgstr "Gut"
+
+#: templates/cities/detail.html:97 templates/cities/detail.html:105
+#: templates/cities/detail.html:113 templates/home.html:109
+#: templates/home.html:117 templates/home.html:125
+msgid "Fair"
+msgstr "Ausreichend"
+
+#: templates/cities/detail.html:98 templates/cities/detail.html:106
+#: templates/cities/detail.html:114 templates/home.html:110
+#: templates/home.html:118 templates/home.html:126
+msgid "Moderate"
+msgstr "Mäßig"
+
+#: templates/cities/detail.html:99 templates/cities/detail.html:107
+#: templates/cities/detail.html:115 templates/home.html:111
+#: templates/home.html:119 templates/home.html:127
+msgid "Poor"
+msgstr "Schlecht"
+
+#: templates/cities/detail.html:100 templates/cities/detail.html:108
+#: templates/cities/detail.html:116 templates/home.html:112
+#: templates/home.html:120 templates/home.html:128
+msgid "Very poor"
+msgstr "Sehr schlecht"
+
+#: templates/cities/detail.html:101 templates/cities/detail.html:109
+#: templates/cities/detail.html:117 templates/home.html:113
+#: templates/home.html:121 templates/home.html:129
+msgid "Extremely poor"
+msgstr "Extrem schlecht"
 
 #: templates/cities/list.html:5 templates/cities/list.html:11
 msgid "Cities and municipalities"
@@ -579,25 +684,22 @@ msgstr "Keine Stadt verfügbar."
 msgid "Device:"
 msgstr "Geräte"
 
-#: templates/devices/detail.html:32 templates/devices/list.html:21
-msgid "ID"
-msgstr "ID"
-
-#: templates/devices/detail.html:34 templates/devices/list.html:22
+#: templates/devices/detail.html:34 templates/devices/list.html:35
 #, fuzzy
 #| msgid "Moderate"
 msgid "Model"
-msgstr "Mäßig"
+msgstr "Modell"
 
 #: templates/devices/detail.html:34 templates/devices/detail.html:35
 #: templates/devices/detail.html:51 templates/devices/detail.html:77
 #: templates/devices/detail.html:88 templates/devices/detail.html:99
-#: templates/devices/detail.html:116 templates/devices/list.html:37
-#: templates/devices/list.html:38 templates/devices/list.html:46
+#: templates/devices/detail.html:116 templates/devices/list.html:46
+#: templates/devices/list.html:47 templates/devices/list.html:48
+#: templates/devices/list.html:49
 msgid "N/A"
 msgstr ""
 
-#: templates/devices/detail.html:35
+#: templates/devices/detail.html:35 templates/devices/list.html:36
 #, fuzzy
 #| msgid "Firmware version"
 msgid "Firmware"
@@ -615,7 +717,7 @@ msgstr "Keine Sensoren verfügbar."
 msgid "QR-Code Text:"
 msgstr "QR-Code Text:"
 
-#: templates/devices/detail.html:77 templates/devices/list.html:25
+#: templates/devices/detail.html:77
 msgid "Organization"
 msgstr "Organisation"
 
@@ -679,13 +781,13 @@ msgstr "unbekannt"
 msgid "Log pagination"
 msgstr ""
 
-#: templates/devices/detail.html:186 templates/devices/list.html:70
-#: templates/stations/list.html:64 templates/stations/list.html:121
+#: templates/devices/detail.html:186 templates/stations/list.html:64
+#: templates/stations/list.html:121
 msgid "Previous"
 msgstr "Vorherige"
 
-#: templates/devices/detail.html:210 templates/devices/list.html:94
-#: templates/stations/list.html:88 templates/stations/list.html:145
+#: templates/devices/detail.html:210 templates/stations/list.html:88
+#: templates/stations/list.html:145
 msgid "Next"
 msgstr "Nächste"
 
@@ -737,7 +839,7 @@ msgstr "Notiz bearbeiten"
 msgid "Save Notes"
 msgstr "Speichere Notiz"
 
-#: templates/devices/form.html:7 templates/devices/list.html:51
+#: templates/devices/form.html:7 templates/devices/list.html:52
 msgid "Edit Device"
 msgstr "Gerät bearbeiten"
 
@@ -745,39 +847,17 @@ msgstr "Gerät bearbeiten"
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: templates/devices/list.html:23
+#: templates/devices/list.html:37
 #, fuzzy
-#| msgid "Firmware version"
-msgid "Firmware Version"
-msgstr "Firmware Version"
+#| msgid "Organization"
+msgid "Organisation"
+msgstr "Organisation"
 
-#: templates/devices/list.html:24
-#, fuzzy
-#| msgid "Start date"
-msgid "Last Status Update"
-msgstr "Startdatum"
+#: templates/devices/list.html:38
+msgid "Device registered"
+msgstr "Gerät registriert"
 
-#: templates/devices/list.html:43
-msgid "Never"
-msgstr "Nie"
-
-#: templates/devices/list.html:48
-#, fuzzy
-#| msgid "Details"
-msgid "View Details"
-msgstr "Details"
-
-#: templates/devices/list.html:49
-#, fuzzy
-#| msgid "Details"
-msgid "Detail"
-msgstr "Details"
-
-#: templates/devices/list.html:66
-msgid "Device pagination"
-msgstr ""
-
-#: templates/devices/list.html:109 templates/devices/my.html:29
+#: templates/devices/list.html:67 templates/devices/my.html:29
 msgid "No devices found."
 msgstr "Keine Geräte gefunden."
 
@@ -793,71 +873,15 @@ msgstr "MAC Adresse"
 msgid "Firmware version"
 msgstr "Firmware Version"
 
-#: templates/devices/my.html:16
-msgid "Actions"
-msgstr "Aktionen"
-
-#: templates/home.html:30
-msgid "Air quality"
-msgstr "Luftqualität"
-
-#: templates/home.html:32 templates/home.html:33 templates/home.html:34
-msgid "Particulate Matter"
-msgstr "Feinstaub"
-
-#: templates/home.html:37
-msgid "Method: AQI by U.S. EPA NAAQS"
-msgstr "Methode: AQI nach U.S. EPA NAAQS"
-
-#: templates/home.html:93 templates/home.html:102 templates/home.html:111
-msgid "Good"
-msgstr "Gut"
-
-#: templates/home.html:94 templates/home.html:103 templates/home.html:112
-msgid "Moderate"
-msgstr "Mäßig"
-
-#: templates/home.html:95 templates/home.html:104 templates/home.html:113
-msgid "Unhealthy for sensitive groups"
-msgstr "Ungesund für empfindliche Gruppen"
-
-#: templates/home.html:96 templates/home.html:105 templates/home.html:114
-msgid "Unhealthy"
-msgstr "Ungesund"
-
-#: templates/home.html:97 templates/home.html:106 templates/home.html:115
-msgid "Very unhealthy"
-msgstr "Sehr ungesund"
-
-#: templates/home.html:98 templates/home.html:107 templates/home.html:116
-msgid "Hazardous"
-msgstr "Gefährlich"
-
-#: templates/organizations/create.html:10 templates/organizations/my.html:13
-#, fuzzy
-#| msgid "Create campaign"
-msgid "Create Organization"
-msgstr "Messkampagne erstellen"
-
 #: templates/organizations/detail.html:10
 #, fuzzy
 #| msgid "Description"
 msgid "Description:"
 msgstr "Beschreibung"
 
-#: templates/organizations/detail.html:17
-msgid "Users"
-msgstr "Nutzer:innen"
-
 #: templates/organizations/detail.html:35
 msgid "Remove User"
 msgstr "Entferne Nutzer:in"
-
-#: templates/organizations/detail.html:42
-#, fuzzy
-#| msgid "No devices found."
-msgid "No users found."
-msgstr "Keine Nutzer:innen gefunden."
 
 #: templates/organizations/detail.html:55
 msgid "Invite a User"
@@ -889,50 +913,56 @@ msgstr "Meine Organisation"
 msgid "Station"
 msgstr "Station"
 
-#: templates/stations/detail.html:63
-msgid "48-hour overview"
+#: templates/stations/detail.html:29
+#, fuzzy
+#| msgid "48-hour overview"
+msgid "48-hour overview (1-hour average)"
 msgstr "48-Stunden Überblick"
 
-#: templates/stations/detail.html:67
+#: templates/stations/detail.html:33
 msgid "Particulate Matter (PM1)"
 msgstr "Feinstaub (PM1)"
 
-#: templates/stations/detail.html:74
+#: templates/stations/detail.html:40
 msgid "Particulate Matter (PM2.5)"
 msgstr "Feinstaub (PM2.5)"
 
-#: templates/stations/detail.html:81
+#: templates/stations/detail.html:47
 msgid "Particulate Matter (PM10)"
 msgstr "Feinstaub (PM10)"
 
-#: templates/stations/detail.html:88
+#: templates/stations/detail.html:54
 msgid "Temperature (°C)"
 msgstr "Temperatur (°C)"
 
-#: templates/stations/detail.html:95
+#: templates/stations/detail.html:61
 #, python-format
 msgid "Humidity (%%)"
 msgstr "Luftfeuchtigkeit (%%)"
 
-#: templates/stations/detail.html:104
+#: templates/stations/detail.html:70
 msgid "Surroundings"
 msgstr "Umgebung"
 
-#: templates/stations/detail.html:107
-msgid "Download data"
-msgstr "Daten herunterladen"
+#: templates/stations/detail.html:73
+#, fuzzy
+#| msgid "Download data"
+msgid "Download data in CSV format"
+msgstr "Daten im CSV-Format herunterladen"
 
-#: templates/stations/detail.html:110
+#: templates/stations/detail.html:76
 msgid "Start date:"
 msgstr "Startdatum:"
 
-#: templates/stations/detail.html:114
+#: templates/stations/detail.html:80
 msgid "End date:"
 msgstr "Enddatum:"
 
-#: templates/stations/detail.html:117
-msgid "Download measurements as CSV"
-msgstr "Download Messwerte als CSV"
+#: templates/stations/detail.html:83 templates/workshops/detail.html:98
+#, fuzzy
+#| msgid "Download data"
+msgid "Download"
+msgstr "Herunterladen"
 
 #: templates/stations/list.html:5 templates/stations/list.html:36
 msgid "Stations overview"
@@ -994,76 +1024,84 @@ msgstr "Device"
 msgid "Alle Geräte"
 msgstr "All devices"
 
-#: templates/workshops/detail.html:308
-msgid "Konzenration (µg/m³)"
+#: templates/workshops/detail.html:101
+msgid "CSV"
 msgstr ""
 
-#: templates/workshops/detail.html:365 templates/workshops/detail.html:372
+#: templates/workshops/detail.html:286 templates/workshops/detail.html:293
 msgid "Gut (<5 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:366 templates/workshops/detail.html:373
+#: templates/workshops/detail.html:287 templates/workshops/detail.html:294
 msgid "Befriedigend (5-15 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:368 templates/workshops/detail.html:375
+#: templates/workshops/detail.html:289 templates/workshops/detail.html:296
 msgid "Schlecht (15-25 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:369 templates/workshops/detail.html:376
+#: templates/workshops/detail.html:290 templates/workshops/detail.html:297
 msgid "Sehr schlecht (>25 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:379
+#: templates/workshops/detail.html:300
 msgid "Gut (<15 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:380
+#: templates/workshops/detail.html:301
 msgid "Befriedigend (15-45 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:382
+#: templates/workshops/detail.html:303
 msgid "Schlecht (45-60 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:383
+#: templates/workshops/detail.html:304
 msgid "Sehr schlecht (>60 µg/m³)"
 msgstr ""
 
-#: templates/workshops/detail.html:387
+#: templates/workshops/detail.html:308
 msgid "Kalt (<0°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:388
+#: templates/workshops/detail.html:309
 msgid "Kühl (0-10°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:389
+#: templates/workshops/detail.html:310
 msgid "Mild (10-20°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:390
+#: templates/workshops/detail.html:311
 msgid "Warm (20-30°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:391
+#: templates/workshops/detail.html:312
 msgid "Heiß (>30°C)"
 msgstr ""
 
-#: templates/workshops/detail.html:395
+#: templates/workshops/detail.html:316
 #, python-format
 msgid "Trocken (<30%%)"
 msgstr ""
 
-#: templates/workshops/detail.html:396
+#: templates/workshops/detail.html:317
 #, python-format
 msgid "Mittel (30-70%%)"
 msgstr ""
 
-#: templates/workshops/detail.html:397
+#: templates/workshops/detail.html:318
 #, python-format
 msgid "Feucht (>70%%)"
 msgstr ""
+
+#: templates/workshops/detail.html:359
+msgid "Karte fokusieren, um alle Punkte anzuzeigen."
+msgstr ""
+
+#: templates/workshops/detail.html:362
+msgid "Zoom to all"
+msgstr "Auf alle fokusieren"
 
 #: templates/workshops/form.html:10
 msgid "Workshop"
@@ -1079,26 +1117,30 @@ msgstr ""
 "öffentlichen Workshops aufgelistet."
 
 #: templates/workshops/list.html:13
-msgid "Running workshops"
+#, fuzzy
+#| msgid "Running workshops"
+msgid "Upcoming workshops"
 msgstr "Laufende Workshops"
 
 #: templates/workshops/list.html:20
 msgid "Start:"
 msgstr "Startdatum:"
 
-#: templates/workshops/list.html:28
-msgid "No running workshops."
+#: templates/workshops/list.html:54
+#, fuzzy
+#| msgid "No running workshops."
+msgid "No upcoming workshops."
 msgstr "Keine laufenden Workshops."
 
-#: templates/workshops/list.html:35
+#: templates/workshops/list.html:61
 msgid "Past workshops"
 msgstr "Vergangene Workshops"
 
-#: templates/workshops/list.html:42
+#: templates/workshops/list.html:68
 msgid "End:"
 msgstr "Ende:"
 
-#: templates/workshops/list.html:50
+#: templates/workshops/list.html:102
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
@@ -1106,7 +1148,11 @@ msgstr "Keine vergangenen Workshops."
 msgid "Create workshop"
 msgstr "Workshop erstellen"
 
-#: templates/workshops/my.html:41
+#: templates/workshops/my.html:24
+msgid "Code:"
+msgstr ""
+
+#: templates/workshops/my.html:92
 msgid "No workshops found."
 msgstr "Keine Workshops gefunden."
 
@@ -1138,6 +1184,47 @@ msgstr ""
 "Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."
+
+#, fuzzy
+#~| msgid "Firmware version"
+#~ msgid "Firmware Version"
+#~ msgstr "Firmware Version"
+
+#, fuzzy
+#~| msgid "Start date"
+#~ msgid "Last Status Update"
+#~ msgstr "Startdatum"
+
+#~ msgid "Never"
+#~ msgstr "Nie"
+
+#, fuzzy
+#~| msgid "Details"
+#~ msgid "View Details"
+#~ msgstr "Details"
+
+#, fuzzy
+#~| msgid "Details"
+#~ msgid "Detail"
+#~ msgstr "Details"
+
+#~ msgid "Method: AQI by U.S. EPA NAAQS"
+#~ msgstr "Methode: AQI nach U.S. EPA NAAQS"
+
+#~ msgid "Unhealthy for sensitive groups"
+#~ msgstr "Ungesund für empfindliche Gruppen"
+
+#~ msgid "Unhealthy"
+#~ msgstr "Ungesund"
+
+#~ msgid "Very unhealthy"
+#~ msgstr "Sehr ungesund"
+
+#~ msgid "Hazardous"
+#~ msgstr "Gefährlich"
+
+#~ msgid "Download measurements as CSV"
+#~ msgstr "Download Messwerte als CSV"
 
 #~ msgid "Campaign name"
 #~ msgstr "Name der Messkampagne"
