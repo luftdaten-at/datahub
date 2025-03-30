@@ -7,19 +7,19 @@
 {% block styles %}
 <!-- Leaflet CSS -->
 <!--<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">-->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet.min.css">
+
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
 
 <!-- Leaflet JS -->
 <!--<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>-->
 <script src="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet-src.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet.min.css">
+
 <script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
 <!--<script src="{% static 'js/leaflet.markercluster.js' %}"></script>-->
 
-<!-- Plotly JS -->
-<script src="{% static 'js/plotly-2.27.0.min.js' %}" charset="utf-8"></script>
 
 <style>
     .info {
@@ -86,11 +86,20 @@
 {% endblock map %}
 
 {% block content %}
-    <div class="mt-3">
+    <div class="mt-3 mb-5">
         <h2>{{ workshop.title }}</h2>
         <p>{{ workshop.description }}</p>
         <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
         <p>Code: {{ workshop.name }}</p>
+
+        <h4>{% trans "Devices" %}</h4>
+            <ul id="device-list"></ul>    
+
+        <h4>{% trans "Download" %}</h4>
+        <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-download me-1"></i>
+            {% trans "CSV" %}
+        </a>
     </div>
     <script>
         const colorSteps = [
@@ -160,6 +169,27 @@
             }
         }
     
+        function showDeviceList() {
+            // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
+            const deviceCounts = {};
+            for (let i = 0; i < points.length; i++) {
+                const device = points[i].device;
+                if (!deviceCounts[device]) {
+                    deviceCounts[device] = 0;
+                }
+                deviceCounts[device]++;
+            }
+    
+            // 2. Füge die Daten in <ul id="device-list"> ein
+            const ul = document.getElementById("device-list");
+            ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
+            for (const device in deviceCounts) {
+                const li = document.createElement("li");
+                li.textContent = `${device}: ${deviceCounts[device]} Messpunkte`;
+                ul.appendChild(li);
+            }
+        }
+
         fetchMarkerData().then(() => {
             addMarkerLayer("pm25");
             const devices = new Set();
@@ -173,6 +203,7 @@
                 option.value = device;
                 select.add(option);
             }
+            showDeviceList();
         });
     
         function getMean(arr) {
@@ -250,116 +281,6 @@
             return true;
         }
     
-        // Chart logic
-        async function loadDataForStation(uid) {
-            // Fetch data for point
-            //const response = await fetch("/data/demostationweekly.csv");
-            const currentDate = new Date();
-            const ts = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
-            // Convert date to string of format yyyy-mm-dd hh:mm:ss.000
-            const dateString = ts.toISOString();
-            const api_url = "{{API_URL}}";
-            const response = await fetch(`${api_url}/point/history/?station_ids=${uid}&smooth=100&start=${dateString}`);
-    
-            // Parse response CSV
-            const text = await response.text();
-            const items = text.split(" ");
-            var pm1Values = [];
-            var pm25Values = [];
-            var pm10Values = [];
-            var timestamps = [];
-            for (let row in items) {
-                if (items[row].length == 0) continue;
-                var data = items[row].split(";");
-                // Careful: check for presence of pm1
-                const [secsSinceEpoch, pm1, pm25, pm10] = data;
-                pm1Values.push(pm1);
-                pm25Values.push(pm25);
-                pm10Values.push(pm10);
-                timestamps.push(new Date(secsSinceEpoch * 1000).toISOString());
-            }
-    
-            TESTER = document.getElementById('infobox');
-            Plotly.newPlot(TESTER, [{
-                x: timestamps,
-                y: pm1Values,
-                type: 'line',
-                name: 'PM1',
-                hovertemplate: '%{x}: %{y:.2f} µg/m³',
-            },
-            {
-                x: timestamps,
-                y: pm25Values,
-                type: 'line',
-                name: 'PM2.5',
-                hovertemplate: '%{x}: %{y:.2f} µg/m³',
-            },
-            {
-                x: timestamps,
-                y: pm10Values,
-                type: 'line',
-                name: 'PM10',
-                hovertemplate: '%{x}: %{y:.2f} µg/m³',
-            }], {
-                margin: {t: 0},
-                height: 500,
-                yaxis: {
-                    title: {
-                        text: '{% trans "Konzenration (µg/m³)" %}',
-                    },
-                    fixedrange: true,
-                },
-                title: {
-                    text: 'Station 12345 - Feinstaub der letzten Woche',
-                    automargin: true,
-                },
-                xaxis: {fixedrange: true},
-                shapes: [
-                    {
-                        type: 'line',
-                        xref: 'paper',
-                        x0: 0,
-                        y0: 5,
-                        x1: 1,
-                        y1: 5,
-                        line: {
-                            color: 'rgb(0, 0, 0)',
-                            width: 1,
-                            dash: 'dot'
-                        },
-                        layer: 'below',
-                    },
-                    {
-                        type: 'line',
-                        xref: 'paper',
-                        x0: 0,
-                        y0: 15,
-                        x1: 1,
-                        y1: 15,
-                        line: {
-                            color: 'rgb(0, 0, 0)',
-                            width: 1,
-                            dash: 'dot'
-                        },
-                        layer: 'below',
-                    },
-                    {
-                        type: 'line',
-                        xref: 'paper',
-                        x0: 0,
-                        y0: 45,
-                        x1: 1,
-                        y1: 45,
-                        line: {
-                            color: 'rgb(0, 0, 0)',
-                            width: 1,
-                            dash: 'dot'
-                        },
-                        layer: 'below',
-                    },
-                ],
-            });
-        }
     
         const colorRanges = {'pm1': [
             { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
@@ -425,25 +346,42 @@
         // Add a class to the outermost div
         legend._container.className += ' leaflet-center';
 
-        // Check if coordinates are specified for workshop and set view accordingly
-        {% comment %} if({{ workshop.mapbox_top_left_lat }} != null) {
-            // Rotate map to make the bottom left to bottom right line horizontal
-            var bottomLonDistance = {{ workshop.mapbox_bottom_right_lon }} - {{ workshop.mapbox_bottom_left_lon }};
-            var bottomLatDistance = {{ workshop.mapbox_bottom_right_lat }} - {{ workshop.mapbox_bottom_left_lat }};
-            // Scale longitude distance by cos(lat)
-            var bottomLonDistanceScaled = bottomLonDistance * Math.cos({{ workshop.mapbox_bottom_left_lat }} * Math.PI / 180);
-            var angle = Math.atan2(bottomLatDistance, bottomLonDistanceScaled) * 180 / Math.PI;
-            // Log the angle for debugging
-            console.log("Angle: " + angle);
-            // Set bearing
-            map.setBearing(angle);
-            // Set bounds
-            const bounds = [
-                [{{ workshop.mapbox_top_left_lat }}, {{ workshop.mapbox_top_left_lon }}],
-                [{{ workshop.mapbox_bottom_right_lat }}, {{ workshop.mapbox_bottom_right_lon }}]
-            ];
-            map.fitBounds(bounds);
-        } {% endcomment %}
+    // Button "Zoom to all"
+    var fitBoundsControl = L.control({ position: 'bottomleft' });
+
+    fitBoundsControl.onAdd = function(map) {
+        var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+        controlDiv.innerHTML = `
+            <button
+                class="btn btn-secondary btn-sm"
+                id="fitBoundsButton"
+                style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+                title={% trans "Zoom map to show all points." %}
+            >
+                <i class="bi bi-arrows-fullscreen"></i>
+                {% trans "Zoom to all" %}
+            </button>
+        `;
+        return controlDiv;
+    };
+
+    fitBoundsControl.addTo(map);
+
+    document.addEventListener("click", function(e) {
+        if (e.target.closest("#fitBoundsButton")) {
+            fitMapToAllPoints();
+        }
+    });
+
+    function fitMapToAllPoints() {
+        if (!points || points.length === 0) {
+            return;
+        }
+        
+        const latLngs = points.map(item => [item.lat, item.lon]);
+        const bounds = L.latLngBounds(latLngs);
+        map.fitBounds(bounds);
+    }
     </script>
 
 {% endblock content %}

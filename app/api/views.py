@@ -16,7 +16,7 @@ from .models import AirQualityRecord, MobilityMode
 from workshops.models import Participant, Workshop
 from devices.models import Device
 
-from .serializers import AirQualityRecordSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
+from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
 
 
 @extend_schema(tags=['workshops']) 
@@ -97,17 +97,18 @@ class WorkshopDetailView(RetrieveAPIView):
     serializer_class = WorkshopSerializer
 
 
+@extend_schema(tags=['workshops'])
 class WorkshopAirQualityDataView(RetrieveAPIView):
     """
     Processes a GET request by returning the AirQualityRecords connected with the workshop name
 
     """
     queryset = AirQualityRecord.objects.all()
-    serializer_class = AirQualityRecordSerializer
+    serializer_class = AirQualityRecordWorkshopSerializer
 
     def get(self, request, pk):
         records = AirQualityRecord.objects.filter(workshop__name=pk)
-        serializer = AirQualityRecordSerializer(records, many=True)
+        serializer = AirQualityRecordWorkshopSerializer(records, many=True)
         return Response(serializer.data)
 
 

@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.i18n import i18n_patterns
+from django.views.generic import RedirectView
 from django.views.i18n import JavaScriptCatalog
 from django.conf import settings
 from debug_toolbar.toolbar import debug_toolbar_urls
@@ -25,6 +26,7 @@ from accounts.views import DashboardView
 
 urlpatterns = [
     path('campaign/admin/jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Add this line
+    path('robots.txt', RedirectView.as_view(url=settings.STATIC_URL + "robots.txt", permanent=True)),
     # Django admin
     path('backend/', admin.site.urls),
     # User management

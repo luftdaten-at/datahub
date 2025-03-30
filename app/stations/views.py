@@ -11,9 +11,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
     api_url = f"{settings.API_URL}/station/current?station_ids={pk}&last_active=3600&output_format=geojson"
-
+    params = {
+        'station_ids': pk,
+        'last_active': 3600,
+        'output_format': 'geojson',
+    }
     try:
-        response = requests.get(api_url)
+        response = requests.get(api_url, params=params)
         response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
         station_data = response.json()  # Daten im JSON-Format
 
@@ -31,24 +35,37 @@ def StationDetailView(request, pk):
                 'coordinates': geometry.get('coordinates'),
                 'sensors': [],
             }
-            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0) - timedelta(hours=1)
+            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
             time_minus_48h = current_time - timedelta(hours=47)
             formatted_current_time = current_time.isoformat(timespec='minutes')
             formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
             # api query
-            api_sensor_data_48h = f"{settings.API_URL}/station/historical?station_ids={pk}&output_format={OutputFormat.JSON.value}&precision={Precision.HOURLY.value}&start={formatted_time_minus_48h}&end={formatted_current_time}"
-            print(api_sensor_data_48h)
-            response = requests.get(api_sensor_data_48h)
+            api_sensor_data_48h = f"{settings.API_URL}/station/historical"
+            params = {
+                'station_ids': pk,
+                'output_format': OutputFormat.JSON.value,
+                'precision': Precision.HOURLY.value,
+                'start': formatted_time_minus_48h,
+                'end': formatted_current_time,
+            }
+            response = requests.get(api_sensor_data_48h, params=params)
             response.raise_for_status()
             data_48h = response.json()
             dim_hour_val = defaultdict(lambda: [0 for _ in range(48)])
             for data_hour in data_48h:
                 hour = datetime.fromisoformat(data_hour["time_measured"])
+                hour = hour.replace(tzinfo=timezone.utc)
+
                 for dim_val in data_hour["values"]:
                     dim = dim_val["dimension"]
                     val = dim_val["value"]
                     dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
 
+            dims_for_display = [2, 3, 5, 6, 7]
+            for dim in dims_for_display:
+                dim = str(dim)
+                if dim not in dim_hour_val:
+                    dim_hour_val[dim] = 'false' 
             station_info["data_48h"] = dim_hour_val
         else:
             raise Http404(f"Station mit ID {pk} nicht gefunden.")
@@ -66,8 +83,8 @@ def StationListView(request):
     Fetches two lists: stations with the highest PM2.5 values and 
     stations with the lowest PM2.5 values.
     """
-    url_min = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
-    url_max = f"{settings.API_URL}/station/topn?n=10&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
+    url_min = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
+    url_max = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
 
     error_message = None
     try:
@@ -98,9 +115,9 @@ def StationListView(request):
         min_stations = []
         max_stations = []
 
-    # Paginate each list separately (example: 5 stations per page)
-    paginator_top = Paginator(max_stations, 5)
-    paginator_low = Paginator(min_stations, 5)
+    # Paginate each list separately
+    paginator_top = Paginator(max_stations, 10)
+    paginator_low = Paginator(min_stations, 10)
 
     page_top = request.GET.get('page_top')
     page_low = request.GET.get('page_low')

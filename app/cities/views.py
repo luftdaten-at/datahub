@@ -7,10 +7,12 @@ from django.conf import settings
 from main.enums import Dimension, SensorModel, OutputFormat, Precision, Order
 
 def CitiesDetailView(request, pk):
-    api_url = f"{settings.API_URL}/city/current?city_slug={pk}"
-    print(api_url)
+    api_url = f"{settings.API_URL}/city/current"
+    params = {
+        "city_slug": {pk},
+    }
     try:
-        response = requests.get(api_url)
+        response = requests.get(api_url, params=params)
         response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
         station_data = response.json()  # Daten im JSON-Format
 
@@ -25,6 +27,7 @@ def CitiesDetailView(request, pk):
             'timezone': properties.get('timezone'),
             'coordinates': geometry.get('coordinates'),
             'last_updated': properties.get('time'),
+            'station_count': properties.get('station_count'),
             'values': []
         }
 
@@ -36,6 +39,8 @@ def CitiesDetailView(request, pk):
             city_info['values'].append({
                 'dimension': translated_dimension,
                 'value': value.get("value"),
+                'value_count': value.get('value_count'),
+                'station_count': value.get('station_count'),
                 'unit': Dimension.get_unit(dimension_id)
             })
 

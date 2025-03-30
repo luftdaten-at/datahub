@@ -72,6 +72,24 @@ class AirQualityRecordSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class AirQualityRecordWorkshopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AirQualityRecord
+        fields = [
+            'time',
+            'pm1',
+            'pm25',
+            'pm10',
+            'temperature',
+            'humidity',
+            'lat',
+            'lon',
+            'device',
+            'participant',
+            'mode'
+        ]
+
+
 class WorkshopSerializer(serializers.ModelSerializer):
     class Meta:
         model = Workshop
