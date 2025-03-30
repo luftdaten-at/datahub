@@ -21,6 +21,7 @@
                 </h5>
                 <p class="mb-1">
                     <strong>{% trans "Date:" %}</strong> {{ workshop.start_date|date:"d.m.Y H:i" }} – {{ workshop.end_date|date:"d.m.Y H:i" }}<br>
+                    <strong>{% trans "Code:" %}</strong> {{ workshop.name }}
                 </p>
             </div>
             <div class="d-flex flex-column flex-md-row gap-2 justify-content-end">
