@@ -45,7 +45,10 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         device = self.object
 
         # Fetch all DeviceStatus entries related to this Device, ordered by time_received ascendingly
-        device_status_qs = DeviceStatus.objects.filter(device=device).order_by('time_received')
+        device_status_qs = DeviceStatus.objects.filter(
+            device=device,
+            battery_soc__isnull=False
+        ).order_by('time_received')
         context['battery_status'] = device_status_qs.exists()
 
         if context['battery_status']:

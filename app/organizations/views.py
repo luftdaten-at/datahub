@@ -8,6 +8,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
+from django.template.loader import render_to_string
 
 from main import settings
 from accounts.models import CustomUser
@@ -122,38 +123,49 @@ def remove_user_from_organization(request, org_id, user_id):
 @login_required
 def invite_user_to_organization(request, org_id):
     if request.method != 'POST':
-        return redirect(f"organizations-detail", pk=org_id)
+        return redirect("organizations-detail", pk=org_id)
 
     organization = get_object_or_404(Organization, id=org_id)
     email = request.POST.get('email')
     
+    # Check permissions
     if not request.user.is_superuser and request.user != organization.owner:
         messages.error(request, "You do not have permission to invite users to this organization.")
-        return redirect(f"organizations-detail", pk=org_id)
+        return redirect("organizations-detail", pk=org_id)
 
-    user = CustomUser.objects.filter(email = email).first()
+    user = CustomUser.objects.filter(email=email).first()
 
     if user:
         organization.users.add(user)
+        messages.success(request, f"{email} has been added to the organization.")
     else:
-        # check if invitation already exists
-        invitation = OrganizationInvitation.objects.filter(email=email, organization__pk = organization.pk).first()
+        # Check if invitation already exists
+        invitation = OrganizationInvitation.objects.filter(email=email, organization=organization).first()
+
         if not invitation:
-            # create invitation
+            # Create an invitation
             invitation = OrganizationInvitation(
-                expiring_date = None,
-                email = email,
-                organization = organization,
+                expiring_date=None,
+                email=email,
+                organization=organization,
             )
-        invitation.save()
-        # send invitation email
-        # TODO add link to register
+            invitation.save()
+
+        # Generate the email body from a template
+        context = {
+            'organization': organization,
+            'registration_link': ''
+        }
+        message_body = render_to_string('organization/emails/invite_user_to_organization.txt', context)
+
+        # Send the email
         send_mail(
             subject=f"You've been invited to join {organization.name}",
-            message=f"Visit this link to register and join {organization.name}: <registration_link>",
+            message=message_body,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email],
         )
+
         messages.success(request, f"An invitation has been sent to {email}.")
 
-    return redirect(f"organizations-detail", pk=org_id)
+    return redirect("organizations-detail", pk=org_id)
