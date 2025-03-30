@@ -62,14 +62,13 @@ class WorkshopDetailView(DetailView):
         """
         This method is overridden to only include workshops that are public.
         """
-        # Only fetch workshops that are public.
         return Workshop.objects.filter(public=True)
     
     def get_object(self, queryset=None):
         """
         This method is overridden to provide additional checks for the workshop's visibility.
         If the requested workshop is not public, it raises a 404.
-        """        
+        """
         try:
             queryset = self.get_queryset() if queryset is None else queryset
             obj = super().get_object(queryset=queryset)
