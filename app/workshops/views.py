@@ -75,9 +75,10 @@ class WorkshopDetailView(DetailView):
         
         except Workshop.DoesNotExist:
             raise Http404("Workshop nicht gefunden.")
-
-        if not obj.public and obj.owner != self.request.user:
-            raise Http404("Workshop nicht gefunden.")
+        
+        if not obj.public:
+            if not self.request.user.is_superuser and obj.owner != self.request.user:
+                raise Http404("Workshop nicht gefunden.")
 
         return obj
 
@@ -103,20 +104,20 @@ class WorkshopCreateView(CreateView):
     model = Workshop
     form_class = WorkshopForm
     template_name = 'workshops/form.html'
-    success_url = reverse_lazy('workshops-my')  # Redirect after a successful creation
+    success_url = reverse_lazy('workshops-my')
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user  # Set the owner to the current user
+        form.instance.owner = self.request.user
         return super().form_valid(form)
     
 
 class WorkshopUpdateView(UpdateView):
     model = Workshop
     form_class = WorkshopForm
-    template_name = 'workshops/form.html'  # Reuse the form template
+    template_name = 'workshops/form.html'
 
     def get_success_url(self):
-        return reverse_lazy('workshops-my')  # Redirect to the workshop list after update
+        return reverse_lazy('workshops-my')
 
     def form_valid(self, form):
   
@@ -125,12 +126,11 @@ class WorkshopUpdateView(UpdateView):
 
 class WorkshopDeleteView(DeleteView):
     model = Workshop
-    template_name = 'workshops/confirm_delete.html'  # Confirmation page template
-    success_url = reverse_lazy('workshops-my')  # Redirect here after deletion
+    template_name = 'workshops/confirm_delete.html'
+    success_url = reverse_lazy('workshops-my')
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        # Optional: restrict deletion to the owner or admin
         if not self.request.user.is_superuser:
             queryset = queryset.filter(owner=self.request.user)
         return queryset
