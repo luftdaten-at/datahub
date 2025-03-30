@@ -34,7 +34,7 @@
                 <option value="10">{% trans "Particulate Matter" %} PM10</option>
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
-            <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: AQI by U.S. EPA NAAQS" %}</a></span>
+            <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
         </div>
     </div>
     <div id="map"></div>
@@ -58,262 +58,232 @@
         <div class="col-12">
             <h2>Luftdaten.at Datahub</h2>
             <p>Die angezeigten Daten stammen aus den Luftmessnetzen von Luftdaten.at und der Sensor.Community. Dabei 
-                werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Mitgemessen werden kann mit einer 
+                werden Feinstaub, Temperatur und Luftfeuchtigkeit gemessen. Unsere Daten geben Aufschluss über den aktuellen 
+                Stand der Luftqualität an jeder der Citizen Messstationen in Österreich. Die langfristige (jährliche)
+                 Belastungsituation wird dabei nicht widergespielt, sie kann erheblich abweichen. Mitgemessen werden kann mit einer 
                 <a href="https://luftdaten.at/messen/air-station/">Air Station</a> vor dem eigenen Fenster.</p>
         </div>
     </div>
 
     <script>
-    const API_URL = "{{ API_URL|default_if_none:'https://api.luftdaten.at/v1' }}"; 
-
-    // 1) Hier den Fetch-Aufruf direkt clientseitig
-    async function fetchMarkerData() {
-        const queryUrl = `${API_URL}/station/historical?end=current&precision=all&output_format=json&include_location=true`;
-        console.log("Requesting: " + queryUrl);
-
-        try {
-            const resp = await fetch(queryUrl);
-            if (!resp.ok) {
-                console.error("Failed to query current endpoint, status:", resp.status);
+        const API_URL = "{{ API_URL|default_if_none:'https://api.luftdaten.at/v1' }}"; 
+    
+        // 1) Hier den Fetch-Aufruf direkt clientseitig
+        async function fetchMarkerData() {
+            const queryUrl = `${API_URL}/station/historical?end=current&precision=all&output_format=json&include_location=true`;
+            console.log("Requesting: " + queryUrl);
+    
+            try {
+                const resp = await fetch(queryUrl);
+                if (!resp.ok) {
+                    console.error("Failed to query current endpoint, status:", resp.status);
+                    return [];
+                }
+                // parse JSON
+                const jsonData = await resp.json();
+                // Baue ein Array wie zuvor (device, lat, lon, pm1, pm25, pm10)
+                const results = [];
+                for (const j of jsonData) {
+                    // Aggregiere values in ein Objekt { PM1_0: x, PM2_5: y, ... }
+                    const valuesObj = {};
+                    for (const d of j['values']) {
+                        valuesObj[d['dimension']] = d['value'];
+                    }
+                    results.push([
+                        String(j['device']),
+                        String(j['location']['lat']),
+                        String(j['location']['lon']),
+                        String(valuesObj["PM1_0"] ?? null),
+                        String(valuesObj["PM2_5"] ?? null),
+                        String(valuesObj["PM10_0"] ?? null),
+                    ]);
+                }
+                return results;
+            } catch (err) {
+                console.error("Error fetching data:", err);
                 return [];
             }
-            // parse JSON
-            const jsonData = await resp.json();
-            // Baue ein Array wie zuvor (device, lat, lon, pm1, pm25, pm10)
-            const results = [];
-            for (const j of jsonData) {
-                // Aggregiere values in ein Objekt { PM1_0: x, PM2_5: y, ... }
-                const valuesObj = {};
-                for (const d of j['values']) {
-                    valuesObj[d['dimension']] = d['value'];
-                }
-                results.push([
-                    String(j['device']),
-                    String(j['location']['lat']),
-                    String(j['location']['lon']),
-                    String(valuesObj["PM1_0"] ?? null),
-                    String(valuesObj["PM2_5"] ?? null),
-                    String(valuesObj["PM10_0"] ?? null),
-                ]);
-            }
-            return results;
-        } catch (err) {
-            console.error("Error fetching data:", err);
-            return [];
         }
-    }
-
-    // 2) Deine Farblogik, Map-Setup usw.
-    const colorStepsPM1 = [
-        [0,    [120, 1, 0.75], "{% trans 'Good' %}"],
-        [9,  [60, 1, 1],     "{% trans 'Moderate' %}"],
-        [35, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],
-        [55, [0, 1, 1],      "{% trans 'Unhealthy' %}"],
-        [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],
-        [250.5,[330, 1, 0.5],  "{% trans 'Hazardous' %}"]
-    ];
-    const colorStepsPM25 = [
-        [0,    [120, 1, 0.75], "{% trans 'Good' %}"],
-        [9,  [60, 1, 1],     "{% trans 'Moderate' %}"],
-        [35, [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],
-        [55, [0, 1, 1],      "{% trans 'Unhealthy' %}"],
-        [125,[300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],
-        [250.5,[330, 1, 0.5],  "{% trans 'Hazardous' %}"]
-    ];
-    const colorStepsPM10 = [
-        [0,    [120, 1, 0.75], "{% trans 'Good' %}"],
-        [54,   [60, 1, 1],     "{% trans 'Moderate' %}"],
-        [154,  [30, 1, 1],     "{% trans 'Unhealthy for sensitive groups' %}"],
-        [254,  [0, 1, 1],      "{% trans 'Unhealthy' %}"],
-        [354,  [300, 1, 0.7],  "{% trans 'Very unhealthy' %}"],
-        [424,  [330, 1, 0.5],  "{% trans 'Hazardous' %}"],
-    ];
-    const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
-
-    function interpolate(a, b, fraction) {
-        return [
-            a[0] + (b[0] - a[0]) * fraction,
-            a[1] + (b[1] - a[1]) * fraction,
-            a[2] + (b[2] - a[2]) * fraction
+    
+        // 2) Farblogik: Direkt RGB-Werte statt HSV
+        // Beispielwerte als [R, G, B], alle im Bereich 0..255
+        const colorStepsPM1 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
         ];
-    }
+        const colorStepsPM25 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+        ];
+        const colorStepsPM10 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+        ];
+        const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
 
-    function getColorForPM(value, colorSteps) {
-        if (isNaN(value)) return [0, 0, 0.7];
-        for (let i = 0; i < colorSteps.length - 1; i++) {
-            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
-                const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
-                return colorSteps[i][1];
+    
+        // Gibt reinen RGB-Wert [R, G, B] zurück
+        function getColorForPM(value, colorSteps) {
+            if (isNaN(value)) return [128, 128, 128]; // z.B. Grau für ungültige Werte
+            for (let i = 0; i < colorSteps.length - 1; i++) {
+                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) { 
+                    return colorSteps[i][1]; 
+                }
+            }
+            return colorSteps[colorSteps.length - 1][1];
+        }
+    
+        function getMean(arr) {
+            let acc = 0;
+            let count = 0;
+            for(let i = 0; i < arr.length; i++) {
+                if(isNaN(arr[i])) continue;
+                acc += Number(arr[i]);
+                count++;
+            }
+            if(count === 0) return NaN;
+            return acc / count;
+        }
+    
+        function createLegend(pmTypeIndex, colorSteps) {
+            var legendDiv = document.getElementById('legend');
+            legendDiv.innerHTML = '';
+    
+            for (var i = 0; i < colorSteps.length; i++) {
+                var from = colorSteps[i][0];
+                var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+                var rgb = colorSteps[i][1];
+                var description = colorSteps[i][2]; 
+    
+                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+    
+                var item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.flexDirection = 'row';
+                item.style.alignItems = 'center';
+                item.style.marginBottom = '4px';
+    
+                var colorBox = document.createElement('span');
+                colorBox.style.background = colorString;
+                colorBox.style.width = '18px';
+                colorBox.style.height = '18px';
+                colorBox.style.display = 'inline-block';
+                colorBox.style.marginRight = '8px';
+                colorBox.style.border = '1px solid #ccc';
+                colorBox.style.borderRadius = '50%';
+    
+                var labelText = document.createElement('span');
+                labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+                labelText.style.fontSize = '0.8rem';
+    
+                item.appendChild(colorBox);
+                item.appendChild(labelText);
+                legendDiv.appendChild(item);
             }
         }
-        return colorSteps[colorSteps.length - 1][1];
-    }
-
-    function hsvToRgb(h, s, v) {
-        h = h % 360;
-        let c = v * s;
-        let x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-        let m = v - c;
-        let rPrime, gPrime, bPrime;
-        
-        if (h < 60) {
-            rPrime = c; gPrime = x; bPrime = 0;
-        } else if (h < 120) {
-            rPrime = x; gPrime = c; bPrime = 0;
-        } else if (h < 180) {
-            rPrime = 0; gPrime = c; bPrime = x;
-        } else if (h < 240) {
-            rPrime = 0; gPrime = x; bPrime = c;
-        } else if (h < 300) {
-            rPrime = x; gPrime = 0; bPrime = c;
-        } else {
-            rPrime = c; gPrime = 0; bPrime = x;
+    
+        function showPM(selection) {
+            var pmTypeIndex = selection.selectedIndex; 
+            var colorSteps = colorStepsArray[pmTypeIndex];
+            addMarkerLayer(pmTypeIndex, colorSteps);
+            createLegend(pmTypeIndex, colorSteps);
         }
-        
-        let r = Math.round((rPrime + m) * 255);
-        let g = Math.round((gPrime + m) * 255);
-        let b = Math.round((bPrime + m) * 255);
-        
-        return [r, g, b];
-    }
-
-    function getMean(arr) {
-        let acc = 0;
-        let count = 0;
-        for(let i = 0; i < arr.length; i++) {
-            if(isNaN(arr[i])) continue;
-            acc += Number(arr[i]);
-            count++;
-        }
-        if(count === 0) return NaN;
-        return acc / count;
-    }
-
-    function createLegend(pmTypeIndex, colorSteps) {
-        var legendDiv = document.getElementById('legend');
-        legendDiv.innerHTML = '';
-
-        for (var i = 0; i < colorSteps.length; i++) {
-            var from = colorSteps[i][0];
-            var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
-            var hsv = colorSteps[i][1];
-            var description = colorSteps[i][2]; 
-
-            const rgb = hsvToRgb(hsv[0], hsv[1], hsv[2]);
-            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-
-            var item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.flexDirection = 'row';
-            item.style.alignItems = 'center';
-            item.style.marginBottom = '4px';
-
-            var colorBox = document.createElement('span');
-            colorBox.style.background = colorString;
-            colorBox.style.width = '18px';
-            colorBox.style.height = '18px';
-            colorBox.style.display = 'inline-block';
-            colorBox.style.marginRight = '8px';
-            colorBox.style.border = '1px solid #ccc';
-            colorBox.style.borderRadius = '50%';
-
-            var labelText = document.createElement('span');
-            labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
-            labelText.style.fontSize = '0.8rem';
-
-            item.appendChild(colorBox);
-            item.appendChild(labelText);
-            legendDiv.appendChild(item);
-        }
-    }
-
-    function showPM(selection) {
-        var pmTypeIndex = selection.selectedIndex; 
-        var colorSteps = colorStepsArray[pmTypeIndex];
-        addMarkerLayer(pmTypeIndex, colorSteps);
-        createLegend(pmTypeIndex, colorSteps);
-    }
-
-    // Setup the map
-    const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
-
-    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; OpenStreetMap'
-    }).addTo(map);
-
-    var markerLayer;
-
-    async function addMarkerLayer(pmTypeIndex, colorSteps) {
-        if (markerLayer != null) {
-            map.removeLayer(markerLayer);
-        }
-
-        markerLayer = L.markerClusterGroup({
-            iconCreateFunction: function (cluster) {
-                const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
-                const colorArrayHSV = getColorForPM(meanPM, colorSteps);
-                const rgb = hsvToRgb(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-                const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
-                const textColor = brightness > 125 ? "black" : "white";
-                const displayValue = isNaN(meanPM) ? '' : meanPM.toFixed(1);
-                return L.divIcon({
-                    iconSize: [40, 40],
-                    className: '',
-                    html: `<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border: 1px solid white;"><span style="color: ${textColor};">${displayValue}</span></div>`
-                });
-            },
-            showCoverageOnHover: false,
-        });
-
-        const markerList = [];
-        // stationData (Array) = [ [device, lat, lon, pm1, pm25, pm10], ...]
-        for (let i = 0; i < stationData.length; i++) {
-            const [stationID, lat, lon, pm1, pm25, pm10] = stationData[i];
-            const pmArray = [pm1, pm25, pm10];
-            const pmValue = pmArray[pmTypeIndex];
-            
-            const colorArrayHSV = getColorForPM(pmValue, colorSteps);
-            const rgb = hsvToRgb(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-            const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
-            const textColor = brightness > 125 ? "black" : "white";
-            const displayValue = isNaN(pmValue) ? '' : Number(pmValue).toFixed(1);
-
-            var marker = L.marker([lat, lon], {
-                icon: L.divIcon({
-                    iconSize: [40, 40],
-                    className: '',
-                    html: `
-                      <a class="hiddenlink clickable" href="/stations/${stationID}">
-                        <div style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;">
-                          <span style="color: ${textColor};">
-                            ${displayValue}
-                          </span>
-                        </div>
-                      </a>
-                    `
-                })
+    
+        // Karte aufsetzen
+        const map = L.map('map', {fadeAnimation: false}).setView([48.2112, 16.3736], 13);
+    
+        const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; OpenStreetMap'
+        }).addTo(map);
+    
+        var markerLayer;
+        let stationData = [];
+    
+        // Marker-Cluster
+        async function addMarkerLayer(pmTypeIndex, colorSteps) {
+            if (markerLayer != null) {
+                map.removeLayer(markerLayer);
+            }
+    
+            markerLayer = L.markerClusterGroup({
+                iconCreateFunction: function (cluster) {
+                    const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
+                    const colorArrayRGB = getColorForPM(meanPM, colorSteps);
+                    const [r, g, b] = colorArrayRGB;
+                    const colorString = `rgb(${r}, ${g}, ${b})`;
+    
+                    // Helligkeitsberechnung für Textfarbe
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    const textColor = brightness > 125 ? "black" : "white";
+                    const displayValue = isNaN(meanPM) ? '' : meanPM.toFixed(1);
+    
+                    return L.divIcon({
+                        iconSize: [40, 40],
+                        className: '',
+                        html: `<div class="clickable" style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border: 1px solid white;">
+                                  <span style="color: ${textColor};">${displayValue}</span>
+                               </div>`
+                    });
+                },
+                showCoverageOnHover: false,
             });
-            marker.pm = pmValue;
-            markerList.push(marker);
+    
+            const markerList = [];
+            // stationData = [[device, lat, lon, pm1, pm25, pm10], ...]
+            for (let i = 0; i < stationData.length; i++) {
+                const [stationID, lat, lon, pm1, pm25, pm10] = stationData[i];
+                const pmArray = [pm1, pm25, pm10];
+                const pmValue = pmArray[pmTypeIndex];
+    
+                const colorArrayRGB = getColorForPM(pmValue, colorSteps);
+                const [r, g, b] = colorArrayRGB;
+                const colorString = `rgb(${r}, ${g}, ${b})`;
+                const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                const textColor = brightness > 125 ? "black" : "white";
+                const displayValue = isNaN(pmValue) ? '' : Number(pmValue).toFixed(1);
+    
+                var marker = L.marker([lat, lon], {
+                    icon: L.divIcon({
+                        iconSize: [40, 40],
+                        className: '',
+                        html: `
+                          <a class="hiddenlink clickable" href="/stations/${stationID}">
+                            <div style="height: 3.5em; width: 3.5em; background-color: ${colorString}; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;">
+                              <span style="color: ${textColor};">${displayValue}</span>
+                            </div>
+                          </a>
+                        `
+                    })
+                });
+                marker.pm = pmValue;
+                markerList.push(marker);
+            }
+    
+            markerLayer.addLayers(markerList);
+            map.addLayer(markerLayer);
         }
-
-        markerLayer.addLayers(markerList);
-        map.addLayer(markerLayer);
-    }
-
-    // 3) Daten abrufen und die Karte initialisieren
-    let stationData = [];
-    fetchMarkerData().then((results) => {
-        stationData = results; // gefülltes Array [ [device, lat, lon, pm1, pm25, pm10], ...]
-        var defaultPmTypeIndex = 1; // PM2.5
-        var defaultColorSteps = colorStepsArray[defaultPmTypeIndex];
-        addMarkerLayer(defaultPmTypeIndex, defaultColorSteps);
-        createLegend(defaultPmTypeIndex, defaultColorSteps);
-    });
-
+    
+        // 3) Daten abrufen und die Karte initialisieren
+        fetchMarkerData().then((results) => {
+            stationData = results; // gefülltes Array [[device, lat, lon, pm1, pm25, pm10], ...]
+            var defaultPmTypeIndex = 1; // PM2.5
+            var defaultColorSteps = colorStepsArray[defaultPmTypeIndex];
+            addMarkerLayer(defaultPmTypeIndex, defaultColorSteps);
+            createLegend(defaultPmTypeIndex, defaultColorSteps);
+        });
     </script>
 {% endif %}
 {% endblock content %}
