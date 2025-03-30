@@ -24,72 +24,8 @@ class HomePageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['host'] = self.request.get_host()
-
-        # query new endpoint
-        query_url = f'{API_URL}/station/historical?end=current&precision=all&output_format=json&include_location=true'
-        resp = requests.get(query_url)
-
-        data = []
-        if resp.status_code == 200:
-            for j in json.loads(resp.text):
-                values = {d['dimension']: d['value'] for d in j['values']}
-                data.append([
-                    str(j['device']),
-                    str(j['location']['lat']),
-                    str(j['location']['lon']),
-                    str(values.get(enums.Dimension.PM1_0, None)),
-                    str(values.get(enums.Dimension.PM2_5, None)),
-                    str(values.get(enums.Dimension.PM10_0, None))
-                ])
-        else:
-            logger.log(logging.ERROR, "Failed to query current endpoint")
-
-        context['data'] = data
-        
-        # # 1. Fetch the city data (JSON)
-        # api_url_cities = f"{settings.API_URL}/city/all"
-        # cities = []
-        # cities_number = 0  # Default if fetching fails
-
-        # try:
-        #     response = requests.get(api_url_cities)
-        #     response.raise_for_status()
-        #     data = response.json()
-        #     cities = data.get("cities", [])
-        #     cities_number = len(cities)
-        # except requests.exceptions.HTTPError as err_http:
-        #     logger.error("HTTPError while fetching city data from %s: %s", api_url_cities, err_http)
-        #     error_message = "There was an error fetching the city data: 404."
-        #     context['error_message'] = error_message
-        # except requests.exceptions.RequestException as err_req:
-        #     logger.error("RequestException while fetching city data from %s: %s", api_url_cities, err_req)
-        #     error_message = "There was an error fetching the city data."
-        #     context['error_message'] = error_message
-
-        # context['cities_number'] = cities_number
-
-        # # 2. Fetch the station data (CSV)
-        # api_url_stations = f"{settings.API_URL}/station/current"
-        # stations = []
-        # stations_number = 0 # Default if fetching fails
-
-        # try:
-        #     response = requests.get(api_url_stations)
-        #     response.raise_for_status()
-        #     data = response.json()
-        #     stations = data.get("device", [])
-        #     stations_number = len(stations)
-        # except requests.exceptions.HTTPError as err_http:
-        #     logger.error("HTTPError while fetching station data from %s: %s", api_url_stations, err_http)
-        #     error_message = "There was an error fetching the station data: 404."
-        #     context['error_message'] = error_message
-        # except requests.exceptions.RequestException as err_req:
-        #     logger.error("RequestException while fetching station data from %s: %s", api_url_stations, err_req)
-        #     error_message = "There was an error fetching the station data."
-        #     context['error_message'] = error_message
-
-        # context['stations_number'] = stations_number
-
+        # Falls du den API_URL in der Template-Logik brauchst:
+        context['API_URL'] = API_URL
         return context
     
 
