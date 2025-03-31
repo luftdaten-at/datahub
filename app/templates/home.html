@@ -92,9 +92,9 @@
                         String(j['device']),
                         String(j['location']['lat']),
                         String(j['location']['lon']),
-                        String(valuesObj["PM1_0"] ?? null),
-                        String(valuesObj["PM2_5"] ?? null),
-                        String(valuesObj["PM10_0"] ?? null),
+                        String(valuesObj[2] ?? null),
+                        String(valuesObj[3] ?? null),
+                        String(valuesObj[5] ?? null),
                     ]);
                 }
                 return results;
