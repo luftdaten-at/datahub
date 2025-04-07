@@ -38,7 +38,9 @@ class AirQualityDataAddView(APIView):
         errors = []
         for record in data:
             try:
-                device, _ = Device.objects.get_or_create(id=record.get('device'))
+                device_id = f'{record.get('device').upper()}AAA'
+
+                device, _ = Device.objects.get_or_create(id=device_id)
                 participant, _ = Participant.objects.get_or_create(name=record.get('participant'))
                 mode, _ = MobilityMode.objects.get_or_create(name=record.get('mode'))
                 workshop = Workshop.objects.get(name=record.get('workshop'))
