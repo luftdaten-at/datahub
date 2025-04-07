@@ -91,8 +91,8 @@
         <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
         <p>Code: {{ workshop.name }}</p>
 
-        <h4>{% trans "Devices" %}</h4>
-            <ul id="device-list"></ul>    
+        <h4 id="device-list-header"></h4>
+        <ul id="device-list"></ul>    
 
         <h4>{% trans "Download" %}</h4>
         <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
@@ -101,6 +101,9 @@
         </a>
     </div>
     <script>
+        const devicesLabel = "{% trans 'Devices' %}";
+        const measurementsLabel = "{% trans 'measurements' %}";
+
         const colorSteps = [
             [0, [115, 0.8, 0.8]],
             [5, [115, 0.8, 0.8]],
@@ -180,11 +183,16 @@
             }
     
             // 2. Füge die Daten in <ul id="device-list"> ein
+            const device_h4 = document.getElementById("device-list-header");
+            device_h4.innerHTML = "";
+            if (Object.keys(deviceCounts).length > 0) {
+                device_h4.textContent=devicesLabel;
+            }
             const ul = document.getElementById("device-list");
             ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
             for (const device in deviceCounts) {
                 const li = document.createElement("li");
-                li.textContent = `${device}: ${deviceCounts[device]} {% trans "measurements" %}`;
+                li.textContent = `${device}: ${deviceCounts[device]} measurementsLabel`;
                 ul.appendChild(li);
             }
         }
