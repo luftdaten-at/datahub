@@ -38,7 +38,10 @@ class AirQualityDataAddView(APIView):
         errors = []
         for record in data:
             try:
-                device_id = f'{record.get('device').upper()}AAA'
+                mac = record.get('device').upper()
+                rmac = ''.join(reversed([mac[i:i+2] for i in range(0, len(mac), 2)]))
+
+                device_id = f'{rmac}AAA'
 
                 device, _ = Device.objects.get_or_create(id=device_id)
                 participant, _ = Participant.objects.get_or_create(name=record.get('participant'))
