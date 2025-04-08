@@ -2,87 +2,50 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{{ workshop.title }}{% endblock title %}
+{% block title %}Luftdaten.at Datahub{% endblock title %}
 
 {% block styles %}
+{% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
+{% else %}
 <!-- Leaflet CSS -->
-<!--<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">-->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet.min.css">
-
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
 
 <!-- Leaflet JS -->
-<!--<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>-->
-<script src="https://cdn.jsdelivr.net/npm/leaflet-rotate-map@0.3.1/leaflet-src.min.js"></script>
-
+<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
+<script src="{% static 'js/leaflet.markercluster.js' %}"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
-<!--<script src="{% static 'js/leaflet.markercluster.js' %}"></script>-->
 
-
-<style>
-    .info {
-        padding: 6px 8px;
-        font: 14px/16px Arial, Helvetica, sans-serif;
-        background: white;
-        background: rgba(255,255,255,0.8);
-        box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        border-radius: 5px;
-    }
-    .info i {
-        width: 18px;
-        height: 18px;
-        float: left;
-        margin-right: 8px;
-        opacity: 0.7;
-    }
-    .legend {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-    
-    .legend-item {
-        display: flex;
-        align-items: center;
-        margin: 0 10px;
-    }
-    
-    .legend-item i {
-        width: 18px;
-        height: 18px;
-        margin-right: 5px;
-    }
-    .leaflet-center {
-        left: 50%;
-        transform: translate(-50%, 0%);
-    }    
-</style>
+{% endif %}
 {% endblock styles %}
 
+
 {% block map %}
+{% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
+{% else %}
 <div class=".container-fluid">
     <div class="position-absolute top-0 end-0 card"
-        style="width: 18rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+        style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card-body">
-            <h5 class="card-title">{% trans "Measurement Type" %}</h5>
-            <select class="form-select" id="select-value" aria-label="Default select example" onchange="updateValues()">
-                <option value="pm1">{% trans "Particulate Matter PM1.0" %}</option>
-                <option value="pm25" selected>{% trans "Particulate Matter PM2.5" %}</option>
-                <option value="pm10">{% trans "Particulate Matter PM10.0" %}</option>
-                <option value="temperature">{% trans "Temperature" %}</option>
+            <h5 class="card-title">{% trans "Air quality" %}</h5>
+            <select class="form-select" aria-label="Default select example" onchange="addMarkerLayer(this.value)">
+                <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
+                <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
+                <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
+                <option value="temperature">{% trans "Temperatur" %} </option>
             </select>
-            <h5 class="card-title" style="margin-top: 1rem;">{% trans "Device" %}</h5>
-            <select class="form-select" id="select-device" aria-label="Default select example" onchange="updateValues()">
-                <option value="all" selected>{% trans "All devices" %}</option>
-            </select>
+            <div id="legend" style="margin-top: 1rem;"></div>
+            <span id="legend-method" style="font-size: 0.8rem;"></span>
         </div>
     </div>
-    <div id="map">
-    </div>
+    <div id="map"></div>
 </div>
+{% endif %}
 {% endblock map %}
+
 
 {% block content %}
     <div class="mt-3 mb-5">
@@ -104,31 +67,152 @@
         const devicesLabel = "{% trans 'Devices' %}";
         const measurementsLabel = "{% trans 'measurements' %}";
 
-        const colorSteps = [
-            [0, [115, 0.8, 0.8]],
-            [10, [115, 0.8, 0.8]],
-            [20, [60, 0.87, 0.95]],
-            [25, [0, 0.87, 0.8]],
-            [50, [0, 0.87, 0.4]],
+        // 2) Farblogik: Direkt RGB-Werte statt HSV
+        // Beispielwerte als [R, G, B], alle im Bereich 0..255
+        const colorStepsPM1 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
         ];
-    
-        function interpolate(a, b, fraction) {
-            return [a[0] + (b[0] - a[0]) * fraction, a[1] + (b[1] - a[1]) * fraction, a[2] + (b[2] - a[2]) * fraction];
-        }
-    
-        function getColorForPM25(value) {
-            if(isNaN(value) || value == null) return [0, 0, 0.7]; // grey
-            for (let i = 0; i < colorSteps.length - 1; i++) {
-                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
-                    const fraction = (value - colorSteps[i][0]) / (colorSteps[i + 1][0] - colorSteps[i][0]);
-                    return interpolate(colorSteps[i][1], colorSteps[i + 1][1], fraction);
-                }
+        const colorStepsPM25 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+        ];
+        const colorStepsPM10 = [
+            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+            [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
+            [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+            [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
+            [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
+            [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+        ];
+
+        const colorStepsArray = {
+            'pm1': colorStepsPM1,
+            'pm25': colorStepsPM25,
+            'pm10': colorStepsPM10,
+        };
+
+        function createColorGradientImageWithQuarterLabels(scale, lo, hi, width = 200, height = 30, labelPadding = 10, labelWidth = 50) {
+            // Check if lo and hi are valid
+            if (lo === undefined || hi === undefined) {
+                console.error('Invalid lo or hi values:', lo, hi);
+                return;
             }
-            return colorSteps[colorSteps.length - 1][1];
+
+            // Adjust the canvas width to ensure there's enough space for the labels
+            const canvasWidth = width + labelWidth * 2; // Add extra space on both sides for labels
+
+            // Create an off-screen canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvasWidth;  // Use the adjusted width
+            canvas.height = height + labelPadding + 20;  // Extra space for labels below the gradient
+
+            // Create a gradient using chroma scale
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+            // Generate the colors for the gradient
+            const colors = scale.colors(width);
+            if (!colors || colors.length === 0) {
+                console.error('Failed to generate colors from the scale:', colors);
+                return;
+            }
+
+            // Add color stops based on the scale
+            colors.forEach((color, i) => {
+                gradient.addColorStop(i / (width - 1), color);
+            });
+
+            // Fill the canvas with the gradient
+            ctx.fillStyle = gradient;
+            ctx.fillRect(labelWidth, 0, width, height); // Shift gradient to the right by labelWidth
+
+            // Calculate the quarter positions and ensure they are defined
+            const quarters = [lo, (lo + hi) / 4, (lo + hi) / 2, (3 * (lo + hi)) / 4, hi];
+            const labelPositions = [0, width / 4, width / 2, (3 * width) / 4, width];
+            
+            // Draw the background for the labels (white rectangle below the gradient)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, height + labelPadding, canvasWidth, 20);  // White background for labels below the gradient
+
+            // Draw labels for the quarters outside the image (below the gradient)
+            ctx.fillStyle = 'black'; // Label color
+            ctx.font = '12px Arial'; // Font size
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Draw the labels outside the gradient area (rotate them by 90 degrees)
+            quarters.forEach((value, index) => {
+                if (value === undefined) {
+                    console.error(`Quarter value at index ${index} is undefined`);
+                } else {
+                    // Position labels below the gradient
+                    const labelXPosition = labelPositions[index] + labelWidth; // Shift the label position by labelWidth
+                    const labelYPosition = height + labelPadding + 10; // Shift labels below the gradient
+
+                    // Draw the label (not rotated, horizontal text)
+                    ctx.fillText(value.toFixed(2), labelXPosition, labelYPosition);
+                }
+            });
+
+            return canvas;
         }
+
+        function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
+            var legendDiv = document.getElementById('legend');
+            legendDiv.innerHTML = '';
+            if(pmTypeIndex == 'temperature'){
+                //legendDiv.innerHTML = createColorGradientImage(scale); 
+                legendDiv.innerHTML = '<p>&#916;T in K</p>';
+                legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale, 0, hi - lo));
+                document.getElementById("legend-method").innerHTML = "";
+                return;
+            }
+
+            document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/luftqualitaet/grenzwerte/">Method: European Air Quality Index</a>';
+
+            for (var i = 0; i < colorSteps.length; i++) {
+                var from = colorSteps[i][0];
+                var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+                var rgb = colorSteps[i][1];
+                var description = colorSteps[i][2]; 
     
-        let hsv2hsl = (h, s, v, l = v - v * s / 2, m = Math.min(l, 1 - l)) => [h, m ? (v - l) / m : 0, l];
+                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
     
+                var item = document.createElement('div');
+                item.style.display = 'flex';
+                item.style.flexDirection = 'row';
+                item.style.alignItems = 'center';
+                item.style.marginBottom = '4px';
+    
+                var colorBox = document.createElement('span');
+                colorBox.style.background = colorString;
+                colorBox.style.width = '18px';
+                colorBox.style.height = '18px';
+                colorBox.style.display = 'inline-block';
+                colorBox.style.marginRight = '8px';
+                colorBox.style.border = '1px solid #ccc';
+                colorBox.style.borderRadius = '50%';
+    
+                var labelText = document.createElement('span');
+                labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+                labelText.style.fontSize = '0.8rem';
+    
+                item.appendChild(colorBox);
+                item.appendChild(labelText);
+                legendDiv.appendChild(item);
+            }
+        }
+        
+        /*
         function updateValues() {
             var value = document.getElementById("select-value").value;
             var device = document.getElementById("select-device").value;
@@ -146,6 +230,7 @@
                     '</div>';
             });
         }
+        */
     
         const map = L.map('map', {fadeAnimation: false, rotate: true }).setView([48.2112, 16.3736], 13);
     
@@ -169,10 +254,18 @@
             for (let item in json) {
                 points.push(json[item]);
             }
+
+            var defaultPmTypeIndex = 'pm25'; // PM2.5
+
+            addMarkerLayer("pm25");
+            showDeviceList();
         }
-    
+
+        fetchMarkerData();
+
         function showDeviceList() {
             // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
+            console.log('hallo');
             const deviceCounts = {};
             for (let i = 0; i < points.length; i++) {
                 const device = points[i].device;
@@ -192,26 +285,12 @@
             ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
             for (const device in deviceCounts) {
                 const li = document.createElement("li");
-                li.textContent = `${device}: ${deviceCounts[device]} measurementsLabel`;
+                li.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
                 ul.appendChild(li);
             }
         }
-
-        fetchMarkerData().then(() => {
-            addMarkerLayer("pm25");
-            const devices = new Set();
-            for(let i = 0; i < points.length; i++) {
-                devices.add(points[i].device);
-            }
-            const select = document.getElementById("select-device");
-            for (let device of devices) {
-                var option = document.createElement("option");
-                option.text = device;
-                option.value = device;
-                select.add(option);
-            }
-            showDeviceList();
-        });
+        
+        /*
     
         function getMean(arr) {
             var acc = 0;
@@ -224,11 +303,22 @@
             if(count == 0) return NaN;
             return acc / count;
         }
-    
+        */
+
+        // Gibt reinen RGB-Wert [R, G, B] zurück
+        function getColorForPM(value, colorSteps) {
+            if (isNaN(value)) return [128, 128, 128]; // z.B. Grau für ungültige Werte
+            for (let i = 0; i < colorSteps.length - 1; i++) {
+                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) { 
+                    return colorSteps[i][1]; 
+                }
+            }
+            return colorSteps[colorSteps.length - 1][1];
+        }
+
         var markerLayer;
     
         async function addMarkerLayer(value, device = null) {
-
             // Log that this function was called
             console.log("addMarkerLayer called with value: " + value + " and device: " + device);
     
@@ -238,6 +328,7 @@
     
             // Marker layer
             markerLayer = L.layerGroup({
+                /*
                 iconCreateFunction: function (cluster) {
                     const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
                     const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
@@ -247,22 +338,46 @@
                     return L.divIcon({iconSize: [6, 6], className: '', html: '<div class="clickable" style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"></div>'});
                 },
                 showCoverageOnHover: false,
+                */
             });
     
             const markerList = [];
-    
+
+            const lo = Math.min(...points.map(j => j[value]));
+            const hi = Math.max(...points.map(j => j[value]));
+
+            const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
+
+            createLegend(value, colorStepsArray[value], scale, lo, hi);
+            /*
+            const colored = points.map(j => ({
+                value: j[value],
+                color: scale(j[value]).hex()
+            }));
+            */
+
             // Add markers for each point
             for (let i in points) {
                 const point = points[i];
                 if(device != null && point.device != device) continue;
                 const pm = point[value];
+
+                /*
                 const colorArrayHSV = getColorForPM25(pm);
                 const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
                 var colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
                 const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
+                */
 
                 // Temp: just set colorString to be the hex color defined in the colorRanges
-                colorString = colorRanges[value].find(range => pm >= range.range[0] && pm < range.range[1]).color;
+                let colorString = '';
+                // get color string for temperature
+                if(value == 'temperature'){
+                    colorString = scale(point[value]);
+                }else{
+                    const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
+                    colorString = `rgb(${r}, ${g}, ${b})`;
+                }
 
                 var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
                 marker.pm = pm; // Add a custom attribute to marker
