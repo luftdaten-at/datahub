@@ -250,19 +250,36 @@
             });
     
             const markerList = [];
-    
+
+            const lo = Math.min(...points.map(j => j[value]));
+            const hi = Math.max(...points.map(j => j[value]));
+
+            const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
+            /*
+            const colored = points.map(j => ({
+                value: j[value],
+                color: scale(j[value]).hex()
+            }));
+            */
+
             // Add markers for each point
             for (let i in points) {
                 const point = points[i];
                 if(device != null && point.device != device) continue;
                 const pm = point[value];
+                /*
                 const colorArrayHSV = getColorForPM25(pm);
                 const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
                 var colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
                 const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
+                */
 
                 // Temp: just set colorString to be the hex color defined in the colorRanges
-                colorString = colorRanges[value].find(range => pm >= range.range[0] && pm < range.range[1]).color;
+                let colorString = colorRanges[value].find(range => pm >= range.range[0] && pm < range.range[1]).color;
+                // get color string for temperature
+                if(value == 'temperature'){
+                    colorString = scale(point[value]);
+                }
 
                 var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
                 marker.pm = pm; // Add a custom attribute to marker
