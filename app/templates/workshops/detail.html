@@ -171,7 +171,8 @@
             legendDiv.innerHTML = '';
             if(pmTypeIndex == 'temperature'){
                 //legendDiv.innerHTML = createColorGradientImage(scale); 
-                legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale,lo,hi));
+                legendDiv.innerHTML = '<p>&#916;T in K</p>';
+                legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale, 0, hi - lo));
                 return;
             }
             for (var i = 0; i < colorSteps.length; i++) {
