@@ -91,13 +91,9 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Workshop.objects.filter(
-                end_date__lte=timezone.now()
-            ).order_by('-end_date')
+            return Workshop.objects.filter().order_by('-end_date')
         else:
-            return Workshop.objects.filter(
-                end_date__lte=timezone.now(), owner=self.request.user
-            ).order_by('-end_date')
+            return Workshop.objects.filter(owner=self.request.user).order_by('-end_date')
 
 
 class WorkshopCreateView(CreateView):
