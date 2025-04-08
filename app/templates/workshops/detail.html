@@ -38,7 +38,7 @@
                 <option value="temperature">{% trans "Temperatur" %} </option>
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
-            <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
+            <span id="legend-method" style="font-size: 0.8rem;"></span>
         </div>
     </div>
     <div id="map"></div>
@@ -173,8 +173,12 @@
                 //legendDiv.innerHTML = createColorGradientImage(scale); 
                 legendDiv.innerHTML = '<p>&#916;T in K</p>';
                 legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale, 0, hi - lo));
+                document.getElementById("legend-method").innerHTML = "";
                 return;
             }
+
+            document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/luftqualitaet/grenzwerte/">Method: European Air Quality Index</a>';
+
             for (var i = 0; i < colorSteps.length; i++) {
                 var from = colorSteps[i][0];
                 var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
