@@ -187,13 +187,14 @@
             var defaultPmTypeIndex = 'pm25'; // PM2.5
 
             addMarkerLayer("pm25");
+            showDeviceList();
         }
 
         fetchMarkerData();
 
-        /*
         function showDeviceList() {
             // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
+            console.log('hallo');
             const deviceCounts = {};
             for (let i = 0; i < points.length; i++) {
                 const device = points[i].device;
@@ -213,12 +214,12 @@
             ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
             for (const device in deviceCounts) {
                 const li = document.createElement("li");
-                li.textContent = `${device}: ${deviceCounts[device]} measurementsLabel`;
+                li.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
                 ul.appendChild(li);
             }
         }
-
         
+        /*
     
         function getMean(arr) {
             var acc = 0;
