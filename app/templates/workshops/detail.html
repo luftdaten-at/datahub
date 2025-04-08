@@ -100,12 +100,78 @@
             'pm10': colorStepsPM10,
         };
 
+        function createColorGradientImageWithQuarterLabels(scale, lo, hi, width = 200, height = 30, labelPadding = 10, labelWidth = 50) {
+            // Check if lo and hi are valid
+            if (lo === undefined || hi === undefined) {
+                console.error('Invalid lo or hi values:', lo, hi);
+                return;
+            }
 
-        function createLegend(pmTypeIndex, colorSteps) {
+            // Adjust the canvas width to ensure there's enough space for the labels
+            const canvasWidth = width + labelWidth * 2; // Add extra space on both sides for labels
+
+            // Create an off-screen canvas element
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvasWidth;  // Use the adjusted width
+            canvas.height = height + labelPadding + 20;  // Extra space for labels below the gradient
+
+            // Create a gradient using chroma scale
+            const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+            // Generate the colors for the gradient
+            const colors = scale.colors(width);
+            if (!colors || colors.length === 0) {
+                console.error('Failed to generate colors from the scale:', colors);
+                return;
+            }
+
+            // Add color stops based on the scale
+            colors.forEach((color, i) => {
+                gradient.addColorStop(i / (width - 1), color);
+            });
+
+            // Fill the canvas with the gradient
+            ctx.fillStyle = gradient;
+            ctx.fillRect(labelWidth, 0, width, height); // Shift gradient to the right by labelWidth
+
+            // Calculate the quarter positions and ensure they are defined
+            const quarters = [lo, (lo + hi) / 4, (lo + hi) / 2, (3 * (lo + hi)) / 4, hi];
+            const labelPositions = [0, width / 4, width / 2, (3 * width) / 4, width];
+            
+            // Draw the background for the labels (white rectangle below the gradient)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, height + labelPadding, canvasWidth, 20);  // White background for labels below the gradient
+
+            // Draw labels for the quarters outside the image (below the gradient)
+            ctx.fillStyle = 'black'; // Label color
+            ctx.font = '12px Arial'; // Font size
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Draw the labels outside the gradient area (rotate them by 90 degrees)
+            quarters.forEach((value, index) => {
+                if (value === undefined) {
+                    console.error(`Quarter value at index ${index} is undefined`);
+                } else {
+                    // Position labels below the gradient
+                    const labelXPosition = labelPositions[index] + labelWidth; // Shift the label position by labelWidth
+                    const labelYPosition = height + labelPadding + 10; // Shift labels below the gradient
+
+                    // Draw the label (not rotated, horizontal text)
+                    ctx.fillText(value.toFixed(2), labelXPosition, labelYPosition);
+                }
+            });
+
+            return canvas;
+        }
+
+        function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
             var legendDiv = document.getElementById('legend');
             legendDiv.innerHTML = '';
             if(pmTypeIndex == 'temperature'){
-                legendDiv.innerHTML = 'Hallo'; 
+                //legendDiv.innerHTML = createColorGradientImage(scale); 
+                legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale,lo,hi));
                 return;
             }
             for (var i = 0; i < colorSteps.length; i++) {
@@ -244,11 +310,10 @@
             }
             return colorSteps[colorSteps.length - 1][1];
         }
-    
+
         var markerLayer;
     
         async function addMarkerLayer(value, device = null) {
-            createLegend(value, colorStepsArray[value]);
             // Log that this function was called
             console.log("addMarkerLayer called with value: " + value + " and device: " + device);
     
@@ -277,6 +342,8 @@
             const hi = Math.max(...points.map(j => j[value]));
 
             const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
+
+            createLegend(value, colorStepsArray[value], scale, lo, hi);
             /*
             const colored = points.map(j => ({
                 value: j[value],
