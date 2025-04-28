@@ -23,6 +23,8 @@ class Workshop(models.Model):
     mapbox_bottom_right_lat = models.FloatField(null=True, blank=True)
     mapbox_bottom_right_lon = models.FloatField(null=True, blank=True)
 
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='workshops')
+
     history = AuditlogHistoryField()
 
     owner = models.ForeignKey(
