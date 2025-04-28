@@ -233,7 +233,7 @@
         */
     
         const map = L.map('map', {fadeAnimation: false, rotate: true }).setView([48.2112, 16.3736], 13);
-    
+        
         const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -402,7 +402,7 @@
             loadDataForStation(uid);
             return true;
         }
-    
+        /* 
         const colorRanges = {
         'pm1': [
             { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
@@ -430,8 +430,7 @@
             { label: '{% trans "Heiß (>30°C)" %}', color: '#ff0000', range: [30, 400] },
         ]};
     
-        const legend = L.control({ position: 'bottomright' });
-
+        
         legend.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'info legend leaflet-center');
             div.id = 'legend';
@@ -444,11 +443,13 @@
             });
             return div;
         };
-        
+        const legend = L.control({ position: 'bottomright' });
         legend.addTo(map);
+        legend._container.className += ' leaflet-center';
+        */
+
 
         // Add a class to the outermost div
-        legend._container.className += ' leaflet-center';
 
     // Button "Zoom to all"
     var fitBoundsControl = L.control({ position: 'bottomleft' });
