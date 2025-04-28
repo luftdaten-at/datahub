@@ -11,6 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .forms import CustomUserCreationForm, CustomUserEditForm
 from .models import CustomUser
 from organizations.models import Organization, OrganizationInvitation
+from workshops.models import Workshop, WorkshopInvitation
 from campaign.models import Campaign
 
 
@@ -65,6 +66,8 @@ class SignupPageView(CreateView):
 
     def form_valid(self, form):
         user = form.instance
+
+        # Invitations to organizations
         invitations = OrganizationInvitation.objects.filter(email=user.email).all()
         time_now = datetime.datetime.now(datetime.timezone.utc)
         user.save()
@@ -72,6 +75,16 @@ class SignupPageView(CreateView):
             if not invitation.expiring_date or time_now < invitation.expiring_date:
                 invitation.organization.users.add(user)
             invitation.delete()
+        
+        # Invitations to workshops
+        invitations = WorkshopInvitation.objects.filter(email=user.email).all()
+        time_now = datetime.datetime.now(datetime.timezone.utc)
+        user.save()
+        for invitation in invitations:
+            if not invitation.expiring_date or time_now < invitation.expiring_date:
+                invitation.workshop.users.add(user)
+            invitation.delete()
+
         return super().form_valid(form)
 
 
