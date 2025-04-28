@@ -90,6 +90,13 @@
     </div>
 </div>
 
+<!-- template.html -->
+<form method="get" action="{% url 'workshop-image-upload' workshop.pk %}">
+    <button type="submit" class="btn btn-primary">
+        Upload Images
+    </button>
+</form>
+
 
 <script>
     const devicesLabel = "{% trans 'Devices' %}";
