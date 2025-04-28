@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 
 from .models import Workshop, WorkshopInvitation
 from .forms import WorkshopForm
@@ -86,7 +87,7 @@ class WorkshopDetailView(DetailView):
             raise Http404("Workshop nicht gefunden.")
         
         if not obj.public:
-            if not self.request.user.is_superuser and obj.owner != self.request.user:
+            if not self.request.user.is_superuser and not obj.users.filter(id = self.request.user.id).exists():
                 raise Http404("Workshop nicht gefunden.")
 
         return obj
@@ -150,7 +151,7 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
         if self.request.user.is_superuser:
             return Workshop.objects.filter().order_by('-end_date')
         else:
-            return Workshop.objects.filter(owner=self.request.user).order_by('-end_date')
+            return Workshop.objects.filter(users=self.request.user).order_by('-end_date')
 
 
 class WorkshopCreateView(CreateView):
