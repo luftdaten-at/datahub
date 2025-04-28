@@ -78,6 +78,12 @@ class Participant(models.Model):
     def __str__(self):
         return self.name
 
+
+class WorkshopImage(models.Model):
+    workshop = models.ForeignKey('Workshop', on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='workshop_images/')
+
+
 auditlog.register(Workshop) 
 auditlog.register(Participant)
 auditlog.register(WorkshopInvitation)
