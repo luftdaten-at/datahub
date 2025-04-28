@@ -51,6 +51,20 @@ class Workshop(models.Model):
         while Workshop.objects.filter(name=name).exists():
             name = ''.join(random.choices(string.ascii_letters + string.digits, k=length))
         return name
+
+
+class WorkshopInvitation(models.Model):
+    expiring_date = models.DateField(null=True)
+    email = models.EmailField()
+    workshop = models.ForeignKey('Workshop', on_delete=models.CASCADE, related_name='invitations')
+    history = AuditlogHistoryField()
+
+    class Meta:
+        unique_together = ('email', 'workshop')
+
+    def __str__(self):
+        return f'{self.email} {self.workshop.name} {self.expiring_date}'
+
     
 class Participant(models.Model):
     name = models.CharField(max_length=255, unique=True, primary_key=True, blank=True)
@@ -64,3 +78,4 @@ class Participant(models.Model):
 
 auditlog.register(Workshop) 
 auditlog.register(Participant)
+auditlog.register(WorkshopInvitation)
