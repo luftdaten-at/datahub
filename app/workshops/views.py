@@ -92,7 +92,7 @@ class WorkshopDetailView(DetailView):
 
 
 @login_required
-def invite_user_to_organization(request, workshop_id):
+def invite_user_to_workshop(request, workshop_id):
     workshop = get_object_or_404(Workshop, id=workshop_id)
     email = request.POST.get('email')
     
