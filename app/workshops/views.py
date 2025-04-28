@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from django.core.exceptions import PermissionDenied
 
 from .models import Workshop, WorkshopInvitation
 from .forms import WorkshopForm
@@ -159,22 +160,26 @@ class WorkshopCreateView(CreateView):
     success_url = reverse_lazy('workshops-my')
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user
+        workshop = form.save(commit=False)
+        workshop.owner = self.request.user
+        workshop.users.add(self.request.user)
+        workshop.save()
+
         return super().form_valid(form)
     
-
 class WorkshopUpdateView(UpdateView):
     model = Workshop
     form_class = WorkshopForm
     template_name = 'workshops/form.html'
+    success_url = reverse_lazy('workshops-my')
 
-    def get_success_url(self):
-        return reverse_lazy('workshops-my')
-
-    def form_valid(self, form):
-  
-        return super().form_valid(form)
-    
+    def get_object(self, queryset = None):
+        workshop = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return workshop
+        if self.request.user != workshop.owner:
+            raise PermissionDenied('You are not allowed to edite this Workshop')
+        return workshop
 
 class WorkshopDeleteView(DeleteView):
     model = Workshop
