@@ -9,10 +9,20 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.core.exceptions import PermissionDenied
+from django.db.models import Q
 
-from .models import Workshop
+from .models import Workshop, WorkshopInvitation
 from .forms import WorkshopForm
+from accounts.models import CustomUser
 from api.models import AirQualityRecord
+from main import settings
+
 
 class WorkshopListView(ListView):
     model = Workshop
@@ -77,10 +87,58 @@ class WorkshopDetailView(DetailView):
             raise Http404("Workshop nicht gefunden.")
         
         if not obj.public:
-            if not self.request.user.is_superuser and obj.owner != self.request.user:
+            if not self.request.user.is_superuser and not obj.users.filter(id = self.request.user.id).exists():
                 raise Http404("Workshop nicht gefunden.")
 
         return obj
+
+
+@login_required
+def invite_user_to_workshop(request, workshop_id):
+    workshop = get_object_or_404(Workshop, name=workshop_id)
+    email = request.POST.get('email')
+    
+    # Check permissions
+    if not request.user.is_superuser and request.user != Workshop.owner:
+        messages.error(request, "You do not have permission to invite users to this organization.")
+        return redirect('workshop-detail', workshop.pk)
+
+    user = CustomUser.objects.filter(email=email).first()
+
+    if user:
+        workshop.users.add(user)
+        messages.success(request, f"{email} has been added to the organization.")
+    else:
+        # Check if invitation already exists
+        invitation = WorkshopInvitation.objects.filter(email=email, workshop=workshop).first()
+
+        if not invitation:
+            # Create an invitation
+            invitation = WorkshopInvitation(
+                expiring_date=None,
+                email=email,
+                workshop=workshop,
+            )
+            invitation.save()
+
+        # Generate the email body from a template
+        context = {
+            'workshop': workshop,
+            'registration_link': ''
+        }
+        message_body = render_to_string('workshops/email/invite_user_to_workshop.txt', context)
+
+        # Send the email
+        send_mail(
+            subject=f"You've been invited to join {workshop.name}",
+            message=message_body,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+        )
+
+        messages.success(request, f"An invitation has been sent to {email}.")
+
+    return redirect('workshop-detail', workshop.pk)
 
 
 class WorkshopMyView(LoginRequiredMixin, ListView):
@@ -93,7 +151,7 @@ class WorkshopMyView(LoginRequiredMixin, ListView):
         if self.request.user.is_superuser:
             return Workshop.objects.filter().order_by('-end_date')
         else:
-            return Workshop.objects.filter(owner=self.request.user).order_by('-end_date')
+            return Workshop.objects.filter(users=self.request.user).order_by('-end_date')
 
 
 class WorkshopCreateView(CreateView):
@@ -103,22 +161,26 @@ class WorkshopCreateView(CreateView):
     success_url = reverse_lazy('workshops-my')
 
     def form_valid(self, form):
-        form.instance.owner = self.request.user
+        workshop = form.save(commit=False)
+        workshop.owner = self.request.user
+        workshop.users.add(self.request.user)
+        workshop.save()
+
         return super().form_valid(form)
     
-
 class WorkshopUpdateView(UpdateView):
     model = Workshop
     form_class = WorkshopForm
     template_name = 'workshops/form.html'
+    success_url = reverse_lazy('workshops-my')
 
-    def get_success_url(self):
-        return reverse_lazy('workshops-my')
-
-    def form_valid(self, form):
-  
-        return super().form_valid(form)
-    
+    def get_object(self, queryset = None):
+        workshop = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return workshop
+        if self.request.user != workshop.owner:
+            raise PermissionDenied('You are not allowed to edite this Workshop')
+        return workshop
 
 class WorkshopDeleteView(DeleteView):
     model = Workshop
