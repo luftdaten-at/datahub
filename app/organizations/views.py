@@ -156,7 +156,7 @@ def invite_user_to_organization(request, org_id):
             'organization': organization,
             'registration_link': ''
         }
-        message_body = render_to_string('organization/emails/invite_user_to_organization.txt', context)
+        message_body = render_to_string('organizations/email/invite_user_to_organization.txt', context)
 
         # Send the email
         send_mail(

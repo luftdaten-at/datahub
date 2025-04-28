@@ -9,10 +9,18 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
 
-from .models import Workshop
+from .models import Workshop, WorkshopInvitation
 from .forms import WorkshopForm
+from accounts.models import CustomUser
 from api.models import AirQualityRecord
+from main import settings
+
 
 class WorkshopListView(ListView):
     model = Workshop
@@ -81,6 +89,54 @@ class WorkshopDetailView(DetailView):
                 raise Http404("Workshop nicht gefunden.")
 
         return obj
+
+
+@login_required
+def invite_user_to_organization(request, workshop_id):
+    workshop = get_object_or_404(Workshop, id=workshop_id)
+    email = request.POST.get('email')
+    
+    # Check permissions
+    if not request.user.is_superuser and request.user != Workshop.owner:
+        messages.error(request, "You do not have permission to invite users to this organization.")
+        return
+
+    user = CustomUser.objects.filter(email=email).first()
+
+    if user:
+        workshop.users.add(user)
+        messages.success(request, f"{email} has been added to the organization.")
+    else:
+        # Check if invitation already exists
+        invitation = WorkshopInvitation.objects.filter(email=email, workshop=workshop).first()
+
+        if not invitation:
+            # Create an invitation
+            invitation = WorkshopInvitation(
+                expiring_date=None,
+                email=email,
+                workshop=workshop,
+            )
+            invitation.save()
+
+        # Generate the email body from a template
+        context = {
+            'workshop': workshop,
+            'registration_link': ''
+        }
+        message_body = render_to_string('workshops/email/invite_user_to_workshop.txt', context)
+
+        # Send the email
+        send_mail(
+            subject=f"You've been invited to join {workshop.name}",
+            message=message_body,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email],
+        )
+
+        messages.success(request, f"An invitation has been sent to {email}.")
+
+    return
 
 
 class WorkshopMyView(LoginRequiredMixin, ListView):
