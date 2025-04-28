@@ -46,446 +46,473 @@
 {% endif %}
 {% endblock map %}
 
-
 {% block content %}
-    <div class="mt-3 mb-5">
-        <h2>{{ workshop.title }}</h2>
-        <p>{{ workshop.description }}</p>
-        <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
-        <p>Code: {{ workshop.name }}</p>
+<div class="mt-3 mb-5">
+    <h2>{{ workshop.title }}</h2>
+    <p>{{ workshop.description }}</p>
+    <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
+    <p>Code: {{ workshop.name }}</p>
 
-        <h4 id="device-list-header"></h4>
-        <ul id="device-list"></ul>    
+    <h4 id="device-list-header"></h4>
+    <ul id="device-list"></ul>    
 
-        <h4>{% trans "Download" %}</h4>
-        <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
-            <i class="bi bi-download me-1"></i>
-            {% trans "CSV" %}
-        </a>
+    <h4>{% trans "Download" %}</h4>
+    <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
+        <i class="bi bi-download me-1"></i>
+        {% trans "CSV" %}
+    </a>
+</div>
+
+
+<!-- Invite User Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h4 class="mb-0">{% trans "Invite a User" %}</h4>
     </div>
-    <script>
-        const devicesLabel = "{% trans 'Devices' %}";
-        const measurementsLabel = "{% trans 'measurements' %}";
-
-        // 2) Farblogik: Direkt RGB-Werte statt HSV
-        // Beispielwerte als [R, G, B], alle im Bereich 0..255
-        const colorStepsPM1 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
-        const colorStepsPM25 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
-        const colorStepsPM10 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
-
-        const colorStepsArray = {
-            'pm1': colorStepsPM1,
-            'pm25': colorStepsPM25,
-            'pm10': colorStepsPM10,
-        };
-
-        function createColorGradientImageWithQuarterLabels(scale, lo, hi, width = 200, height = 30, labelPadding = 10, labelWidth = 50) {
-            // Check if lo and hi are valid
-            if (lo === undefined || hi === undefined) {
-                console.error('Invalid lo or hi values:', lo, hi);
-                return;
-            }
-
-            // Adjust the canvas width to ensure there's enough space for the labels
-            const canvasWidth = width + labelWidth * 2; // Add extra space on both sides for labels
-
-            // Create an off-screen canvas element
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = canvasWidth;  // Use the adjusted width
-            canvas.height = height + labelPadding + 20;  // Extra space for labels below the gradient
-
-            // Create a gradient using chroma scale
-            const gradient = ctx.createLinearGradient(0, 0, width, 0);
-
-            // Generate the colors for the gradient
-            const colors = scale.colors(width);
-            if (!colors || colors.length === 0) {
-                console.error('Failed to generate colors from the scale:', colors);
-                return;
-            }
-
-            // Add color stops based on the scale
-            colors.forEach((color, i) => {
-                gradient.addColorStop(i / (width - 1), color);
-            });
-
-            // Fill the canvas with the gradient
-            ctx.fillStyle = gradient;
-            ctx.fillRect(labelWidth, 0, width, height); // Shift gradient to the right by labelWidth
-
-            // Calculate the quarter positions and ensure they are defined
-            const quarters = [lo, (lo + hi) / 4, (lo + hi) / 2, (3 * (lo + hi)) / 4, hi];
-            const labelPositions = [0, width / 4, width / 2, (3 * width) / 4, width];
-            
-            // Draw the background for the labels (white rectangle below the gradient)
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, height + labelPadding, canvasWidth, 20);  // White background for labels below the gradient
-
-            // Draw labels for the quarters outside the image (below the gradient)
-            ctx.fillStyle = 'black'; // Label color
-            ctx.font = '12px Arial'; // Font size
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Draw the labels outside the gradient area (rotate them by 90 degrees)
-            quarters.forEach((value, index) => {
-                if (value === undefined) {
-                    console.error(`Quarter value at index ${index} is undefined`);
-                } else {
-                    // Position labels below the gradient
-                    const labelXPosition = labelPositions[index] + labelWidth; // Shift the label position by labelWidth
-                    const labelYPosition = height + labelPadding + 10; // Shift labels below the gradient
-
-                    // Draw the label (not rotated, horizontal text)
-                    ctx.fillText(value.toFixed(2), labelXPosition, labelYPosition);
-                }
-            });
-
-            return canvas;
-        }
-
-        function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
-            var legendDiv = document.getElementById('legend');
-            legendDiv.innerHTML = '';
-            if(pmTypeIndex == 'temperature'){
-                //legendDiv.innerHTML = createColorGradientImage(scale); 
-                legendDiv.innerHTML = '<p>&#916;T in K</p>';
-                legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale, 0, hi - lo));
-                document.getElementById("legend-method").innerHTML = "";
-                return;
-            }
-
-            document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/luftqualitaet/grenzwerte/">Method: European Air Quality Index</a>';
-
-            for (var i = 0; i < colorSteps.length; i++) {
-                var from = colorSteps[i][0];
-                var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
-                var rgb = colorSteps[i][1];
-                var description = colorSteps[i][2]; 
-    
-                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-    
-                var item = document.createElement('div');
-                item.style.display = 'flex';
-                item.style.flexDirection = 'row';
-                item.style.alignItems = 'center';
-                item.style.marginBottom = '4px';
-    
-                var colorBox = document.createElement('span');
-                colorBox.style.background = colorString;
-                colorBox.style.width = '18px';
-                colorBox.style.height = '18px';
-                colorBox.style.display = 'inline-block';
-                colorBox.style.marginRight = '8px';
-                colorBox.style.border = '1px solid #ccc';
-                colorBox.style.borderRadius = '50%';
-    
-                var labelText = document.createElement('span');
-                labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
-                labelText.style.fontSize = '0.8rem';
-    
-                item.appendChild(colorBox);
-                item.appendChild(labelText);
-                legendDiv.appendChild(item);
-            }
-        }
-        
-        /*
-        function updateValues() {
-            var value = document.getElementById("select-value").value;
-            var device = document.getElementById("select-device").value;
-            if(device == "all") device = null;
-            addMarkerLayer(value, device);
-
-            // Update legend
-            var legend = document.getElementById("legend");
-            legend.innerHTML = "";
-            colorRanges[value].forEach(function (range) {
-                legend.innerHTML +=
-                    '<div class="legend-item">' +
-                    '<i style="background:' + range.color + '"></i> ' +
-                    range.label +
-                    '</div>';
-            });
-        }
-        */
-    
-        const map = L.map('map', {fadeAnimation: false, rotate: true }).setView([48.2112, 16.3736], 13);
-    
-        const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-    
-        var points;
-    
-        async function fetchMarkerData() {
-            const fetch_url = "/api/v1/workshops/{{ workshop.name }}/data/";
-            console.log(fetch_url);
-            const response = await fetch(fetch_url);
-    
-            points = [];
-    
-            // Parse response JSON
-            const text = await response.text();
-            const json = JSON.parse(text);
-            for (let item in json) {
-                points.push(json[item]);
-            }
-
-            var defaultPmTypeIndex = 'pm25'; // PM2.5
-
-            addMarkerLayer("pm25");
-            showDeviceList();
-        }
-
-        fetchMarkerData();
-
-        function showDeviceList() {
-            // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
-            console.log('hallo');
-            const deviceCounts = {};
-            for (let i = 0; i < points.length; i++) {
-                const device = points[i].device;
-                if (!deviceCounts[device]) {
-                    deviceCounts[device] = 0;
-                }
-                deviceCounts[device]++;
-            }
-    
-            // 2. Füge die Daten in <ul id="device-list"> ein
-            const device_h4 = document.getElementById("device-list-header");
-            device_h4.innerHTML = "";
-            if (Object.keys(deviceCounts).length > 0) {
-                device_h4.textContent=devicesLabel;
-            }
-            const ul = document.getElementById("device-list");
-            ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
-            for (const device in deviceCounts) {
-                const li = document.createElement("li");
-                li.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
-                ul.appendChild(li);
-            }
-        }
-        
-        /*
-    
-        function getMean(arr) {
-            var acc = 0;
-            var count = 0;
-            for(let i = 0; i < arr.length; i++) {
-                if(isNaN(arr[i])) continue;
-                acc += Number(arr[i]);
-                count++;
-            }
-            if(count == 0) return NaN;
-            return acc / count;
-        }
-        */
-
-        // Gibt reinen RGB-Wert [R, G, B] zurück
-        function getColorForPM(value, colorSteps) {
-            if (isNaN(value)) return [128, 128, 128]; // z.B. Grau für ungültige Werte
-            for (let i = 0; i < colorSteps.length - 1; i++) {
-                if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) { 
-                    return colorSteps[i][1]; 
-                }
-            }
-            return colorSteps[colorSteps.length - 1][1];
-        }
-
-        var markerLayer;
-    
-        async function addMarkerLayer(value, device = null) {
-            // Log that this function was called
-            console.log("addMarkerLayer called with value: " + value + " and device: " + device);
-    
-            if (markerLayer != null) {
-                map.removeLayer(markerLayer);
-            }
-    
-            // Marker layer
-            markerLayer = L.layerGroup({
-                /*
-                iconCreateFunction: function (cluster) {
-                    const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
-                    const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
-                    const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-                    const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
-                    const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                    return L.divIcon({iconSize: [6, 6], className: '', html: '<div class="clickable" style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"></div>'});
-                },
-                showCoverageOnHover: false,
-                */
-            });
-    
-            const markerList = [];
-
-            const lo = Math.min(...points.map(j => j[value]));
-            const hi = Math.max(...points.map(j => j[value]));
-
-            const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
-
-            createLegend(value, colorStepsArray[value], scale, lo, hi);
-            /*
-            const colored = points.map(j => ({
-                value: j[value],
-                color: scale(j[value]).hex()
-            }));
-            */
-
-            // Add markers for each point
-            for (let i in points) {
-                const point = points[i];
-                if(device != null && point.device != device) continue;
-                const pm = point[value];
-                /*
-
-                /*
-                const colorArrayHSV = getColorForPM25(pm);
-                const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
-                var colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
-                const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
-                */
-
-                // Temp: just set colorString to be the hex color defined in the colorRanges
-                let colorString = '';
-                // get color string for temperature
-                if(value == 'temperature'){
-                    colorString = scale(point[value]);
-                }else{
-                    const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
-                    colorString = `rgb(${r}, ${g}, ${b})`;
-                }
-
-                var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
-                marker.pm = pm; // Add a custom attribute to marker
-                var unit;
-                if(value == "pm1") unit = " µg/m³";
-                else if(value == "pm25") unit = " µg/m³";
-                else if(value == "pm10") unit = " µg/m³";
-                else if(value == "temperature") unit = "°C";
-                marker.bindPopup(pm + unit); // Bind a popup to the marker
-                markerList.push(marker);
-            }
-    
-            for (let i = 0; i < markerList.length; i++) {
-                markerLayer.addLayer(markerList[i]);
-            }
-            
-            map.addLayer(markerLayer);
-        };
-    
-        function requestStationData(uid) {
-            loadDataForStation(uid);
-            return true;
-        }
-    
-        const colorRanges = {
-        'pm1': [
-            { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
-            { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
-            { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
-            { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
-        ],
-        'pm25': [
-            { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
-            { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
-            { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
-            { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
-        ],
-        'pm10': [
-            { label: '{% trans "Gut (<15 µg/m³)" %}', color: '#36cc29', range: [0, 15] },
-            { label: '{% trans "Befriedigend (15-45 µg/m³)" %}', color: '#f2f21f', range: [15, 45] },
-            { label: '{% trans "Schlecht (45-60 µg/m³)" %}', color: '#cc1b1b', range: [45, 60] },
-            { label: '{% trans "Sehr schlecht (>60 µg/m³)" %}', color: '#660d0d', range: [60, 100000] },
-        ],
-        'temperature': [
-            { label: '{% trans "Kalt (<0°C)" %}', color: '#0000ff', range: [-100, 0] },
-            { label: '{% trans "Kühl (0-10°C)" %}', color: '#00ffff', range: [0, 10] },
-            { label: '{% trans "Mild (10-20°C)" %}', color: '#00ff00', range: [10, 20] },
-            { label: '{% trans "Warm (20-30°C)" %}', color: '#ffff00', range: [20, 30] },
-            { label: '{% trans "Heiß (>30°C)" %}', color: '#ff0000', range: [30, 400] },
-        ]};
-    
-        const legend = L.control({ position: 'bottomright' });
-
-        legend.onAdd = function (map) {
-            var div = L.DomUtil.create('div', 'info legend leaflet-center');
-            div.id = 'legend';
-            colorRanges['pm25'].forEach(function (range) {
-                div.innerHTML +=
-                    '<div class="legend-item">' +
-                    '<i style="background:' + range.color + '"></i> ' +
-                    range.label +
-                    '</div>';
-            });
-            return div;
-        };
-        
-        legend.addTo(map);
-
-        // Add a class to the outermost div
-        legend._container.className += ' leaflet-center';
-
-    // Button "Zoom to all"
-    var fitBoundsControl = L.control({ position: 'bottomleft' });
-
-    fitBoundsControl.onAdd = function(map) {
-        var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
-        controlDiv.innerHTML = `
-            <button
-                class="btn btn-secondary btn-sm"
-                id="fitBoundsButton"
-                style="display: flex; align-items: center; justify-content: center; gap: 4px;"
-                title={% trans "Zoom map to show all points." %}
-            >
-                <i class="bi bi-arrows-fullscreen"></i>
-                {% trans "Zoom to all" %}
+    <div class="card-body">
+        <form method="post" action="{% url 'invite-user-to-workshop' workshop.pk %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="invite-email" class="form-label">{% trans "User Email" %}</label>
+                <input
+                    type="email"
+                    id="invite-email"
+                    name="email"
+                    class="form-control"
+                    placeholder="{% trans 'Enter user email' %}"
+                    required
+                />
+            </div>
+            <button type="submit" class="btn btn-success">
+                <i class="bi bi-envelope-fill"></i> {% trans "Send Invitation" %}
             </button>
-        `;
-        return controlDiv;
+        </form>
+    </div>
+</div>
+
+
+<script>
+    const devicesLabel = "{% trans 'Devices' %}";
+    const measurementsLabel = "{% trans 'measurements' %}";
+
+    // 2) Farblogik: Direkt RGB-Werte statt HSV
+    // Beispielwerte als [R, G, B], alle im Bereich 0..255
+    const colorStepsPM1 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+    const colorStepsPM25 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+    const colorStepsPM10 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+
+    const colorStepsArray = {
+        'pm1': colorStepsPM1,
+        'pm25': colorStepsPM25,
+        'pm10': colorStepsPM10,
     };
 
-    fitBoundsControl.addTo(map);
-
-    document.addEventListener("click", function(e) {
-        if (e.target.closest("#fitBoundsButton")) {
-            fitMapToAllPoints();
-        }
-    });
-
-    function fitMapToAllPoints() {
-        if (!points || points.length === 0) {
+    function createColorGradientImageWithQuarterLabels(scale, lo, hi, width = 200, height = 30, labelPadding = 10, labelWidth = 50) {
+        // Check if lo and hi are valid
+        if (lo === undefined || hi === undefined) {
+            console.error('Invalid lo or hi values:', lo, hi);
             return;
         }
-        
-        const latLngs = points.map(item => [item.lat, item.lon]);
-        const bounds = L.latLngBounds(latLngs);
-        map.fitBounds(bounds);
-    }
-    </script>
 
+        // Adjust the canvas width to ensure there's enough space for the labels
+        const canvasWidth = width + labelWidth * 2; // Add extra space on both sides for labels
+
+        // Create an off-screen canvas element
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = canvasWidth;  // Use the adjusted width
+        canvas.height = height + labelPadding + 20;  // Extra space for labels below the gradient
+
+        // Create a gradient using chroma scale
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+        // Generate the colors for the gradient
+        const colors = scale.colors(width);
+        if (!colors || colors.length === 0) {
+            console.error('Failed to generate colors from the scale:', colors);
+            return;
+        }
+
+        // Add color stops based on the scale
+        colors.forEach((color, i) => {
+            gradient.addColorStop(i / (width - 1), color);
+        });
+
+        // Fill the canvas with the gradient
+        ctx.fillStyle = gradient;
+        ctx.fillRect(labelWidth, 0, width, height); // Shift gradient to the right by labelWidth
+
+        // Calculate the quarter positions and ensure they are defined
+        const quarters = [lo, (lo + hi) / 4, (lo + hi) / 2, (3 * (lo + hi)) / 4, hi];
+        const labelPositions = [0, width / 4, width / 2, (3 * width) / 4, width];
+        
+        // Draw the background for the labels (white rectangle below the gradient)
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, height + labelPadding, canvasWidth, 20);  // White background for labels below the gradient
+
+        // Draw labels for the quarters outside the image (below the gradient)
+        ctx.fillStyle = 'black'; // Label color
+        ctx.font = '12px Arial'; // Font size
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Draw the labels outside the gradient area (rotate them by 90 degrees)
+        quarters.forEach((value, index) => {
+            if (value === undefined) {
+                console.error(`Quarter value at index ${index} is undefined`);
+            } else {
+                // Position labels below the gradient
+                const labelXPosition = labelPositions[index] + labelWidth; // Shift the label position by labelWidth
+                const labelYPosition = height + labelPadding + 10; // Shift labels below the gradient
+
+                // Draw the label (not rotated, horizontal text)
+                ctx.fillText(value.toFixed(2), labelXPosition, labelYPosition);
+            }
+        });
+
+        return canvas;
+    }
+
+    function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
+        var legendDiv = document.getElementById('legend');
+        legendDiv.innerHTML = '';
+        if(pmTypeIndex == 'temperature'){
+            //legendDiv.innerHTML = createColorGradientImage(scale); 
+            legendDiv.innerHTML = '<p>&#916;T in K</p>';
+            legendDiv.appendChild(createColorGradientImageWithQuarterLabels(scale, 0, hi - lo));
+            document.getElementById("legend-method").innerHTML = "";
+            return;
+        }
+
+        document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/luftqualitaet/grenzwerte/">Method: European Air Quality Index</a>';
+
+        for (var i = 0; i < colorSteps.length; i++) {
+            var from = colorSteps[i][0];
+            var to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+            var rgb = colorSteps[i][1];
+            var description = colorSteps[i][2]; 
+
+            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+
+            var item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.flexDirection = 'row';
+            item.style.alignItems = 'center';
+            item.style.marginBottom = '4px';
+
+            var colorBox = document.createElement('span');
+            colorBox.style.background = colorString;
+            colorBox.style.width = '18px';
+            colorBox.style.height = '18px';
+            colorBox.style.display = 'inline-block';
+            colorBox.style.marginRight = '8px';
+            colorBox.style.border = '1px solid #ccc';
+            colorBox.style.borderRadius = '50%';
+
+            var labelText = document.createElement('span');
+            labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+            labelText.style.fontSize = '0.8rem';
+
+            item.appendChild(colorBox);
+            item.appendChild(labelText);
+            legendDiv.appendChild(item);
+        }
+    }
+    
+    /*
+    function updateValues() {
+        var value = document.getElementById("select-value").value;
+        var device = document.getElementById("select-device").value;
+        if(device == "all") device = null;
+        addMarkerLayer(value, device);
+
+        // Update legend
+        var legend = document.getElementById("legend");
+        legend.innerHTML = "";
+        colorRanges[value].forEach(function (range) {
+            legend.innerHTML +=
+                '<div class="legend-item">' +
+                '<i style="background:' + range.color + '"></i> ' +
+                range.label +
+                '</div>';
+        });
+    }
+    */
+
+    const map = L.map('map', {fadeAnimation: false, rotate: true }).setView([48.2112, 16.3736], 13);
+
+    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    var points;
+
+    async function fetchMarkerData() {
+        const fetch_url = "/api/v1/workshops/{{ workshop.name }}/data/";
+        console.log(fetch_url);
+        const response = await fetch(fetch_url);
+
+        points = [];
+
+        // Parse response JSON
+        const text = await response.text();
+        const json = JSON.parse(text);
+        for (let item in json) {
+            points.push(json[item]);
+        }
+
+        var defaultPmTypeIndex = 'pm25'; // PM2.5
+
+        addMarkerLayer("pm25");
+        showDeviceList();
+    }
+
+    fetchMarkerData();
+
+    function showDeviceList() {
+        // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
+        console.log('hallo');
+        const deviceCounts = {};
+        for (let i = 0; i < points.length; i++) {
+            const device = points[i].device;
+            if (!deviceCounts[device]) {
+                deviceCounts[device] = 0;
+            }
+            deviceCounts[device]++;
+        }
+
+        // 2. Füge die Daten in <ul id="device-list"> ein
+        const device_h4 = document.getElementById("device-list-header");
+        device_h4.innerHTML = "";
+        if (Object.keys(deviceCounts).length > 0) {
+            device_h4.textContent=devicesLabel;
+        }
+        const ul = document.getElementById("device-list");
+        ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
+        for (const device in deviceCounts) {
+            const li = document.createElement("li");
+            li.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
+            ul.appendChild(li);
+        }
+    }
+    
+    /*
+
+    function getMean(arr) {
+        var acc = 0;
+        var count = 0;
+        for(let i = 0; i < arr.length; i++) {
+            if(isNaN(arr[i])) continue;
+            acc += Number(arr[i]);
+            count++;
+        }
+        if(count == 0) return NaN;
+        return acc / count;
+    }
+    */
+
+    // Gibt reinen RGB-Wert [R, G, B] zurück
+    function getColorForPM(value, colorSteps) {
+        if (isNaN(value)) return [128, 128, 128]; // z.B. Grau für ungültige Werte
+        for (let i = 0; i < colorSteps.length - 1; i++) {
+            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) { 
+                return colorSteps[i][1]; 
+            }
+        }
+        return colorSteps[colorSteps.length - 1][1];
+    }
+
+    var markerLayer;
+
+    async function addMarkerLayer(value, device = null) {
+        // Log that this function was called
+        console.log("addMarkerLayer called with value: " + value + " and device: " + device);
+
+        if (markerLayer != null) {
+            map.removeLayer(markerLayer);
+        }
+
+        // Marker layer
+        markerLayer = L.layerGroup({
+            /*
+            iconCreateFunction: function (cluster) {
+                const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
+                const colorArrayHSV = getColorForPM25(meanPM); // TODO use different boundaries for different PM
+                const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
+                const colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
+                const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
+                return L.divIcon({iconSize: [6, 6], className: '', html: '<div class="clickable" style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt; border-style: solid; border-color: white;"></div>'});
+            },
+            showCoverageOnHover: false,
+            */
+        });
+
+        const markerList = [];
+
+        const lo = Math.min(...points.map(j => j[value]));
+        const hi = Math.max(...points.map(j => j[value]));
+
+        const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
+
+        createLegend(value, colorStepsArray[value], scale, lo, hi);
+        /*
+        const colored = points.map(j => ({
+            value: j[value],
+            color: scale(j[value]).hex()
+        }));
+        */
+
+        // Add markers for each point
+        for (let i in points) {
+            const point = points[i];
+            if(device != null && point.device != device) continue;
+            const pm = point[value];
+            /*
+
+            /*
+            const colorArrayHSV = getColorForPM25(pm);
+            const colorArrayHSL = hsv2hsl(colorArrayHSV[0], colorArrayHSV[1], colorArrayHSV[2]);
+            var colorString = `hsl(${colorArrayHSL[0]}, ${colorArrayHSL[1] * 100}%, ${colorArrayHSL[2] * 100}%)`;
+            const textColor = colorArrayHSL[2] > 0.45 ? "black" : "white";
+            */
+
+            // Temp: just set colorString to be the hex color defined in the colorRanges
+            let colorString = '';
+            // get color string for temperature
+            if(value == 'temperature'){
+                colorString = scale(point[value]);
+            }else{
+                const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
+                colorString = `rgb(${r}, ${g}, ${b})`;
+            }
+
+            var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
+            marker.pm = pm; // Add a custom attribute to marker
+            var unit;
+            if(value == "pm1") unit = " µg/m³";
+            else if(value == "pm25") unit = " µg/m³";
+            else if(value == "pm10") unit = " µg/m³";
+            else if(value == "temperature") unit = "°C";
+            marker.bindPopup(pm + unit); // Bind a popup to the marker
+            markerList.push(marker);
+        }
+
+        for (let i = 0; i < markerList.length; i++) {
+            markerLayer.addLayer(markerList[i]);
+        }
+        
+        map.addLayer(markerLayer);
+    };
+
+    function requestStationData(uid) {
+        loadDataForStation(uid);
+        return true;
+    }
+
+    const colorRanges = {
+    'pm1': [
+        { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
+        { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
+        { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
+        { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
+    ],
+    'pm25': [
+        { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
+        { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
+        { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
+        { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
+    ],
+    'pm10': [
+        { label: '{% trans "Gut (<15 µg/m³)" %}', color: '#36cc29', range: [0, 15] },
+        { label: '{% trans "Befriedigend (15-45 µg/m³)" %}', color: '#f2f21f', range: [15, 45] },
+        { label: '{% trans "Schlecht (45-60 µg/m³)" %}', color: '#cc1b1b', range: [45, 60] },
+        { label: '{% trans "Sehr schlecht (>60 µg/m³)" %}', color: '#660d0d', range: [60, 100000] },
+    ],
+    'temperature': [
+        { label: '{% trans "Kalt (<0°C)" %}', color: '#0000ff', range: [-100, 0] },
+        { label: '{% trans "Kühl (0-10°C)" %}', color: '#00ffff', range: [0, 10] },
+        { label: '{% trans "Mild (10-20°C)" %}', color: '#00ff00', range: [10, 20] },
+        { label: '{% trans "Warm (20-30°C)" %}', color: '#ffff00', range: [20, 30] },
+        { label: '{% trans "Heiß (>30°C)" %}', color: '#ff0000', range: [30, 400] },
+    ]};
+
+    const legend = L.control({ position: 'bottomright' });
+
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'info legend leaflet-center');
+        div.id = 'legend';
+        colorRanges['pm25'].forEach(function (range) {
+            div.innerHTML +=
+                '<div class="legend-item">' +
+                '<i style="background:' + range.color + '"></i> ' +
+                range.label +
+                '</div>';
+        });
+        return div;
+    };
+    
+    legend.addTo(map);
+
+    // Add a class to the outermost div
+    legend._container.className += ' leaflet-center';
+
+// Button "Zoom to all"
+var fitBoundsControl = L.control({ position: 'bottomleft' });
+
+fitBoundsControl.onAdd = function(map) {
+    var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+    controlDiv.innerHTML = `
+        <button
+            class="btn btn-secondary btn-sm"
+            id="fitBoundsButton"
+            style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+            title={% trans "Zoom map to show all points." %}
+        >
+            <i class="bi bi-arrows-fullscreen"></i>
+            {% trans "Zoom to all" %}
+        </button>
+    `;
+    return controlDiv;
+};
+
+fitBoundsControl.addTo(map);
+
+document.addEventListener("click", function(e) {
+    if (e.target.closest("#fitBoundsButton")) {
+        fitMapToAllPoints();
+    }
+});
+
+function fitMapToAllPoints() {
+    if (!points || points.length === 0) {
+        return;
+    }
+    
+    const latLngs = points.map(item => [item.lat, item.lon]);
+    const bounds = L.latLngBounds(latLngs);
+    map.fitBounds(bounds);
+}
+</script>
 {% endblock content %}

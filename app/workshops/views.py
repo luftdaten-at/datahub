@@ -93,13 +93,13 @@ class WorkshopDetailView(DetailView):
 
 @login_required
 def invite_user_to_workshop(request, workshop_id):
-    workshop = get_object_or_404(Workshop, id=workshop_id)
+    workshop = get_object_or_404(Workshop, name=workshop_id)
     email = request.POST.get('email')
     
     # Check permissions
     if not request.user.is_superuser and request.user != Workshop.owner:
         messages.error(request, "You do not have permission to invite users to this organization.")
-        return
+        return redirect('workshop-detail', workshop.pk)
 
     user = CustomUser.objects.filter(email=email).first()
 
@@ -136,7 +136,7 @@ def invite_user_to_workshop(request, workshop_id):
 
         messages.success(request, f"An invitation has been sent to {email}.")
 
-    return
+    return redirect('workshop-detail', workshop.pk)
 
 
 class WorkshopMyView(LoginRequiredMixin, ListView):
