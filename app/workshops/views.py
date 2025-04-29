@@ -180,6 +180,7 @@ class WorkshopCreateView(CreateView):
 
     def form_valid(self, form):
         workshop = form.save(commit=False)
+        workshop.save()
         workshop.owner = self.request.user
         workshop.users.add(self.request.user)
         workshop.save()
