@@ -44,6 +44,7 @@ referencing==0.36.2
 requests==2.32.3
 requests-oauthlib==2.0.0
 rpds-py==0.22.3
+shapely==2.1.0
 six==1.17.0
 sqlparse==0.5.3
 typing_extensions==4.12.2

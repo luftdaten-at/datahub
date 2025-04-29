@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.gis',
     # Third-party
     'crispy_forms',
     'crispy_bootstrap5',
@@ -134,7 +135,8 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+         #'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB', default='postgres'),
         'USER': env('POSTGRES_USER', default='postgres'),
         'PASSWORD': env('POSTGRES_PASSWORD', default='password'),

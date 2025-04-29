@@ -246,3 +246,4 @@ class WorkshopImageUploadView(FormView):
         files = form.cleaned_data["file_field"]
         print(f'dbg {files}')
         return super().form_valid(form)
+
