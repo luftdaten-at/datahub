@@ -82,7 +82,9 @@ class Participant(models.Model):
 class WorkshopImage(models.Model):
     workshop = models.ForeignKey('Workshop', on_delete=models.CASCADE, related_name='images')
     image = models.ImageField(upload_to='workshop_images/')
-    #location = models.ForeignKey('Location', on_delete=models.CASCADE, related_name='workshop_images')
+    location = models.ForeignKey('api.Location', on_delete=models.CASCADE, related_name='workshop_images')
+    time_created = models.DateTimeField(null=True)
+
 
 auditlog.register(Workshop) 
 auditlog.register(Participant)
