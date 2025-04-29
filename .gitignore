@@ -156,3 +156,4 @@ cython_debug/
 # docker compose production environment
 #docker-compose.prod.yml
 db_backup
+app/workshop_images

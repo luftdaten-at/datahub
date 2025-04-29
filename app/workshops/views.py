@@ -23,6 +23,7 @@ from .forms import WorkshopForm, FileFieldForm
 from accounts.models import CustomUser
 from api.models import AirQualityRecord
 from main import settings
+from main.util import workshop_add_image
 
 
 class WorkshopListView(ListView):
@@ -244,6 +245,9 @@ class WorkshopImageUploadView(FormView):
 
     def form_valid(self, form):
         files = form.cleaned_data["file_field"]
-        print(f'dbg {files}')
+
+        for img in files:
+            workshop_add_image(img, workshop_id = self.kwargs['workshop_id'])
+
         return super().form_valid(form)
 
