@@ -2,9 +2,19 @@ import datetime
 import numpy as np
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
+from django.contrib.gis.geos import Point
+from PIL import Image
+from PIL.ExifTags import TAGS
+from datetime import datetime
+import pytz
+import time
+import pyproj
 
 from devices.models import Device, DeviceStatus
+from workshops.models import Workshop, WorkshopImage
 from main.enums import SensorModel, Dimension
+from api.models import Location
+
 
 def get_or_create_station(station_info: dict):
     '''
@@ -124,3 +134,66 @@ def room_calculate_current_values(room):
             current_tvoc,
             tvoc_color
         ]
+
+def workshop_add_image(file, workshop_id):
+    workshop = Workshop.objects.filter(name = workshop_id).first()
+    loc = None
+    time = None
+
+    img = Image.open(file.file)
+
+    exif_data = img._getexif()
+    # TODO get data from exif_data
+    if False and exif_data:
+        # 0x9003 	DateTimeOriginal 	string 	ExifIFD 	(date/time when original image was taken)
+        time = exif_data.get(0x9003)
+        # 0x9011 	OffsetTimeOriginal 	string 	ExifIFD 	(time zone for DateTimeOriginal)
+        offset = exif_data.get(0x9011)
+        # 0x882a 	34858 	Image 	Exif.Image.TimeZoneOffset
+        time_zone = exif_data.get(0x882a)
+        print(time)
+        print(offset)
+        print(time_zone)
+    else:
+        # read from file name
+        # expect
+        # 241104145947.jpg
+        try:
+            # set to Vienna time zone
+            time = datetime.strptime(
+                file._name.split('.')[0], '%y%m%d%H%M%S'
+            ).replace(tzinfo=pytz.timezone('Europe/Vienna'))
+        except ValueError:
+            # faild to extract time
+            return
+
+    # get location from time
+    points = [(r.time, r.lat, r.lon) for r in workshop.air_quality_records.all()]
+    points.sort()
+
+    for i in range(0, len(points) - 1):
+        if points[i][0] <= time < points[i + 1][0]:
+            # calc point
+            # a1, a2, d = geod.inv(lon, lat, lon2, lat2)
+            # geod.fwd(lon, lat, a1, d / 2)
+            time1, lat1, lon1 = points[i]
+            time2, lat2, lon2 = points[i + 1]
+            f = (time - time1).total_seconds() / (time2 - time1).total_seconds()
+            geod = pyproj.Geod(ellps="WGS84")
+            a1, a2, d = geod.inv(lon1, lat1, lon2, lat2)
+            lon_target, lat_target, _ = geod.fwd(lon1, lat1, a1, d * f)
+
+            location, created = Location.objects.get_or_create(
+                coordinates = Point(lat_target, lon_target),
+                height = None
+            )
+            location.save()
+
+            WorkshopImage.objects.create(
+                workshop = workshop,
+                image = file,
+                location = location,
+                time_created = time
+            )
+
+            break

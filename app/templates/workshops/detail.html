@@ -90,6 +90,13 @@
     </div>
 </div>
 
+<!-- template.html -->
+<form method="get" action="{% url 'workshop-image-upload' workshop.pk %}">
+    <button type="submit" class="btn btn-primary">
+        Upload Images
+    </button>
+</form>
+
 
 <script>
     const devicesLabel = "{% trans 'Devices' %}";
@@ -290,6 +297,30 @@
     }
 
     fetchMarkerData();
+
+    // Zusatzlicher Layer: Bilder-Marker aus einem Array
+    // Format: [element, time, lat, lon, image_url]
+    // Beispiel:
+    // ['BeispielSensor', '2025-04-29T10:00:00Z', 48.2112, 16.3736, 'https://example.com/image.jpg']
+    const imageData = {{ images|safe }};
+
+    const imageLayer = L.layerGroup();
+    imageData.forEach(item => {
+        const [element, time, lat, lon, imageUrl] = item;
+        console.log(imageUrl);
+        const marker = L.marker([lat, lon]);
+        const popupContent = `
+            <div>
+              <strong>${element}</strong><br>
+              <em>${time}</em><br>
+              <img src="${imageUrl}" alt="${element}" style="max-width:200px;">
+            </div>
+        `;
+        marker.bindPopup(popupContent);
+        imageLayer.addLayer(marker);
+    });
+    // Füge den Bild-Layer der Karte hinzu
+    imageLayer.addTo(map);
 
     function showDeviceList() {
         // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
