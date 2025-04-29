@@ -299,15 +299,15 @@
     fetchMarkerData();
 
     // Zusatzlicher Layer: Bilder-Marker aus einem Array
-    const imageData = [
-        // Format: [element, time, lat, lon, image_url]
-        // Beispiel:
-        // ['BeispielSensor', '2025-04-29T10:00:00Z', 48.2112, 16.3736, 'https://example.com/image.jpg']
-    ];
+    // Format: [element, time, lat, lon, image_url]
+    // Beispiel:
+    // ['BeispielSensor', '2025-04-29T10:00:00Z', 48.2112, 16.3736, 'https://example.com/image.jpg']
+    const imageData = {{ images|safe }};
 
     const imageLayer = L.layerGroup();
     imageData.forEach(item => {
         const [element, time, lat, lon, imageUrl] = item;
+        console.log(imageUrl);
         const marker = L.marker([lat, lon]);
         const popupContent = `
             <div>

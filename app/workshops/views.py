@@ -1,4 +1,5 @@
 import csv
+import os
 
 from django.utils import timezone
 from django.views import View
@@ -94,6 +95,21 @@ class WorkshopDetailView(DetailView):
 
         return obj
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)    
+        # description, time, lat, lon, url
+        images = []
+        for workshop_image in self.object.workshop_images.all():
+            images.append([
+                'something', 
+                workshop_image.time_created.isoformat(),
+                workshop_image.location.coordinates.x,
+                workshop_image.location.coordinates.y,
+                os.path.join(settings.MEDIA_URL, workshop_image.image.name)
+            ])
+            
+        context['images'] = images
+        return context
 
 @login_required
 def invite_user_to_workshop(request, workshop_id):
