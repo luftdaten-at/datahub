@@ -31,7 +31,7 @@ class AirQualityRecord(models.Model):
     iaq_acc = models.SmallIntegerField(null=True, blank=True)
     iaq_static = models.FloatField(null=True, blank=True)
     pressure = models.FloatField(null=True, blank=True)
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, null=True)
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, null=True, related_name='air_quality_records')
     workshop = models.ForeignKey(Workshop, on_delete=models.CASCADE, null=True, blank=True, related_name='air_quality_records')
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True, blank=True)
     lat = models.FloatField(null=True, blank=True)
