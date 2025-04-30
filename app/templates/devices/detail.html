@@ -106,7 +106,17 @@
                         {% endfor %} 
                     </ul>
                 </li>
-                
+                <li class="list-group-item">
+                    <strong>{% trans "Workshop" %}:</strong> {{ current_workshop|default:_("N/A") }}
+                    <!-- change log -->
+                    <ul class="list-group">
+                        {% for entry in workshop_change_log %}
+                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "Workshop changed from" %} {{ entry.prev }} {% trans "to" %}  {{ entry.next }}</li>
+                        {% empty %}
+                            <li class="list-group-item">{% trans "No logs available." %}</li>
+                        {% endfor %} 
+                    </ul>
+                </li> 
             </ul>
             
             <!-- Notes Section -->

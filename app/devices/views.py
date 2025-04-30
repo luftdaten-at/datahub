@@ -67,51 +67,68 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                 round(status.battery_voltage, 2) 
                 for status in device_status_qs 
                 if status.battery_soc is not None and status.battery_voltage is not None
-            ]
-
-            # query changes
-            organization_changes = device.history.filter(changes__icontains = '"current_organization"').all().order_by('-timestamp')
-            room_changes = device.history.filter(changes__icontains = '"current_room"').all().order_by('-timestamp')
-            user_changes = device.history.filter(changes__icontains = '"current_user"').all().order_by('-timestamp')
-            
-            organization_change_log = []
-            room_change_log = []
-            user_change_log = []
-
-            # prepare changes
-            for h in organization_changes:
-                prev = h.changes['current_organization'][0]
-                next = h.changes['current_organization'][1]
-                organization_change_log.append({
-                    'timestamp': h.timestamp,
-                    'prev': None if prev == 'None' else Organization.objects.filter(id=prev).first(),
-                    'next': None if next == 'None' else Organization.objects.filter(id=next).first(),
-                })
-            for h in room_changes:
-                prev = h.changes['current_room'][0]
-                next = h.changes['current_room'][1]
-                room_change_log.append({
-                    'timestamp': h.timestamp,
-                    'prev': None if prev == 'None' else Room.objects.filter(id=prev).first(),
-                    'next': None if next == 'None' else Room.objects.filter(id=next).first(),
-                })
-            for h in user_changes:
-                prev = h.changes['current_user'][0]
-                next = h.changes['current_user'][1]
-                user_change_log.append({
-                    'timestamp': h.timestamp,
-                    'prev': None if prev == 'None' else CustomUser.objects.filter(id=prev).first(),
-                    'next': None if next == 'None' else CustomUser.objects.filter(id=next).first(),
-                })
-
-            context['organization_change_log'] = organization_change_log 
-            context['room_change_log'] = room_change_log
-            context['user_change_log'] = user_change_log
-            
+            ]            
             # Serialize data to JSON format
             context['battery_times'] = json.dumps(battery_times, cls=DjangoJSONEncoder)
             context['battery_charges'] = json.dumps(battery_charges, cls=DjangoJSONEncoder)
             context['battery_voltages'] = json.dumps(battery_voltages, cls=DjangoJSONEncoder)
+        
+        # query changes
+        organization_changes = device.history.filter(changes__icontains = '"current_organization"').all().order_by('-timestamp')
+        room_changes = device.history.filter(changes__icontains = '"current_room"').all().order_by('-timestamp')
+        user_changes = device.history.filter(changes__icontains = '"current_user"').all().order_by('-timestamp')
+        
+        organization_change_log = []
+        room_change_log = []
+        user_change_log = []
+        workshop_change_log = []
+
+        # prepare changes
+        for h in organization_changes:
+            prev = h.changes['current_organization'][0]
+            next = h.changes['current_organization'][1]
+            organization_change_log.append({
+                'timestamp': h.timestamp,
+                'prev': None if prev == 'None' else Organization.objects.filter(id=prev).first(),
+                'next': None if next == 'None' else Organization.objects.filter(id=next).first(),
+            })
+        for h in room_changes:
+            prev = h.changes['current_room'][0]
+            next = h.changes['current_room'][1]
+            room_change_log.append({
+                'timestamp': h.timestamp,
+                'prev': None if prev == 'None' else Room.objects.filter(id=prev).first(),
+                'next': None if next == 'None' else Room.objects.filter(id=next).first(),
+            })
+        for h in user_changes:
+            prev = h.changes['current_user'][0]
+            next = h.changes['current_user'][1]
+            user_change_log.append({
+                'timestamp': h.timestamp,
+                'prev': None if prev == 'None' else CustomUser.objects.filter(id=prev).first(),
+                'next': None if next == 'None' else CustomUser.objects.filter(id=next).first(),
+            })
+        
+        # time, workshop
+        workshop_changes = []
+        for record in reversed(sorted((record.time, record.workshop.name) for record in device.air_quality_records.all())):
+            if not workshop_changes or workshop_changes[-1][1] != record[1]:
+                workshop_changes.append(record)
+
+        for i in range(0, len(workshop_changes)):
+            workshop_change_log.append({
+                'timestamp': workshop_changes[i][0],
+                'prev': None if i == len(workshop_changes) - 1 else workshop_changes[i + 1][1],
+                'next': workshop_changes[i][1]
+            })
+
+        current_workshop = workshop_change_log[0]['next'] if workshop_change_log else None
+
+        context['organization_change_log'] = organization_change_log 
+        context['room_change_log'] = room_change_log
+        context['user_change_log'] = user_change_log
+        context['workshop_change_log'] = workshop_change_log
+        context['current_workshop'] = current_workshop
 
         # Fetch all DeviceLogs entries related to this Device, ordered by timestamp descendingly
         device_logs_qs = DeviceLogs.objects.filter(device=device).order_by('-timestamp')
@@ -180,7 +197,7 @@ class DeviceEditView(UpdateView):
     model = Device
     form_class = DeviceForm
     template_name = 'devices/form.html'
-    success_url = reverse_lazy('device-list')  # URL to redirect to after a successful update
+    success_url = reverse_lazy('devices-list')  # URL to redirect to after a successful update
 
     def get_queryset(self):
         """
@@ -221,7 +238,7 @@ class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
 class DeviceDeleteView(LoginRequiredMixin, DeleteView):
     model = Device
     template_name = 'devices/confirm_delete.html'  # Confirmation page template
-    success_url = reverse_lazy('device-list')  # Redirect here after deletion
+    success_url = reverse_lazy('devices-list')  # Redirect here after deletion
 
     def get_object(self, queryset = None):
         device = super().get_object(queryset)
