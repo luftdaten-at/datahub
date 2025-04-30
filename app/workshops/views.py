@@ -107,9 +107,43 @@ class WorkshopDetailView(DetailView):
                 workshop_image.location.coordinates.y,
                 os.path.join(settings.MEDIA_URL, workshop_image.image.name)
             ])
-            
+
+        context['is_owner'] = self.request.user.is_superuser or self.request.user == self.object.owner 
         context['images'] = images
         return context
+
+class WorkshopManagementView(LoginRequiredMixin, DetailView):
+    model = Workshop
+    template_name = 'workshops/management.html'
+    context_object_name = 'workshop'
+
+    def get_object(self, queryset = None):
+        workshop = super().get_object(queryset)
+        if self.request.user.is_superuser:
+            return workshop 
+        if workshop.owner != self.request.user:
+            raise PermissionDenied("Only members can view this Organization")
+        return workshop
+
+
+@login_required
+def remove_user_from_workshop(request, workshop_id, user_id):
+    workshop = get_object_or_404(Workshop, name=workshop_id)
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    # Ensure the user performing the action has permission
+    if not request.user.is_superuser and request.user != workshop.owner:
+        messages.error(request, "You do not have permission to remove users from this workshop.")
+        return redirect('workshop-detail', workshop_id)
+    
+    # the owner cannot be removed
+    if user == workshop.owner:
+        messages.error(request, "The Owner of the Workshop cannot be removed")
+        return redirect('workshop-management', workshop_id)
+
+    workshop.users.remove(user)
+    return redirect('workshop-management', workshop_id)
+
 
 @login_required
 def invite_user_to_workshop(request, workshop_id):
@@ -156,7 +190,7 @@ def invite_user_to_workshop(request, workshop_id):
 
         messages.success(request, f"An invitation has been sent to {email}.")
 
-    return redirect('workshop-detail', workshop.pk)
+    return redirect('workshop-management', workshop.pk)
 
 
 class WorkshopMyView(LoginRequiredMixin, ListView):
@@ -257,8 +291,12 @@ class WorkshopImageUploadView(FormView):
     template_name = "workshops/upload_images.html"  # Replace with your template.
 
     def get_success_url(self):
-        #return reverse_lazy('workshop-detail', self.kwargs['workshop_id'])
         return reverse_lazy('workshop-detail', kwargs={'pk': self.kwargs['workshop_id']})
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['workshop_id'] = self.kwargs['workshop_id']
+        return context
 
     def form_valid(self, form):
         files = form.cleaned_data["file_field"]

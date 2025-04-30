@@ -13,4 +13,13 @@
     {{ form|crispy }}
     <button class="btn btn-success" type="submit">{% trans "Save" %}</button>
 </form>
+
+<br>
+
+<!-- Back Button -->
+<div class="d-flex mb-4">
+    <a href="{% url 'workshop-detail' workshop_id %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> {% trans "Back to Workshop" %}
+    </a>
+</div>
 {% endblock %}
