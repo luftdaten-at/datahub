@@ -301,7 +301,7 @@
         console.log('hallo');
         const deviceCounts = {};
         for (let i = 0; i < points.length; i++) {
-            const device = points[i].device;
+            const device = points[i].device_name;
             if (!deviceCounts[device]) {
                 deviceCounts[device] = 0;
             }
@@ -392,7 +392,7 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
-            if(device != null && point.device != device) continue;
+            if(device != null && point.device_name != device) continue;
             const pm = point[value];
             /*
 
@@ -436,52 +436,52 @@
         return true;
     }
 
-    const colorRanges = {
-    'pm1': [
-        { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
-        { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
-        { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
-        { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
-    ],
-    'pm25': [
-        { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
-        { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
-        { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
-        { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
-    ],
-    'pm10': [
-        { label: '{% trans "Gut (<15 µg/m³)" %}', color: '#36cc29', range: [0, 15] },
-        { label: '{% trans "Befriedigend (15-45 µg/m³)" %}', color: '#f2f21f', range: [15, 45] },
-        { label: '{% trans "Schlecht (45-60 µg/m³)" %}', color: '#cc1b1b', range: [45, 60] },
-        { label: '{% trans "Sehr schlecht (>60 µg/m³)" %}', color: '#660d0d', range: [60, 100000] },
-    ],
-    'temperature': [
-        { label: '{% trans "Kalt (<0°C)" %}', color: '#0000ff', range: [-100, 0] },
-        { label: '{% trans "Kühl (0-10°C)" %}', color: '#00ffff', range: [0, 10] },
-        { label: '{% trans "Mild (10-20°C)" %}', color: '#00ff00', range: [10, 20] },
-        { label: '{% trans "Warm (20-30°C)" %}', color: '#ffff00', range: [20, 30] },
-        { label: '{% trans "Heiß (>30°C)" %}', color: '#ff0000', range: [30, 400] },
-    ]};
+    // const colorRanges = {
+    // 'pm1': [
+    //     { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
+    //     { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
+    //     { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
+    //     { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
+    // ],
+    // 'pm25': [
+    //     { label: '{% trans "Gut (<5 µg/m³)" %}', color: '#36cc29', range: [0, 5] },
+    //     { label: '{% trans "Befriedigend (5-15 µg/m³)" %}', color: '#f2f21f', range: [5, 15] },
+    //     { label: '{% trans "Schlecht (15-25 µg/m³)" %}', color: '#cc1b1b', range: [15, 25] },
+    //     { label: '{% trans "Sehr schlecht (>25 µg/m³)" %}', color: '#660d0d', range: [25, 100000] },
+    // ],
+    // 'pm10': [
+    //     { label: '{% trans "Gut (<15 µg/m³)" %}', color: '#36cc29', range: [0, 15] },
+    //     { label: '{% trans "Befriedigend (15-45 µg/m³)" %}', color: '#f2f21f', range: [15, 45] },
+    //     { label: '{% trans "Schlecht (45-60 µg/m³)" %}', color: '#cc1b1b', range: [45, 60] },
+    //     { label: '{% trans "Sehr schlecht (>60 µg/m³)" %}', color: '#660d0d', range: [60, 100000] },
+    // ],
+    // 'temperature': [
+    //     { label: '{% trans "Kalt (<0°C)" %}', color: '#0000ff', range: [-100, 0] },
+    //     { label: '{% trans "Kühl (0-10°C)" %}', color: '#00ffff', range: [0, 10] },
+    //     { label: '{% trans "Mild (10-20°C)" %}', color: '#00ff00', range: [10, 20] },
+    //     { label: '{% trans "Warm (20-30°C)" %}', color: '#ffff00', range: [20, 30] },
+    //     { label: '{% trans "Heiß (>30°C)" %}', color: '#ff0000', range: [30, 400] },
+    // ]};
 
-    const legend = L.control({ position: 'bottomright' });
+    // const legend = L.control({ position: 'bottomright' });
 
-    legend.onAdd = function (map) {
-        var div = L.DomUtil.create('div', 'info legend leaflet-center');
-        div.id = 'legend';
-        colorRanges['pm25'].forEach(function (range) {
-            div.innerHTML +=
-                '<div class="legend-item">' +
-                '<i style="background:' + range.color + '"></i> ' +
-                range.label +
-                '</div>';
-        });
-        return div;
-    };
+    // legend.onAdd = function (map) {
+    //     var div = L.DomUtil.create('div', 'info legend leaflet-center');
+    //     div.id = 'legend';
+    //     colorRanges['pm25'].forEach(function (range) {
+    //         div.innerHTML +=
+    //             '<div class="legend-item">' +
+    //             '<i style="background:' + range.color + '"></i> ' +
+    //             range.label +
+    //             '</div>';
+    //     });
+    //     return div;
+    // };
     
-    legend.addTo(map);
+    // legend.addTo(map);
 
     // Add a class to the outermost div
-    legend._container.className += ' leaflet-center';
+    // legend._container.className += ' leaflet-center';
 
 // Button "Zoom to all"
 var fitBoundsControl = L.control({ position: 'bottomleft' });
