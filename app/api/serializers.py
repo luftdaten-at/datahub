@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from collections.abc import Mapping
 from .models import AirQualityRecord
 from workshops.models import Workshop
 from devices.models import Device, DeviceStatus, Sensor
@@ -73,6 +74,7 @@ class AirQualityRecordSerializer(serializers.ModelSerializer):
 
 
 class AirQualityRecordWorkshopSerializer(serializers.ModelSerializer):
+    device_name = serializers.SerializerMethodField()
     class Meta:
         model = AirQualityRecord
         fields = [
@@ -84,10 +86,20 @@ class AirQualityRecordWorkshopSerializer(serializers.ModelSerializer):
             'humidity',
             'lat',
             'lon',
-            'device',
+            'device_name',
             'participant',
             'mode'
         ]
+
+    def get_device_name(self, obj):
+        # If obj is a model instance with a Device relation
+        device = getattr(obj, 'device', None)
+        if device:
+            return device.device_name or device.id
+        # Fallback if obj is a dict (e.g., from values())
+        if isinstance(obj, Mapping):
+            return obj.get('device')
+        return None
 
 
 class WorkshopSerializer(serializers.ModelSerializer):

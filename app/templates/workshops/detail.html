@@ -301,7 +301,7 @@
         console.log('hallo');
         const deviceCounts = {};
         for (let i = 0; i < points.length; i++) {
-            const device = points[i].device;
+            const device = points[i].device_name;
             if (!deviceCounts[device]) {
                 deviceCounts[device] = 0;
             }
@@ -392,7 +392,7 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
-            if(device != null && point.device != device) continue;
+            if(device != null && point.device_name != device) continue;
             const pm = point[value];
             /*
 
