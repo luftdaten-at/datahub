@@ -266,8 +266,9 @@
 
         var defaultPmTypeIndex = 'pm25'; // PM2.5
 
-        addMarkerLayer("pm25");
+        await addMarkerLayer("pm25");
         showDeviceList();
+        fitMapToAllPoints();
     }
 
     fetchMarkerData();
