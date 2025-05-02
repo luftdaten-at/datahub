@@ -137,6 +137,7 @@ class Measurement(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, related_name='measurements')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='measurements')
+    workshop = models.ForeignKey('workshops.Workshop', on_delete=models.CASCADE, null=True, related_name='measurements')
 
     def __str__(self):
         return f'Measurement {self.id} from Device {self.device.id}'
