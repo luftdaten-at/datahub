@@ -142,6 +142,7 @@ _base.html is the base template with different blocks.
 home.html can be used as an example on how to use the blocks.
 
 Static files like css, js and images are in the folder /app/static.
+Uploads are in the folder /app/media.
 
 ### Admin
 The admin login can be found unter /backend.
