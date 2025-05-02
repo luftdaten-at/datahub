@@ -79,6 +79,11 @@
                 {% trans "Add moving average" %}
             </button>
         </div>
+        <div class="btn-group ms-2" role="group" aria-label="{% trans 'Hide outliers (95% confidence interval)' %}">
+            <button id="toggleCIBtn" type="button" class="btn btn-outline-secondary btn-sm">
+                {% trans "Hide outliers (95% confidence interval)" %}
+            </button>
+        </div>
     </div>
 
     <h4 id="device-list-header"></h4>
@@ -96,6 +101,7 @@
     let isLogScale = false;
     let chartInstance = null;
     let showRollingAvg = false;
+    let hideOutliers = false;
     const devicesLabel = "{% trans 'Devices' %}";
     const measurementsLabel = "{% trans 'measurements' %}";
 
@@ -490,7 +496,21 @@ function drawChart(value = 'pm25') {
                d.getMonth() === firstDate.getMonth() &&
                d.getDate() === firstDate.getDate();
     });
-    const labels = sorted.map(p => {
+    // Filter points outside 95% confidence interval if requested
+    let usedPoints = sorted;
+    if (hideOutliers) {
+        const allValues = sorted.map(p => p[value]);
+        const mean = allValues.reduce((a, b) => a + b, 0) / allValues.length;
+        const variance = allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (allValues.length - 1);
+        const stddev = Math.sqrt(variance);
+        const ciLower = mean - 1.96 * stddev;
+        const ciUpper = mean + 1.96 * stddev;
+        usedPoints = sorted.filter(p => {
+            const v = p[value];
+            return v >= ciLower && v <= ciUpper;
+        });
+    }
+    const labels = usedPoints.map(p => {
         const d = new Date(p.time);
         const hours = String(d.getHours()).padStart(2, '0');
         const minutes = String(d.getMinutes()).padStart(2, '0');
@@ -503,7 +523,7 @@ function drawChart(value = 'pm25') {
         // Return an array for multi-line label: date on first line, time on second
         return [`${day}.${month}.${year}`, `${hours}:${minutes}`];
     });
-    const data  = sorted.map(p => p[value]);
+    const data = usedPoints.map(p => p[value]);
     // Prepare datasets with optional rolling average
     const datasets = [{
         label: chartLabels[value],
@@ -575,8 +595,19 @@ function toggleRollingAvg() {
         ? "{% trans 'Hide moving average' %}"
         : "{% trans 'Add moving average' %}";
 }
+
+function toggleCI() {
+    hideOutliers = !hideOutliers;
+    const select = document.querySelector('.form-select');
+    drawChart(select.value);
+    const btn = document.getElementById('toggleCIBtn');
+    btn.textContent = hideOutliers
+        ? "{% trans 'Show outliers' %}"
+        : "{% trans 'Hide outliers (95% confidence interval)' %}";
+}
 // Attach event listeners to static chart controls
 document.getElementById('toggleScaleBtn').addEventListener('click', toggleScale);
 document.getElementById('toggleAvgBtn').addEventListener('click', toggleRollingAvg);
+document.getElementById('toggleCIBtn').addEventListener('click', toggleCI);
 </script>
 {% endblock content %}
