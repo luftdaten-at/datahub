@@ -200,6 +200,12 @@ class CreateStationDataAPIView(APIView):
                             room = station.current_room,
                             user = station.current_user,
                         )
+
+                        if 'workshop' in station_data:
+                            measurement.workshop = Workshop.objects.filter(name = station_data['workshop']).first()
+
+                        print(f'3.14159 {measurement.workshop=}')
+
                         measurement.save()
 
                         # Add values (dimension, value) for the measurement
