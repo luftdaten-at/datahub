@@ -53,8 +53,6 @@
                                 {% with latest_status=device.status_list.all|dictsortreversed:"time_received"|first %}
                                     {% if latest_status %}
                                         {{ latest_status.time_received|date:"Y-m-d H:i" }}
-                                    {% else %}
-                                        {% trans "" %}
                                     {% endif %}
                                 {% endwith %}
                             </td>

@@ -53,9 +53,11 @@
     <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
         <h2>{{ workshop.title }}</h2>
         <span>
-            {% if is_owner %}
+            {% if is_owner or is_admin %}
                 <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-outline-primary">{% trans "Edit" %}</a>
-                <a href="{% url 'workshop-management' workshop.pk %}" class="btn btn-outline-primary">{% trans "Manage" %}</a>
+                {% if not workshop.public %}
+                <a href="{% url 'workshop-management' workshop.pk %}" class="btn btn-outline-primary">{% trans "Access" %}</a>
+                {% endif %}
                 <a href="{% url 'workshop-image-upload' workshop.pk %}" class="btn btn-outline-primary">{% trans "Upload Images" %}</a>
             {% endif %}
         </span>
