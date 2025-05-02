@@ -1,4 +1,5 @@
-import datetime
+from datetime import datetime
+from datetime import timezone
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 
@@ -169,7 +170,7 @@ class CreateStationDataAPIView(APIView):
                 raise ValidationError("Wrong API Key")
 
             # Record the time when the request was received
-            time_received = datetime.datetime.now(datetime.timezone.utc)
+            time_received = datetime.now(timezone.utc)
 
             if sensors_data is None:
                 return JsonResponse({"status": "success, but no sensor data found"}, status=200)
@@ -201,10 +202,10 @@ class CreateStationDataAPIView(APIView):
                             user = station.current_user,
                         )
 
+                        print(f'3.14159 {measurement.workshop=}')
+
                         if 'workshop' in station_data:
                             measurement.workshop = Workshop.objects.filter(name = station_data['workshop']).first()
-
-                        print(f'3.14159 {measurement.workshop=}')
 
                         measurement.save()
 
