@@ -1,11 +1,10 @@
-import datetime
 import numpy as np
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.gis.geos import Point
 from PIL import Image
 from PIL.ExifTags import TAGS
-from datetime import datetime
+from datetime import datetime, timezone
 import pytz
 import time
 import pyproj
@@ -52,7 +51,7 @@ def get_or_create_station(station_info: dict):
 
     # add a new DeviceStatus
     station_status = DeviceStatus.objects.create(
-        time_received = datetime.datetime.now(datetime.timezone.utc),
+        time_received = datetime.now(timezone.utc),
         device = station,
         battery_voltage = station_info.get('battery', {}).get('voltage', None),
         battery_soc = station_info.get('battery', {}).get('percentage', None),
