@@ -37,7 +37,7 @@
                 <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
                 <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
                 <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
-                <option value="temperature">{% trans "Temperatur" %} </option>
+                <option value="temperature">{% trans "Temperature" %} </option>
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
             <span id="legend-method" style="font-size: 0.8rem;"></span>
@@ -469,17 +469,17 @@ function fitMapToAllPoints() {
 }
 
 const chartLabels = {
-    pm1: "{% trans 'PM1' %}",
-    pm25: "{% trans 'PM2.5' %}",
-    pm10: "{% trans 'PM10' %}",
-    temperature: "{% trans 'Temperature' %}"
+    pm1: "{% trans 'Particulate Matter' %} PM1",
+    pm25: "{% trans 'Particulate Matter' %} PM2.5",
+    pm10: "{% trans 'Particulate Matter' %} PM10",
+    temperature: "{% trans 'Temperature difference' %}"
 };
 
 const chartUnits = {
     pm1: "µg/m³",
     pm25: "µg/m³",
     pm10: "µg/m³",
-    temperature: "°C"
+    temperature: "ΔT in K"
 };
 
 function drawChart(value = 'pm25') {
@@ -523,7 +523,12 @@ function drawChart(value = 'pm25') {
         // Return an array for multi-line label: date on first line, time on second
         return [`${day}.${month}.${year}`, `${hours}:${minutes}`];
     });
-    const data = usedPoints.map(p => p[value]);
+    let data = usedPoints.map(p => p[value]);
+    if (value === 'temperature') {
+        // Convert to delta in Kelvin relative to the minimum temperature
+        const minVal = Math.min(...usedPoints.map(p => p[value]));
+        data = data.map(v => v - minVal);
+    }
     // Prepare datasets with optional rolling average
     const datasets = [{
         label: chartLabels[value],
