@@ -1,5 +1,9 @@
 import json
 from collections import defaultdict
+import csv
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
+from django.views import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import UpdateView, DeleteView
@@ -261,4 +265,37 @@ def change_device_id(old_id, new_id):
         print("Device with the specified ID does not exist")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+# View to export DeviceLogs for a given Device as CSV
+class DeviceLogsCSVView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    View to export DeviceLogs for a given Device as CSV.
+    """
+    def test_func(self):
+        # Only superusers may export logs
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get(self, request, pk, *args, **kwargs):
+        # Fetch the device or return 404
+        device = get_object_or_404(Device, pk=pk)
+        # Query all logs for this device, ordered by timestamp descending
+        logs = DeviceLogs.objects.filter(device=device).order_by('-timestamp')
+
+        # Prepare HTTP response with CSV content
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="device_{device.id}_logs.csv"'
+
+        writer = csv.writer(response)
+        # Write header
+        writer.writerow(['timestamp', 'level', 'message'])
+        # Write log rows
+        for log in logs:
+            writer.writerow([
+                log.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                log.level,
+                log.message
+            ])
+
+        return response
 

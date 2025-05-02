@@ -152,8 +152,15 @@
     <!-- Device Logs -->
     <div class="row">
         <div class="col-md-12">
-        <h3 class="mt-4 mb-4">{% trans "Log" %}</h3>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="mt-4 mb-4">{% trans "Status log" %}</h3>
+                {% if device_logs %}
+                <a href="{% url 'device-logs-csv' device.pk %}" class="btn btn-sm btn-outline-secondary">
+                    {% trans "Download Status logs" %}
+                </a>
+                {% endif %}
 
+            </div>
         {% if device_logs %}
             <ul class="list-group mb-3">
                 {% for log in device_logs %}
@@ -228,6 +235,7 @@
                     {% endif %}
                 </ul>
             </nav>
+            
         {% else %}
             <div class="alert alert-info" role="alert">
                 {% trans "No log updates available for this device." %}
