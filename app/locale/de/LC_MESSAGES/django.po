@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-02 15:01+0200\n"
+"POT-Creation-Date: 2025-05-03 08:52+0200\n"
 "PO-Revision-Date: 2024-12-07 01:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -56,7 +56,7 @@ msgstr ""
 "Soll die Messkampagne öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur zugewiesene Benutzer Ergebnisse sehen."
 
-#: devices/views.py:250
+#: devices/views.py:254
 msgid "You are not allowed to delete this device."
 msgstr "Sie sind nicht berechtigt, dieses Gerät zu löschen."
 
@@ -803,59 +803,63 @@ msgstr "Batteriestatus"
 msgid "No battery status available for this device."
 msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
 
-#: templates/devices/detail.html:155
+#: templates/devices/detail.html:156
 #, fuzzy
-#| msgid "Log in"
-msgid "Log"
-msgstr "Anmelden"
+#| msgid "Start date"
+msgid "Status log"
+msgstr "Startdatum"
 
-#: templates/devices/detail.html:178
+#: templates/devices/detail.html:159
+msgid "Download Status logs"
+msgstr ""
+
+#: templates/devices/detail.html:185
 msgid "unknown"
 msgstr "unbekannt"
 
-#: templates/devices/detail.html:192
+#: templates/devices/detail.html:199
 msgid "Log pagination"
 msgstr "Protokollpaginierung"
 
-#: templates/devices/detail.html:196 templates/stations/list.html:64
+#: templates/devices/detail.html:203 templates/stations/list.html:64
 #: templates/stations/list.html:121
 msgid "Previous"
 msgstr "Vorherige"
 
-#: templates/devices/detail.html:220 templates/stations/list.html:88
+#: templates/devices/detail.html:227 templates/stations/list.html:88
 #: templates/stations/list.html:145
 msgid "Next"
 msgstr "Nächste"
 
-#: templates/devices/detail.html:233
+#: templates/devices/detail.html:241
 msgid "No log updates available for this device."
 msgstr "Keine Logs verfügbar für dieses Gerät."
 
-#: templates/devices/detail.html:239
+#: templates/devices/detail.html:247
 #, fuzzy
 #| msgid "Devices"
 msgid "Back to Devices"
 msgstr "Zurück zu Geräte"
 
-#: templates/devices/detail.html:253
+#: templates/devices/detail.html:261
 #, python-format
 msgid "Battery Charge (%%)"
 msgstr "Batterieladung (%%)"
 
-#: templates/devices/detail.html:264
+#: templates/devices/detail.html:272
 msgid "Battery Voltage (V)"
 msgstr "Batteriespannung (V)"
 
-#: templates/devices/detail.html:299 templates/workshops/detail.html:570
+#: templates/devices/detail.html:307 templates/workshops/detail.html:570
 msgid "Time"
 msgstr "Zeit"
 
-#: templates/devices/detail.html:314
+#: templates/devices/detail.html:322
 #, python-format
 msgid "Charge (%%)"
 msgstr "Ladung (%%)"
 
-#: templates/devices/detail.html:328
+#: templates/devices/detail.html:336
 msgid "Voltage (V)"
 msgstr "Spannung (V)"
 
@@ -1078,7 +1082,7 @@ msgstr "Gleitenden Durchschnitt hinzufügen"
 #: templates/workshops/detail.html:613
 #, python-format
 msgid "Hide outliers (95%% confidence interval)"
-msgstr "Ausreißer ausblenden (95%-Konfidenzintervall)"
+msgstr "Ausreißer ausblenden (95%%-Konfidenzintervall)"
 
 #: templates/workshops/detail.html:97
 msgid "CSV"
@@ -1208,6 +1212,11 @@ msgstr ""
 "Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."
+
+#, fuzzy
+#~| msgid "Log in"
+#~ msgid "Log"
+#~ msgstr "Anmelden"
 
 #~ msgid "Gerät"
 #~ msgstr "Device"
