@@ -73,6 +73,7 @@ def migrate_air_quality_records():
             workshop=record.workshop,
             location=location,
             mode=record.mode,
+            participant=record.participant
         )
 
         # Create Values
