@@ -131,13 +131,16 @@ class Measurement(models.Model):
     """
     Measurement taken by a device in a room.
     """
-    time_received = models.DateTimeField()
+    time_received = models.DateTimeField(null=True)
     time_measured = models.DateTimeField()
     sensor_model = models.IntegerField()
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements')
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, related_name='measurements')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='measurements')
     workshop = models.ForeignKey('workshops.Workshop', on_delete=models.CASCADE, null=True, related_name='measurements')
+    location = models.ForeignKey('api.Location', on_delete=models.CASCADE, null=True, related_name='measurements')
+    mode = models.ForeignKey('api.MobilityMode', on_delete=models.CASCADE, null=True, blank=True, related_name='measurements')
+    participant = models.ForeignKey('workshops.Participant', on_delete=models.CASCADE, null=True, blank=True, related_name='measurements')
 
     def __str__(self):
         return f'Measurement {self.id} from Device {self.device.id}'

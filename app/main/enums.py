@@ -336,3 +336,16 @@ class Order(str, Enum):
     MIN="min"
     MAX="max"
 
+
+AQR_DIMENSION_MAP = {
+    'pm1': 2,
+    'pm25': 3,
+    'pm10': 5,
+    'humidity': 6,
+    'temperature': 7,
+    'voc': 8,
+    'nox': 9,
+    'pressure': 10,
+    'co2': 11,
+    'o3': 12,
+}
