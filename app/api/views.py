@@ -201,8 +201,6 @@ class CreateStationDataAPIView(APIView):
                             user = station.current_user,
                         )
 
-                        print(f'3.14159 {measurement.workshop=}')
-
                         if 'workshop' in station_data:
                             measurement.workshop = Workshop.objects.filter(name = station_data['workshop']).first()
 
