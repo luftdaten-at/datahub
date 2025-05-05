@@ -50,7 +50,7 @@ def migrate_air_quality_records():
         
         device = Device.objects.filter(id = new_device_id).first()
         if device is None:
-            print(f"Skipping record {record.id} has no device")
+            print(f"Skipping record {record.id}, device with new id {new_device_id} and old id {record.device.id} not found")
             continue
         
         # Create Measurement

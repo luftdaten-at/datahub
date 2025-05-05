@@ -121,32 +121,40 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         '''
 
         aqr_reverse = {v: k for k, v in enums.AQR_DIMENSION_MAP.items()}
-        measurement = Measurement.objects.filter(workshop = pk).first()
+        measurements = Measurement.objects.filter(workshop = pk).all()
 
-        values = {v.dimension: v.value for v in measurement.values.all()}
-    
-        data = {
-            "time": measurement.time_measured.isoformat(),
-            "device": measurement.device.id,  # or another unique identifier
-            "participant": measurement.participant.name,
-            "mode": measurement.mode.name,  # assumes user has a mode field
-            "lat": None,
-            "lon": None,
-        }
+        ret = []
 
-        # Add dimension values
-        for dim_id, name in aqr_reverse.items():
-            if dim_id in values:
-                data[name] = values[dim_id]
-            else:
-                data[name] = None
+        for measurement in measurements:
+            values = {v.dimension: v.value for v in measurement.values.all()}
 
-        # Add lat/lon if available
-        if measurement.location and measurement.location.coordinates:
-            data["lat"] = measurement.location.coordinates.y
-            data["lon"] = measurement.location.coordinates.x
+            if measurement.participant is None or measurement.mode is None:
+                continue
+        
+            data = {
+                "time": measurement.time_measured.isoformat(),
+                "device": measurement.device.id,  # or another unique identifier
+                "participant": measurement.participant.name,
+                "mode": measurement.mode.name,  # assumes user has a mode field
+                "lat": None,
+                "lon": None,
+            }
 
-        return JsonResponse(data, status=200)
+            # Add dimension values
+            for dim_id, name in aqr_reverse.items():
+                if dim_id in values:
+                    data[name] = values[dim_id]
+                else:
+                    data[name] = None
+
+            # Add lat/lon if available
+            if measurement.location and measurement.location.coordinates:
+                data["lat"] = measurement.location.coordinates.y
+                data["lon"] = measurement.location.coordinates.x
+            
+            ret.append(data)
+
+        return JsonResponse(ret, status=200)
 
 
 @extend_schema(tags=['devices'])
