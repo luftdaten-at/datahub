@@ -134,7 +134,7 @@ class Measurement(models.Model):
     time_received = models.DateTimeField()
     time_measured = models.DateTimeField()
     sensor_model = models.IntegerField()
-    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements')
+    device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements', null=True)
     room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, related_name='measurements')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='measurements')
     workshop = models.ForeignKey('workshops.Workshop', on_delete=models.CASCADE, null=True, related_name='measurements')

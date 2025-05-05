@@ -5,19 +5,6 @@ from main import enums
 from django.contrib.gis.geos import Point
 from django.utils.timezone import now
 
-# Mapping from field name to dimension ID
-DIMENSION_MAP = {
-    'pm1': 2,
-    'pm25': 3,
-    'pm10': 5,
-    'humidity': 6,
-    'temperature': 7,
-    'voc': 8,
-    'nox': 9,
-    'pressure': 10,
-    'co2': 11,
-    'o3': 12,
-}
 
 TRANSLATE = '''B8ADBB1D0470AAA
 D83BDA6D3D2CAAA
@@ -61,9 +48,9 @@ def migrate_air_quality_records():
                 coordinates=Point(record.lon, record.lat),
                 height=None
             )
-
+        
         # Create Measurement
-        measurement, _ = Measurement.objects.get_or_create(
+        measurement, created = Measurement.objects.get_or_create(
             time_measured=record.time,
             time_received=now(),  # or record.time if you don't have a separate received timestamp
             sensor_model=enums.SensorModel.SEN5X,  # replace with actual model ID if known
@@ -76,8 +63,12 @@ def migrate_air_quality_records():
             participant=record.participant
         )
 
+        if not created:
+            print(f"Skipping record {record.id} already has an existing Measurement {measurement.id}")
+            continue
+
         # Create Values
-        for field, dimension_id in DIMENSION_MAP.items():
+        for field, dimension_id in enums.AQR_DIMENSION_MAP.items():
             value = getattr(record, field)
             if value is not None:
                 Values.objects.create(

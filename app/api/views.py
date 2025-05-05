@@ -15,6 +15,7 @@ from main.util import get_or_create_station
 from .models import AirQualityRecord, MobilityMode
 from workshops.models import Participant, Workshop
 from devices.models import Device
+from main import enums
 
 from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
 
@@ -112,9 +113,40 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
     serializer_class = AirQualityRecordWorkshopSerializer
 
     def get(self, request, pk):
+        '''
         records = AirQualityRecord.objects.filter(workshop__name=pk)
         serializer = AirQualityRecordWorkshopSerializer(records, many=True)
+
         return Response(serializer.data)
+        '''
+
+        aqr_reverse = {v: k for k, v in enums.AQR_DIMENSION_MAP.items()}
+        measurement = Measurement.objects.filter(workshop = pk).first()
+
+        values = {v.dimension: v.value for v in measurement.values.all()}
+    
+        data = {
+            "time": measurement.time_measured.isoformat(),
+            "device": measurement.device.id,  # or another unique identifier
+            "participant": measurement.participant.name,
+            "mode": measurement.mode.name,  # assumes user has a mode field
+            "lat": None,
+            "lon": None,
+        }
+
+        # Add dimension values
+        for dim_id, name in aqr_reverse.items():
+            if dim_id in values:
+                data[name] = values[dim_id]
+            else:
+                data[name] = None
+
+        # Add lat/lon if available
+        if measurement.location and measurement.location.coordinates:
+            data["lat"] = measurement.location.coordinates.y
+            data["lon"] = measurement.location.coordinates.x
+
+        return JsonResponse(data, status=200)
 
 
 @extend_schema(tags=['devices'])
