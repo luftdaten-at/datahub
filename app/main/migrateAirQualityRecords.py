@@ -36,7 +36,7 @@ def migrate_air_quality_records():
         new_device_id = None
         if record.device.id in device_set:
             id_num = int(record.device.id, 16) + 0x1000
-            new_device_id = hex(id_num).upper()
+            new_device_id = hex(id_num)[2:].upper()
         else:
             new_device_id = record.device.id
         
