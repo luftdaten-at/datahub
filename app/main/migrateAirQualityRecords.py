@@ -6,8 +6,7 @@ from django.contrib.gis.geos import Point
 from django.utils.timezone import now
 
 
-TRANSLATE = '''B8ADBB1D0470AAA
-D83BDA6D3D2CAAA
+TRANSLATE = '''D83BDA6D3D2CAAA
 28372F821AE4AAA
 D83BDA6E3FF0AAA
 28372F8080A0AAA
@@ -33,7 +32,7 @@ D83BDA6E4034AAA
 def migrate_air_quality_records():
     device_set = set([d for d in TRANSLATE.split('\n')])
 
-    for record in AirQualityRecord.objects.all():
+    for record in AirQualityRecord.objects.filter(workshop = 'tz8cli').all():
         new_device_id = None
         if record.device.id in device_set:
             id_num = int(record.device.id, 16) + 0x1000
@@ -48,6 +47,11 @@ def migrate_air_quality_records():
                 coordinates=Point(record.lon, record.lat),
                 height=None
             )
+        
+        device = Device.objects.filter(id = new_device_id).first()
+        if device is None:
+            print(f"Skipping record {record.id} has no device")
+            continue
         
         # Create Measurement
         measurement, created = Measurement.objects.get_or_create(
