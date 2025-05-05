@@ -154,7 +154,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             
             ret.append(data)
 
-        return JsonResponse(ret, status=200)
+        return JsonResponse(ret, status=200, safe=False)
 
 
 @extend_schema(tags=['devices'])

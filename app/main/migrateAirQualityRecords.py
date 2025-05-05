@@ -32,7 +32,7 @@ D83BDA6E4034AAA
 def migrate_air_quality_records():
     device_set = set([d for d in TRANSLATE.split('\n')])
 
-    for record in AirQualityRecord.objects.filter(workshop = 'tz8cli').all():
+    for record in AirQualityRecord.objects.all():
         new_device_id = None
         if record.device.id in device_set:
             id_num = int(record.device.id, 16) + 0x1000
