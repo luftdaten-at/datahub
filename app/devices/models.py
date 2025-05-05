@@ -139,6 +139,7 @@ class Measurement(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, related_name='measurements')
     workshop = models.ForeignKey('workshops.Workshop', on_delete=models.CASCADE, null=True, related_name='measurements')
     location = models.ForeignKey('api.Location', on_delete=models.CASCADE, null=True, related_name='measurements')
+    mode = models.ForeignKey('api.MobilityMode', on_delete=models.CASCADE, null=True, blank=True, related_name='measurements')
 
     def __str__(self):
         return f'Measurement {self.id} from Device {self.device.id}'
