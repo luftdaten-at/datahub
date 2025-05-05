@@ -52,7 +52,7 @@ def migrate_air_quality_records():
         # Create Measurement
         measurement, created = Measurement.objects.get_or_create(
             time_measured=record.time,
-            time_received=now(),  # or record.time if you don't have a separate received timestamp
+            time_received=None,  # or record.time if you don't have a separate received timestamp
             sensor_model=enums.SensorModel.SEN5X,  # replace with actual model ID if known
             device=Device.objects.filter(id = new_device_id).first(),
             room=None,  # Assign if you can map from record
@@ -78,4 +78,3 @@ def migrate_air_quality_records():
                 )
 
         print(f"Migrated record {record.id} to measurement {measurement.id}")
-

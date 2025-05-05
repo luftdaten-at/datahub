@@ -131,7 +131,7 @@ class Measurement(models.Model):
     """
     Measurement taken by a device in a room.
     """
-    time_received = models.DateTimeField()
+    time_received = models.DateTimeField(null=True)
     time_measured = models.DateTimeField()
     sensor_model = models.IntegerField()
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='measurements', null=True)
