@@ -310,10 +310,9 @@
 
     function showDeviceList() {
         // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
-        console.log('hallo');
         const deviceCounts = {};
         for (let i = 0; i < points.length; i++) {
-            const device = points[i].device_name;
+            const device = points[i].device;
             if (!deviceCounts[device]) {
                 deviceCounts[device] = 0;
             }
@@ -389,7 +388,7 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
-            if(device != null && point.device_name != device) continue;
+            if(device != null && point.device != device) continue;
             const pm = point[value];
             /*
 
