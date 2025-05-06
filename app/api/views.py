@@ -138,6 +138,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
                 "mode": measurement.mode.name,  # assumes user has a mode field
                 "lat": None,
                 "lon": None,
+                "display_name": measurement.device.device_name if measurement.device.device_name is not None else measurement.device.id,
             }
 
             # Add dimension values

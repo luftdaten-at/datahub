@@ -312,7 +312,7 @@
         // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
         const deviceCounts = {};
         for (let i = 0; i < points.length; i++) {
-            const device = points[i].device;
+            const device = points[i].display_name;
             if (!deviceCounts[device]) {
                 deviceCounts[device] = 0;
             }
@@ -388,7 +388,7 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
-            if(device != null && point.device != device) continue;
+            if(device != null && point.display_name != device) continue;
             const pm = point[value];
             /*
 
