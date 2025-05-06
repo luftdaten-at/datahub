@@ -33,7 +33,10 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         # Optimize queryset by selecting related 'current_organization'
-        return Device.objects.select_related('current_organization').all().order_by('id')
+        device_list = Device.objects.select_related('current_organization').all().order_by('id')
+        device_list = [device for device in device_list if len(device.id) >= 15]
+
+        return device_list
 
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
@@ -115,7 +118,7 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         
         # time, workshop
         workshop_changes = []
-        for record in reversed(sorted((record.time, record.workshop.name) for record in device.air_quality_records.all())):
+        for record in reversed(sorted((record.time_measured, record.workshop.name) for record in device.measurements.all() if record.workshop is not None)):
             if not workshop_changes or workshop_changes[-1][1] != record[1]:
                 workshop_changes.append(record)
 
