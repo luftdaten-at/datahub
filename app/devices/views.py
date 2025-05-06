@@ -33,7 +33,10 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
     def get_queryset(self):
         # Optimize queryset by selecting related 'current_organization'
-        return Device.objects.select_related('current_organization').all().order_by('id')
+        device_list = Device.objects.select_related('current_organization').all().order_by('id')
+        device_list = [device for device in device_list if len(device.id) >= 15]
+
+        return device_list
 
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
