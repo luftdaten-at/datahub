@@ -115,7 +115,7 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         
         # time, workshop
         workshop_changes = []
-        for record in reversed(sorted((record.time, record.workshop.name) for record in device.air_quality_records.all())):
+        for record in reversed(sorted((record.time_measured, record.workshop.name) for record in device.measurements.all())):
             if not workshop_changes or workshop_changes[-1][1] != record[1]:
                 workshop_changes.append(record)
 
