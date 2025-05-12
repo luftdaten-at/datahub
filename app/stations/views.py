@@ -4,7 +4,7 @@ from collections import defaultdict
 from django.shortcuts import render
 from django.http import Http404
 from django.conf import settings
-from main.enums import OutputFormat, Precision, Order
+from main.enums import OutputFormat, Precision, Order, SensorModel
 from requests.exceptions import HTTPError, RequestException
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
@@ -67,6 +67,16 @@ def StationDetailView(request, pk):
                 if dim not in dim_hour_val:
                     dim_hour_val[dim] = 'false' 
             station_info["data_48h"] = dim_hour_val
+
+            # build sensor info
+            api_url = f"{settings.API_URL}/station/info"
+            params = {
+                'station_id': pk,
+            }
+            response = requests.get(api_url, params=params)
+            response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
+            info = response.json()  # Daten im JSON-Format
+            sensors = [SensorModel.get_sensor_name(v['type']) for _, v in info['sensors'].items()]
         else:
             raise Http404(f"Station mit ID {pk} nicht gefunden.")
 
@@ -76,7 +86,7 @@ def StationDetailView(request, pk):
         return render(request, 'stations/error.html', {'error': str(e)})
 
     # Render die Daten im Template
-    return render(request, 'stations/detail.html', {'station': station_info})
+    return render(request, 'stations/detail.html', {'station': station_info, 'sensors' : sensors})
 
 def StationListView(request):
     """
