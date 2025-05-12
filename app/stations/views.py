@@ -76,8 +76,7 @@ def StationDetailView(request, pk):
             response = requests.get(api_url, params=params)
             response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
             info = response.json()  # Daten im JSON-Format
-            sensor_list = [SensorModel.get_sensor_name(v['type']) for _, v in info['sensors'].items()]
-
+            sensors = [SensorModel.get_sensor_name(v['type']) for _, v in info['sensors'].items()]
         else:
             raise Http404(f"Station mit ID {pk} nicht gefunden.")
 
@@ -87,7 +86,7 @@ def StationDetailView(request, pk):
         return render(request, 'stations/error.html', {'error': str(e)})
 
     # Render die Daten im Template
-    return render(request, 'stations/detail.html', {'station': station_info})
+    return render(request, 'stations/detail.html', {'station': station_info, 'sensors' : sensors})
 
 def StationListView(request):
     """
