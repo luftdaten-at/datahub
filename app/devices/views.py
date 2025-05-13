@@ -2,6 +2,7 @@ import json
 from collections import defaultdict
 import csv
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic.list import ListView
@@ -302,3 +303,7 @@ class DeviceLogsCSVView(LoginRequiredMixin, UserPassesTestMixin, View):
 
         return response
 
+
+def calibrationView(request):
+    context = {}
+    return render(request=request, template_name='devices/calibration.html', context=context)
