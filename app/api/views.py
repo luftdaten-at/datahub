@@ -154,6 +154,24 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
                 data["lon"] = measurement.location.coordinates.x
             
             ret.append(data)
+        
+        for record in AirQualityRecord.objects.filter(workshop = pk):
+            data = {
+                "time": record.time,
+                "device": record.device.id,  # or another unique identifier
+                "participant": record.participant.name,
+                "mode": record.mode.name,  # assumes user has a mode field
+                "lat": record.lat,
+                "lon": record.lon,
+                "display_name": record.device.device_name if record.device.device_name is not None else record.device.id,
+                'pm1': record.pm1,
+                'pm25': record.pm25,
+                'pm10': record.pm10,
+                'temperature': record.temperature,
+                'humidity': record.humidity,
+            }
+
+            ret.append(data)
 
         return JsonResponse(ret, status=200, safe=False)
 
