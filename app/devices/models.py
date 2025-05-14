@@ -24,6 +24,8 @@ class Device(models.Model):
     api_key = models.CharField(max_length=64, null=True)
     auto_number = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    test_mode = models.BooleanField(null=True)
+    calibration_mode = models.BooleanField(null=True)
 
     current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
     current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
