@@ -203,7 +203,16 @@ class CreateStationStatusAPIView(APIView):
                         message=status_data.get('message', ''),  # Default empty message if not provided
                     )
 
-            return Response({"status": "success"}, status=200)
+            return Response(
+                {
+                    "status": "success",
+                    "flags": {
+                        "test_mode": station.test_mode,
+                        "calibration_mode": station.calibration_mode,
+                    }
+                }, 
+                status=200
+            )
 
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
