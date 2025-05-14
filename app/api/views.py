@@ -193,9 +193,9 @@ class CreateStationStatusAPIView(APIView):
             raise ValidationError("Wrong API Key")
 
         if station.test_mode is None:
-            station.test_mode = station_data['test_mode']
+            station.test_mode = station_data.get('test_mode')
         if station.calibration_mode is None:
-            station.calibration_mode = status_data['calibration_mode']
+            station.calibration_mode = station_data.get('calibration_mode')
 
         try:
             with transaction.atomic():
