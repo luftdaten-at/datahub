@@ -192,6 +192,12 @@ class CreateStationStatusAPIView(APIView):
         if station.api_key != station_data.get('apikey'):
             raise ValidationError("Wrong API Key")
 
+        if station.test_mode is None:
+            station.test_mode = station_data.get('test_mode')
+        if station.calibration_mode is None:
+            station.calibration_mode = station_data.get('calibration_mode')
+        station.save()
+
         try:
             with transaction.atomic():
                 for status_data in status_list:
@@ -203,7 +209,16 @@ class CreateStationStatusAPIView(APIView):
                         message=status_data.get('message', ''),  # Default empty message if not provided
                     )
 
-            return Response({"status": "success"}, status=200)
+            return Response(
+                {
+                    "status": "success",
+                    "flags": {
+                        "test_mode": station.test_mode,
+                        "calibration_mode": station.calibration_mode,
+                    }
+                }, 
+                status=200
+            )
 
         except Exception as e:
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
