@@ -196,6 +196,7 @@ class CreateStationStatusAPIView(APIView):
             station.test_mode = station_data.get('test_mode')
         if station.calibration_mode is None:
             station.calibration_mode = station_data.get('calibration_mode')
+        station.save()
 
         try:
             with transaction.atomic():
