@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import defaultdict
 import csv
 from django.http import HttpResponse
@@ -21,6 +22,9 @@ from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
 from organizations.models import Organization
 from campaign.models import Room
+
+
+logger = logging.getLogger('logger')
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
