@@ -24,7 +24,7 @@ from organizations.models import Organization
 from campaign.models import Room
 
 
-logger = logging.getLogger('logger')
+logger = logging.getLogger('myapp')
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device

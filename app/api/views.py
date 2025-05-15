@@ -20,7 +20,7 @@ from main import enums
 
 from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('myapp')
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
