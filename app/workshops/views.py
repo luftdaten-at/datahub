@@ -37,7 +37,6 @@ class WorkshopListView(ListView):
     template_name = 'workshops/list.html'
     
     def get_context_data(self, **kwargs):
-        logger.info('load workshop list view')
         context = super().get_context_data(**kwargs)
         
         # Upcoming workshops: those with end_date in the future, sorted descending (latest first)
