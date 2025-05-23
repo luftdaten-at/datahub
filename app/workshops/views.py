@@ -1,4 +1,5 @@
 import csv
+import logging
 import os
 
 from django.utils import timezone
@@ -25,6 +26,9 @@ from accounts.models import CustomUser
 from api.models import AirQualityRecord
 from main import settings
 from main.util import workshop_add_image
+
+
+logger = logging.getLogger('myapp')
 
 
 class WorkshopListView(ListView):

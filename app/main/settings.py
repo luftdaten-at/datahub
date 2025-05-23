@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'auditlog',
     'debug_toolbar',
+    "log_viewer",
     # Local
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
@@ -280,3 +281,41 @@ if env("DJANGO_ENV") == 'production':
     API_URL = 'https://api.luftdaten.at/v1'
 else:
     API_URL = 'https://staging.api.luftdaten.at/v1'
+
+LOG_VIEWER_FILES = ['logs/log.log']
+#LOG_VIEWER_FILES_PATTERN = '*.log*'
+#LOG_VIEWER_FILES_DIR = 'logs/'
+LOG_VIEWER_PAGE_LENGTH = 25       # total log lines per-page
+LOG_VIEWER_MAX_READ_LINES = 1000  # total log lines will be read
+LOG_VIEWER_FILE_LIST_MAX_ITEMS_PER_PAGE = 25 # Max log files loaded in Datatable per page
+LOG_VIEWER_PATTERNS = ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+LOG_VIEWER_EXCLUDE_TEXT_PATTERN = None  # String regex expression to exclude the log from line
+
+import os
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/log.log'),
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        # Optional: Custom logger for your app
+        'myapp': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timezone
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
@@ -19,6 +20,7 @@ from main import enums
 
 from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
 
+logger = logging.getLogger('myapp')
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
@@ -296,10 +298,10 @@ class CreateStationDataAPIView(APIView):
 
             except Exception as e:
                 import traceback
-                print(traceback.format_exc())
+                (traceback.format_exc())
                 return JsonResponse({"status": "error", "message": str(e)}, status=400)
 
         except Exception as e:
             import traceback
-            print(traceback.format_exc())
+            logger.error(traceback.format_exc())
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
