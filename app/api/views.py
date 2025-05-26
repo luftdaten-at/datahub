@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
 
-from main.util import get_or_create_station
+from main.util import get_or_create_station, get_avg_temp_per_spot
 from .models import AirQualityRecord, MobilityMode
 from workshops.models import Participant, Workshop, WorkshopSpot
 from devices.models import Device
@@ -86,15 +86,16 @@ class GetWorkshopSpotsAPIView(APIView):
             raise ValidationError("Workshop doesn't exists")
         if not (request.user.is_superuser or request.user == workshop.owner):
             raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
-        
-        ret = []
 
+        mean_temperature = {ws_id:mean_temp for ws_id, mean_temp in get_avg_temp_per_spot(pk)}
+        ret = []
         for workshop_spot in workshop.workshop_spots.all():
             ret.append({
                 'lon': workshop_spot.center.x,
                 'lat': workshop_spot.center.y,
                 'radius': workshop_spot.radius,
                 'type': workshop_spot.type,
+                'temperature': mean_temperature.get(workshop_spot.id, None)
             })
 
         return JsonResponse(ret, status=200, safe=False)

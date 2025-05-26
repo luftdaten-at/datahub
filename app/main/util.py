@@ -1,5 +1,6 @@
 import numpy as np
 import logging
+from django.db import connection
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.gis.geos import Point
@@ -210,3 +211,20 @@ def workshop_add_image(file, workshop_id):
 
     # Picture was not added
     return False
+
+
+def get_avg_temp_per_spot(workshop_id):
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT ws.id, AVG(v.value)
+            FROM devices_measurement AS m
+            INNER JOIN api_location l ON l.id = m.location_id
+            INNER JOIN devices_values v ON v.measurement_id = m.id
+            INNER JOIN workshops_workshopspot ws 
+                ON ST_Within(l.coordinates, ws.area) 
+                AND ws.workshop_id = m.workshop_id
+            WHERE m.workshop_id = %s
+              AND v.dimension = 7
+            GROUP BY ws.id
+        """, [workshop_id])
+        return cursor.fetchall()
