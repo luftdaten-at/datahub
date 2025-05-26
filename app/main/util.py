@@ -1,8 +1,9 @@
 import numpy as np
+import logging
 from django.core.exceptions import PermissionDenied
 from django.db.models import Max
 from django.contrib.gis.geos import Point
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
 from datetime import datetime, timezone
 import pytz
@@ -13,6 +14,9 @@ from devices.models import Device, DeviceStatus
 from workshops.models import Workshop, WorkshopImage
 from main.enums import SensorModel, Dimension
 from api.models import Location
+
+
+logger = logging.getLogger('myapp')
 
 
 def get_or_create_station(station_info: dict):
@@ -139,7 +143,11 @@ def workshop_add_image(file, workshop_id):
     loc = None
     time = None
 
-    img = Image.open(file.file)
+    try:
+        img = Image.open(file.file)
+    except UnidentifiedImageError as e:
+        logger.info(e)
+        return
 
     exif_data = img._getexif()
     # TODO get data from exif_data
