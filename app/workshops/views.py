@@ -20,6 +20,7 @@ from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 
+from zoneinfo import ZoneInfo
 from .models import Workshop, WorkshopInvitation
 from .forms import WorkshopForm, FileFieldForm
 from accounts.models import CustomUser
@@ -105,8 +106,7 @@ class WorkshopDetailView(DetailView):
         images = []
         for workshop_image in self.object.workshop_images.all():
             images.append([
-                'something', 
-                workshop_image.time_created.isoformat(),
+                workshop_image.time_created.astimezone(ZoneInfo("Europe/Vienna")).strftime("%d.%m.%Y %H:%M"),
                 workshop_image.location.coordinates.x,
                 workshop_image.location.coordinates.y,
                 os.path.join(settings.MEDIA_URL, workshop_image.image.name)

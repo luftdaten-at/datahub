@@ -292,14 +292,13 @@
 
     const imageLayer = L.layerGroup();
     imageData.forEach(item => {
-        const [element, time, lat, lon, imageUrl] = item;
+        const [time, lat, lon, imageUrl] = item;
         console.log(imageUrl);
         const marker = L.marker([lat, lon]);
         const popupContent = `
             <div>
-              <strong>${element}</strong><br>
-              <em>${time}</em><br>
-              <img src="${imageUrl}" alt="${element}" style="max-width:200px;">
+              <span class="utctime">${time}</span><br>
+              <img src="${imageUrl}" style="max-width:200px;">
             </div>
         `;
         marker.bindPopup(popupContent);
