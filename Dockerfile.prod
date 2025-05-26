@@ -35,3 +35,5 @@ RUN pip install -r requirements.txt
 
 # Copy project
 COPY ./app/ .
+
+RUN mkdir -p logs
