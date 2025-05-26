@@ -139,6 +139,9 @@ def room_calculate_current_values(room):
         ]
 
 def workshop_add_image(file, workshop_id):
+    '''
+    returns true if the picture was added sucessfully
+    '''
     workshop = Workshop.objects.filter(name = workshop_id).first()
     loc = None
     time = None
@@ -147,7 +150,7 @@ def workshop_add_image(file, workshop_id):
         img = Image.open(file.file)
     except UnidentifiedImageError as e:
         logger.info(e)
-        return
+        return False
 
     exif_data = img._getexif()
     # TODO get data from exif_data
@@ -203,4 +206,7 @@ def workshop_add_image(file, workshop_id):
                 time_created = time
             )
 
-            break
+            return True
+
+    # Picture was not added
+    return False

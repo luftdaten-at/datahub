@@ -306,7 +306,9 @@ class WorkshopImageUploadView(FormView):
         files = form.cleaned_data["file_field"]
 
         for img in files:
-            workshop_add_image(img, workshop_id = self.kwargs['workshop_id'])
+            success = workshop_add_image(img, workshop_id=self.kwargs['workshop_id'])
+            if not success:
+                form.add_error('file_field', 'Failed to process one or more images.')
+                return self.form_invalid(form)
 
         return super().form_valid(form)
-
