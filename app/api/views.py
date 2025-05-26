@@ -1,4 +1,5 @@
 import logging
+import json
 from datetime import datetime, timezone
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
@@ -65,9 +66,39 @@ class DeleteWorkshopSpotAPIView(APIView):
         if not (request.user.is_superuser or request.user == workshop.owner):
             raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
 
-        WorkshopSpot.objects.filter(pk = j['workshop_spot']).first().delete()
+        workshop_spot = WorkshopSpot.objects.filter(pk = j['workshop_spot']).first()
+
+        if workshop_spot is None:
+            raise ValidationError("Workshop spot doesn't exists")
+
+        workshop_spot.delete()
 
         return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=['workshops'])
+class GetWorkshopSpotsAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = WorkshopSpotPkSerializer 
+    def get(self, request, pk, *args, **kwargs):
+        workshop = Workshop.objects.filter(pk=pk).first()
+        if workshop is None:
+            raise ValidationError("Workshop doesn't exists")
+        if not (request.user.is_superuser or request.user == workshop.owner):
+            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
+        
+        ret = []
+
+        for workshop_spot in workshop.workshop_spots.all():
+            ret.append({
+                'lon': workshop_spot.center.x,
+                'lat': workshop_spot.center.y,
+                'radius': workshop_spot.radius,
+                'type': workshop_spot.type,
+            })
+
+        return JsonResponse(ret, status=200, safe=False)
+
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
