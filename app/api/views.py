@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import BasePermission
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
 
@@ -18,9 +19,17 @@ from workshops.models import Participant, Workshop
 from devices.models import Device
 from main import enums
 
-from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
+from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer, WorkshopSpotSerializer
 
 logger = logging.getLogger('myapp')
+
+
+@extend_schema(tags=['workshops'])
+class CreateWorkshopSpotAPIView(APIView):
+    serializer_class = WorkshopSpotSerializer
+    def post(self, request, *args, **kwargs):
+        pass
+
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):

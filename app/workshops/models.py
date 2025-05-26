@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.gis.db.models import PointField, PolygonField
 from django.conf import settings
 import string
 import random
@@ -84,6 +85,14 @@ class WorkshopImage(models.Model):
     image = models.ImageField(upload_to='workshop_images/')
     location = models.ForeignKey('api.Location', on_delete=models.CASCADE, related_name='workshop_images')
     time_created = models.DateTimeField(null=True)
+
+
+class WorkshopSpot(models.Model):
+    workshop = models.ForeignKey('Workshop', on_delete=models.CASCADE, related_name='workshop_spots')
+    center = PointField()
+    radius = models.FloatField()
+    area = PolygonField()
+    type = models.CharField()
 
 
 auditlog.register(Workshop) 

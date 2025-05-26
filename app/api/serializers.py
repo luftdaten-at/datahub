@@ -172,3 +172,11 @@ class StationStatusDataSerializer(serializers.Serializer):
 class StationStatusSerializer(serializers.Serializer):
     station_info = StationInfoSerializer()
     status_list = serializers.ListField(child=StationStatusDataSerializer())
+
+
+class WorkshopSpotSerializer(serializers.Serializer):
+    workshop = serializers.CharField()
+    lat = serializers.FloatField()
+    lon = serializers.FloatField()
+    radius = serializers.FloatField()
+    type = serializers.CharField()
