@@ -20,7 +20,7 @@ from workshops.models import Participant, Workshop, WorkshopSpot
 from devices.models import Device
 from main import enums
 
-from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer, WorkshopSpotSerializer
+from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer, WorkshopSpotSerializer, WorkshopSpotPkSerializer
 
 logger = logging.getLogger('myapp')
 
@@ -51,6 +51,23 @@ class CreateWorkshopSpotAPIView(APIView):
         )
 
         return Response(status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=['workshops'])
+class DeleteWorkshopSpotAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = WorkshopSpotPkSerializer 
+    def post(self, request, *args, **kwargs):
+        j = request.data
+        workshop = Workshop.objects.filter(pk=j['workshop']).first()
+        if workshop is None:
+            raise ValidationError("Workshop doesn't exists")
+        if not (request.user.is_superuser or request.user == workshop.owner):
+            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
+
+        WorkshopSpot.objects.filter(pk = j['workshop_spot']).first().delete()
+
+        return Response(status=status.HTTP_200_OK)
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):

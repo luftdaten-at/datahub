@@ -180,3 +180,8 @@ class WorkshopSpotSerializer(serializers.Serializer):
     lon = serializers.FloatField()
     radius = serializers.FloatField()
     type = serializers.CharField()
+
+
+class WorkshopSpotPkSerializer(serializers.Serializer):
+    workshop = serializers.CharField()
+    workshop_spot = serializers.IntegerField()
