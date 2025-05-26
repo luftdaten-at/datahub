@@ -94,7 +94,10 @@ class WorkshopSpot(models.Model):
     area = PolygonField()
     type = models.CharField()
 
+    history = AuditlogHistoryField()
+
 
 auditlog.register(Workshop) 
 auditlog.register(Participant)
 auditlog.register(WorkshopInvitation)
+auditlog.register(WorkshopSpot)
