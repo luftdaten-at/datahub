@@ -1,26 +1,105 @@
 import logging
+import json
 from datetime import datetime, timezone
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
+from django.contrib.gis.geos import Point
 
 from devices.models import DeviceLogs, Measurement, Values
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.generics import RetrieveAPIView
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema
 
-from main.util import get_or_create_station
+from main.util import get_or_create_station, get_avg_temp_per_spot
 from .models import AirQualityRecord, MobilityMode
-from workshops.models import Participant, Workshop
+from workshops.models import Participant, Workshop, WorkshopSpot
 from devices.models import Device
 from main import enums
 
-from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer
+from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSerializer, DeviceSerializer, WorkshopSerializer, StationDataSerializer, StationStatusSerializer, WorkshopSpotSerializer, WorkshopSpotPkSerializer
 
 logger = logging.getLogger('myapp')
+
+
+@extend_schema(tags=['workshops'])
+class CreateWorkshopSpotAPIView(APIView):
+    serializer_class = WorkshopSpotSerializer
+    permission_classes = (IsAuthenticated,)
+    def post(self, request, *args, **kwargs):
+        j = request.data
+        workshop = Workshop.objects.filter(pk=j['workshop']).first()
+        if workshop is None:
+            raise ValidationError("Workshop doesn't exists")
+        if not (request.user.is_superuser or request.user == workshop.owner):
+            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
+
+        center = Point(j['lon'], j['lat'], srid=4326)
+        center.transform(3857) # Web Mercator projection in meters
+        circle_polygon = center.buffer(j['radius'], quadsegs=32)
+        circle_polygon.transform(4326)
+
+        WorkshopSpot.objects.get_or_create(
+            workshop = workshop,
+            center = center,
+            radius = j['radius'],
+            area = circle_polygon,
+            type = j['type'],
+        )
+
+        return Response(status=status.HTTP_201_CREATED)
+
+
+@extend_schema(tags=['workshops'])
+class DeleteWorkshopSpotAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = WorkshopSpotPkSerializer 
+    def post(self, request, *args, **kwargs):
+        j = request.data
+        workshop = Workshop.objects.filter(pk=j['workshop']).first()
+        if workshop is None:
+            raise ValidationError("Workshop doesn't exists")
+        if not (request.user.is_superuser or request.user == workshop.owner):
+            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
+
+        workshop_spot = WorkshopSpot.objects.filter(pk = j['workshop_spot']).first()
+
+        if workshop_spot is None:
+            raise ValidationError("Workshop spot doesn't exists")
+
+        workshop_spot.delete()
+
+        return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema(tags=['workshops'])
+class GetWorkshopSpotsAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = WorkshopSpotPkSerializer 
+    def get(self, request, pk, *args, **kwargs):
+        workshop = Workshop.objects.filter(pk=pk).first()
+        if workshop is None:
+            raise ValidationError("Workshop doesn't exists")
+        if not (request.user.is_superuser or request.user == workshop.owner):
+            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
+
+        mean_temperature = {ws_id:mean_temp for ws_id, mean_temp in get_avg_temp_per_spot(pk)}
+        ret = []
+        for workshop_spot in workshop.workshop_spots.all():
+            ret.append({
+                'lon': workshop_spot.center.x,
+                'lat': workshop_spot.center.y,
+                'radius': workshop_spot.radius,
+                'type': workshop_spot.type,
+                'temperature': mean_temperature.get(workshop_spot.id, None)
+            })
+
+        return JsonResponse(ret, status=200, safe=False)
+
 
 @extend_schema(tags=['workshops']) 
 class AirQualityDataAddView(APIView):
