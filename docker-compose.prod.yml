@@ -1,11 +1,12 @@
 services:
   app:
-    image: luftdaten/datahub:0.4.3
+    image: luftdaten/datahub:0.7.2
     command: >
-      sh -c "python manage.py collectstatic --noinput && uvicorn main.asgi:application --host 0.0.0.0 --port 8000"
+      sh -c "python manage.py collectstatic --noinput && python manage.py migrate && uvicorn main.asgi:application --host 0.0.0.0 --port 8000"
     restart: unless-stopped
     volumes:
       - static_volume:/usr/src/app/staticfiles
+      - media_volume:/usr/src/app/media
     depends_on:
       - db
     env_file:
@@ -13,11 +14,12 @@ services:
     networks:
       - internal
   db:
-    image: postgres:16-alpine
+    #image: postgres:16-alpine
+    image: postgis/postgis
     restart: unless-stopped
     volumes:
       - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
-      - db_data:/var/lib/postgresql/data/
+      - postgis_db_data:/var/lib/postgresql/data/
     env_file:
       - .env
     environment:
@@ -29,6 +31,7 @@ services:
     restart: unless-stopped
     volumes:
       - static_volume:/home/app/web/staticfiles
+      - media_volume:/home/app/web/media
     depends_on:
       - app
     labels:
@@ -44,9 +47,25 @@ services:
     networks:
       - proxy
       - internal
+  backup:
+    image: tiredofit/db-backup
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    env_file:
+    - .env
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./backup:/backup
+    depends_on:
+      - db
+    networks:
+      - internal
 volumes:
   static_volume:
+  media_volume:
   db_data:
+  postgis_db_data:
 networks:
   internal:
   proxy:
