@@ -305,5 +305,5 @@ class DeviceLogsCSVView(LoginRequiredMixin, UserPassesTestMixin, View):
 
 
 def calibrationView(request):
-    context = {}
+    context = {} 
     return render(request=request, template_name='devices/calibration.html', context=context)
