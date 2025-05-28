@@ -117,8 +117,13 @@ function buildDeviceDimensionList() {
       modelArrow.style.display = 'inline-block';
       modelArrow.style.marginRight = '8px';
       modelLi.appendChild(modelArrow);
+      // Use SensorModel enum for model name if possible
+      let modelName = model;
+      if (!isNaN(Number(model))) {
+        modelName = SensorModel.getSensorName(Number(model));
+      }
       const modelLabel = document.createElement('em');
-      modelLabel.textContent = model;
+      modelLabel.textContent = modelName;
       modelLi.appendChild(modelLabel);
       // Collapsible for dimensions
       const dimCollapseDiv = document.createElement('div');
@@ -130,11 +135,18 @@ function buildDeviceDimensionList() {
         const dimLi = document.createElement('li');
         dimLi.className = 'list-group-item';
         const checkboxId = `cb_${device}_${model}_${dim}`.replace(/[^a-zA-Z0-9_]/g, '_');
+        // Use Dimension enum for name/unit if possible
+        let dimName = dim;
+        let dimUnit = '';
+        if (!isNaN(Number(dim))) {
+          dimName = Dimension.getName(Number(dim));
+          dimUnit = Dimension.getUnit(Number(dim));
+        }
         dimLi.innerHTML = `
           <div class="form-check">
             <input class="form-check-input" type="checkbox" name="selected_dims" id="${checkboxId}" value="${device}|||${model}|||${dim}">
             <label class="form-check-label" for="${checkboxId}">
-              Dimension ${dim}
+              ${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' <span class=\'text-muted\' style=\'font-size:0.9em;\'>' + dimUnit + '</span>' : ''}
             </label>
           </div>
         `;
@@ -259,7 +271,16 @@ function releaseColor(label) {
 
 function buildDatasets(selectedDims) {
   // Remove colors for deselected lines
-  const selectedLabels = new Set(selectedDims.map(({ device, model, dim }) => `${device} (${model}) [${dim}]`));
+  const selectedLabels = new Set(selectedDims.map(({ device, model, dim }) => {
+    // Use enums for label
+    let modelName = model;
+    if (!isNaN(Number(model))) modelName = SensorModel.getSensorName(Number(model));
+    let dimName = dim;
+    if (!isNaN(Number(dim))) dimName = Dimension.getName(Number(dim));
+    let dimUnit = '';
+    if (!isNaN(Number(dim))) dimUnit = Dimension.getUnit(Number(dim));
+    return `${device} (${modelName}) [${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' ' + dimUnit : ''}]`;
+  }));
   for (const label of Array.from(colorAssignments.keys())) {
     if (!selectedLabels.has(label)) {
       releaseColor(label);
@@ -270,7 +291,13 @@ function buildDatasets(selectedDims) {
   selectedDims.forEach(({ device, model, dim }) => {
     const data = allData[device]?.[model]?.[dim];
     if (!data) return;
-    const label = `${device} (${model}) [${dim}]`;
+    let modelName = model;
+    if (!isNaN(Number(model))) modelName = SensorModel.getSensorName(Number(model));
+    let dimName = dim;
+    if (!isNaN(Number(dim))) dimName = Dimension.getName(Number(dim));
+    let dimUnit = '';
+    if (!isNaN(Number(dim))) dimUnit = Dimension.getUnit(Number(dim));
+    const label = `${device} (${modelName}) [${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' ' + dimUnit : ''}]`;
     const color = getOrAssignColor(label);
     datasets.push({
       label,
