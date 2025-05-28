@@ -9,5 +9,5 @@ urlpatterns = [
     path('<str:pk>/edit/', DeviceEditView.as_view(), name='device-edit'),
     path('<str:pk>/edit-notes/', DeviceNotesUpdateView.as_view(), name='device-edit-notes'),
     path('<str:pk>/logs.csv', DeviceLogsCSVView.as_view(), name='device-logs-csv'),
-    path('calibration', calibrationView, name='calibration'),
+    path('calibration/', calibrationView, name='calibration'),
 ]
