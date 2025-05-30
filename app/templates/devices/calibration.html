@@ -1,0 +1,359 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Calibration View" %}{% endblock title %}
+{% block styles %}
+{% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
+{% else %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
+<link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
+
+<!-- Leaflet JS -->
+<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
+<script src="{% static 'js/leaflet.markercluster.js' %}"></script>
+
+<script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+{% endif %}
+{% endblock styles %}
+
+{% block content %}
+<div class="container-fluid px-2">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-3 mt-3 text-center" style="font-size:1.3rem;">{% trans "Select Device Dimensions for Calibration" %}</h2>
+  </div>   
+  <div class="row min-vh-100 align-items-center">
+    <div class="col-lg-3 col-md-4 d-flex flex-column justify-content-start" style="min-width:260px;max-width:340px;">
+      <form id="device-form">
+        <ul id="device-list" class="list-group" style="max-height: 600px; overflow-y: auto;"></ul>
+      </form>
+    </div>
+    <div class="col-lg-9 col-md-8 d-flex align-items-center justify-content-center" style="min-height:600px;">
+      <div class="w-100" style="max-width:1100px;">
+        <canvas id="deviceChart" style="background:#fff;box-shadow:0 2px 12px rgba(0,0,0,0.07);border-radius:12px;width:100%!important;height:600px!important;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const listEl = document.getElementById('device-list');
+const formEl = document.getElementById('device-form');
+const ctx = document.getElementById('deviceChart').getContext('2d');
+let allData = {};
+let chart = null;
+
+// Helper to store available device/model/dim structure
+let deviceTree = {};
+
+// Fetch devices and calibration data, then build UI
+async function fetchAndBuildUI() {
+  // Fetch calibration CSV data
+  const csv = await fetch('https://staging.api.luftdaten.at/v1/station/calibration?data=true').then(r => r.text());
+  allData = {};
+  deviceTree = {};
+  csv.trim().split('\n').forEach(line => {
+    const [name, model, dim, val, time] = line.split(',').map(s => s.trim());
+    // Build allData for charting
+    if (!allData[name]) allData[name] = {};
+    if (!allData[name][model]) allData[name][model] = {};
+    if (!allData[name][model][dim]) allData[name][model][dim] = [];
+    allData[name][model][dim].push({ x: time, y: parseFloat(val) });
+    // Build deviceTree for UI
+    if (!deviceTree[name]) deviceTree[name] = {};
+    if (!deviceTree[name][model]) deviceTree[name][model] = new Set();
+    deviceTree[name][model].add(dim);
+  });
+  // Sort allData values by time (ISO string)
+  Object.values(allData).forEach(models => {
+    Object.values(models).forEach(dims => {
+      Object.values(dims).forEach(dataArr => {
+        dataArr.sort((a, b) => a.x.localeCompare(b.x));
+      });
+    });
+  });
+  buildDeviceDimensionList();
+  updateChart();
+}
+
+// Build nested device/model/dimension checkbox list
+function buildDeviceDimensionList() {
+  listEl.innerHTML = '';
+  Object.entries(deviceTree).forEach(([device, models]) => {
+    const deviceLi = document.createElement('li');
+    deviceLi.className = 'list-group-item';
+    deviceLi.style.cursor = 'pointer';
+    deviceLi.style.userSelect = 'none';
+    // Arrow for device
+    const deviceArrow = document.createElement('span');
+    deviceArrow.innerHTML = '&#9654;'; // right arrow
+    deviceArrow.style.transition = 'transform 0.2s';
+    deviceArrow.style.display = 'inline-block';
+    deviceArrow.style.marginRight = '8px';
+    deviceLi.appendChild(deviceArrow);
+    const deviceLabel = document.createElement('strong');
+    deviceLabel.textContent = device;
+    deviceLi.appendChild(deviceLabel);
+    // Collapsible container for models/dims
+    const collapseDiv = document.createElement('div');
+    collapseDiv.style.display = 'none';
+    collapseDiv.className = 'mt-2';
+    const modelUl = document.createElement('ul');
+    modelUl.className = 'list-group';
+    Object.entries(models).forEach(([model, dims]) => {
+      const modelLi = document.createElement('li');
+      modelLi.className = 'list-group-item';
+      modelLi.style.cursor = 'pointer';
+      modelLi.style.userSelect = 'none';
+      // Arrow for model
+      const modelArrow = document.createElement('span');
+      modelArrow.innerHTML = '&#9654;';
+      modelArrow.style.transition = 'transform 0.2s';
+      modelArrow.style.display = 'inline-block';
+      modelArrow.style.marginRight = '8px';
+      modelLi.appendChild(modelArrow);
+      // Use SensorModel enum for model name if possible
+      let modelName = model;
+      if (!isNaN(Number(model))) {
+        modelName = SensorModel.getSensorName(Number(model));
+      }
+      const modelLabel = document.createElement('em');
+      modelLabel.textContent = modelName;
+      modelLi.appendChild(modelLabel);
+      // Collapsible for dimensions
+      const dimCollapseDiv = document.createElement('div');
+      dimCollapseDiv.style.display = 'none';
+      dimCollapseDiv.className = 'mt-2';
+      const dimUl = document.createElement('ul');
+      dimUl.className = 'list-group';
+      Array.from(dims).forEach(dim => {
+        const dimLi = document.createElement('li');
+        dimLi.className = 'list-group-item';
+        const checkboxId = `cb_${device}_${model}_${dim}`.replace(/[^a-zA-Z0-9_]/g, '_');
+        // Use Dimension enum for name/unit if possible
+        let dimName = dim;
+        let dimUnit = '';
+        if (!isNaN(Number(dim))) {
+          dimName = Dimension.getName(Number(dim));
+          dimUnit = Dimension.getUnit(Number(dim));
+        }
+        dimLi.innerHTML = `
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="selected_dims" id="${checkboxId}" value="${device}|||${model}|||${dim}">
+            <label class="form-check-label" for="${checkboxId}">
+              ${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' <span class=\'text-muted\' style=\'font-size:0.9em;\'>' + dimUnit + '</span>' : ''}
+            </label>
+          </div>
+        `;
+        dimUl.appendChild(dimLi);
+      });
+      dimCollapseDiv.appendChild(dimUl);
+      modelLi.appendChild(dimCollapseDiv);
+      modelLi.addEventListener('click', function(e) {
+        // Only toggle collapse if not clicking a checkbox or label
+        if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+          const expanded = dimCollapseDiv.style.display === 'block';
+          dimCollapseDiv.style.display = expanded ? 'none' : 'block';
+          modelArrow.style.transform = expanded ? 'rotate(0deg)' : 'rotate(90deg)';
+          e.stopPropagation();
+        }
+      });
+      modelUl.appendChild(modelLi);
+    });
+    collapseDiv.appendChild(modelUl);
+    deviceLi.appendChild(collapseDiv);
+    deviceLi.addEventListener('click', function(e) {
+      // Only toggle collapse if not clicking a checkbox or label
+      if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+        const expanded = collapseDiv.style.display === 'block';
+        collapseDiv.style.display = expanded ? 'none' : 'block';
+        deviceArrow.style.transform = expanded ? 'rotate(0deg)' : 'rotate(90deg)';
+      }
+    });
+    listEl.appendChild(deviceLi);
+  });
+}
+
+// Get selected device/model/dim combinations
+function getSelectedDims() {
+  return [...document.querySelectorAll('input[name="selected_dims"]:checked')].map(cb => {
+    const [device, model, dim] = cb.value.split('|||');
+    return { device, model, dim };
+  });
+}
+
+// Color management for unique and persistent line colors
+const colorAssignments = new Map(); // key: label, value: color
+const usedColors = new Set(); // currently used colors
+
+function getColorDistance(c1, c2) {
+  // c1, c2: [h, s, l] in [0, 360], [0, 100], [0, 100]
+  // Use Euclidean distance in HSL, but maximize the minimum distance
+  const dh = Math.abs(c1[0] - c2[0]);
+  const ds = Math.abs(c1[1] - c2[1]);
+  const dl = Math.abs(c1[2] - c2[2]);
+  return Math.sqrt(dh * dh + ds * ds + dl * dl);
+}
+
+function hslToString([h, s, l]) {
+  return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+function parseHSL(str) {
+  // 'hsl(123, 70%, 60%)' => [123, 70, 60]
+  const m = str.match(/hsl\((\d+),\s*(\d+)%?,\s*(\d+)%?\)/);
+  if (!m) return [0, 70, 60];
+  return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+}
+
+function generateRandomColor(isFirst = false) {
+  // Generate a random pastel color, or blue for the first
+  if (isFirst) {
+    // Blue: h=220, s=70, l=60
+    return [220, 70, 60];
+  }
+  const h = Math.floor(Math.random() * 360);
+  const s = 70;
+  const l = 60;
+  return [h, s, l];
+}
+
+function getMaxDistanceColor(used) {
+  // Try 30 random colors, pick the one with the maximum MINIMUM distance to all used
+  let bestColor = null;
+  let bestDist = -1;
+  for (let i = 0; i < 30; i++) {
+    const candidate = generateRandomColor(used.size === 0 && i === 0);
+    const candidateStr = hslToString(candidate);
+    if (used.has(candidateStr)) continue;
+    let minDist = Infinity;
+    if (used.size === 0) {
+      // If no colors are used, just use the first (blue)
+      bestColor = candidateStr;
+      break;
+    }
+    for (const u of used) {
+      const uArr = parseHSL(u);
+      const dist = getColorDistance(candidate, uArr);
+      if (dist < minDist) minDist = dist;
+    }
+    if (minDist > bestDist) {
+      bestDist = minDist;
+      bestColor = candidateStr;
+    }
+  }
+  // If all are used, just return a new random
+  return bestColor || hslToString(generateRandomColor());
+}
+
+function getOrAssignColor(label) {
+  if (colorAssignments.has(label)) {
+    usedColors.add(colorAssignments.get(label));
+    return colorAssignments.get(label);
+  }
+  const color = getMaxDistanceColor(usedColors);
+  colorAssignments.set(label, color);
+  usedColors.add(color);
+  return color;
+}
+
+function releaseColor(label) {
+  if (colorAssignments.has(label)) {
+    usedColors.delete(colorAssignments.get(label));
+    colorAssignments.delete(label);
+  }
+}
+
+function buildDatasets(selectedDims) {
+  // Remove colors for deselected lines
+  const selectedLabels = new Set(selectedDims.map(({ device, model, dim }) => {
+    // Use enums for label
+    let modelName = model;
+    if (!isNaN(Number(model))) modelName = SensorModel.getSensorName(Number(model));
+    let dimName = dim;
+    if (!isNaN(Number(dim))) dimName = Dimension.getName(Number(dim));
+    let dimUnit = '';
+    if (!isNaN(Number(dim))) dimUnit = Dimension.getUnit(Number(dim));
+    return `${device} (${modelName}) [${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' ' + dimUnit : ''}]`;
+  }));
+  for (const label of Array.from(colorAssignments.keys())) {
+    if (!selectedLabels.has(label)) {
+      releaseColor(label);
+    }
+  }
+  // Assign colors for selected lines
+  const datasets = [];
+  selectedDims.forEach(({ device, model, dim }) => {
+    const data = allData[device]?.[model]?.[dim];
+    if (!data) return;
+    let modelName = model;
+    if (!isNaN(Number(model))) modelName = SensorModel.getSensorName(Number(model));
+    let dimName = dim;
+    if (!isNaN(Number(dim))) dimName = Dimension.getName(Number(dim));
+    let dimUnit = '';
+    if (!isNaN(Number(dim))) dimUnit = Dimension.getUnit(Number(dim));
+    const label = `${device} (${modelName}) [${dimName}${dimUnit && dimUnit !== 'Unknown' ? ' ' + dimUnit : ''}]`;
+    const color = getOrAssignColor(label);
+    datasets.push({
+      label,
+      data,
+      borderColor: color,
+      fill: false,
+      tension: 0.1,
+      pointRadius: 0,
+    });
+  });
+  return datasets;
+}
+
+// Create or update the chart
+function updateChart() {
+  const selected = getSelectedDims();
+  const datasets = buildDatasets(selected);
+  if (chart) {
+    chart.data.datasets = datasets;
+    chart.update();
+  } else {
+    chart = new Chart(ctx, {
+      type: 'line',
+      data: { datasets },
+      options: {
+        parsing: true,
+        responsive: true,
+        scales: {
+          x: {
+            type: 'time',
+            time: { unit: 'minute' },
+            title: { display: true, text: 'Time' }
+          },
+          y: { title: { display: true, text: 'Value' } }
+        },
+        plugins: {
+          legend: { display: true, position: 'bottom' }
+        }
+      }
+    });
+  }
+}
+
+// Update chart when dimension selection changes
+formEl.addEventListener('change', (e) => {
+  if (e.target.name === 'selected_dims') {
+    updateChart();
+  }
+});
+
+// Prevent form submission (optional)
+formEl.addEventListener('submit', e => {
+  e.preventDefault();
+});
+
+// On load
+fetchAndBuildUI();
+</script>
+{% endblock content %}

@@ -174,5 +174,181 @@
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <!-- Custom JavaScript -->
     <script src="{% static 'js/base.js' %}"></script>
+    <!-- SensorModel and Dimension JS classes for frontend use -->
+    <script>
+    class SensorModel {
+        static SEN5X = 1;
+        static BMP280 = 2;
+        static BME280 = 3;
+        static BME680 = 4;
+        static SCD4X = 5;
+        static AHT20 = 6;
+        static SHT30 = 7;
+        static SHT31 = 8;
+        static AGS02MA = 9;
+        static SHT4X = 10;
+        static SGP40 = 11;
+        static DHT22 = 12;
+        static SDS011 = 13;
+        static SHT35 = 14;
+        static SPS30 = 15;
+        static PMS5003 = 16;
+        static PMS7003 = 17;
+        static VIRTUAL_SENSOR = 18;
+        static LTR390 = 19;
+        static BMP388 = 20;
+        static BMP390 = 21;
+        static LSM6DS = 22;
+
+        static names = {
+            1: "SEN5X",
+            2: "BMP280",
+            3: "BME280",
+            4: "BME680",
+            5: "SCD4X",
+            6: "AHT20",
+            7: "SHT30",
+            8: "SHT31",
+            9: "AGS02MA",
+            10: "SHT4X",
+            11: "SGP40",
+            12: "DHT22",
+            13: "SDS011",
+            14: "SHT35",
+            15: "SPS30",
+            16: "PMS5003",
+            17: "PMS7003",
+            18: "VIRTUAL_SENSOR",
+            19: "LTR390",
+            20: "BMP388",
+            21: "BMP390",
+            22: "lsm6ds"
+        };
+
+        static getSensorName(sensorModel) {
+            return this.names[sensorModel] || "Unknown Sensor";
+        }
+    }
+
+    class Dimension {
+        static PM0_1 = 1;
+        static PM1_0 = 2;
+        static PM2_5 = 3;
+        static PM4_0 = 4;
+        static PM10_0 = 5;
+        static HUMIDITY = 6;
+        static TEMPERATURE = 7;
+        static VOC_INDEX = 8;
+        static NOX_INDEX = 9;
+        static PRESSURE = 10;
+        static CO2 = 11;
+        static O3 = 12;
+        static AQI = 13;
+        static GAS_RESISTANCE = 14;
+        static TVOC = 15;
+        static NO2 = 16;
+        static SGP40_RAW_GAS = 17;
+        static SGP40_ADJUSTED_GAS = 18;
+        static ADJUSTED_TEMP_CUBE = 19;
+        static UVS = 20;
+        static LIGHT = 21;
+        static ALTITUDE = 22;
+        static UVI = 23;
+        static LUX = 24;
+        static ACCELERATION_X = 25;
+        static ACCELERATION_Y = 26;
+        static ACCELERATION_Z = 27;
+        static GYRO_X = 28;
+        static GYRO_Y = 29;
+        static GYRO_Z = 30;
+
+        static units = {
+            1: "µg/m³",
+            2: "µg/m³",
+            3: "µg/m³",
+            4: "µg/m³",
+            5: "µg/m³",
+            6: "%",
+            7: "°C",
+            8: "Index",
+            9: "Index",
+            10: "hPa",
+            11: "ppm",
+            12: "ppb",
+            13: "Index",
+            14: "Ω",
+            15: "ppb",
+            16: "ppb",
+            17: "Ω",
+            18: "Ω",
+            19: "°C",
+            25: "m/s²",
+            26: "m/s²",
+            27: "m/s²",
+            28: "radians/s",
+            29: "radians/s",
+            30: "radians/s",
+            23: "UV Index",
+            24: "lx"
+        };
+
+        static names = {
+            1: "PM0.1",
+            2: "PM1.0",
+            3: "PM2.5",
+            4: "PM4.0",
+            5: "PM10.0",
+            6: "Humidity",
+            7: "Temperature",
+            8: "VOC Index",
+            9: "NOx Index",
+            10: "Pressure",
+            11: "CO2",
+            12: "Ozone (O3)",
+            13: "Air Quality Index (AQI)",
+            14: "Gas Resistance",
+            15: "Total VOC",
+            16: "Nitrogen Dioxide (NO2)",
+            17: "SGP40 Raw Gas",
+            18: "SGP40 Adjusted Gas",
+            19: "Adjusted Temperature Air Cube",
+            20: "UVS",
+            21: "Light",
+            25: "acceleration X",
+            26: "acceleration Y",
+            27: "acceleration Z",
+            28: "gyro X",
+            29: "gyro Y",
+            30: "gyro Z",
+            23: "UV Index",
+            24: "Lux"
+        };
+
+        static sensorCommunityNames = {
+            1: "P01",
+            2: "P1",
+            3: "P2",
+            4: "P4",
+            5: "P10",
+            6: "humidity",
+            7: "temperature",
+            10: "pressure",
+            11: "co2_ppm",
+            12: "ozone_ppb",
+            15: "tvoc",
+            16: "no2_ppb"
+        };
+
+        static getUnit(dimensionId) {
+            return this.units[dimensionId] || "Unknown";
+        }
+        static getName(dimensionId) {
+            return this.names[dimensionId] || "Unknown";
+        }
+        static getSensorCommunityName(dimensionId) {
+            return this.sensorCommunityNames[dimensionId] || "Unknown";
+        }
+    }
+    </script>
 </body>
 </html>
