@@ -38,6 +38,8 @@
                 <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
                 <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
                 <option value="temperature">{% trans "Temperature" %} </option>
+                <option value="humidity">{% trans "Humidity" %}</option>
+                <option value="voc">{% trans "VOC Index" %}</option>
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
             <span id="legend-method" style="font-size: 0.8rem;"></span>
@@ -208,6 +210,9 @@
     function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
         var legendDiv = document.getElementById('legend');
         legendDiv.innerHTML = '';
+        if(pmTypeIndex == 'voc' || pmTypeIndex == 'humidity'){
+            return;
+        }
         if(pmTypeIndex == 'temperature'){
             //legendDiv.innerHTML = createColorGradientImage(scale); 
             legendDiv.innerHTML = '<p>&#916;T in K</p>';
@@ -371,8 +376,8 @@
 
         const markerList = [];
 
-        const lo = Math.min(...points.map(j => j[value]));
-        const hi = Math.max(...points.map(j => j[value]));
+        const lo = Math.min(...points.filter(j => j[value] !== undefined).map(j => j[value]));
+        const hi = Math.max(...points.filter(j => j[value] !== undefined).map(j => j[value]));
 
         const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
 
@@ -389,6 +394,7 @@
             const point = points[i];
             if(device != null && point.display_name != device) continue;
             const pm = point[value];
+            if(pm === undefined) continue;
             /*
 
             /*
@@ -401,7 +407,7 @@
             // Temp: just set colorString to be the hex color defined in the colorRanges
             let colorString = '';
             // get color string for temperature
-            if(value == 'temperature'){
+            if(value == 'temperature' || value == 'voc' || value == 'humidity'){
                 colorString = scale(point[value]);
             }else{
                 const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
@@ -415,6 +421,10 @@
             else if(value == "pm25") unit = " µg/m³";
             else if(value == "pm10") unit = " µg/m³";
             else if(value == "temperature") unit = "°C";
+            // add correct units for voc and humidity
+            else if(value == "voc") unit = "Index";
+            else if(value == "humidity") unit = "%";
+            else unit = "";
             marker.bindPopup(pm + unit); // Bind a popup to the marker
             markerList.push(marker);
         }
@@ -499,7 +509,7 @@ function drawChart(value = 'pm25') {
     // Filter points outside 95% confidence interval if requested
     let usedPoints = sorted;
     if (hideOutliers) {
-        const allValues = sorted.map(p => p[value]);
+        const allValues = sorted.map(p => p[value]).filter(val => val !== undefined);
         const mean = allValues.reduce((a, b) => a + b, 0) / allValues.length;
         const variance = allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (allValues.length - 1);
         const stddev = Math.sqrt(variance);
