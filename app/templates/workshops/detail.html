@@ -38,6 +38,8 @@
                 <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
                 <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
                 <option value="temperature">{% trans "Temperature" %} </option>
+                <option value="humidity">{% trans "Humidity" %}</option>
+                <option value="voc">{% trans "VOC Index" %}</option>
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
             <span id="legend-method" style="font-size: 0.8rem;"></span>
@@ -401,7 +403,7 @@
             // Temp: just set colorString to be the hex color defined in the colorRanges
             let colorString = '';
             // get color string for temperature
-            if(value == 'temperature'){
+            if(value == 'temperature' || value == 'voc' || value == 'humidity'){
                 colorString = scale(point[value]);
             }else{
                 const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
@@ -415,6 +417,10 @@
             else if(value == "pm25") unit = " µg/m³";
             else if(value == "pm10") unit = " µg/m³";
             else if(value == "temperature") unit = "°C";
+            // add correct units for voc and humidity
+            else if(value == "voc") unit = "Index";
+            else if(value == "humidity") unit = "%";
+            else unit = "";
             marker.bindPopup(pm + unit); // Bind a popup to the marker
             markerList.push(marker);
         }
