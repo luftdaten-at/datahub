@@ -210,6 +210,9 @@
     function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
         var legendDiv = document.getElementById('legend');
         legendDiv.innerHTML = '';
+        if(pmTypeIndex == 'voc' || pmTypeIndex == 'humidity'){
+            return;
+        }
         if(pmTypeIndex == 'temperature'){
             //legendDiv.innerHTML = createColorGradientImage(scale); 
             legendDiv.innerHTML = '<p>&#916;T in K</p>';
@@ -373,8 +376,8 @@
 
         const markerList = [];
 
-        const lo = Math.min(...points.map(j => j[value]));
-        const hi = Math.max(...points.map(j => j[value]));
+        const lo = Math.min(...points.filter(j => j[value] !== undefined).map(j => j[value]));
+        const hi = Math.max(...points.filter(j => j[value] !== undefined).map(j => j[value]));
 
         const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
 
@@ -391,6 +394,7 @@
             const point = points[i];
             if(device != null && point.display_name != device) continue;
             const pm = point[value];
+            if(pm === undefined) continue;
             /*
 
             /*
@@ -505,7 +509,7 @@ function drawChart(value = 'pm25') {
     // Filter points outside 95% confidence interval if requested
     let usedPoints = sorted;
     if (hideOutliers) {
-        const allValues = sorted.map(p => p[value]);
+        const allValues = sorted.map(p => p[value]).filter(val => val !== undefined);
         const mean = allValues.reduce((a, b) => a + b, 0) / allValues.length;
         const variance = allValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / (allValues.length - 1);
         const stddev = Math.sqrt(variance);
