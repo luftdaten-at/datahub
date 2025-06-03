@@ -20,6 +20,8 @@
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
 
 {% endif %}
 {% endblock styles %}
@@ -414,7 +416,7 @@
                 colorString = `rgb(${r}, ${g}, ${b})`;
             }
 
-            var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></div></a>'})});
+            var marker = L.marker([point.lat, point.lon], {icon: L.divIcon({iconSize: [6, 6], className: '', html: '<a class="hiddenlink clickable"><div style="height: 0.5em; width: 0.5em; background-color: ' + colorString + '; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10pt;"></a>'})});
             marker.pm = pm; // Add a custom attribute to marker
             var unit;
             if(value == "pm1") unit = " µg/m³";
@@ -583,8 +585,7 @@ function drawChart(value = 'pm25') {
                     title: { display: true, text: unit }
                 }
             }
-        }
-    });
+        }});
 }
 
 function toggleScale() {
@@ -624,5 +625,122 @@ function toggleCI() {
 document.getElementById('toggleScaleBtn').addEventListener('click', toggleScale);
 document.getElementById('toggleAvgBtn').addEventListener('click', toggleRollingAvg);
 document.getElementById('toggleCIBtn').addEventListener('click', toggleCI);
+
+var drawControl;
+
+function toggleDraw() {
+    if (drawControl) {
+        map.removeControl(drawControl);
+        drawControl = null;
+        document.getElementById('toggleDrawBtn').textContent = '{% trans "Activate Draw" %}';
+    } else {
+        drawControl = new L.Control.Draw({
+            draw: {
+                circle: true,
+                marker: false,
+                polygon: false,
+                polyline: false,
+                rectangle: false
+            },
+            edit: {
+                featureGroup: new L.FeatureGroup().addTo(map)
+            }
+        });
+        map.addControl(drawControl);
+        document.getElementById('toggleDrawBtn').textContent = '{% trans "Deactivate Draw" %}';
+    }
+}
+
+var drawControlButton = L.control({ position: 'topright' });
+
+drawControlButton.onAdd = function(map) {
+    var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
+    controlDiv.innerHTML = `
+        <button
+            class="btn btn-secondary btn-sm"
+            id="toggleDrawBtn"
+            style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+            title="{% trans 'Activate or deactivate drawing on the map.' %}"
+        >
+            {% trans "Activate Draw" %}
+        </button>
+    `;
+    return controlDiv;
+};
+
+drawControlButton.addTo(map);
+
+document.addEventListener("click", function(e) {
+    if (e.target.closest("#toggleDrawBtn")) {
+        toggleDraw();
+    }
+});
+
+map.on('draw:created', function (e) {
+    var type = e.layerType;
+    var layer = e.layer;
+
+    if (type === 'circle') {
+        // Extract circle data
+        var center = layer.getLatLng();
+        var radius = layer.getRadius();
+
+        // Call the handleCircle function with circle data
+        handleCircle(center, radius);
+    }
+});
+
+function handleCircle(center, radius) {
+    console.log('Circle drawn with center:', center, 'and radius:', radius);
+    newCircles = circleSet;
+    newCircles.push({
+        type: 0,
+        center: center,
+        radius: radius
+    });
+    updateCircles(newCircles);
+}
+
+let circleSet = [];
+let circleLayerGroup = L.layerGroup().addTo(map);
+
+function updateCircles(newCircles) {
+    // Clear the existing circles
+    circleLayerGroup.clearLayers();
+
+    // Update the circle set
+    circleSet = newCircles;
+
+    // Draw the new circles on the map
+    circleSet.forEach((circle, index) => {
+        const { center, radius } = circle;
+        const leafletCircle = L.circle(center, { radius });
+
+        // Add a popup with a remove button
+        leafletCircle.bindPopup(
+            `<div>
+                <p>Type: ${circle.type}</p>
+                <p>Radius: ${radius} meters</p>
+                <button onclick="removeCircle(${index})">Remove Circle</button>
+            </div>`
+        );
+
+        circleLayerGroup.addLayer(leafletCircle);
+    });
+}
+
+function removeCircle(index) {
+    // Remove the circle from the set
+    circleSet.splice(index, 1);
+
+    // Update the circles on the map
+    updateCircles(circleSet);
+}
+
+// Example usage:
+// updateCircles([
+//     { type: 1, center: [48.2112, 16.3736], radius: 500 },
+//     { type: 2, center: [48.2200, 16.3800], radius: 300 }
+// ]);
 </script>
 {% endblock content %}
