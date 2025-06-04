@@ -628,11 +628,16 @@ document.getElementById('toggleCIBtn').addEventListener('click', toggleCI);
 
 var drawControl;
 
-function toggleDraw() {
+let selectedCircleType = "cool"; // Default type
+
+function toggleDraw(type) {
+    selectedCircleType = type; // Set the selected type
+
     if (drawControl) {
         map.removeControl(drawControl);
         drawControl = null;
-        document.getElementById('toggleDrawBtn').textContent = '{% trans "Activate Draw" %}';
+        document.getElementById('toggleCoolDrawBtn').textContent = '{% trans "Activate Cool Draw" %}';
+        document.getElementById('toggleHotDrawBtn').textContent = '{% trans "Activate Hot Draw" %}';
     } else {
         drawControl = new L.Control.Draw({
             draw: {
@@ -647,7 +652,12 @@ function toggleDraw() {
             }
         });
         map.addControl(drawControl);
-        document.getElementById('toggleDrawBtn').textContent = '{% trans "Deactivate Draw" %}';
+
+        if (type === "cool") {
+            document.getElementById('toggleCoolDrawBtn').textContent = '{% trans "Deactivate Cool Draw" %}';
+        } else if (type === "hot") {
+            document.getElementById('toggleHotDrawBtn').textContent = '{% trans "Deactivate Hot Draw" %}';
+        }
     }
 }
 
@@ -658,11 +668,19 @@ drawControlButton.onAdd = function(map) {
     controlDiv.innerHTML = `
         <button
             class="btn btn-secondary btn-sm"
-            id="toggleDrawBtn"
+            id="toggleCoolDrawBtn"
             style="display: flex; align-items: center; justify-content: center; gap: 4px;"
-            title="{% trans 'Activate or deactivate drawing on the map.' %}"
+            title="{% trans 'Activate or deactivate drawing cool circles on the map.' %}"
         >
-            {% trans "Activate Draw" %}
+            {% trans "Activate Cool Draw" %}
+        </button>
+        <button
+            class="btn btn-secondary btn-sm"
+            id="toggleHotDrawBtn"
+            style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+            title="{% trans 'Activate or deactivate drawing hot circles on the map.' %}"
+        >
+            {% trans "Activate Hot Draw" %}
         </button>
     `;
     return controlDiv;
@@ -671,8 +689,10 @@ drawControlButton.onAdd = function(map) {
 drawControlButton.addTo(map);
 
 document.addEventListener("click", function(e) {
-    if (e.target.closest("#toggleDrawBtn")) {
-        toggleDraw();
+    if (e.target.closest("#toggleCoolDrawBtn")) {
+        toggleDraw("cool");
+    } else if (e.target.closest("#toggleHotDrawBtn")) {
+        toggleDraw("hot");
     }
 });
 
@@ -691,13 +711,13 @@ map.on('draw:created', function (e) {
 });
 
 function handleCircle(center, radius) {
-    console.log('Circle drawn with center:', center, 'and radius:', radius);
+    console.log('Circle drawn with center:', center, 'and radius:', radius, 'Type:', selectedCircleType);
     let data = JSON.stringify({
         workshop: '{{ workshop.pk }}',
         lat: center.lat,
         radius: radius,
         lon: center.lng,
-        type: 'cool',
+        type: selectedCircleType,
     });
     fetch('/api/v1/workshops/spot/add/', {
         method: 'POST',
