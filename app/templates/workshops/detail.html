@@ -692,41 +692,46 @@ map.on('draw:created', function (e) {
 
 function handleCircle(center, radius) {
     console.log('Circle drawn with center:', center, 'and radius:', radius);
-    newCircles = circleSet;
-    newCircles.push({
-        type: 0,
-        center: center,
-        radius: radius
+    let data = JSON.stringify({
+        workshop: '{{ workshop.pk }}',
+        lat: center.lat,
+        radius: radius,
+        lon: center.lng,
+        type: 'cool',
     });
-    updateCircles(newCircles);
+    fetch('/api/v1/workshops/spot/add/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': '{{ csrf_token }}', 
+        },
+        body: data
+    });
+    updateCircles();
 }
 
-let circleSet = [];
 let circleLayerGroup = L.layerGroup().addTo(map);
 
-function updateCircles(newCircles) {
-    // Clear the existing circles
-    circleLayerGroup.clearLayers();
+function updateCircles() {
+    fetch('/api/v1/workshops/{{workshop.pk}}/spot/').then(data => data.text().then(text => {
+        j = JSON.parse(text);
+        // Clear the existing circles
+        circleLayerGroup.clearLayers();
 
-    // Update the circle set
-    circleSet = newCircles;
-
-    // Draw the new circles on the map
-    circleSet.forEach((circle, index) => {
-        const { center, radius } = circle;
-        const leafletCircle = L.circle(center, { radius });
-
-        // Add a popup with a remove button
-        leafletCircle.bindPopup(
-            `<div>
-                <p>Type: ${circle.type}</p>
-                <p>Radius: ${radius} meters</p>
-                <button onclick="removeCircle(${index})">Remove Circle</button>
-            </div>`
-        );
-
-        circleLayerGroup.addLayer(leafletCircle);
-    });
+        j.forEach(p => {
+            const leafletCircle = L.circle([p.lat, p.lon], p.radius);
+            // Add a popup with a remove button
+            leafletCircle.bindPopup(
+                `<div>
+                    <p>Type: ${p.type}</p>
+                    <p>Radius: ${p.radius} meters</p>
+                    <p>Temperature: ${p.temperature} </p>
+                    <button onclick="removeCircle(0)">Remove Circle</button>
+                </div>`
+            );
+            circleLayerGroup.addLayer(leafletCircle);
+        });
+    })); 
 }
 
 function removeCircle(index) {
@@ -736,6 +741,8 @@ function removeCircle(index) {
     // Update the circles on the map
     updateCircles(circleSet);
 }
+
+updateCircles();
 
 // Example usage:
 // updateCircles([

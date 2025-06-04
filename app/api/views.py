@@ -42,6 +42,7 @@ class CreateWorkshopSpotAPIView(APIView):
         center.transform(3857) # Web Mercator projection in meters
         circle_polygon = center.buffer(j['radius'], quadsegs=32)
         circle_polygon.transform(4326)
+        print('hallo')
 
         WorkshopSpot.objects.get_or_create(
             workshop = workshop,
