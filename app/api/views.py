@@ -91,6 +91,7 @@ class GetWorkshopSpotsAPIView(APIView):
         ret = []
         for workshop_spot in workshop.workshop_spots.all():
             ret.append({
+                'pk': workshop_spot.pk,
                 'lon': workshop_spot.center.x,
                 'lat': workshop_spot.center.y,
                 'radius': workshop_spot.radius,
