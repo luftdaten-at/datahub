@@ -738,15 +738,15 @@ function updateCircles() {
         // Clear the existing circles
         circleLayerGroup.clearLayers();
 
-        j.forEach(p => {
-            const leafletCircle = L.circle([p.lat, p.lon], p.radius);
+        j.forEach(circle => {
+            const leafletCircle = L.circle([circle.lat, circle.lon], circle.radius);
             // Add a popup with a remove button
             leafletCircle.bindPopup(
                 `<div>
-                    <p>Type: ${p.type}</p>
-                    <p>Radius: ${p.radius} meters</p>
-                    <p>Temperature: ${p.temperature} </p>
-                    <button onclick="removeCircle(0)">Remove Circle</button>
+                    <p>Type: ${circle.type}</p>
+                    <p>Radius: ${circle.radius} meters</p>
+                    <p>Temperature: ${circle.temperature} </p>
+                    <button onclick="removeCircle(${circle.pk})" >Remove Circle</button>
                 </div>`
             );
             circleLayerGroup.addLayer(leafletCircle);
@@ -754,12 +754,25 @@ function updateCircles() {
     })); 
 }
 
-function removeCircle(index) {
+async function removeCircle(workshop_spot) {
     // Remove the circle from the set
-    circleSet.splice(index, 1);
-
+    console.log({
+            workshop: '{{ workshop.pk }}',
+            workshop_spot: workshop_spot,
+        });
+    await fetch('/api/v1/workshops/spot/delete/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFTOKEN': '{{ csrf_token }}', 
+        },
+        body: JSON.stringify({
+            workshop: '{{ workshop.pk }}',
+            workshop_spot: workshop_spot,
+        })
+    });
     // Update the circles on the map
-    updateCircles(circleSet);
+    updateCircles();
 }
 
 updateCircles();
