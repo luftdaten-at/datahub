@@ -710,7 +710,7 @@ map.on('draw:created', function (e) {
     }
 });
 
-function handleCircle(center, radius) {
+async function handleCircle(center, radius) {
     console.log('Circle drawn with center:', center, 'and radius:', radius, 'Type:', selectedCircleType);
     let data = JSON.stringify({
         workshop: '{{ workshop.pk }}',
@@ -719,7 +719,7 @@ function handleCircle(center, radius) {
         lon: center.lng,
         type: selectedCircleType,
     });
-    fetch('/api/v1/workshops/spot/add/', {
+    await fetch('/api/v1/workshops/spot/add/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -740,6 +740,14 @@ function updateCircles() {
 
         j.forEach(circle => {
             const leafletCircle = L.circle([circle.lat, circle.lon], circle.radius);
+            if(circle.type == 'cool'){
+                leafletCircle.setStyle({color: 'blue'});
+            }else if(circle.type == 'hot'){
+                leafletCircle.setStyle({color: 'red'});
+            }else{
+                // unknown type
+                leafletCircle.setStyle({color: 'grey'});
+            }
             // Add a popup with a remove button
             leafletCircle.bindPopup(
                 `<div>
@@ -756,10 +764,6 @@ function updateCircles() {
 
 async function removeCircle(workshop_spot) {
     // Remove the circle from the set
-    console.log({
-            workshop: '{{ workshop.pk }}',
-            workshop_spot: workshop_spot,
-        });
     await fetch('/api/v1/workshops/spot/delete/', {
         method: 'POST',
         headers: {
