@@ -636,8 +636,6 @@ function toggleDraw(type) {
     if (drawControl) {
         map.removeControl(drawControl);
         drawControl = null;
-        document.getElementById('toggleCoolDrawBtn').textContent = '{% trans "Activate Cool Draw" %}';
-        document.getElementById('toggleHotDrawBtn').textContent = '{% trans "Activate Hot Draw" %}';
     } else {
         drawControl = new L.Control.Draw({
             draw: {
@@ -652,35 +650,29 @@ function toggleDraw(type) {
             }
         });
         map.addControl(drawControl);
-
-        if (type === "cool") {
-            document.getElementById('toggleCoolDrawBtn').textContent = '{% trans "Deactivate Cool Draw" %}';
-        } else if (type === "hot") {
-            document.getElementById('toggleHotDrawBtn').textContent = '{% trans "Deactivate Hot Draw" %}';
-        }
     }
 }
 
-var drawControlButton = L.control({ position: 'topright' });
+var drawControlButton = L.control({ position: 'topleft' });
 
 drawControlButton.onAdd = function(map) {
     var controlDiv = L.DomUtil.create('div', 'leaflet-bar leaflet-control');
     controlDiv.innerHTML = `
         <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-sm"
             id="toggleCoolDrawBtn"
-            style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+            style="background-color: blue; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 0;"
             title="{% trans 'Activate or deactivate drawing cool circles on the map.' %}"
         >
-            {% trans "Activate Cool Draw" %}
+            <i class="bi bi-snow"></i>
         </button>
         <button
-            class="btn btn-secondary btn-sm"
+            class="btn btn-sm"
             id="toggleHotDrawBtn"
-            style="display: flex; align-items: center; justify-content: center; gap: 4px;"
+            style="background-color: red; color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; border-radius: 0;"
             title="{% trans 'Activate or deactivate drawing hot circles on the map.' %}"
         >
-            {% trans "Activate Hot Draw" %}
+            <i class="bi bi-fire"></i>
         </button>
     `;
     return controlDiv;
