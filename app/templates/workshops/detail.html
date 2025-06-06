@@ -646,7 +646,9 @@ function toggleDraw(type) {
                 rectangle: false
             },
             edit: {
-                featureGroup: new L.FeatureGroup().addTo(map)
+                featureGroup: new L.FeatureGroup().addTo(map),
+                edit: false,
+                remove: false
             }
         });
         map.addControl(drawControl);
@@ -744,8 +746,8 @@ function updateCircles() {
             leafletCircle.bindPopup(
                 `<div>
                     <p>Type: ${circle.type}</p>
-                    <p>Radius: ${circle.radius} meters</p>
-                    <p>Temperature: ${circle.temperature} </p>
+                    <p>Radius: ${Math.round(circle.radius)} meters</p>
+                    <p>Temperature: ${Math.round(circle.temperature * 100) / 100} </p>
                     <button onclick="removeCircle(${circle.pk})" >Remove Circle</button>
                 </div>`
             );
