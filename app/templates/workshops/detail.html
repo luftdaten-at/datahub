@@ -31,22 +31,34 @@
 {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
 {% else %}
 <div class=".container-fluid">
-    <div class="position-absolute top-0 end-0 card"
-        style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
-        <div class="card-body">
-            <h5 class="card-title">{% trans "Air quality" %}</h5>
-            <select class="form-select" aria-label="Default select example" onchange="addMarkerLayer(this.value); drawChart(this.value)">
-                <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
-                <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
-                <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
-                <option value="temperature">{% trans "Temperature" %} </option>
-                <option value="humidity">{% trans "Humidity" %}</option>
-                <option value="voc">{% trans "VOC Index" %}</option>
-            </select>
-            <div id="legend" style="margin-top: 1rem;"></div>
-            <span id="legend-method" style="font-size: 0.8rem;"></span>
+    <div class="position-absolute top-0 end-0" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Air quality" %}</h5>
+                <select class="form-select" aria-label="Default select example" onchange="addMarkerLayer(this.value); drawChart(this.value)">
+                    <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
+                    <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
+                    <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
+                    <option value="temperature">{% trans "Temperature" %} </option>
+                    <option value="humidity">{% trans "Humidity" %}</option>
+                    <option value="voc">{% trans "VOC Index" %}</option>
+                </select>
+                <div id="legend" style="margin-top: 1rem;"></div>
+                <span id="legend-method" style="font-size: 0.8rem;"></span>
+            </div>
+        </div>
+        <div class="card mt-2">
+            <div class="card-body">
+                <h5 class="card-title">{% trans "Layers" %}</h5>
+                    <input class="form-check-input" id="hotspots" type="checkbox" id="layerToggle" style="width: 30px" checked>
+                    Hotspots
+                    <br>
+                    <input class="form-check-input" id="coolspots" type="checkbox" id="layerToggle" style="width: 30px" checked>
+                    Coolspots
+            </div>
         </div>
     </div>
+
     <div id="map"></div>
 </div>
 {% endif %}
@@ -675,7 +687,7 @@ drawControlButton.onAdd = function(map) {
             title="{% trans 'Activate or deactivate drawing hot circles on the map.' %}"
         >
             <i class="bi bi-fire"></i>
-        </button>
+        </button> 
     `;
     return controlDiv;
 };
@@ -724,13 +736,22 @@ async function handleCircle(center, radius) {
     updateCircles();
 }
 
-let circleLayerGroup = L.layerGroup().addTo(map);
+let circleLayerGroupHot = L.layerGroup().addTo(map);
+let circleLayerGroupCool = L.layerGroup().addTo(map);
+
+document.getElementById('hotspots').addEventListener("change", function() {
+    if(this.checked) map.addLayer(circleLayerGroupHot); else map.removeLayer(circleLayerGroupHot);
+});
+document.getElementById('coolspots').addEventListener("change", function() {
+    if(this.checked) map.addLayer(circleLayerGroupCool); else map.removeLayer(circleLayerGroupCool);
+});
 
 function updateCircles() {
     fetch('/api/v1/workshops/{{workshop.pk}}/spot/').then(data => data.text().then(text => {
         j = JSON.parse(text);
         // Clear the existing circles
-        circleLayerGroup.clearLayers();
+        circleLayerGroupHot.clearLayers();
+        circleLayerGroupCool.clearLayers();
 
         j.forEach(circle => {
             const leafletCircle = L.circle([circle.lat, circle.lon], circle.radius);
@@ -747,13 +768,17 @@ function updateCircles() {
                 `<div>
                     <p>Type: ${circle.type}</p>
                     <p>Radius: ${Math.round(circle.radius)} meters</p>
-                    <p>Temperature: ${Math.round(circle.temperature * 100) / 100} </p>
+                    <p>Temperature: ${circle.temperature != null ? Math.round(circle.temperature * 100) / 100 : 'No measurements present'} </p>
                     <button onclick="removeCircle(${circle.pk})" >Remove Circle</button>
                 </div>`
             );
-            circleLayerGroup.addLayer(leafletCircle);
+            if(circle.type == 'hot'){
+                circleLayerGroupHot.addLayer(leafletCircle);
+            }else if(circle.type == 'cool'){
+                circleLayerGroupCool.addLayer(leafletCircle); 
+            }
         });
-    })); 
+    }));
 }
 
 async function removeCircle(workshop_spot) {
