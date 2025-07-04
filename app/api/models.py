@@ -40,6 +40,15 @@ class AirQualityRecord(models.Model):
     mode = models.ForeignKey(MobilityMode, on_delete=models.CASCADE, null=True, blank=True)
     location = models.ForeignKey('api.Location', on_delete=models.CASCADE, null=True, related_name='air_quality_records')
 
+    def save(self, *args, **kwargs):
+        if self.lat is not None and self.lon is not None and not self.location:
+            from django.contrib.gis.geos import Point
+            Location = self._meta.get_field('location').related_model
+            point = Point(self.lon, self.lat)
+            location_obj = Location.objects.create(coordinates=point)
+            self.location = location_obj
+        super().save(*args, **kwargs)
+
 
 class Location(models.Model):
     coordinates = PointField()
