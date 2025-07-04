@@ -38,6 +38,7 @@ class AirQualityRecord(models.Model):
     lon = models.FloatField(null=True, blank=True)
     location_precision = models.FloatField(null=True, blank=True)
     mode = models.ForeignKey(MobilityMode, on_delete=models.CASCADE, null=True, blank=True)
+    location = models.ForeignKey('api.Location', on_delete=models.CASCADE, null=True, related_name='air_quality_records')
 
 
 class Location(models.Model):

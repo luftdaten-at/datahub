@@ -7,6 +7,7 @@ from django.contrib.gis.geos import Point
 from PIL import Image, UnidentifiedImageError
 from PIL.ExifTags import TAGS
 from datetime import datetime, timezone
+from collections import defaultdict
 import pytz
 import time
 import pyproj
@@ -227,4 +228,20 @@ def get_avg_temp_per_spot(workshop_id):
               AND v.dimension = 7
             GROUP BY ws.id
         """, [workshop_id])
-        return cursor.fetchall()
+        d1 = cursor.fetchall()
+        cursor.execute("""
+            select ws.id, avg(aqr.temperature)
+            from api_airqualityrecord as aqr
+            inner join api_location l on l.id = aqr.location_id
+            inner join workshops_workshopspot ws
+                on ST_Within(l.coordinates, ws.area)
+                and ws.workshop_id = aqr.workshop_id
+            where aqr.workshop_id = %s
+            group by ws.id;
+        """, [workshop_id])
+        d2 = cursor.fetchall()
+        d = defaultdict(list)
+        for k, v in d1: d[k].append(v)
+        for k, v in d2: d[k].append(v)
+        res = [(k,np.mean(v)) for k,v in d.items()]
+        return res
