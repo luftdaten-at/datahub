@@ -294,6 +294,10 @@ LOG_VIEWER_EXCLUDE_TEXT_PATTERN = None  # String regex expression to exclude the
 
 import os
 
+# Ensure logs directory exists
+logs_dir = os.path.join(BASE_DIR, 'logs')
+os.makedirs(logs_dir, exist_ok=True)
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -307,7 +311,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/log.log'),
+            'filename': os.path.join(logs_dir, 'log.log'),
             'formatter': 'simple',
         },
     },

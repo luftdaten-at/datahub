@@ -78,14 +78,11 @@ class DeleteWorkshopSpotAPIView(APIView):
 
 @extend_schema(tags=['workshops'])
 class GetWorkshopSpotsAPIView(APIView):
-    permission_classes = (IsAuthenticated,)
     serializer_class = WorkshopSpotPkSerializer 
     def get(self, request, pk, *args, **kwargs):
         workshop = Workshop.objects.filter(pk=pk).first()
         if workshop is None:
             raise ValidationError("Workshop doesn't exists")
-        if not (request.user.is_superuser or request.user == workshop.owner):
-            raise PermissionDenied("You don't have the permissions to add a spot to this workshop")
 
         mean_temperature = {ws_id:mean_temp for ws_id, mean_temp in get_avg_temp_per_spot(pk)}
         ret = []
@@ -385,3 +382,6 @@ class CreateStationDataAPIView(APIView):
             import traceback
             logger.error(traceback.format_exc())
             return JsonResponse({"status": "error", "message": str(e)}, status=400)
+
+
+

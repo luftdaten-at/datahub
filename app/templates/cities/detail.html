@@ -13,7 +13,6 @@
 <!-- Leaflet JS -->
 <script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
-<script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
 <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
 {% comment %} <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> {% endcomment %}
 {% endblock styles %}
@@ -169,9 +168,12 @@
 
     // Leaflet-Karte (Ausschnitt, Tiles etc.) – dein vorhandener Code
     var map = L.map('map').setView([{{ city.coordinates.1|stringformat:"f" }}, {{ city.coordinates.0|stringformat:"f" }}], 13);
-    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    const tiles = L.tileLayer('https://mapsneu.wien.gv.at/basemap/bmapgrau/{type}/google3857/{z}/{y}/{x}.{format}', {
         maxZoom: 19,
-        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; OpenStreetMap'
+        attribution: 'Datenquelle: basemap.at',
+        type: 'normal',
+        format: 'png',
+        bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
     }).addTo(map);
 
     // Daten abrufen (Beispiel CSV) – dein vorhandener Code

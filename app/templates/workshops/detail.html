@@ -14,7 +14,6 @@
 
 <!-- Leaflet JS -->
 <script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-<script src="{% static 'js/TileLayer.Grayscale.js' %}"></script>
 <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
 
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
@@ -272,9 +271,38 @@
 
     const map = L.map('map', {fadeAnimation: false, rotate: true }).setView([48.2112, 16.3736], 13);
 
-    const tiles = L.tileLayer.grayscale('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // Define Austria bounds
+    const austriaBounds = {
+        north: 49.037872,
+        south: 46.35877,
+        east: 17.189532,
+        west: 8.782379
+    };
+
+    // Function to check if a point is outside Austria
+    function isOutsideAustria(lat, lon) {
+        return lat < austriaBounds.south || lat > austriaBounds.north || 
+               lon < austriaBounds.west || lon > austriaBounds.east;
+    }
+
+    // Function to switch basemap
+    function switchToOpenStreetMap() {
+        if (tiles) {
+            map.removeLayer(tiles);
+        }
+        tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+    }
+
+    // Initialize with BasemapAT.grau
+    let tiles = L.tileLayer('https://mapsneu.wien.gv.at/basemap/bmapgrau/{type}/google3857/{z}/{y}/{x}.{format}', {
         maxZoom: 19,
-        attribution: '<a href="https://luftdaten.at">CC BY 2024 Luftdaten.at</a> | &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        attribution: 'Datenquelle: basemap.at',
+        type: 'normal',
+        format: 'png',
+        bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
     }).addTo(map);
 
     var points;
@@ -291,6 +319,22 @@
         const json = JSON.parse(text);
         for (let item in json) {
             points.push(json[item]);
+        }
+
+        // Check if there are points outside Austria
+        let hasPointsOutsideAustria = false;
+        for (let point of points) {
+            if (point.lat && point.lon && isOutsideAustria(point.lat, point.lon)) {
+                hasPointsOutsideAustria = true;
+                console.log(`Point outside Austria found: lat=${point.lat}, lon=${point.lon}`);
+                break;
+            }
+        }
+
+        // Switch to OpenStreetMap if points are outside Austria
+        if (hasPointsOutsideAustria) {
+            console.log('Switching to OpenStreetMap basemap due to points outside Austria');
+            switchToOpenStreetMap();
         }
 
         var defaultPmTypeIndex = 'pm25'; // PM2.5
@@ -327,6 +371,12 @@
     imageLayer.addTo(map);
 
     function showDeviceList() {
+        // Check if points array is empty
+        if (!points || points.length === 0) {
+            console.log('No data available for device list');
+            return;
+        }
+        
         // 1. Erzeuge ein Objekt deviceCounts = { deviceName: Anzahl, ... }
         const deviceCounts = {};
         for (let i = 0; i < points.length; i++) {
@@ -371,6 +421,12 @@
 
         if (markerLayer != null) {
             map.removeLayer(markerLayer);
+        }
+
+        // Check if points array is empty
+        if (!points || points.length === 0) {
+            console.log('No data available for markers');
+            return;
         }
 
         // Marker layer
@@ -484,10 +540,16 @@ document.addEventListener("click", function(e) {
 
 function fitMapToAllPoints() {
     if (!points || points.length === 0) {
+        console.log('No data available for map bounds');
         return;
     }
     
-    const latLngs = points.map(item => [item.lat, item.lon]);
+    const latLngs = points.map(item => [item.lat, item.lon]).filter(coord => coord[0] && coord[1]);
+    if (latLngs.length === 0) {
+        console.log('No valid coordinates for map bounds');
+        return;
+    }
+    
     const bounds = L.latLngBounds(latLngs);
     map.fitBounds(bounds);
 }
@@ -510,8 +572,22 @@ function drawChart(value = 'pm25') {
     document.getElementById('chart-header').textContent = '{% trans "Chart" %} ' + chartLabels[value];
     const unit = chartUnits[value];
     const ctx = document.getElementById('chartCanvas').getContext('2d');
+    
+    // Check if points array is empty
+    if (!points || points.length === 0) {
+        console.log('No data available for chart');
+        return;
+    }
+    
     // Sort points by time
     const sorted = points.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
+    
+    // Check if sorted array is empty
+    if (sorted.length === 0) {
+        console.log('No valid data points for chart');
+        return;
+    }
+    
     // Determine if all points fall on the same day
     const firstDate = new Date(sorted[0].time);
     const sameDay = sorted.every(p => {
@@ -747,13 +823,29 @@ document.getElementById('coolspots').addEventListener("change", function() {
 });
 
 function updateCircles() {
-    fetch('/api/v1/workshops/{{workshop.pk}}/spot/').then(data => data.text().then(text => {
-        j = JSON.parse(text);
-        // Clear the existing circles
-        circleLayerGroupHot.clearLayers();
-        circleLayerGroupCool.clearLayers();
+    fetch('/api/v1/workshops/{{workshop.pk}}/spot/')
+        .then(response => {
+            if (!response.ok) {
+                console.log('Failed to fetch workshop spots:', response.status, response.statusText);
+                return [];
+            }
+            return response.text();
+        })
+        .then(text => {
+            if (!text) return;
+            
+            try {
+                const j = JSON.parse(text);
+                // Clear the existing circles
+                circleLayerGroupHot.clearLayers();
+                circleLayerGroupCool.clearLayers();
 
-        j.forEach(circle => {
+                if (!Array.isArray(j)) {
+                    console.log('Workshop spots data is not an array:', j);
+                    return;
+                }
+
+                j.forEach(circle => {
             const leafletCircle = L.circle([circle.lat, circle.lon], circle.radius);
             if(circle.type == 'cool'){
                 leafletCircle.setStyle({color: 'blue'});
@@ -778,7 +870,10 @@ function updateCircles() {
                 circleLayerGroupCool.addLayer(leafletCircle); 
             }
         });
-    }));
+            } catch (error) {
+                console.error('Error parsing workshop spots data:', error);
+            }
+        });
 }
 
 async function removeCircle(workshop_spot) {
