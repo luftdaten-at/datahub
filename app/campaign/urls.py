@@ -9,6 +9,7 @@ urlpatterns = [
     path('<str:pk>/update/', CampaignsUpdateView.as_view(), name='campaigns-update'),
     path('<str:pk>/delete/', CampaignsDeleteView.as_view(), name='campaigns-delete'),
     path('<str:pk>/add-user/', CampaignAddUserView.as_view(), name='campaign-add-user'),
+    path('<str:campaign_pk>/remove-user/<int:user_pk>/', CampaignRemoveUserView.as_view(), name='campaign-remove-user'),
     path('<str:pk>/participants/<int:user>/', ParticipantDetailView.as_view(), name='participants-detail'),
     path('<str:campaign_pk>/participants/<int:pk>/add-devices', ParticipantsAddDevicesView.as_view(), name='user-add-device'),
     path('rooms/<int:pk>/', RoomDetailView.as_view(), name='room-detail'),

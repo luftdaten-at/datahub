@@ -47,22 +47,16 @@ class CampaignForm(forms.ModelForm):
 
 
 class CampaignUserForm(forms.ModelForm):
-    users = (forms.ModelMultipleChoiceField(label='',
-             queryset=CustomUser.objects.none(),
-             widget=FilteredSelectMultiple(
-                verbose_name='Users',
-                is_stacked=False,
-             ),
-             required=False))
+    users = forms.ModelMultipleChoiceField(
+        label='',
+        queryset=CustomUser.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
 
     class Meta:
         model = Campaign
         fields = ['users']
-    
-    class Media:
-        css = {
-            'all': ('/static/admin/css/widgets.css', '/static/css/adminoverrides.css', ),
-        } # custom css
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -70,8 +64,24 @@ class CampaignUserForm(forms.ModelForm):
         # Get the user from the passed arguments (initial data)
         self.campaign = kwargs.get('initial', {}).get('campaign', None)
 
+        # Customize the label method to include email
+        self.fields['users'].label_from_instance = lambda obj: f"{obj.username} ({obj.email})"
+        
         if self.campaign:
-            self.fields['users'].queryset = self.campaign.organization.users.filter(~Q(id = self.campaign.owner.id)).all()
+            # Get all users in the organization who are not already in the campaign
+            organization_users = self.campaign.organization.users.all()
+            campaign_users = self.campaign.users.all()
+            available_users = organization_users.exclude(id__in=campaign_users.values_list('id', flat=True))
+            
+            # Create a new field with the proper queryset
+            self.fields['users'] = forms.ModelMultipleChoiceField(
+                label='',
+                queryset=available_users,
+                widget=forms.CheckboxSelectMultiple,
+                required=False
+            )
+            # Set the label method again
+            self.fields['users'].label_from_instance = lambda obj: f"{obj.username} ({obj.email})"
         
         # Initialize form helper
         self.helper = FormHelper(self)
@@ -79,9 +89,10 @@ class CampaignUserForm(forms.ModelForm):
     
     def save(self, commit=True):
         campaign = super().save(commit=commit)
-                
-        # set owner to be member
-        self.campaign.users.add(self.campaign.owner)
+        
+        # Ensure the campaign owner is always a member
+        if self.campaign.owner and self.campaign.owner not in campaign.users.all():
+            campaign.users.add(self.campaign.owner)
 
         return campaign
 

@@ -6,10 +6,12 @@ from django.core.exceptions import PermissionDenied
 from django.views.generic.detail import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
+from django.views.generic import View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.db.models import Max, Q
+from django.contrib import messages
 
 
 from .models import Campaign, Room
@@ -136,6 +138,19 @@ class CampaignAddUserView(LoginRequiredMixin, UpdateView):
         initial['campaign'] = self.object
         return initial
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['campaign'] = self.object
+        
+        # Add available users count to context for template condition
+        if self.object:
+            organization_users = self.object.organization.users.all()
+            campaign_users = self.object.users.all()
+            available_users = organization_users.exclude(id__in=campaign_users.values_list('id', flat=True))
+            context['available_users_count'] = available_users.count()
+        
+        return context
+
     def get_object(self, queryset = None):
         campaign = super().get_object(queryset)
         user = self.request.user
@@ -145,6 +160,27 @@ class CampaignAddUserView(LoginRequiredMixin, UpdateView):
         if user != campaign.owner:
             raise PermissionDenied('You are not allowed to update this Campaign')
         return campaign
+
+
+class CampaignRemoveUserView(LoginRequiredMixin, View):
+    def post(self, request, campaign_pk, user_pk):
+        campaign = get_object_or_404(Campaign, pk=campaign_pk)
+        user_to_remove = get_object_or_404(CustomUser, pk=user_pk)
+        
+        # Check permissions
+        if not request.user.is_superuser and request.user != campaign.owner:
+            raise PermissionDenied('You are not allowed to remove users from this Campaign')
+        
+        # Don't allow removing the campaign owner
+        if user_to_remove == campaign.owner:
+            messages.error(request, 'Cannot remove the campaign owner from the campaign.')
+            return redirect('campaigns-detail', pk=campaign_pk)
+        
+        # Remove the user from the campaign
+        campaign.users.remove(user_to_remove)
+        messages.success(request, f'{user_to_remove.username} has been removed from the campaign.')
+        
+        return redirect('campaigns-detail', pk=campaign_pk)
 
 
 class RoomAddDeviceView(LoginRequiredMixin, UpdateView):
