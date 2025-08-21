@@ -430,6 +430,11 @@ class RoomCreateView(LoginRequiredMixin, CreateView):
 
         return super().dispatch(request, *args, **kwargs)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['campaign'] = self.campaign
+        return context
+
     def form_valid(self, form):
         room = form.save(commit=False)
         campaign = self.campaign
@@ -461,6 +466,11 @@ class RoomUpdateView(LoginRequiredMixin, UpdateView):
             raise PermissionDenied("You are not allowed to create a Room")
 
         return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['campaign'] = self.campaign
+        return context
     
     def get_success_url(self):
         return reverse_lazy('campaigns-detail', kwargs={'pk': self.campaign.pk})
