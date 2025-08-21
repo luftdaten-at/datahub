@@ -67,6 +67,28 @@ class OrganizationUpdateView(LoginRequiredMixin, UpdateView):
             raise PermissionDenied('You are not allowed to edite this Organization')
         return organisation
 
+    def form_valid(self, form):
+        organization = form.save(commit=False)
+        new_owner = form.cleaned_data.get('new_owner')
+        
+        if new_owner and new_owner != organization.owner:
+            # Transfer ownership
+            old_owner = organization.owner
+            organization.owner = new_owner
+            organization.save()
+            
+            # Add success message
+            messages.success(
+                self.request, 
+                f"Ownership of '{organization.name}' has been transferred from {old_owner.username} to {new_owner.username}."
+            )
+        else:
+            # Just save the organization without ownership change
+            organization.save()
+            messages.success(self.request, f"Organization '{organization.name}' has been updated successfully.")
+        
+        return super().form_valid(form)
+
 
 class OrganizationDetailView(LoginRequiredMixin, DetailView):
     model = Organization

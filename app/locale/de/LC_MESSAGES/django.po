@@ -422,6 +422,24 @@ msgstr "Die Konto löschen Schaltfläche wird aktiviert, sobald Sie nicht mehr E
 msgid "You are not an owner of any organizations. You can safely delete your account."
 msgstr "Sie sind nicht Eigentümer einer Organisation. Sie können Ihr Konto sicher löschen."
 
+#: templates/organizations/create.html:5
+msgid "Edit Organization"
+msgstr "Organisation bearbeiten"
+
+#: templates/organizations/create.html:15
+msgid "Ownership Transfer"
+msgstr "Eigentümerwechsel"
+
+#: templates/organizations/create.html:16
+msgid "You can transfer ownership of this organization to another member using the form below."
+msgstr "Sie können das Eigentum dieser Organisation an ein anderes Mitglied übergeben, indem Sie das Formular unten verwenden."
+
+#: templates/organizations/create.html:26
+msgid "Update Organization"
+msgstr "Organisation aktualisieren"
+
+
+
 #: templates/account/signup.html:5 templates/account/signup.html:8
 #: templates/account/signup.html:12
 msgid "Register"
