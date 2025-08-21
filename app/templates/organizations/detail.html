@@ -2,12 +2,103 @@
 {% load i18n %}
 {% load static %}
 
+{% block title %}{{ organization.name }}{% endblock title %}
+
+{% block styles %}
+<style>
+.organization-user-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.organization-user-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.organization-user-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.organization-user-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.organization-user-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.organization-campaign-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.organization-campaign-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.organization-campaign-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.organization-campaign-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.organization-campaign-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.user-info, .campaign-info {
+    font-size: 0.9rem;
+}
+
+.user-info i, .campaign-info i, .device-info i {
+    width: 16px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+
+.organization-device-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.organization-device-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.organization-device-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.organization-device-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.organization-device-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.device-info {
+    font-size: 0.9rem;
+}
+</style>
+{% endblock styles %}
+
 {% block content %}
-<div class="container mt-5 flex-grow-1">
+<div class="container mt-5">
     <div class="row">
         <div class="col-12">
             <h2>{{ organization.name }}</h2>
-            <p><strong>{% trans "Description:" %}</strong> {{ organization.description }}</p>
+            {% if organization.description %}
+                <p class="text-muted">{{ organization.description }}</p>
+            {% endif %}
         </div>
     </div>
 
@@ -17,47 +108,68 @@
             <h3 class="mb-0">{% trans "Users" %}</h3>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th>{% trans "Username" %}</th>
-                            <th>{% trans "Email" %}</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in organization.users.all %}
-                            <tr>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td class="text-end">
-                                    <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm" title="{% trans 'Remove User' %}">
-                                        <i class="bi bi-trash"></i> {% trans "Remove" %}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="2" class="text-center">{% trans "No users found." %}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% if organization.users.all %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for user in organization.users.all %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm organization-user-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="#" class="text-decoration-none">{{ user.username }}</a>
+                                        {% if user == organization.owner %}
+                                            <span class="badge bg-primary ms-2">{% trans "Owner" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary ms-2">{% trans "Member" %}</span>
+                                        {% endif %}
+                                    </h5>
+                                    
+                                    <div class="user-info">
+                                        <div class="mb-2">
+                                            <i class="bi bi-envelope text-muted"></i>
+                                            <a href="mailto:{{ user.email }}" class="text-decoration-none text-muted">{{ user.email }}</a>
+                                        </div>
+                                        {% if user.first_name or user.last_name %}
+                                            <div class="mb-2">
+                                                <i class="bi bi-person text-muted"></i>
+                                                <strong>{% trans "Name:" %}</strong> {{ user.first_name }} {{ user.last_name }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        {% if user != organization.owner %}
+                                            <a href="{% url 'remove-user-from-organization' organization.pk user.pk %}" class="btn btn-danger btn-sm" title="{% trans 'Remove User' %}">
+                                                <i class="bi bi-trash"></i>
+                                                <span class="d-none d-sm-inline">{% trans "Remove" %}</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">{% trans "No users found." %}</p>
+                </div>
+            {% endif %}
         </div>
     </div>
 
-
-    <!-- Invite User Card -->
+    <!-- Invite User Section -->
     <div class="card mb-4">
         <div class="card-header">
-            <h4 class="mb-0">{% trans "Invite a User" %}</h4>
+            <h4 class="mb-0">
+                <i class="bi bi-person-plus me-2"></i>
+                {% trans "Invite a User" %}
+            </h4>
         </div>
         <div class="card-body">
-            <form method="post" action="{% url 'invite-user-to-organization' organization.pk %}">
+            <form method="post" action="{% url 'invite-user-to-organization' organization.pk %}" class="row g-3 align-items-end">
                 {% csrf_token %}
-                <div class="mb-3">
+                <div class="col-md-8">
                     <label for="invite-email" class="form-label">{% trans "User Email" %}</label>
                     <input
                         type="email"
@@ -68,9 +180,12 @@
                         required
                     />
                 </div>
-                <button type="submit" class="btn btn-success">
-                    <i class="bi bi-envelope-fill"></i> {% trans "Send Invitation" %}
-                </button>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-envelope-fill me-2"></i>
+                        {% trans "Send Invitation" %}
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -89,38 +204,148 @@
         {% endfor %}
     {% endif %}
 
+    <!-- Campaigns Card -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">{% trans "Campaigns" %}</h3>
+        </div>
+        <div class="card-body">
+            {% if organization.campaigns.all %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for campaign in organization.campaigns.all %}
+                        <div class="col">
+                            <div class="card h-100 shadow-sm organization-campaign-card">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="text-decoration-none">{{ campaign.name }}</a>
+                                        {% if campaign.public %}
+                                            <span class="badge bg-success ms-2">{% trans "Public" %}</span>
+                                        {% else %}
+                                            <span class="badge bg-warning ms-2">{% trans "Private" %}</span>
+                                        {% endif %}
+                                    </h5>
+                                    
+                                    {% if campaign.description %}
+                                        <p class="card-text text-muted mb-3">{{ campaign.description|truncatewords:20 }}</p>
+                                    {% endif %}
+                                    
+                                    <div class="campaign-info">
+                                        <div class="mb-2">
+                                            <i class="bi bi-calendar-event text-muted"></i>
+                                            <strong>{% trans "Date:" %}</strong> {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="bi bi-people text-muted"></i>
+                                            <strong>{% trans "Participants:" %}</strong> {{ campaign.users.count }}
+                                        </div>
+                                        <div class="mb-2">
+                                            <i class="bi bi-door-open text-muted"></i>
+                                            <strong>{% trans "Rooms:" %}</strong> {{ campaign.rooms.count }}
+                                        </div>
+                                        {% if campaign.owner %}
+                                            <div class="mb-2">
+                                                <i class="bi bi-person-badge text-muted"></i>
+                                                <strong>{% trans "Owner:" %}</strong> {{ campaign.owner.username }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="card-footer">
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a href="{% url 'campaigns-detail' campaign.pk %}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                            <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                                        </a>
+                                        {% if campaign.owner == user or user.is_superuser %}
+                                            <a href="{% url 'campaigns-update' campaign.pk %}" class="btn btn-secondary btn-sm">
+                                                <i class="bi bi-pencil-square"></i>
+                                                <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <p class="text-muted mb-0">{% trans "No campaigns found for this organization." %}</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
           <h3 class="mb-0">{% trans "Devices" %}</h3>
         </div>
         <div class="card-body">
-          <!-- Responsive Table-Wrapper; nur nötig, wenn es sehr viele Spalten gibt -->
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>{% trans "Device ID" %}</th>
-                  <th>{% trans "Device name" %}</th>
-                  <th>{% trans "Last update" %}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for device in organization.current_devices.all %}
-                  <tr>
-                    <td>{{ device.id }}</td>
-                    <td>{{ device.device_name }}</td>
-                    <td>{{ device.last_update }}</td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="3" class="text-muted text-center">
-                      {% trans "No Device found" %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-        </div>
+          {% if organization.current_devices.all %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+              {% for device in organization.current_devices.all %}
+                <div class="col">
+                  <div class="card h-100 shadow-sm organization-device-card">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <a href="#" class="text-decoration-none">{{ device.device_name }}</a>
+                        <span class="badge bg-info ms-2">ID: {{ device.id }}</span>
+                        {% if device.device_type %}
+                          <span class="badge bg-secondary ms-1">{{ device.device_type }}</span>
+                        {% endif %}
+                      </h5>
+                      
+                      <div class="device-info">
+                        <div class="mb-2">
+                          <i class="bi bi-clock text-muted"></i>
+                          <strong>{% trans "Last Update:" %}</strong> 
+                          {% if device.last_update %}
+                            {{ device.last_update|date:"d.m.Y H:i" }}
+                          {% else %}
+                            <span class="text-muted">{% trans "Never" %}</span>
+                          {% endif %}
+                        </div>
+                        {% if device.current_user %}
+                          <div class="mb-2">
+                            <i class="bi bi-person text-muted"></i>
+                            <strong>{% trans "Assigned to:" %}</strong> {{ device.current_user.username }}
+                          </div>
+                        {% endif %}
+                        {% if device.current_room %}
+                          <div class="mb-2">
+                            <i class="bi bi-door-open text-muted"></i>
+                            <strong>{% trans "Room:" %}</strong> {{ device.current_room.name }}
+                          </div>
+                        {% endif %}
+                        {% if device.current_campaign %}
+                          <div class="mb-2">
+                            <i class="bi bi-calendar-event text-muted"></i>
+                            <strong>{% trans "Campaign:" %}</strong> {{ device.current_campaign.name }}
+                          </div>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="card-footer">
+                      <div class="d-flex gap-2 justify-content-end">
+                        <a href="#" class="btn btn-primary btn-sm">
+                          <i class="bi bi-eye"></i>
+                          <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                        </a>
+                        <a href="#" class="btn btn-secondary btn-sm">
+                          <i class="bi bi-pencil-square"></i>
+                          <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <p class="text-muted mb-0">{% trans "No devices found for this organization." %}</p>
+            </div>
+          {% endif %}
         </div>
       </div>
 
