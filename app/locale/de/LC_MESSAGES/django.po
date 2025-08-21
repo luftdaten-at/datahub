@@ -109,15 +109,11 @@ msgstr "Meine Organisation"
 #: templates/_base.html:85 templates/account/dashboard.html:19
 #: templates/account/dashboard.html:42 templates/campaigns/my.html:4
 #: templates/campaigns/my.html:8
-#, fuzzy
-#| msgid "My campaigns"
 msgid "My Campaigns"
-msgstr "Meine Messkampagnen"
+msgstr "Meine Kampagnen"
 
 #: templates/_base.html:91 templates/workshops/my.html:4
 #: templates/workshops/my.html:8
-#, fuzzy
-#| msgid "My workshops"
 msgid "My Workshops"
 msgstr "Meine Workshops"
 
@@ -224,10 +220,8 @@ msgid "No campaigns found."
 msgstr "Keine Messkampagnen gefunden."
 
 #: templates/account/dashboard.html:70 templates/campaigns/my.html:9
-#, fuzzy
-#| msgid "Create campaign"
 msgid "Create Campaign"
-msgstr "Messkampagne erstellen"
+msgstr "Kampagne erstellen"
 
 #: templates/account/dashboard.html:76
 msgid "My Organization"
@@ -239,10 +233,8 @@ msgstr "Du bist nicht Mitglied einer Organisation."
 
 #: templates/account/dashboard.html:103 templates/organizations/create.html:10
 #: templates/organizations/my.html:13
-#, fuzzy
-#| msgid "Create campaign"
 msgid "Create Organization"
-msgstr "Messkampagne erstellen"
+msgstr "Organisation erstellen"
 
 #: templates/account/dashboard.html:111 templates/help.html:5
 #: templates/help.html:11
@@ -353,8 +345,6 @@ msgstr "Möchtest du wirklich löschen"
 #: templates/account/password_change.html:9
 #: templates/account/password_change.html:13 templates/account/settings.html:11
 #: templates/account/settings.html:12
-#, fuzzy
-#| msgid "Change password"
 msgid "Change Password"
 msgstr "Passwort ändern"
 
@@ -391,16 +381,46 @@ msgstr ""
 "wenn Sie sie nicht innerhalb weniger Minuten erhalten."
 
 #: templates/account/settings.html:14 templates/account/settings.html:17
-#, fuzzy
-#| msgid "Delete"
 msgid "Delete Data"
-msgstr "Löschen"
+msgstr "Daten löschen"
+
+#: templates/account/settings.html:11
+msgid "Update your account password to keep your account secure. Choose a strong password that you haven't used elsewhere."
+msgstr "Aktualisieren Sie Ihr Kontopasswort, um Ihr Konto sicher zu halten. Wählen Sie ein sicheres Passwort, das Sie nicht anderswo verwendet haben."
 
 #: templates/account/settings.html:19 templates/account/settings.html:23
-#, fuzzy
-#| msgid "Delete"
 msgid "Delete Account"
-msgstr "Löschen"
+msgstr "Konto löschen"
+
+#: templates/account/settings.html:15
+msgid "Your account is connected to"
+msgstr "Ihr Konto ist mit"
+
+#: templates/account/settings.html:15
+msgid "measurements. Do you really want to delete these?"
+msgstr "Messwerten verbunden. Möchten Sie diese wirklich löschen?"
+
+#: templates/account/settings.html:21
+msgid "Cannot Delete Account"
+msgstr "Konto kann nicht gelöscht werden"
+
+#: templates/account/settings.html:21
+msgid "Your account is currently an owner in these organizations:"
+msgstr "Ihr Konto ist derzeit Eigentümer dieser Organisationen:"
+
+
+
+#: templates/account/settings.html:21
+msgid "You must remove yourself, transfer ownership, or delete these organizations before you can delete your user."
+msgstr "Sie müssen sich entfernen, das Eigentum übertragen oder diese Organisationen löschen, bevor Sie Ihren Benutzer löschen können."
+
+#: templates/account/settings.html:21
+msgid "The delete account button will be enabled once you are no longer an owner of any organizations."
+msgstr "Die Konto löschen Schaltfläche wird aktiviert, sobald Sie nicht mehr Eigentümer einer Organisation sind."
+
+#: templates/account/settings.html:21
+msgid "You are not an owner of any organizations. You can safely delete your account."
+msgstr "Sie sind nicht Eigentümer einer Organisation. Sie können Ihr Konto sicher löschen."
 
 #: templates/account/signup.html:5 templates/account/signup.html:8
 #: templates/account/signup.html:12
@@ -1212,6 +1232,170 @@ msgstr ""
 "Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."
+
+#: templates/account/login.html:25
+msgid "Please correct the errors below."
+msgstr "Bitte korrigieren Sie die folgenden Fehler."
+
+#: templates/account/login.html:35
+msgid "Enter your email address"
+msgstr "Geben Sie Ihre E-Mail-Adresse ein"
+
+#: templates/account/login.html:55
+msgid "Enter your password"
+msgstr "Geben Sie Ihr Passwort ein"
+
+#: templates/account/login.html:70
+msgid "Remember me"
+msgstr "Angemeldet bleiben"
+
+#: templates/account/login.html:75
+msgid "Send Reset Email"
+msgstr "Zurücksetzen-E-Mail senden"
+
+#: templates/account/login.html:78
+msgid "Back to Login"
+msgstr "Zurück zur Anmeldung"
+
+#: templates/account/login.html:85
+msgid "Don't have an account?"
+msgstr "Haben Sie noch kein Konto?"
+
+#: templates/account/login.html:95
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+#: templates/account/password_reset.html:25
+msgid "You are already logged in."
+msgstr "Sie sind bereits angemeldet."
+
+#: templates/account/password_reset_done.html:15
+msgid "Password Reset Email Sent"
+msgstr "Passwort-Zurücksetzen-E-Mail gesendet"
+
+#: templates/account/password_reset_done.html:20
+msgid "Check Your Email"
+msgstr "Überprüfen Sie Ihre E-Mail"
+
+#: templates/account/password_reset_done.html:25
+msgid "We have sent you an email with instructions to reset your password. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes."
+msgstr "Wir haben Ihnen eine E-Mail mit Anweisungen zum Zurücksetzen Ihres Passworts gesendet. Wenn Sie diese nicht erhalten haben, überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, wenn Sie sie nicht innerhalb weniger Minuten erhalten."
+
+#: templates/account/password_reset_done.html:38
+msgid "Go to Homepage"
+msgstr "Zur Startseite"
+
+#: templates/account/password_reset_from_key.html:25
+msgid "Password Reset Failed"
+msgstr "Passwort-Zurücksetzen fehlgeschlagen"
+
+#: templates/account/password_reset_from_key.html:30
+msgid "The password reset link was invalid, possibly because it has already been used or has expired."
+msgstr "Der Passwort-Zurücksetzen-Link war ungültig, möglicherweise weil er bereits verwendet wurde oder abgelaufen ist."
+
+#: templates/account/password_reset_from_key.html:35
+msgid "Request New Password Reset"
+msgstr "Neues Passwort-Zurücksetzen anfordern"
+
+#: templates/account/password_reset_from_key.html:45
+msgid "Please enter your new password twice so we can verify you typed it in correctly."
+msgstr "Bitte geben Sie Ihr neues Passwort zweimal ein, damit wir überprüfen können, dass Sie es korrekt eingegeben haben."
+
+#: templates/account/password_reset_from_key.html:55
+msgid "New Password"
+msgstr "Neues Passwort"
+
+#: templates/account/password_reset_from_key.html:75
+msgid "Confirm New Password"
+msgstr "Neues Passwort bestätigen"
+
+#: templates/account/password_reset_from_key.html:95
+msgid "Change My Password"
+msgstr "Mein Passwort ändern"
+
+#: templates/account/password_reset_from_key.html:105
+msgid "Password Reset Complete"
+msgstr "Passwort-Zurücksetzen abgeschlossen"
+
+#: templates/account/password_reset_from_key.html:110
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr "Ihr Passwort wurde gesetzt. Sie können sich jetzt anmelden."
+
+#: templates/account/logout.html:25
+msgid "Confirm Logout"
+msgstr "Abmeldung bestätigen"
+
+
+
+
+
+#: templates/account/signup.html:80
+msgid "Confirm your password"
+msgstr "Bestätigen Sie Ihr Passwort"
+
+#: templates/account/signup.html:105
+msgid "Already have an account?"
+msgstr "Haben Sie bereits ein Konto?"
+
+
+
+#: templates/campaigns/detail.html:130
+msgid "No rooms available for this campaign."
+msgstr "Keine Räume für diese Kampagne verfügbar."
+
+#: templates/campaigns/detail.html:152
+msgid "Contact Information"
+msgstr "Kontaktinformationen"
+
+#: templates/campaigns/detail.html:158
+msgid "Campaign Owner"
+msgstr "Kampagneninhaber"
+
+#: templates/campaigns/detail.html:169
+msgid "Are you sure you want to remove this user from the campaign?"
+msgstr "Sind Sie sicher, dass Sie diesen Benutzer aus der Kampagne entfernen möchten?"
+
+#: templates/campaigns/detail.html:190
+msgid "Back to my Campaigns"
+msgstr "Zurück zu meinen Kampagnen"
+
+
+
+#: templates/campaigns/my.html:88
+msgid "Organization:"
+msgstr "Organisation:"
+
+#: templates/campaigns/my.html:93
+msgid "Participants:"
+msgstr "Teilnehmer:"
+
+#: templates/campaigns/my.html:97
+msgid "Rooms:"
+msgstr "Räume:"
+
+#: templates/campaigns/add_user.html:6
+msgid "Add Participants to Campaign"
+msgstr "Teilnehmer zur Kampagne hinzufügen"
+
+#: templates/campaigns/add_user.html:14
+msgid "Select Users to Add:"
+msgstr "Benutzer zum Hinzufügen auswählen:"
+
+#: templates/campaigns/add_user.html:16
+msgid "Select All"
+msgstr "Alle auswählen"
+
+#: templates/campaigns/add_user.html:32
+msgid "No users available to add to this campaign."
+msgstr "Keine Benutzer verfügbar, um sie zu dieser Kampagne hinzuzufügen."
+
+#: templates/campaigns/add_user.html:41
+msgid "Add Selected Users"
+msgstr "Ausgewählte Benutzer hinzufügen"
+
+#: templates/campaigns/add_user.html:104
+msgid "Deselect All"
+msgstr "Alle abwählen"
 
 #, fuzzy
 #~| msgid "Log in"
