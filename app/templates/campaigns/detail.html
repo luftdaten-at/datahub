@@ -38,6 +38,38 @@
     border-top: 1px solid rgba(0, 0, 0, 0.125);
     background-color: rgba(0, 0, 0, 0.02);
 }
+
+.participant-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.participant-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.participant-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.participant-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.participant-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.participant-card a[href^="mailto:"] {
+    color: #6c757d;
+    transition: color 0.2s ease-in-out;
+}
+
+.participant-card a[href^="mailto:"]:hover {
+    color: #0d6efd;
+}
 </style>
 {% endblock styles %}
 
@@ -107,46 +139,52 @@
           <a href="{% url 'campaign-add-user' campaign.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Participant" %}</a>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                    <th>{% trans "Username" %}</th>
-                    <th>{% trans "Email" %}</th>
-                    <th></th>
-                </tr>
-              </thead>
-              <tbody>
-            {% for user in campaign.users.all %}
-                <tr>
-                    <td><a href="{% url 'participants-detail' campaign.pk user.pk %}">{{ user.username }}</a></td>
-                    <td>{{ user.email }}</td>
-                    <td>
-                      <div class="text-end d-flex flex-column flex-md-row gap-2 justify-content-end">
+          {% if campaign.users.all %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+              {% for user in campaign.users.all %}
+                <div class="col">
+                  <div class="card h-100 shadow-sm participant-card">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="text-decoration-none">{{ user.username }}</a>
+                      </h5>
+                      <div class="mb-3">
+                        <h6 class="text-muted mb-2">{% trans "Contact Information" %}</h6>
+                        <p class="mb-1">
+                          <i class="bi bi-envelope me-2 text-muted"></i>
+                          <a href="mailto:{{ user.email }}" class="text-decoration-none">{{ user.email }}</a>
+                        </p>
+                        {% if user == campaign.owner %}
+                          <span class="badge bg-primary">{% trans "Campaign Owner" %}</span>
+                        {% endif %}
+                      </div>
+                    </div>
+                    <div class="card-footer">
+                      <div class="d-flex gap-2 justify-content-end">
                         <a href="{% url 'participants-detail' campaign.pk user.pk %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-eye"></i>
-                            <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                          <i class="bi bi-eye"></i>
+                          <span class="d-none d-sm-inline">{% trans "Details" %}</span>
                         </a>
                         {% if user != campaign.owner %}
-                            <form method="post" action="{% url 'campaign-remove-user' campaign.pk user.pk %}" style="display: inline;" onsubmit="return confirm('{% trans 'Are you sure you want to remove this user from the campaign?' %}')">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-danger btn-sm">
-                                    <i class="bi bi-x-octagon"></i>
-                                    <span class="d-none d-sm-inline">{% trans "Remove" %}</span>
-                                </button>
-                            </form>
+                          <form method="post" action="{% url 'campaign-remove-user' campaign.pk user.pk %}" style="display: inline;" onsubmit="return confirm('{% trans 'Are you sure you want to remove this user from the campaign?' %}')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm">
+                              <i class="bi bi-x-octagon"></i>
+                              <span class="d-none d-sm-inline">{% trans "Remove" %}</span>
+                            </button>
+                          </form>
                         {% endif %}
+                      </div>
                     </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="3">{% trans "There are no participants in this campaign yet." %}</td>
-                </tr>
-            {% endfor %}
-              </tbody>
-            </table>
-          </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <p class="text-muted mb-0">{% trans "There are no participants in this campaign yet." %}</p>
+            </div>
+          {% endif %}
         </div>
     </div>
     <a href="{% url 'campaigns-my' %}" class="btn btn-outline-secondary">Back to my Campaigns</a>
