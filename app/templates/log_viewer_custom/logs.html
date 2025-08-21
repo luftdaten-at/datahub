@@ -1,0 +1,490 @@
+{% extends '_base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "System Logs" %}{% endblock title %}
+
+{% block content %}
+
+<div class="container-fluid mt-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">
+                    <i class="bi bi-journal-text me-2"></i>{% trans "System Logs" %}
+                </h2>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary" onclick="refreshLogs()">
+                        <i class="bi bi-arrow-clockwise me-1"></i>{% trans "Refresh" %}
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="downloadLogs()">
+                        <i class="bi bi-download me-1"></i>{% trans "Download" %}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label for="levelFilter" class="form-label">{% trans "Log Level" %}</label>
+                            <select class="form-select" id="levelFilter" onchange="filterLogs()">
+                                {% for option in level_options %}
+                                    <option value="{{ option.value }}" {% if option.value == level_filter %}selected{% endif %}>
+                                        {{ option.label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="searchFilter" class="form-label">{% trans "Search" %}</label>
+                            <input type="text" class="form-control" id="searchFilter" placeholder="{% trans 'Search in messages...' %}" onkeyup="filterLogs()">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="perPageFilter" class="form-label">{% trans "Per Page" %}</label>
+                            <select class="form-select" id="perPageFilter" onchange="changePerPage()">
+                                <option value="25">25</option>
+                                <option value="50" selected>50</option>
+                                <option value="100">100</option>
+                                <option value="200">200</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                                    <i class="bi bi-x-circle me-1"></i>{% trans "Clear Filters" %}
+                                </button>
+                                <button class="btn btn-outline-info" onclick="autoRefresh()" id="autoRefreshBtn">
+                                    <i class="bi bi-play-circle me-1"></i>{% trans "Auto Refresh" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Statistics -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-secondary">DEBUG</h5>
+                            <p class="card-text" id="debugCount">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">INFO</h5>
+                            <p class="card-text" id="infoCount">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">WARNING</h5>
+                            <p class="card-text" id="warningCount">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-danger">ERROR</h5>
+                            <p class="card-text" id="errorCount">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">CRITICAL</h5>
+                            <p class="card-text" id="criticalCount">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{% trans "Total" %}</h5>
+                            <p class="card-text" id="totalCount">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Entries -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{% trans "Log Entries" %}</h5>
+                        <small class="text-muted" id="logInfo">{% trans "Loading..." %}</small>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="logsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width: 180px;">{% trans "Timestamp" %}</th>
+                                    <th style="width: 100px;">{% trans "Level" %}</th>
+                                    <th>{% trans "Message" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <tr>
+                                    <td colspan="3" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">{% trans "Loading..." %}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="{% trans 'Log pagination' %}" class="mt-4">
+                <ul class="pagination justify-content-center" id="pagination">
+                    <!-- Pagination will be populated by JavaScript -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+let currentPage = 1;
+let totalPages = 1;
+let autoRefreshInterval = null;
+let allLogs = [];
+
+function loadLogs(page = 1) {
+    const levelFilter = document.getElementById('levelFilter').value;
+    const perPage = document.getElementById('perPageFilter').value;
+    
+    const url = `{% url 'log_viewer_custom:logs_json' %}?page=${page}&per_page=${perPage}&level=${levelFilter}`;
+    
+    fetch(url, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                console.error('Error loading logs:', data.error);
+                document.getElementById('logsTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center text-danger py-4">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Error: ${data.error}
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            allLogs = data.logs;
+            currentPage = data.current_page;
+            totalPages = data.pages;
+            
+            displayLogs(data.logs);
+            updatePagination(data);
+            updateStatistics(data);
+            updateLogInfo(data);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('logsTableBody').innerHTML = `
+                <tr>
+                    <td colspan="3" class="text-center text-danger py-4">
+                        <i class="bi bi-exclamation-triangle me-2"></i>{% trans "Error loading logs" %}: ${error.message}
+                    </td>
+                </tr>
+            `;
+        });
+}
+
+function displayLogs(logs) {
+    const tbody = document.getElementById('logsTableBody');
+    
+    if (logs.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox me-2"></i>{% trans "No log entries found" %}
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = logs.map(log => {
+        // Safely escape HTML
+        const safeMessage = log.message.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        return `
+            <tr class="log-entry" data-level="${log.level.toLowerCase()}" data-message="${log.message.toLowerCase()}">
+                <td>
+                    <small class="text-muted">${log.timestamp}</small>
+                </td>
+                <td>
+                    <span class="badge ${getLevelBadgeClass(log.level)}">
+                        <i class="bi ${getLevelIconClass(log.level)} me-1"></i>${log.level}
+                    </span>
+                </td>
+                <td>
+                    <div class="log-message" style="max-width: 600px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        ${safeMessage}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getLevelBadgeClass(level) {
+    const badgeMap = {
+        'DEBUG': 'bg-secondary',
+        'INFO': 'bg-info',
+        'WARNING': 'bg-warning',
+        'ERROR': 'bg-danger',
+        'CRITICAL': 'bg-dark'
+    };
+    return badgeMap[level] || 'bg-light text-dark';
+}
+
+function getLevelIconClass(level) {
+    const iconMap = {
+        'DEBUG': 'bi-bug',
+        'INFO': 'bi-info-circle',
+        'WARNING': 'bi-exclamation-triangle',
+        'ERROR': 'bi-exclamation-octagon',
+        'CRITICAL': 'bi-x-octagon'
+    };
+    return iconMap[level] || 'bi-question-circle';
+}
+
+function updatePagination(data) {
+    const pagination = document.getElementById('pagination');
+    const pages = [];
+    
+    // Previous button
+    if (data.has_previous) {
+        pages.push(`<li class="page-item"><a class="page-link" href="#" onclick="loadLogs(${data.current_page - 1})">&laquo;</a></li>`);
+    } else {
+        pages.push(`<li class="page-item disabled"><span class="page-link">&laquo;</span></li>`);
+    }
+    
+    // Page numbers
+    const startPage = Math.max(1, data.current_page - 2);
+    const endPage = Math.min(data.pages, data.current_page + 2);
+    
+    for (let i = startPage; i <= endPage; i++) {
+        if (i === data.current_page) {
+            pages.push(`<li class="page-item active"><span class="page-link">${i}</span></li>`);
+        } else {
+            pages.push(`<li class="page-item"><a class="page-link" href="#" onclick="loadLogs(${i})">${i}</a></li>`);
+        }
+    }
+    
+    // Next button
+    if (data.has_next) {
+        pages.push(`<li class="page-item"><a class="page-link" href="#" onclick="loadLogs(${data.current_page + 1})">&raquo;</a></li>`);
+    } else {
+        pages.push(`<li class="page-item disabled"><span class="page-link">&raquo;</span></li>`);
+    }
+    
+    pagination.innerHTML = pages.join('');
+}
+
+function updateStatistics(data) {
+    // Use level_counts from server if available, otherwise calculate from current page
+    let counts = data.level_counts || {
+        'DEBUG': 0,
+        'INFO': 0,
+        'WARNING': 0,
+        'ERROR': 0,
+        'CRITICAL': 0
+    };
+    
+    // If no level_counts from server, calculate from current page logs
+    if (!data.level_counts && data.logs) {
+        data.logs.forEach(log => {
+            counts[log.level] = (counts[log.level] || 0) + 1;
+        });
+    }
+    
+    document.getElementById('debugCount').textContent = counts['DEBUG'] || 0;
+    document.getElementById('infoCount').textContent = counts['INFO'] || 0;
+    document.getElementById('warningCount').textContent = counts['WARNING'] || 0;
+    document.getElementById('errorCount').textContent = counts['ERROR'] || 0;
+    document.getElementById('criticalCount').textContent = counts['CRITICAL'] || 0;
+    document.getElementById('totalCount').textContent = data.total || 0;
+}
+
+function updateLogInfo(data) {
+    const logInfo = document.getElementById('logInfo');
+    logInfo.textContent = `{% trans "Showing" %} ${data.logs.length} {% trans "of" %} ${data.total} {% trans "entries" %} ({% trans "Page" %} ${data.current_page} {% trans "of" %} ${data.pages})`;
+}
+
+function filterLogs() {
+    const levelFilter = document.getElementById('levelFilter').value;
+    const searchFilter = document.getElementById('searchFilter').value.toLowerCase();
+    
+    // Reload logs with new filters
+    loadLogs(1);
+}
+
+function changePerPage() {
+    loadLogs(1);
+}
+
+function clearFilters() {
+    document.getElementById('levelFilter').value = '';
+    document.getElementById('searchFilter').value = '';
+    loadLogs(1);
+}
+
+function refreshLogs() {
+    loadLogs(currentPage);
+}
+
+function autoRefresh() {
+    const btn = document.getElementById('autoRefreshBtn');
+    const icon = btn.querySelector('i');
+    
+    if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        autoRefreshInterval = null;
+        icon.className = 'bi bi-play-circle me-1';
+        btn.innerHTML = '<i class="bi bi-play-circle me-1"></i>{% trans "Auto Refresh" %}';
+        btn.classList.remove('btn-success');
+        btn.classList.add('btn-outline-info');
+    } else {
+        autoRefreshInterval = setInterval(() => {
+            loadLogs(currentPage);
+        }, 5000); // Refresh every 5 seconds
+        icon.className = 'bi bi-pause-circle me-1';
+        btn.innerHTML = '<i class="bi bi-pause-circle me-1"></i>{% trans "Stop Auto Refresh" %}';
+        btn.classList.remove('btn-outline-info');
+        btn.classList.add('btn-success');
+    }
+}
+
+
+
+function downloadLogs() {
+    const levelFilter = document.getElementById('levelFilter').value;
+    const url = `{% url 'log_viewer_custom:logs_json' %}?level=${levelFilter}&download=true`;
+    
+    // Show loading state
+    const downloadBtn = document.querySelector('button[onclick="downloadLogs()"]');
+    const originalText = downloadBtn.innerHTML;
+    downloadBtn.innerHTML = '<i class="bi bi-hourglass me-1"></i>Downloading...';
+    downloadBtn.disabled = true;
+    
+    fetch(url, {
+        method: 'GET',
+        credentials: 'same-origin',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error downloading logs:', data.error);
+                alert('Error downloading logs: ' + data.error);
+                return;
+            }
+            
+            // Create CSV content
+            const csvContent = [
+                ['Timestamp', 'Level', 'Message'],
+                ...data.logs.map(log => [
+                    log.timestamp, 
+                    log.level, 
+                    log.message.replace(/"/g, '""') // Escape quotes in CSV
+                ])
+            ].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+            
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `logs_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(downloadUrl);
+            
+            // Show success message
+            alert(`Downloaded ${data.logs.length} log entries to CSV file.`);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error downloading logs. Please try again.');
+        })
+        .finally(() => {
+            // Restore button state
+            downloadBtn.innerHTML = originalText;
+            downloadBtn.disabled = false;
+        });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Verify elements exist
+    const tbody = document.getElementById('logsTableBody');
+    const levelFilter = document.getElementById('levelFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    
+    if (!tbody) {
+        console.error('Critical error: logsTableBody element not found!');
+        return;
+    }
+    if (!levelFilter) {
+        console.error('Critical error: levelFilter element not found!');
+        return;
+    }
+    if (!searchFilter) {
+        console.error('Critical error: searchFilter element not found!');
+        return;
+    }
+    
+    // Initialize the log viewer
+    loadLogs();
+    
+    // Add search functionality
+    searchFilter.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const rows = document.querySelectorAll('#logsTableBody tr.log-entry');
+        
+        rows.forEach(row => {
+            const message = row.querySelector('.log-message').textContent.toLowerCase();
+            if (message.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock content %}

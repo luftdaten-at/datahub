@@ -42,7 +42,7 @@ urlpatterns = [
     path('stations/', include('stations.urls')),
     path('workshops/', include('workshops.urls')),
     path('organizations/', include('organizations.urls')),
-    path('logs/', include('log_viewer.urls')),
+    path('logs/', include('log_viewer_custom.urls')),
 ] + i18n_patterns(
     # Your URLs that require localization
     # Include set_language URL

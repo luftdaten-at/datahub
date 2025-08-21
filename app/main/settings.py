@@ -83,7 +83,6 @@ INSTALLED_APPS = [
     'oauth2_provider',
     'auditlog',
     'debug_toolbar',
-    "log_viewer",
     # Local
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
@@ -93,7 +92,8 @@ INSTALLED_APPS = [
     'pages.apps.PagesConfig',
     'stations.apps.StationsConfig',
     'workshops.apps.WorkshopsConfig',
-    'organizations.apps.OrganizationsConfig'
+    'organizations.apps.OrganizationsConfig',
+    'log_viewer_custom.apps.LogViewerCustomConfig'
 ]
 
 MIDDLEWARE = [
@@ -319,7 +319,13 @@ LOGGING = {
         },
     },
     'loggers': {
-        # Optional: Custom logger for your app
+        # Django root logger
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # Application logger
         'myapp': {
             'handlers': ['file'],
             'level': 'DEBUG',

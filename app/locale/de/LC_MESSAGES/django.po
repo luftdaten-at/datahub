@@ -537,6 +537,38 @@ msgstr "Löschen"
 msgid "Participants"
 msgstr "Teilnehmer:innen"
 
+#: templates/log_viewer_custom/logs.html:4
+msgid "System Logs"
+msgstr "Systemprotokolle"
+
+#: templates/log_viewer_custom/logs.html:12
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+
+
+
+
+
+
+
+
+
+
+
+
+#: templates/log_viewer_custom/logs.html:120
+msgid "No log entries found"
+msgstr "Keine Protokolleinträge gefunden"
+
+#: templates/log_viewer_custom/logs.html:121
+msgid "Error loading logs"
+msgstr "Fehler beim Laden der Protokolle"
+
+#: templates/log_viewer_custom/logs.html:123
+msgid "Stop Auto Refresh"
+msgstr "Auto-Aktualisierung stoppen"
+
 #: templates/campaigns/detail.html:80
 msgid "Add Participant"
 msgstr "Teilnehmer:in hinzufügen"
