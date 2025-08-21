@@ -11,6 +11,33 @@
     background-color: #28a745;
     color: #fff;
 }
+
+.room-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.room-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.room-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.room-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.measurement-badges {
+    font-size: 0.8rem;
+}
+
+.room-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
 </style>
 {% endblock styles %}
 
@@ -27,50 +54,50 @@
           <a href="{% url 'room-create' campaign.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Create Room" %}</a>
         </div>
         <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                    <th>{% trans "Room name" %}</th>
-                    <th>{% trans "Current measurements" %}</th>
-                    <th></th>
-                </tr>
-              </thead>
-              <tbody>
-            {% for room in campaign.rooms.all %}
-                <tr>
-                    <td><a href="{% url 'room-detail' room.pk %}">{{ room.name }}</a></td>
-                    <td>
-                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:1|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:0 }}°C</span>
-                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:3|to_rgb }})" class="badge badge-custom-green">PM2.5 {{ room_current_values|get:room.pk|at:2 }}µg/m³</span>
-                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:5|to_rgb }})" class="badge badge-custom-green">CO₂ {{ room_current_values|get:room.pk|at:4 }}ppm</span>
-                        <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:7|to_rgb }})" class="badge badge-custom-green">TVOC {{ room_current_values|get:room.pk|at:6 }}ppb</span>
-                    </td>
-                    <td>
-                      <div class="d-flex flex-column flex-md-row gap-2 justify-content-end">
+          {% if campaign.rooms.all %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+              {% for room in campaign.rooms.all %}
+                <div class="col">
+                  <div class="card h-100 shadow-sm room-card">
+                    <div class="card-body">
+                      <h5 class="card-title">
+                        <a href="{% url 'room-detail' room.pk %}" class="text-decoration-none">{{ room.name }}</a>
+                      </h5>
+                      <div class="mb-3">
+                        <h6 class="text-muted mb-2">{% trans "Current measurements" %}</h6>
+                        <div class="d-flex flex-wrap gap-1 measurement-badges">
+                          <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:1|to_rgb }})" class="badge badge-custom-green">Temp {{ room_current_values|get:room.pk|at:0 }}°C</span>
+                          <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:3|to_rgb }})" class="badge badge-custom-green">PM2.5 {{ room_current_values|get:room.pk|at:2 }}µg/m³</span>
+                          <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:5|to_rgb }})" class="badge badge-custom-green">CO₂ {{ room_current_values|get:room.pk|at:4 }}ppm</span>
+                          <span style="color: black; background-color: rgb({{ room_current_values|get:room.pk|at:7|to_rgb }})" class="badge badge-custom-green">TVOC {{ room_current_values|get:room.pk|at:6 }}ppb</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="card-footer">
+                      <div class="d-flex gap-2 justify-content-end">
                         <a href="{% url 'room-detail' room.pk %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-eye"></i>
-                            <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                          <i class="bi bi-eye"></i>
+                          <span class="d-none d-sm-inline">{% trans "Details" %}</span>
                         </a>
                         <a href="{% url 'room-update' campaign.pk room.pk %}" class="btn btn-secondary btn-sm">
-                            <i class="bi bi-pencil-square"></i>
-                            <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                          <i class="bi bi-pencil-square"></i>
+                          <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
                         </a>
                         <a href="{% url 'room-delete' room.pk %}" class="btn btn-danger btn-sm">
-                            <i class="bi bi-trash"></i>
-                            <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
+                          <i class="bi bi-trash"></i>
+                          <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
                         </a>
+                      </div>
                     </div>
-                    </td>
-                </tr>
-            {% empty %}
-                <tr>
-                    <td colspan="2">Keine Räume für diese Kampagne verfügbar.</td>
-                </tr>
-            {% endfor %}
-              </tbody>
-            </table>
-          </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="text-center py-4">
+              <p class="text-muted mb-0">{% trans "No rooms available for this campaign." %}</p>
+            </div>
+          {% endif %}
         </div>
     </div>
 
