@@ -5,49 +5,120 @@
 {% block title %}{% trans "My Organizations" %}{% endblock title %}
 
 {% block styles %}
+<style>
+.organization-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.organization-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.organization-card .card-title a {
+    color: #495057;
+    transition: color 0.2s ease-in-out;
+}
+
+.organization-card .card-title a:hover {
+    color: #0d6efd;
+}
+
+.organization-card .card-footer {
+    border-top: 1px solid rgba(0, 0, 0, 0.125);
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.organization-info {
+    font-size: 0.9rem;
+}
+
+.organization-info i {
+    width: 16px;
+    text-align: center;
+    margin-right: 0.5rem;
+}
+</style>
 {% endblock styles %}
 
 {% block content %}
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-5">
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "My Organisations" %}</h2>
         <a href="{% url 'organizations-create' %}" class="btn btn-outline-primary">{% trans "Create Organization" %}</a>
     </div>
+    
     {% if member_organizations %}
-    <div class="list-group">
-        {% for organization in organizations %}
-            <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                <div class="mb-2 mb-md-0">
-                    <h5 class="mb-1">
-                        <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a> 
-                        {% if organization in owner_organizations %}
-                            <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                        {% elif organization in member_organizations %}
-                            <span class="badge bg-secondary">{% trans "Member" %}</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{% trans "Other" %}</span>
-                        {% endif %}
-                    </h5>
-                    <p class="mb-1">
-                        {{ organization.description|truncatewords:20 }}
-                    </p>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for organization in organizations %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm organization-card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'organizations-detail' organization.pk %}" class="text-decoration-none">{{ organization.name }}</a>
+                                {% if organization in owner_organizations %}
+                                    <span class="badge bg-primary ms-2">{% trans "Owner" %}</span>
+                                {% elif organization in member_organizations %}
+                                    <span class="badge bg-secondary ms-2">{% trans "Member" %}</span>
+                                {% else %}
+                                    <span class="badge bg-info ms-2">{% trans "Other" %}</span>
+                                {% endif %}
+                            </h5>
+                            
+                            {% if organization.description %}
+                                <p class="card-text text-muted mb-3">{{ organization.description|truncatewords:25 }}</p>
+                            {% endif %}
+                            
+                            <div class="organization-info">
+                                <div class="mb-2">
+                                    <i class="bi bi-people text-muted"></i>
+                                    <strong>{% trans "Members:" %}</strong> {{ organization.users.count }}
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-calendar-event text-muted"></i>
+                                    <strong>{% trans "Campaigns:" %}</strong> {{ organization.campaigns.count }}
+                                </div>
+                                <div class="mb-2">
+                                    <i class="bi bi-cpu text-muted"></i>
+                                    <strong>{% trans "Devices:" %}</strong> {{ organization.current_devices.count }}
+                                </div>
+                                {% if organization.owner %}
+                                    <div class="mb-2">
+                                        <i class="bi bi-person-badge text-muted"></i>
+                                        <strong>{% trans "Owner:" %}</strong> {{ organization.owner.username }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="{% url 'organizations-detail' organization.pk %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i>
+                                    <span class="d-none d-sm-inline">{% trans "Details" %}</span>
+                                </a>
+                                {% if organization in owner_organizations or user.is_superuser %}
+                                    <a href="{% url 'organizations-update' organization.pk %}" class="btn btn-secondary btn-sm">
+                                        <i class="bi bi-pencil-square"></i>
+                                        <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+                                    </a>
+                                    <a href="{% url 'organizations-delete' organization.pk %}" class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash"></i>
+                                        <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="d-flex flex-column flex-md-row gap-2">
-                    <a href="{% url 'organizations-detail' organization.pk %}" class="btn btn-primary btn-sm">
-                        <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "Details" %}</span>
-                    </a>
-                    <a href="{% url 'organizations-update' organization.pk %}" class="btn btn-secondary btn-sm">
-                        <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
-                    </a>
-                    <a href="{% url 'organizations-delete' organization.pk %}" class="btn btn-danger btn-sm">
-                        <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
-                    </a>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
     {% else %}
-    <div class="alert alert-warning" role="alert">
-        {% trans "You are not a member of any organizations." %}
-    </div>
+        <div class="text-center py-5">
+            <div class="alert alert-info" role="alert">
+                <i class="bi bi-info-circle me-2"></i>
+                {% trans "You are not a member of any organizations." %}
+            </div>
+        </div>
     {% endif %}
+</div>
 {% endblock content %}
