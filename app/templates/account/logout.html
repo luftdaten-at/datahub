@@ -1,15 +1,56 @@
 {% extends "_base.html" %}
 {% load i18n %}
-{% load crispy_forms_tags %}
 
-{% block title %}{% trans "Log out" %}{% endblock %}
+{% block title %}{% trans "Log out" %}{% endblock title %}
 
 {% block content %}
-    <h2 class="mt-5">{% trans "Log out" %}</h2>
-    <p>{% trans "Do you really want to log out?" %}</p>
-    <form method="post" action="{% url 'account_logout' %}">
-        {% csrf_token %}
-        {{ form|crispy }}
-        <button class="btn btn-danger" type="submit">{% trans "Log out" %}</button>
-    </form>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h3 class="mb-0">
+                        <i class="bi bi-box-arrow-left me-2"></i>
+                        {% trans "Log out" %}
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-question-circle text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    
+                    <h4 class="text-warning mb-3">
+                        {% trans "Confirm Logout" %}
+                    </h4>
+                    
+                    <p class="text-muted mb-4">
+                        {% trans "Do you really want to log out?" %}
+                    </p>
+                    
+                    <form method="post" action="{% url 'account_logout' %}">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <i class="bi bi-exclamation-triangle me-2"></i>
+                                {% trans "Please correct the errors below." %}
+                            </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-box-arrow-left me-2"></i>
+                                {% trans "Log out" %}
+                            </button>
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-house me-2"></i>
+                                {% trans "Cancel" %}
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock content %}

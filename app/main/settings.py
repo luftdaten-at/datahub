@@ -214,7 +214,10 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # django-allauth config
 LOGIN_REDIRECT_URL = "dashboard"
 ACCOUNT_LOGOUT_REDIRECT = "home"
-SITE_ID = 1 
+SITE_ID = 1
+
+# Site configuration for password reset emails
+SITE_NAME = "Luftdaten Datahub" 
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
