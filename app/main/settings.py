@@ -331,5 +331,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        # Organizations app logger
+        'organizations': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }

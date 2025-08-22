@@ -187,6 +187,60 @@
                     </button>
                 </div>
             </form>
+            
+            <!-- Pending Invitations -->
+            {% if pending_invitations %}
+                <hr class="my-3">
+                <h6 class="mb-2">
+                    <i class="bi bi-clock-history me-1"></i>
+                    {% trans "Pending Invitations" %}
+                </h6>
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-2">
+                    {% for invitation in pending_invitations %}
+                        <div class="col">
+                            <div class="card border-warning" style="min-height: auto;">
+                                <div class="card-body py-2 px-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi bi-envelope text-warning me-1"></i>
+                                            <small class="text-truncate">{{ invitation.email }}</small>
+                                        </div>
+                                        <span class="badge bg-warning" style="font-size: 0.7rem;">
+                                            <i class="bi bi-clock me-1"></i>
+                                            {% trans "Pending" %}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">
+                                            <i class="bi bi-hash text-muted me-1"></i>
+                                            #{{ invitation.id }}
+                                        </small>
+                                        <a href="{% url 'cancel-invitation' organization.pk invitation.pk %}" 
+                                           class="btn btn-outline-danger btn-sm py-0 px-2"
+                                           style="font-size: 0.75rem;"
+                                           onclick="return confirm('{% trans 'Are you sure you want to cancel this invitation?' %}')">
+                                            <i class="bi bi-x-circle"></i>
+                                            <span class="d-none d-sm-inline">{% trans "Cancel" %}</span>
+                                        </a>
+                                    </div>
+                                    {% if invitation.expiring_date %}
+                                        <small class="text-muted d-block mt-1">
+                                            <i class="bi bi-exclamation-triangle text-muted me-1"></i>
+                                            {% trans "Expires:" %} {{ invitation.expiring_date|date:"d.m.Y" }}
+                                        </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <hr class="my-3">
+                <p class="text-muted mb-0 small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    {% trans "No pending invitations." %}
+                </p>
+            {% endif %}
         </div>
     </div>
 

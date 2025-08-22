@@ -1,0 +1,16 @@
+Hallo,
+
+Sie wurden eingeladen, der Organisation {{ organization.name }} im Luftdaten.at Datahub beizutreten!
+
+{% if is_existing_user %}
+Sie haben bereits ein Konto im Luftdaten.at Datahub. Bitte besuchen Sie den folgenden Link, um der Organisation beizutreten:
+{{ join_link }}
+
+{% else %}
+Bitte besuchen Sie den folgenden Link, um ein Konto zu erstellen und beizutreten:
+{{ registration_link }}
+
+{% endif %}
+
+Mit freundlichen Grüßen,
+Das Luftdaten.at Team

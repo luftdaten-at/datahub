@@ -1018,8 +1018,7 @@ msgstr "Gib E-Mail-Adresse ein"
 
 #: templates/organizations/detail.html:72
 #: templates/workshops/management.html:72
-#, fuzzy
-#| msgid "Station"
+#: templates/organizations/detail.html:186
 msgid "Send Invitation"
 msgstr "Einladung schicken"
 
@@ -1081,8 +1080,6 @@ msgid "End date:"
 msgstr "Enddatum:"
 
 #: templates/stations/detail.html:83 templates/workshops/detail.html:94
-#, fuzzy
-#| msgid "Download data"
 msgid "Download"
 msgstr "Herunterladen"
 
@@ -1505,3 +1502,49 @@ msgstr "Alle abwählen"
 
 #~ msgid "No"
 #~ msgstr "Nein"
+
+#: organizations/forms.py:10
+msgid "Keep current ownership"
+msgstr "Aktuelles Eigentum beibehalten"
+
+#: organizations/forms.py:11
+msgid "Select a new owner from the organization members. Leave empty to keep current ownership."
+msgstr "Wählen Sie einen neuen Eigentümer aus den Organisationsmitgliedern aus. Lassen Sie es leer, um das aktuelle Eigentum beizubehalten."
+
+#: organizations/forms.py:22
+msgid "Transfer Ownership"
+msgstr "Eigentum übertragen"
+
+#: templates/organizations/detail.html:345
+msgid "No devices found for this organization."
+msgstr "Keine Geräte für diese Organisation gefunden."
+
+#: templates/organizations/detail.html:272
+msgid "No campaigns found for this organization."
+msgstr "Keine Kampagnen für diese Organisation gefunden."
+
+#: templates/organizations/detail.html:185
+msgid "Pending Invitations"
+msgstr "Ausstehende Einladungen"
+
+#: templates/organizations/detail.html:195
+msgid "Pending"
+msgstr "Ausstehend"
+
+#: templates/organizations/detail.html:200
+msgid "Invitation ID:"
+msgstr "Einladungs-ID:"
+
+#: templates/organizations/detail.html:205
+msgid "Expires:"
+msgstr "Läuft ab:"
+
+
+
+#: templates/organizations/detail.html:217
+msgid "Are you sure you want to cancel this invitation?"
+msgstr "Sind Sie sicher, dass Sie diese Einladung abbrechen möchten?"
+
+#: templates/organizations/detail.html:225
+msgid "No pending invitations."
+msgstr "Keine ausstehenden Einladungen."

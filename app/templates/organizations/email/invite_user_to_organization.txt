@@ -1,7 +1,16 @@
 Hello,
 
-You've been invited to join {{ organization.name }}!
+You've been invited to join {{ organization.name }} on the Luftdaten.at Datahub!
 
-Please visit the following link to join:
+{% if is_existing_user %}
+You already have an account on Luftdaten.at Datahub. Please visit the following link to join the organization:
+{{ join_link }}
+
+{% else %}
+Please visit the following link to create an account and join:
 {{ registration_link }}
 
+{% endif %}
+
+Best regards,
+The Luftdaten.at Team

@@ -1,4 +1,5 @@
 from django import forms
+from django.utils.translation import gettext_lazy as _
 from organizations.models import Organization
 
 
@@ -6,8 +7,8 @@ class OrganizationForm(forms.ModelForm):
     new_owner = forms.ModelChoiceField(
         queryset=None,
         required=False,
-        empty_label="Keep current ownership",
-        help_text="Select a new owner from the organization members. Leave empty to keep current ownership."
+        empty_label=_("Keep current ownership"),
+        help_text=_("Select a new owner from the organization members. Leave empty to keep current ownership.")
     )
 
     class Meta:
@@ -22,7 +23,7 @@ class OrganizationForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             # Only show organization members (excluding current owner) as potential new owners
             self.fields['new_owner'].queryset = self.instance.users.exclude(id=self.instance.owner.id)
-            self.fields['new_owner'].label = "Transfer Ownership"
+            self.fields['new_owner'].label = _("Transfer Ownership")
         else:
             # Hide the field for new organizations
             self.fields['new_owner'].widget = forms.HiddenInput()
