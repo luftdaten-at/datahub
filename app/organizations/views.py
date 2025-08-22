@@ -203,7 +203,7 @@ def invite_user_to_organization(request, org_id):
     
     if user:
         # Existing user - send direct join link
-        join_link = request.build_absolute_uri(f'/organizations/{organization.pk}/accept-invitation/{invitation.pk}/')
+        join_link = request.build_absolute_uri(f'/organizations/{organization.pk}/accept-invitation/{invitation.code}/')
         context = {
             'organization': organization,
             'join_link': join_link,
@@ -262,15 +262,15 @@ def invite_user_to_organization(request, org_id):
 
 
 @login_required
-def accept_invitation(request, org_id, invitation_id):
+def accept_invitation(request, org_id, invitation_code):
     organization = get_object_or_404(Organization, id=org_id)
-    invitation = get_object_or_404(OrganizationInvitation, id=invitation_id, organization=organization)
+    invitation = get_object_or_404(OrganizationInvitation, code=invitation_code, organization=organization)
     
-    logger.info(f"User {request.user.username} attempting to accept invitation {invitation_id} for organization {organization.name}")
+    logger.info(f"User {request.user.username} attempting to accept invitation {invitation_code} for organization {organization.name}")
     
     # Check if the invitation email matches the current user's email
     if request.user.email != invitation.email:
-        logger.warning(f"User {request.user.username} email mismatch for invitation {invitation_id}")
+        logger.warning(f"User {request.user.username} email mismatch for invitation {invitation_code}")
         messages.error(request, "This invitation is not for your email address.")
         return redirect("organizations-my")
     
@@ -341,7 +341,7 @@ def resend_invitation(request, org_id, invitation_id):
     
     if user:
         # Existing user - send direct join link
-        join_link = request.build_absolute_uri(f'/organizations/{organization.pk}/accept-invitation/{invitation.pk}/')
+        join_link = request.build_absolute_uri(f'/organizations/{organization.pk}/accept-invitation/{invitation.code}/')
         context = {
             'organization': organization,
             'join_link': join_link,
