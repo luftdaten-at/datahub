@@ -318,3 +318,82 @@ def cancel_invitation(request, org_id, invitation_id):
         messages.error(request, "Failed to cancel invitation. Please try again.")
     
     return redirect("organizations-detail", pk=org_id)
+
+
+@login_required
+def resend_invitation(request, org_id, invitation_id):
+    organization = get_object_or_404(Organization, id=org_id)
+    invitation = get_object_or_404(OrganizationInvitation, id=invitation_id, organization=organization)
+    
+    logger.info(f"User {request.user.username} attempting to resend invitation {invitation_id} for {invitation.email} in organization {organization.name}")
+    
+    # Check permissions
+    if not request.user.is_superuser and request.user != organization.owner:
+        logger.warning(f"User {request.user.username} denied permission to resend invitation in organization {organization.name}")
+        messages.error(request, "You do not have permission to resend invitations for this organization.")
+        return redirect("organizations-detail", pk=org_id)
+    
+    email = invitation.email
+    user = CustomUser.objects.filter(email=email).first()
+    
+    # Generate the email body from a template
+    current_language = translation.get_language()
+    
+    if user:
+        # Existing user - send direct join link
+        join_link = request.build_absolute_uri(f'/organizations/{organization.pk}/accept-invitation/{invitation.pk}/')
+        context = {
+            'organization': organization,
+            'join_link': join_link,
+            'is_existing_user': True
+        }
+        logger.info(f"Resending invitation email to existing user {email} for organization {organization.name}")
+    else:
+        # New user - send registration link
+        registration_link = request.build_absolute_uri('/accounts/signup/')
+        context = {
+            'organization': organization,
+            'registration_link': registration_link,
+            'is_existing_user': False
+        }
+        logger.info(f"Resending invitation email to new user {email} for organization {organization.name}")
+
+    # Try to use localized template first, fall back to default
+    template_paths = [
+        f'organizations/email/{current_language}/invite_user_to_organization.txt',
+        'organizations/email/invite_user_to_organization.txt'
+    ]
+    
+    message_body = None
+    for template_path in template_paths:
+        try:
+            message_body = render_to_string(template_path, context, request=request)
+            break
+        except:
+            continue
+    
+    if not message_body:
+        message_body = render_to_string('organizations/email/invite_user_to_organization.txt', context, request=request)
+
+    # Localized subject
+    if current_language == 'de':
+        subject = f"Sie wurden eingeladen, {organization.name} beizutreten"
+    else:
+        subject = f"You've been invited to join {organization.name}"
+
+    try:
+        # Send the email
+        send_mail(
+            subject=subject,
+            message=message_body,
+            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', settings.EMAIL_HOST_USER),
+            recipient_list=[email],
+            fail_silently=False,
+        )
+        logger.info(f"Invitation email resent successfully to {email} for organization {organization.name} in language {current_language}")
+        messages.success(request, f"Invitation has been resent to {email}.")
+    except Exception as e:
+        logger.error(f"Failed to resend invitation email to {email} for organization {organization.name}: {str(e)}")
+        messages.error(request, f"Failed to resend invitation email to {email}. Please try again later.")
+    
+    return redirect("organizations-detail", pk=org_id)

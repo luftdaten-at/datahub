@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:org_id>/invite-user', invite_user_to_organization, name='invite-user-to-organization'),
     path('<int:org_id>/accept-invitation/<int:invitation_id>', accept_invitation, name='accept-invitation'),
     path('<int:org_id>/cancel-invitation/<int:invitation_id>', cancel_invitation, name='cancel-invitation'),
+    path('<int:org_id>/resend-invitation/<int:invitation_id>', resend_invitation, name='resend-invitation'),
     path('<int:pk>', OrganizationDetailView.as_view(), name='organizations-detail'),
     path('<str:pk>/delete/', OrganizationDeleteView.as_view(), name='organizations-delete'),
     path('<str:pk>/update', OrganizationUpdateView.as_view(), name='organizations-update')

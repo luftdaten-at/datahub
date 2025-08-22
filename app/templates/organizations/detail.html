@@ -215,13 +215,22 @@
                                             <i class="bi bi-hash text-muted me-1"></i>
                                             #{{ invitation.id }}
                                         </small>
-                                        <a href="{% url 'cancel-invitation' organization.pk invitation.pk %}" 
-                                           class="btn btn-outline-danger btn-sm py-0 px-2"
-                                           style="font-size: 0.75rem;"
-                                           onclick="return confirm('{% trans 'Are you sure you want to cancel this invitation?' %}')">
-                                            <i class="bi bi-x-circle"></i>
-                                            <span class="d-none d-sm-inline">{% trans "Cancel" %}</span>
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'resend-invitation' organization.pk invitation.pk %}" 
+                                               class="btn btn-outline-primary btn-sm py-0 px-2"
+                                               style="font-size: 0.75rem;"
+                                               title="{% trans 'Resend invitation email' %}">
+                                                <i class="bi bi-arrow-repeat"></i>
+                                                <span class="d-none d-sm-inline">{% trans "Resend" %}</span>
+                                            </a>
+                                            <a href="{% url 'cancel-invitation' organization.pk invitation.pk %}" 
+                                               class="btn btn-outline-danger btn-sm py-0 px-2"
+                                               style="font-size: 0.75rem;"
+                                               onclick="return confirm('{% trans 'Are you sure you want to cancel this invitation?' %}')">
+                                                <i class="bi bi-x-circle"></i>
+                                                <span class="d-none d-sm-inline">{% trans "Cancel" %}</span>
+                                            </a>
+                                        </div>
                                     </div>
                                     {% if invitation.expiring_date %}
                                         <small class="text-muted d-block mt-1">

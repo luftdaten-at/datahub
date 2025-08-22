@@ -1548,3 +1548,11 @@ msgstr "Sind Sie sicher, dass Sie diese Einladung abbrechen möchten?"
 #: templates/organizations/detail.html:225
 msgid "No pending invitations."
 msgstr "Keine ausstehenden Einladungen."
+
+#: templates/organizations/detail.html:222
+msgid "Resend invitation email"
+msgstr "Einladungs-E-Mail erneut senden"
+
+#: templates/organizations/detail.html:224
+msgid "Resend"
+msgstr "Erneut senden"
