@@ -1,6 +1,6 @@
 services:
   app:
-    image: luftdaten/datahub:0.8.1
+    image: luftdaten/datahub:0.8.2
     command: >
       sh -c "python manage.py collectstatic --noinput && python manage.py migrate && uvicorn main.asgi:application --host 0.0.0.0 --port 8000"
     restart: unless-stopped
