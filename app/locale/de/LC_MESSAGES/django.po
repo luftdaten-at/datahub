@@ -124,6 +124,10 @@ msgstr "Meine Workshops"
 msgid "Devices"
 msgstr "Geräte"
 
+#: templates/_base.html:101
+msgid "Calibration"
+msgstr "Kalibrierung"
+
 #: templates/_base.html:101 templates/account/users/list.html:6
 #: templates/account/users/list.html:17 templates/organizations/detail.html:17
 #: templates/workshops/management.html:17

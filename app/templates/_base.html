@@ -64,52 +64,24 @@
                                 {{ user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'dashboard' %}">
-                                        {% trans "Dashboard" %}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'settings' %}">
-                                        {% trans "Settings" %}
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}">{% trans "Dashboard" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'settings' %}">{% trans "Settings" %}</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'organizations-my' %}">
-                                        {% trans "My Organizations" %}
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'campaigns-my' %}">
-                                        {% trans "My Campaigns" %}
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'organizations-my' %}">{% trans "My Organizations" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'campaigns-my' %}">{% trans "My Campaigns" %}</a></li>
                                 {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at"  %}
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'workshops-my' %}">
-                                        {% trans "My Workshops" %}
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'workshops-my' %}">{% trans "My Workshops" %}</a></li>
                                 {% endif %}
                                 {% if user.is_authenticated and user.is_superuser %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'devices-list' %}">{% trans "Devices" %}</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'users-list' %}">{% trans "Users" %}</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="/logs">{% trans "Logs" %}</a>
-                                </li>
+                                <li><a class="dropdown-item disabled" href="">Admin</a></li>
+                                <li><a class="dropdown-item" href="{% url 'devices-list' %}">{% trans "Devices" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'calibration' %}">{% trans "Calibration" %}</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users-list' %}">{% trans "Users" %}</a></li>
+                                <li><a class="dropdown-item" href="/logs">{% trans "Logs" %}</a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{% url 'account_logout' %}">
-                                        {% trans "Log Out" %}
-                                    </a>
-                                </li>
+                                <li><a class="dropdown-item" href="{% url 'account_logout' %}">{% trans "Log Out" %}</a></li>
                             </ul>
                         </li>
                     {% else %}
