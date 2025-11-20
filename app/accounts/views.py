@@ -5,7 +5,7 @@ from django.views.generic.list import ListView
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm, AdminPasswordChangeForm
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from .forms import CustomUserCreationForm, CustomUserEditForm
@@ -150,3 +150,37 @@ class UsersListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     def get_queryset(self):
         # Optimize queryset by selecting related 'current_organization'
         return CustomUser.objects.all().order_by('id')
+
+
+class UserPasswordChangeView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    """View for superusers to change user passwords."""
+    template_name = 'account/users/password_change.html'
+    form_class = AdminPasswordChangeForm
+
+    def test_func(self):
+        # Only superusers can access this view
+        return self.request.user.is_superuser
+
+    def get_user(self):
+        """Get the user whose password is being changed."""
+        user_id = self.kwargs.get('user_id')
+        return get_user_model().objects.get(pk=user_id)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.get_user()
+        context['target_user'] = user
+        if self.request.method == 'POST':
+            context['form'] = self.form_class(user, self.request.POST)
+        else:
+            context['form'] = self.form_class(user)
+        return context
+
+    def post(self, request, *args, **kwargs):
+        user = self.get_user()
+        form = self.form_class(user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Password for {user.username} has been changed successfully.")
+            return redirect('users-list')
+        return self.render_to_response(self.get_context_data(form=form))

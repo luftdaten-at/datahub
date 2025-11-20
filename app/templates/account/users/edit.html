@@ -6,9 +6,13 @@
 
 {% block content %}
   <h2 class="mt-5">{% trans "Edit User" %}: {{ object.username }}</h2>
+  <div class="mb-3">
+    <a href="{% url 'users-edit-password' object.id %}" class="btn btn-warning">{% trans "Change Password" %}</a>
+  </div>
   <form method="post">
     {% csrf_token %}
     {{ form|crispy }}
     <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    <a href="{% url 'users-list' %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
   </form>
 {% endblock %}
