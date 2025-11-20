@@ -238,6 +238,9 @@ ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 
+# Custom account adapter for redirects
+ACCOUNT_ADAPTER = 'accounts.adapters.CustomAccountAdapter'
+
 # email config
 DEFAULT_FROM_EMAIL = "datahub@luftdaten.at"
 
