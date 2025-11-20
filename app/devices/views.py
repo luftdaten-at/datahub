@@ -12,6 +12,7 @@ from django.views.generic.edit import UpdateView, DeleteView
 from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
 from django.urls import reverse_lazy, reverse
 from django.utils.translation import gettext as _
+from django.utils import timezone
 from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
@@ -23,6 +24,9 @@ from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
 from organizations.models import Organization
 from campaign.models import Room
+from workshops.models import Workshop
+from api.models import AirQualityRecord
+from django.db.models import Count, Min, Max, Q
 
 
 logger = logging.getLogger('myapp')
@@ -188,6 +192,165 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
                     sensors[SensorModel.get_sensor_name(measurement.sensor_model)].append(Dimension.get_name(value.dimension))
 
         context['sensors'] = dict(sensors)
+
+        return context
+
+
+class DeviceDataView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """View to show all workshops and data collected for a device."""
+    model = Device
+    context_object_name = 'device'
+    template_name = 'devices/data.html'
+    pk_url_kwarg = 'pk'
+
+    def test_func(self):
+        # Only superusers can access this view
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        device = self.object
+
+        # Get all workshops that have measurements for this device (from Measurement model)
+        workshops_from_measurements = Workshop.objects.filter(
+            measurements__device=device
+        ).distinct().annotate(
+            measurement_count=Count('measurements', filter=Q(measurements__device=device)),
+            first_measurement=Min('measurements__time_measured', filter=Q(measurements__device=device)),
+            last_measurement=Max('measurements__time_measured', filter=Q(measurements__device=device))
+        )
+
+        # Get all workshops that have air quality records for this device (from AirQualityRecord model)
+        workshops_from_aqr = Workshop.objects.filter(
+            air_quality_records__device=device
+        ).distinct().annotate(
+            aqr_count=Count('air_quality_records', filter=Q(air_quality_records__device=device)),
+            first_aqr=Min('air_quality_records__time', filter=Q(air_quality_records__device=device)),
+            last_aqr=Max('air_quality_records__time', filter=Q(air_quality_records__device=device))
+        )
+
+        # Combine both querysets and get unique workshops
+        all_workshop_ids = set()
+        workshop_dict = {}
+        
+        # Process Measurement-based workshops
+        for workshop in workshops_from_measurements:
+            all_workshop_ids.add(workshop.pk)
+            workshop_dict[workshop.pk] = {
+                'workshop': workshop,
+                'measurement_count': workshop.measurement_count or 0,
+                'aqr_count': 0,
+                'first_measurement': workshop.first_measurement,
+                'last_measurement': workshop.last_measurement,
+                'first_aqr': None,
+                'last_aqr': None,
+            }
+        
+        # Process AirQualityRecord-based workshops
+        for workshop in workshops_from_aqr:
+            all_workshop_ids.add(workshop.pk)
+            if workshop.pk in workshop_dict:
+                # Update existing entry
+                workshop_dict[workshop.pk]['aqr_count'] = workshop.aqr_count or 0
+                workshop_dict[workshop.pk]['first_aqr'] = workshop.first_aqr
+                workshop_dict[workshop.pk]['last_aqr'] = workshop.last_aqr
+            else:
+                # Create new entry
+                workshop_dict[workshop.pk] = {
+                    'workshop': workshop,
+                    'measurement_count': 0,
+                    'aqr_count': workshop.aqr_count or 0,
+                    'first_measurement': None,
+                    'last_measurement': None,
+                    'first_aqr': workshop.first_aqr,
+                    'last_aqr': workshop.last_aqr,
+                }
+
+        # Prepare workshop data with additional statistics
+        workshop_data = []
+        for workshop_id in all_workshop_ids:
+            data = workshop_dict[workshop_id]
+            workshop = data['workshop']
+            
+            # Get unique sensors and dimensions from Measurement model
+            measurements = Measurement.objects.filter(
+                device=device,
+                workshop=workshop
+            ).select_related().prefetch_related('values')
+
+            sensors_used = set()
+            dimensions_used = set()
+            for measurement in measurements:
+                sensors_used.add(measurement.sensor_model)
+                for value in measurement.values.all():
+                    dimensions_used.add(value.dimension)
+
+            # Get dimensions from AirQualityRecord (they have pm1, pm25, pm10, temperature, humidity, etc.)
+            aqr_records = AirQualityRecord.objects.filter(device=device, workshop=workshop)
+            if aqr_records.exists():
+                # Add common dimensions from AQR
+                if aqr_records.filter(pm1__isnull=False).exists():
+                    dimensions_used.add(Dimension.PM1_0)
+                if aqr_records.filter(pm25__isnull=False).exists():
+                    dimensions_used.add(Dimension.PM2_5)
+                if aqr_records.filter(pm10__isnull=False).exists():
+                    dimensions_used.add(Dimension.PM10_0)
+                if aqr_records.filter(temperature__isnull=False).exists():
+                    dimensions_used.add(Dimension.TEMPERATURE)
+                if aqr_records.filter(humidity__isnull=False).exists():
+                    dimensions_used.add(Dimension.HUMIDITY)
+                if aqr_records.filter(voc__isnull=False).exists():
+                    dimensions_used.add(Dimension.VOC_INDEX)
+                if aqr_records.filter(nox__isnull=False).exists():
+                    dimensions_used.add(Dimension.NOX_INDEX)
+                if aqr_records.filter(co2__isnull=False).exists():
+                    dimensions_used.add(Dimension.CO2)
+                if aqr_records.filter(o3__isnull=False).exists():
+                    dimensions_used.add(Dimension.O3)
+                if aqr_records.filter(pressure__isnull=False).exists():
+                    dimensions_used.add(Dimension.PRESSURE)
+
+            # Convert to readable names
+            sensor_names = [SensorModel.get_sensor_name(s) for s in sensors_used]
+            dimension_names = [Dimension.get_name(d) for d in dimensions_used]
+
+            # Determine earliest and latest timestamps
+            first_time = None
+            last_time = None
+            if data['first_measurement'] and data['first_aqr']:
+                first_time = min(data['first_measurement'], data['first_aqr'])
+            elif data['first_measurement']:
+                first_time = data['first_measurement']
+            elif data['first_aqr']:
+                first_time = data['first_aqr']
+                
+            if data['last_measurement'] and data['last_aqr']:
+                last_time = max(data['last_measurement'], data['last_aqr'])
+            elif data['last_measurement']:
+                last_time = data['last_measurement']
+            elif data['last_aqr']:
+                last_time = data['last_aqr']
+
+            total_count = data['measurement_count'] + data['aqr_count']
+
+            workshop_data.append({
+                'workshop': workshop,
+                'measurement_count': total_count,
+                'measurement_count_new': data['measurement_count'],
+                'aqr_count': data['aqr_count'],
+                'first_measurement': first_time,
+                'last_measurement': last_time,
+                'sensors': sorted(sensor_names),
+                'dimensions': sorted(dimension_names),
+            })
+
+        # Sort by first measurement time (most recent first)
+        from datetime import datetime
+        workshop_data.sort(key=lambda x: x['first_measurement'] or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
+
+        context['workshop_data'] = workshop_data
+        context['total_measurements'] = Measurement.objects.filter(device=device).count() + AirQualityRecord.objects.filter(device=device).count()
+        context['total_workshops'] = len(workshop_data)
 
         return context
 

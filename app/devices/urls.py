@@ -1,11 +1,12 @@
 from django.urls import path
-from .views import DeviceDetailView, DeviceEditView, DeviceListView, DeviceLogsCSVView, DeviceMyView, DeviceNotesUpdateView, calibrationView
+from .views import DeviceDetailView, DeviceEditView, DeviceListView, DeviceLogsCSVView, DeviceMyView, DeviceNotesUpdateView, DeviceDataView, calibrationView
 
 urlpatterns = [
     path('', DeviceListView.as_view(), name='devices-list'),
     path('calibration/', calibrationView, name='calibration'),
     path('my/', DeviceMyView.as_view(), name='devices-my'),
     path('<str:pk>/', DeviceDetailView.as_view(), name='device-detail'),
+    path('<str:pk>/data/', DeviceDataView.as_view(), name='device-data'),
     path('<str:pk>/delete/', DeviceEditView.as_view(), name='device-delete'),
     path('<str:pk>/edit/', DeviceEditView.as_view(), name='device-edit'),
     path('<str:pk>/edit-notes/', DeviceNotesUpdateView.as_view(), name='device-edit-notes'),

@@ -22,7 +22,10 @@
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "Device:" %} {{ device.device_name }}</h2>
-        <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+        <div>
+            <a href="{% url 'device-data' device.pk %}" class="btn btn-info me-2">{% trans "View Data" %}</a>
+            <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+        </div>
     </div>    
     
     <div class="row">
