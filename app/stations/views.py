@@ -1,12 +1,13 @@
 import requests
+import json
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from django.shortcuts import render
 from django.http import Http404
 from django.conf import settings
-from main.enums import OutputFormat, Precision, Order, SensorModel
+from django.core.cache import cache
+from main.enums import OutputFormat, Precision, Order, SensorModel, Dimension
 from requests.exceptions import HTTPError, RequestException
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def StationDetailView(request, pk):
     # Beispiel API-URL, die von der Station-ID abhängt
@@ -59,7 +60,13 @@ def StationDetailView(request, pk):
                 for dim_val in data_hour["values"]:
                     dim = dim_val["dimension"]
                     val = dim_val["value"]
-                    dim_hour_val[str(dim)][int((hour - time_minus_48h).total_seconds() // 3600)] = val
+                    # Calculate hour index and ensure it's within bounds [0, 47]
+                    hour_index = int((hour - time_minus_48h).total_seconds() // 3600)
+                    if 0 <= hour_index < 48:
+                        dim_hour_val[str(dim)][hour_index] = val
+                    else:
+                        # Log out-of-range data for debugging
+                        print(f"Warning: Hour index {hour_index} out of range [0, 47] for station {pk}, hour: {hour}, time_minus_48h: {time_minus_48h}")
 
             dims_for_display = [2, 3, 5, 6, 7]
             for dim in dims_for_display:
@@ -90,70 +97,140 @@ def StationDetailView(request, pk):
 
 def StationListView(request):
     """
-    Fetches two lists: stations with the highest PM2.5 values and 
-    stations with the lowest PM2.5 values.
+    Fetches station data for PM1, PM2.5, and PM10 dimensions.
+    Returns highest and lowest values for each dimension in a dashboard-style format.
+    Shows only top 5 stations for highest and lowest values, without pagination.
     """
-    url_min = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"    
-    url_max = f"{settings.API_URL}/station/topn?n=100&dimension=3&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"    
+    # Dimension mapping: PM1=2, PM2.5=3, PM10=5
+    dimensions = {
+        'pm1': Dimension.PM1_0,
+        'pm25': Dimension.PM2_5,
+        'pm10': Dimension.PM10_0,
+    }
 
     error_message = None
+    dimension_data = {}
+    
+    # Fetch data for each dimension
+    for dim_key, dim_id in dimensions.items():
+        url_min = f"{settings.API_URL}/station/topn?n=5&dimension={dim_id}&order={Order.MIN.value}&output_format={OutputFormat.CSV.value}"
+        url_max = f"{settings.API_URL}/station/topn?n=5&dimension={dim_id}&order={Order.MAX.value}&output_format={OutputFormat.CSV.value}"
+        
+        try:
+            resp_min = requests.get(url_min)
+            resp_max = requests.get(url_max)
+
+            resp_min.raise_for_status()
+            resp_max.raise_for_status()
+
+            # Skip header line (i == 0) and limit to 5 stations
+            min_stations = [
+                line.split(",") 
+                for i, line in enumerate(resp_min.text.splitlines())
+                if i
+            ][:5]
+            max_stations = [
+                line.split(",") 
+                for i, line in enumerate(resp_max.text.splitlines())
+                if i
+            ][:5]
+            
+            dimension_data[dim_key] = {
+                'top_stations': max_stations,
+                'lowest_stations': min_stations,
+            }
+            
+        except (HTTPError, RequestException) as e:
+            if error_message is None:
+                error_message = "There was an error fetching station data: 404."
+            print(f"Error fetching station data for {dim_key}: {e}")
+            dimension_data[dim_key] = {
+                'top_stations': [],
+                'lowest_stations': [],
+            }
+    
+    # Fetch all stations with coordinates from /station/all (with caching)
+    cache_key = 'station_all_data'
+    cache_timeout = 3600  # Cache for 1 hour (3600 seconds)
+    
+    all_stations = cache.get(cache_key)
+    
+    if all_stations is None:
+        # Cache miss - fetch from API
+        all_stations = []
+        try:
+            url_all = f"{settings.API_URL}/station/all?output_format={OutputFormat.JSON.value}"
+            resp_all = requests.get(url_all, timeout=30)
+            resp_all.raise_for_status()
+            
+            # Parse JSON response
+            # Expected format: [{"id": "354SC", "location": {"lat": 47.095, "lon": 13.721}, ...}, ...]
+            stations_data = resp_all.json()
+            
+            if isinstance(stations_data, list):
+                for station in stations_data:
+                    try:
+                        station_id = station.get('id')
+                        location = station.get('location', {})
+                        
+                        if isinstance(location, dict):
+                            lat = location.get('lat')
+                            lon = location.get('lon')
+                        else:
+                            lat = None
+                            lon = None
+                        
+                        if station_id and lat is not None and lon is not None:
+                            all_stations.append({
+                                'station_id': str(station_id),
+                                'lat': float(lat),
+                                'lon': float(lon),
+                                'last_active': station.get('last_active', ''),
+                            })
+                        else:
+                            print(f"Station missing required fields: id={station_id}, lat={lat}, lon={lon}")
+                    except (ValueError, TypeError, KeyError) as e:
+                        print(f"Error parsing station data: {e}, station: {station}")
+                        continue
+            else:
+                print(f"Unexpected JSON structure. Expected list, got: {type(stations_data)}")
+            
+            # Store in cache
+            cache.set(cache_key, all_stations, cache_timeout)
+            print(f"Fetched {len(all_stations)} stations from API")
+        except (HTTPError, RequestException) as e:
+            print(f"Error fetching all stations data: {e}")
+            all_stations = []
+        except (ValueError, KeyError) as e:
+            print(f"Error parsing JSON response: {e}")
+            all_stations = []
+    
+    # Fetch active stations statistics from /statistics endpoint
+    active_stations = {}
+    
     try:
-        resp_min = requests.get(url_min)
-        resp_max = requests.get(url_max)
-
-        # Raise HTTPError for bad responses
-        resp_min.raise_for_status()
-        resp_max.raise_for_status()
-
-        # Skip header line (i == 0)
-        min_stations = [
-            line.split(",") 
-            for i, line in enumerate(resp_min.text.splitlines())
-            if i
-        ]
-        max_stations = [
-            line.split(",") 
-            for i, line in enumerate(resp_max.text.splitlines())
-            if i
-        ]
-
-    except (HTTPError, RequestException) as e:
-        # Instead of raising a 404, store an error message in the context.
-        error_message = "There was an error fetching station data: 404."
-        # Optionally, you can log the error:
-        print(f"Error fetching station data: {e}")
-        min_stations = []
-        max_stations = []
-
-    # Paginate each list separately
-    paginator_top = Paginator(max_stations, 10)
-    paginator_low = Paginator(min_stations, 10)
-
-    page_top = request.GET.get('page_top')
-    page_low = request.GET.get('page_low')
-
-    try:
-        top_stations_page = paginator_top.page(page_top)
-    except PageNotAnInteger:
-        top_stations_page = paginator_top.page(1)
-    except EmptyPage:
-        top_stations_page = paginator_top.page(paginator_top.num_pages)
-
-    try:
-        lowest_stations_page = paginator_low.page(page_low)
-    except PageNotAnInteger:
-        lowest_stations_page = paginator_low.page(1)
-    except EmptyPage:
-        lowest_stations_page = paginator_low.page(paginator_low.num_pages)
+        url_statistics = f"{settings.API_URL}/statistics"
+        response = requests.get(url_statistics, timeout=10)
+        response.raise_for_status()
+        stats_data = response.json()
+        
+        # Parse active stations data
+        if 'active_stations' in stats_data:
+            active_stations = stats_data['active_stations']
+        
+    except (HTTPError, RequestException, KeyError, ValueError) as e:
+        print(f"Error fetching statistics: {e}")
+        active_stations = {}
+    
+    # Serialize all_stations to JSON for JavaScript
+    all_stations_json = json.dumps(all_stations)
 
     context = {
-        'top_stations': top_stations_page,
-        'lowest_stations': lowest_stations_page,
-        'paginator_top': paginator_top,
-        'paginator_low': paginator_low,
-        'page_top': top_stations_page,
-        'page_low': lowest_stations_page,
+        'dimension_data': dimension_data,
         'error': error_message,
+        'all_stations': all_stations,
+        'all_stations_json': all_stations_json,
+        'active_stations': active_stations,
     }
 
     return render(request, 'stations/list.html', context)
