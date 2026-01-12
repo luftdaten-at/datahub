@@ -1,11 +1,9 @@
 import requests
-import json
 from datetime import datetime, timedelta, timezone
 from collections import defaultdict
 from django.shortcuts import render
 from django.http import Http404
 from django.conf import settings
-from django.core.cache import cache
 from main.enums import OutputFormat, Precision, Order, SensorModel, Dimension
 from requests.exceptions import HTTPError, RequestException
 
@@ -149,62 +147,6 @@ def StationListView(request):
                 'lowest_stations': [],
             }
     
-    # Fetch all stations with coordinates from /station/all (with caching)
-    cache_key = 'station_all_data'
-    cache_timeout = 3600  # Cache for 1 hour (3600 seconds)
-    
-    all_stations = cache.get(cache_key)
-    
-    if all_stations is None:
-        # Cache miss - fetch from API
-        all_stations = []
-        try:
-            url_all = f"{settings.API_URL}/station/all?output_format={OutputFormat.JSON.value}"
-            resp_all = requests.get(url_all, timeout=30)
-            resp_all.raise_for_status()
-            
-            # Parse JSON response
-            # Expected format: [{"id": "354SC", "location": {"lat": 47.095, "lon": 13.721}, ...}, ...]
-            stations_data = resp_all.json()
-            
-            if isinstance(stations_data, list):
-                for station in stations_data:
-                    try:
-                        station_id = station.get('id')
-                        location = station.get('location', {})
-                        
-                        if isinstance(location, dict):
-                            lat = location.get('lat')
-                            lon = location.get('lon')
-                        else:
-                            lat = None
-                            lon = None
-                        
-                        if station_id and lat is not None and lon is not None:
-                            all_stations.append({
-                                'station_id': str(station_id),
-                                'lat': float(lat),
-                                'lon': float(lon),
-                                'last_active': station.get('last_active', ''),
-                            })
-                        else:
-                            print(f"Station missing required fields: id={station_id}, lat={lat}, lon={lon}")
-                    except (ValueError, TypeError, KeyError) as e:
-                        print(f"Error parsing station data: {e}, station: {station}")
-                        continue
-            else:
-                print(f"Unexpected JSON structure. Expected list, got: {type(stations_data)}")
-            
-            # Store in cache
-            cache.set(cache_key, all_stations, cache_timeout)
-            print(f"Fetched {len(all_stations)} stations from API")
-        except (HTTPError, RequestException) as e:
-            print(f"Error fetching all stations data: {e}")
-            all_stations = []
-        except (ValueError, KeyError) as e:
-            print(f"Error parsing JSON response: {e}")
-            all_stations = []
-    
     # Fetch active stations statistics from /statistics endpoint
     active_stations = {}
     
@@ -222,14 +164,9 @@ def StationListView(request):
         print(f"Error fetching statistics: {e}")
         active_stations = {}
     
-    # Serialize all_stations to JSON for JavaScript
-    all_stations_json = json.dumps(all_stations)
-
     context = {
         'dimension_data': dimension_data,
         'error': error_message,
-        'all_stations': all_stations,
-        'all_stations_json': all_stations_json,
         'active_stations': active_stations,
     }
 
