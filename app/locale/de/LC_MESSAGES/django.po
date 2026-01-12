@@ -1560,3 +1560,35 @@ msgstr "Einladungs-E-Mail erneut senden"
 #: templates/organizations/detail.html:224
 msgid "Resend"
 msgstr "Erneut senden"
+
+#: templates/home.html:71 templates/stations/list.html:205
+msgid "Active Stations"
+msgstr "Aktive Stationen"
+
+#: templates/home.html:77 templates/stations/list.html:211
+msgid "Last Hour"
+msgstr "Letzte Stunde"
+
+#: templates/home.html:87 templates/stations/list.html:221
+msgid "Last 24 Hours"
+msgstr "Letzte 24 Stunden"
+
+#: templates/home.html:97 templates/stations/list.html:231
+msgid "Last 7 Days"
+msgstr "Letzte 7 Tage"
+
+#: templates/home.html:107 templates/stations/list.html:241
+msgid "Last 30 Days"
+msgstr "Letzte 30 Tage"
+
+#: templates/stations/list.html:5
+msgid "All Stations"
+msgstr "Alle Stationen"
+
+#: templates/stations/list.html:263 templates/stations/list.html:315 templates/stations/list.html:365
+msgid "Highest Values"
+msgstr "Höchste Werte"
+
+#: templates/stations/list.html:282 templates/stations/list.html:332 templates/stations/list.html:382
+msgid "Lowest Values"
+msgstr "Niedrigste Werte"

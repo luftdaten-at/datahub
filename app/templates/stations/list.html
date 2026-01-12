@@ -2,159 +2,850 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "Stations overview" %}{% endblock title %}
+{% block title %}{% trans "All Stations" %}{% endblock title %}
 
 {% block styles %}
+<!-- D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+
 <style>
+    #map {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 2rem;
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+    }
+    .region {
+        fill: #f0f0f0;
+        stroke: #ccc;
+        stroke-width: 1;
+    }
+    .station-point {
+        fill: #007bff;
+        stroke: #fff;
+        stroke-width: 1.5;
+        cursor: pointer;
+    }
+    .station-tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .station-popup {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 200px;
+        z-index: 1000;
+        display: none;
+    }
+    .station-popup h4 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+    }
+    .station-popup p {
+        margin: 4px 0;
+        font-size: 14px;
+        color: #666;
+    }
+    .station-popup a {
+        display: inline-block;
+        margin-top: 8px;
+        padding: 6px 12px;
+        background-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+    .station-popup a:hover {
+        background-color: #0056b3;
+    }
+    .station-popup .close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: #999;
+        padding: 0;
+        width: 24px;
+        height: 24px;
+        line-height: 24px;
+    }
+    .station-popup .close-btn:hover {
+        color: #333;
+    }
     .station-link {
         display: inline-block;
-        background-color: #007bff; /* Blue background */
-        color: white; /* White text */
-        padding: 4px 12px; /* Reduced padding for a sleeker look */
-        border-radius: 3px; /* Slightly smaller border radius */
-        text-decoration: none; /* Remove underline */
-        font-weight: normal; /* Regular font weight for a more subtle look */
-        font-size: 14px; /* Adjust font size for a cleaner appearance */
+        background-color: #007bff;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 3px;
+        text-decoration: none;
+        font-weight: normal;
+        font-size: 14px;
         transition: background-color 0.3s ease, transform 0.2s ease;
     }
     .station-link:hover {
-        background-color: #0056b3; /* Darker blue on hover */
-        transform: scale(1.03); /* Slight zoom effect */
+        background-color: #0056b3;
+        transform: scale(1.03);
     }
     .station-link:focus {
         outline: none;
-        box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.75); /* Focus ring for accessibility */
+        box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.75);
     }
     .badge {
         font-size: 14px;
         font-weight: normal;
     }
+    .dimension-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        margin-bottom: 2rem;
+    }
+    .dimension-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    }
+    .dimension-card .card-header {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+    .station-list-section {
+        margin-bottom: 1.5rem;
+    }
+    .station-list-section h5 {
+        margin-bottom: 1rem;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    .extreme-high-badge {
+        display: inline-block;
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        line-height: 20px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 12px;
+        margin-left: 6px;
+        cursor: help;
+        position: relative;
+    }
+    .extreme-high-tooltip {
+        position: absolute;
+        background-color: rgba(0, 0, 0, 0.9);
+        color: white;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        white-space: nowrap;
+        z-index: 1000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 5px;
+    }
+    .extreme-high-tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 5px solid transparent;
+        border-top-color: rgba(0, 0, 0, 0.9);
+    }
+    .extreme-high-badge:hover .extreme-high-tooltip {
+        opacity: 1;
+    }
 </style>
 {% endblock styles %}
 
 {% block content %}
-<h2 class="mb-4 mt-5">{% trans "Stations overview" %}</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">{% trans "All Stations" %}</h2>
 
 <!-- Display error message if present -->
 {% if error %}
     <div class="alert alert-danger" role="alert">
         {{ error }}
     </div>
-{% else %}
-<div class="row">
-    <!-- Column 1: Top 10 with the highest values -->
-    <div class="col-md-6">
-        <h3 class="text-center">{% trans "Top 10 with the highest values for PM2.5" %}</h3>
-        <ul class="list-group">
-            {% for station in top_stations %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
-                        Station {{ station.0 }}
-                    </a>
-                    <span class="badge bg-danger rounded-pill">{{ station.3 }} µg/m³</span>
-                </li>
-            {% endfor %}
-        </ul>
+    {% endif %}
 
-        {% if top_stations.has_other_pages %}
-            <nav aria-label="{% trans 'Top station pagination' %}">
-                <ul class="pagination justify-content-center mt-2">
-                    {% if top_stations.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page_top={{ top_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
-                    {% endif %}
-                    
-                    {% for num in paginator_top.page_range %}
-                        {% if top_stations.number == num %}
-                            <li class="page-item active" aria-current="page">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > top_stations.number|add:'-3' and num < top_stations.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_top={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-                    
-                    {% if top_stations.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page_top={{ top_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-        {% endif %}
+    <!-- Map with all stations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="map"></div>
+        </div>
     </div>
 
-    <!-- Column 2: Top 10 with the lowest values -->
-    <div class="col-md-6">
-        <h3 class="text-center">{% trans "Top 10 with the lowest values for PM2.5" %}</h3>
-        <ul class="list-group">
-            {% for station in lowest_stations %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+    <!-- Active Stations Statistics -->
+    {% if active_stations %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3 class="mb-3">{% trans "Active Stations" %}</h3>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-clock"></i> {% trans "Last Hour" %}
+                    </h5>
+                    <p class="display-6">{{ active_stations.last_hour|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-clock-history"></i> {% trans "Last 24 Hours" %}
+                    </h5>
+                    <p class="display-6">{{ active_stations.last_24_hours|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-calendar-week"></i> {% trans "Last 7 Days" %}
+                    </h5>
+                    <p class="display-6">{{ active_stations.last_7_days|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="bi bi-calendar-month"></i> {% trans "Last 30 Days" %}
+                    </h5>
+                    <p class="display-6">{{ active_stations.last_30_days|default:0 }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Dashboard Cards for each dimension -->
+<div class="row">
+        <!-- PM1 Card -->
+        <div class="col-lg-4 col-md-6 mb-4" data-dimension="pm1">
+            <div class="card dimension-card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-cloud-fill"></i> {% trans "Particulate Matter" %} PM1.0
+                </div>
+                <div class="card-body">
+                    {% if dimension_data.pm1.top_stations %}
+                        <!-- Highest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-danger">
+                                <i class="bi bi-arrow-up-circle-fill"></i> {% trans "Highest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm1.top_stations %}
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
                     <a href="{% url 'station-detail' station.0 %}" class="station-link">
                         Station {{ station.0 }}
                     </a>
-                    <span class="badge bg-success rounded-pill">{{ station.3 }} µg/m³</span>
+                                            <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
+                                        </div>
                 </li>
             {% endfor %}
         </ul>
+                        </div>
 
-        {% if lowest_stations.has_other_pages %}
-            <nav aria-label="{% trans 'Lowest station pagination' %}">
-                <ul class="pagination justify-content-center mt-2">
-                    {% if lowest_stations.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page_low={{ lowest_stations.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
+                        <!-- Lowest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-success">
+                                <i class="bi bi-arrow-down-circle-fill"></i> {% trans "Lowest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm1.lowest_stations %}
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                                Station {{ station.0 }}
+                                            </a>
+                                            <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
+                        <p class="text-muted">{% trans "No data available for PM1.0" %}</p>
                     {% endif %}
-                    
-                    {% for num in paginator_low.page_range %}
-                        {% if lowest_stations.number == num %}
-                            <li class="page-item active" aria-current="page">
-                                <span class="page-link">{{ num }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- PM2.5 Card -->
+        <div class="col-lg-4 col-md-6 mb-4" data-dimension="pm25">
+            <div class="card dimension-card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-cloud-fill"></i> {% trans "Particulate Matter" %} PM2.5
+                </div>
+                <div class="card-body">
+                    {% if dimension_data.pm25.top_stations %}
+                        <!-- Highest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-danger">
+                                <i class="bi bi-arrow-up-circle-fill"></i> {% trans "Highest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm25.top_stations %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                            Station {{ station.0 }}
+                                        </a>
+                                        <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
                             </li>
-                        {% elif num > lowest_stations.number|add:'-3' and num < lowest_stations.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page_low={{ num }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
                     {% endfor %}
-                    
-                    {% if lowest_stations.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page_low={{ lowest_stations.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&raquo;</span>
-                        </li>
-                    {% endif %}
                 </ul>
-            </nav>
-        {% endif %}
+    </div>
+
+                        <!-- Lowest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-success">
+                                <i class="bi bi-arrow-down-circle-fill"></i> {% trans "Lowest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm25.lowest_stations %}
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                        Station {{ station.0 }}
+                    </a>
+                                            <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
+                                        </div>
+                </li>
+            {% endfor %}
+        </ul>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{% trans "No data available for PM2.5" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- PM10 Card -->
+        <div class="col-lg-4 col-md-6 mb-4" data-dimension="pm10">
+            <div class="card dimension-card shadow-sm">
+                <div class="card-header">
+                    <i class="bi bi-cloud-fill"></i> {% trans "Particulate Matter" %} PM10.0
+                </div>
+                <div class="card-body">
+                    {% if dimension_data.pm10.top_stations %}
+                        <!-- Highest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-danger">
+                                <i class="bi bi-arrow-up-circle-fill"></i> {% trans "Highest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm10.top_stations %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                            Station {{ station.0 }}
+                                        </a>
+                                        <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
+                            </li>
+                    {% endfor %}
+                            </ul>
+                        </div>
+
+                        <!-- Lowest values section -->
+                        <div class="station-list-section">
+                            <h5 class="text-success">
+                                <i class="bi bi-arrow-down-circle-fill"></i> {% trans "Lowest Values" %}
+                            </h5>
+                            <ul class="list-group list-group-flush">
+                                {% for station in dimension_data.pm10.lowest_stations %}
+                                    <li class="list-group-item px-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                                Station {{ station.0 }}
+                                            </a>
+                                            <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{% trans "No data available for PM10.0" %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Color Legend -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">{% trans "Air Quality Index" %}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6>PM1.0</h6>
+                            <div id="legend-pm1"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>PM2.5</h6>
+                            <div id="legend-pm25"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <h6>PM10.0</h6>
+                            <div id="legend-pm10"></div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
-{% endif %}
+
+<script>
+    // Color value map from home page
+    const colorStepsPM1 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+    const colorStepsPM25 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+    const colorStepsPM10 = [
+        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
+        [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
+        [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
+        [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
+        [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
+        [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
+    ];
+    
+    const colorStepsMap = {
+        'pm1': colorStepsPM1,
+        'pm25': colorStepsPM25,
+        'pm10': colorStepsPM10
+    };
+    
+    // Get color for PM value
+    function getColorForPM(value, colorSteps) {
+        if (isNaN(value) || value === null) return [128, 128, 128];
+        for (let i = 0; i < colorSteps.length - 1; i++) {
+            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
+                return colorSteps[i][1];
+            }
+        }
+        return colorSteps[colorSteps.length - 1][1];
+    }
+    
+    // Apply colors to badges
+    function applyBadgeColors() {
+        const dimensions = ['pm1', 'pm25', 'pm10'];
+        dimensions.forEach(function(dim) {
+            const colorSteps = colorStepsMap[dim];
+            const card = document.querySelector(`[data-dimension="${dim}"]`);
+            if (!card) {
+                console.log(`Card not found for dimension: ${dim}`);
+                return;
+            }
+            
+            const badges = card.querySelectorAll('.badge');
+            console.log(`Found ${badges.length} badges for ${dim}`);
+            
+            badges.forEach(function(badge) {
+                const text = badge.textContent.trim();
+                const match = text.match(/([\d.]+)\s*µg\/m³/);
+                if (match) {
+                    const value = parseFloat(match[1]);
+                    const [r, g, b] = getColorForPM(value, colorSteps);
+                    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+                    const textColor = brightness > 125 ? "black" : "white";
+                    
+                    badge.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+                    badge.style.color = textColor;
+                    badge.style.border = 'none';
+                    console.log(`Applied color to badge: value=${value}, rgb=(${r},${g},${b})`);
+                    
+                    // Add warning badge for extreme high values (> 300)
+                    if (value > 300) {
+                        // Check if warning badge already exists
+                        let warningBadge = badge.parentElement.querySelector('.extreme-high-badge');
+                        if (!warningBadge) {
+                            warningBadge = document.createElement('span');
+                            warningBadge.className = 'extreme-high-badge';
+                            warningBadge.textContent = '!';
+                            warningBadge.title = `! Extreme high, ${value} µg/m³. There might be a problem with the sensor or a direct emission source.`;
+                            
+                            // Create tooltip
+                            const tooltip = document.createElement('div');
+                            tooltip.className = 'extreme-high-tooltip';
+                            tooltip.textContent = `! Extreme high, ${value} µg/m³. There might be a problem with the sensor or a direct emission source.`;
+                            warningBadge.appendChild(tooltip);
+                            
+                            // Insert after the badge
+                            badge.parentElement.insertBefore(warningBadge, badge.nextSibling);
+                        }
+                    }
+                }
+            });
+        });
+    }
+    
+    // Create legend function
+    function createLegend(legendId, colorSteps) {
+        const legendDiv = document.getElementById(legendId);
+        if (!legendDiv) return;
+        
+        legendDiv.innerHTML = '';
+        
+        for (let i = 0; i < colorSteps.length; i++) {
+            const from = colorSteps[i][0];
+            const to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+            const rgb = colorSteps[i][1];
+            const description = colorSteps[i][2];
+            
+            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+            
+            const item = document.createElement('div');
+            item.style.display = 'flex';
+            item.style.flexDirection = 'row';
+            item.style.alignItems = 'center';
+            item.style.marginBottom = '4px';
+            
+            const colorBox = document.createElement('span');
+            colorBox.style.background = colorString;
+            colorBox.style.width = '18px';
+            colorBox.style.height = '18px';
+            colorBox.style.display = 'inline-block';
+            colorBox.style.marginRight = '8px';
+            colorBox.style.border = '1px solid #ccc';
+            colorBox.style.borderRadius = '50%';
+            
+            const labelText = document.createElement('span');
+            labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+            labelText.style.fontSize = '0.8rem';
+            
+            item.appendChild(colorBox);
+            item.appendChild(labelText);
+            legendDiv.appendChild(item);
+        }
+    }
+    
+    // Initialize page functions
+    function initializePage() {
+        applyBadgeColors();
+        
+        // Create legends
+        createLegend('legend-pm1', colorStepsPM1);
+        createLegend('legend-pm25', colorStepsPM25);
+        createLegend('legend-pm10', colorStepsPM10);
+    }
+    
+    // Run when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializePage);
+    } else {
+        initializePage();
+    }
+    
+    // Set up SVG and projection
+    const width = document.getElementById('map').clientWidth;
+    const height = 500;
+    
+    const svg = d3.select('#map')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+    
+    // Create tooltip
+    const tooltip = d3.select('body')
+        .append('div')
+        .attr('class', 'station-tooltip')
+        .style('opacity', 0);
+    
+    // Create popup
+    const popup = d3.select('#map')
+        .append('div')
+        .attr('class', 'station-popup')
+        .style('display', 'none');
+    
+    // Close popup when clicking outside
+    d3.select('body').on('click', function(event) {
+        if (!event.target.closest('.station-popup') && !event.target.closest('.station-point')) {
+            popup.style('display', 'none');
+        }
+    });
+    
+    // Set up projection for Austria
+    const projection = d3.geoMercator();
+    const path = d3.geoPath().projection(projection);
+    
+    // Load GeoJSON and stations data
+    const allStations = {{ all_stations_json|safe }};
+    
+    // Debug: Log stations data
+    console.log('=== STATION POINTS DEBUG ===');
+    console.log('All stations data:', allStations);
+    console.log('Number of stations:', allStations ? allStations.length : 0);
+    
+    if (allStations && allStations.length > 0) {
+        const sampleStation = allStations[0];
+        console.log('Sample station:', sampleStation);
+        console.log('Sample station keys:', Object.keys(sampleStation));
+        console.log('Sample station has lat/lon:', sampleStation.lat, sampleStation.lon);
+    }
+    
+    // Load GeoJSON base layer
+    const geojsonUrl = "{% static 'img/laender_999_geo.json' %}";
+    console.log('Loading GeoJSON from:', geojsonUrl);
+    
+    d3.json(geojsonUrl)
+        .then(function(geojson) {
+            console.log('GeoJSON loaded successfully:', geojson);
+            console.log('Number of features:', geojson.features ? geojson.features.length : 0);
+            
+            // Scale projection to fit the entire map box with padding
+            projection.fitSize([width, height], geojson);
+            console.log('Projection configured. Width:', width, 'Height:', height);
+            
+            // Draw regions
+            svg.selectAll('.region')
+                .data(geojson.features)
+                .enter()
+                .append('path')
+                .attr('class', 'region')
+                .attr('d', path);
+            
+            console.log('Regions drawn');
+            
+            // Add station points
+            if (allStations && allStations.length > 0) {
+                const validStations = allStations.filter(function(d) { 
+                    const hasCoords = d.lat && d.lon;
+                    if (!hasCoords) {
+                        console.log('Station missing coordinates:', d);
+                    }
+                    return hasCoords;
+                });
+                
+                console.log('Valid stations (with lat/lon):', validStations.length);
+                console.log('Valid stations data:', validStations);
+                
+                if (validStations.length > 0) {
+                    const sampleValid = validStations[0];
+                    const projected = projection([sampleValid.lon, sampleValid.lat]);
+                    console.log('Sample station projection:', {
+                        lon: sampleValid.lon,
+                        lat: sampleValid.lat,
+                        projectedX: projected[0],
+                        projectedY: projected[1]
+                    });
+                }
+                
+                const circles = svg.selectAll('.station-point')
+                    .data(validStations)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'station-point')
+                    .attr('r', 4)
+                    .attr('cx', function(d) {
+                        const x = projection([d.lon, d.lat])[0];
+                        if (isNaN(x)) {
+                            console.log('Invalid X projection for station:', d, 'lon:', d.lon, 'lat:', d.lat);
+                        }
+                        return x;
+                    })
+                    .attr('cy', function(d) {
+                        const y = projection([d.lon, d.lat])[1];
+                        if (isNaN(y)) {
+                            console.log('Invalid Y projection for station:', d, 'lon:', d.lon, 'lat:', d.lat);
+                        }
+                        return y;
+                    })
+                    .on('click', function(event, d) {
+                        event.stopPropagation();
+                        
+                        // Format last_active date
+                        let lastActiveText = 'N/A';
+                        if (d.last_active) {
+                            try {
+                                const date = new Date(d.last_active);
+                                lastActiveText = date.toLocaleString();
+                            } catch (e) {
+                                lastActiveText = d.last_active;
+                            }
+                        }
+                        
+                        // Get click position relative to map
+                        const mapRect = document.getElementById('map').getBoundingClientRect();
+                        const x = event.clientX - mapRect.left;
+                        const y = event.clientY - mapRect.top;
+                        
+                        // Update popup content
+                        popup.html(`
+                            <button class="close-btn" onclick="d3.select('.station-popup').style('display', 'none')">&times;</button>
+                            <h4>Station ${d.station_id}</h4>
+                            <p><strong>Last Active:</strong> ${lastActiveText}</p>
+                            <a href="/stations/${d.station_id}">View Details</a>
+                        `)
+                        .style('left', (x + 10) + 'px')
+                        .style('top', (y - 10) + 'px')
+                        .style('display', 'block');
+                    });
+                
+                console.log('Station circles created:', circles.size());
+                console.log('Total circles in SVG:', svg.selectAll('circle').size());
+                console.log('=== END STATION POINTS DEBUG ===');
+            } else {
+                console.warn('No stations data available or empty array');
+            }
+        })
+        .catch(function(error) {
+            console.error('Error loading GeoJSON:', error);
+            // Fallback: just show stations without base layer
+            console.log('Attempting fallback: showing stations without base layer');
+            if (allStations && allStations.length > 0) {
+                const validStations = allStations.filter(function(d) { 
+                    const hasCoords = d.lat && d.lon;
+                    if (!hasCoords) {
+                        console.log('Fallback: Station missing coordinates:', d);
+                    }
+                    return hasCoords;
+                });
+                
+                console.log('Fallback: Valid stations:', validStations.length);
+                
+                if (validStations.length > 0) {
+                    // Set up a basic projection for fallback
+                    const lons = validStations.map(d => d.lon);
+                    const lats = validStations.map(d => d.lat);
+                    const bounds = [[d3.min(lons), d3.min(lats)], [d3.max(lons), d3.max(lats)]];
+                    console.log('Fallback: Station bounds:', bounds);
+                    
+                    projection.fitExtent([[20, 20], [width - 20, height - 20]], {
+                        type: 'FeatureCollection',
+                        features: [{
+                            type: 'Feature',
+                            geometry: {
+                                type: 'Polygon',
+                                coordinates: [[
+                                    [bounds[0][0], bounds[0][1]],
+                                    [bounds[1][0], bounds[0][1]],
+                                    [bounds[1][0], bounds[1][1]],
+                                    [bounds[0][0], bounds[1][1]],
+                                    [bounds[0][0], bounds[0][1]]
+                                ]]
+                            }
+                        }]
+                    });
+                }
+                
+                const circles = svg.selectAll('.station-point')
+                    .data(validStations)
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'station-point')
+                    .attr('r', 4)
+                    .attr('cx', function(d) {
+                        const x = projection([d.lon, d.lat])[0];
+                        console.log('Fallback: Station', d.station_id, 'X:', x, 'lon:', d.lon, 'lat:', d.lat);
+                        return x;
+                    })
+                    .attr('cy', function(d) {
+                        const y = projection([d.lon, d.lat])[1];
+                        console.log('Fallback: Station', d.station_id, 'Y:', y);
+                        return y;
+                    })
+                svg.selectAll('.station-point')
+                    .data(allStations.filter(function(d) { return d.lat && d.lon; }))
+                    .enter()
+                    .append('circle')
+                    .attr('class', 'station-point')
+                    .attr('r', 4)
+                    .attr('cx', function(d) {
+                        return projection([d.lon, d.lat])[0];
+                    })
+                    .attr('cy', function(d) {
+                        return projection([d.lon, d.lat])[1];
+                    })
+                    .on('click', function(event, d) {
+                        event.stopPropagation();
+                        
+                        // Format last_active date
+                        let lastActiveText = 'N/A';
+                        if (d.last_active) {
+                            try {
+                                const date = new Date(d.last_active);
+                                lastActiveText = date.toLocaleString();
+                            } catch (e) {
+                                lastActiveText = d.last_active;
+                            }
+                        }
+                        
+                        // Get click position relative to map
+                        const mapRect = document.getElementById('map').getBoundingClientRect();
+                        const x = event.clientX - mapRect.left;
+                        const y = event.clientY - mapRect.top;
+                        
+                        // Update popup content
+                        popup.html(`
+                            <button class="close-btn" onclick="d3.select('.station-popup').style('display', 'none')">&times;</button>
+                            <h4>Station ${d.station_id}</h4>
+                            <p><strong>Last Active:</strong> ${lastActiveText}</p>
+                            <a href="/stations/${d.station_id}">View Details</a>
+                        `)
+                        .style('left', (x + 10) + 'px')
+                        .style('top', (y - 10) + 'px')
+                        .style('display', 'block');
+                    });
+                
+                console.log('Station circles created:', circles.size());
+                console.log('Total circles in SVG:', svg.selectAll('circle').size());
+                console.log('=== END STATION POINTS DEBUG ===');
+            } else {
+                console.warn('No stations data available or empty array');
+            }
+        });
+</script>
 {% endblock content %}

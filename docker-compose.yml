@@ -11,7 +11,7 @@ services:
   db:
     image: postgis/postgis
     volumes:
-      - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
+      # - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - .env
@@ -24,16 +24,16 @@ services:
       - "80:80"
     depends_on:
       - app      
-  admin:
-    image: dpage/pgadmin4:latest
-    env_file:
-      - .env
-    depends_on:
-      - db
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin/
-    ports:
-      - "8080:80"
+  # admin:
+  #   image: dpage/pgadmin4:latest
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin/
+  #   ports:
+  #     - "8080:80"
 volumes:
   postgres_data:
   pgadmin-data:
