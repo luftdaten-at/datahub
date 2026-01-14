@@ -5,28 +5,239 @@
 {% block title %}{% trans "Cities and municipalities" %}{% endblock title %}
 
 {% block styles %}
+<!-- D3.js -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        margin-bottom: 2rem;
+        border-radius: 0.375rem;
+        background-color: #ffffff;
+    }
+    .region {
+        fill: #f0f0f0;
+        stroke: #ccc;
+        stroke-width: 1;
+    }
+    .city-circle {
+        fill: #007bff;
+        stroke: #fff;
+        stroke-width: 2;
+        cursor: pointer;
+    }
+    .city-circle:hover {
+        fill: #0056b3;
+    }
+    .city-popup {
+        position: absolute;
+        background-color: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        min-width: 200px;
+        z-index: 1000;
+        display: none;
+    }
+    .city-popup h4 {
+        margin-top: 0;
+        margin-bottom: 8px;
+    }
+    .city-popup .close-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+        line-height: 1;
+    }
+    .city-popup .close-btn:hover {
+        color: #333;
+    }
+</style>
 {% endblock styles %}
 
 {% block content %}
-<h2 class="mb-4 mt-5">{% trans "Cities and municipalities" %}</h2>
+<div class="container mt-5">
+    <h2 class="mb-4">{% trans "Cities and municipalities" %}</h2>
 
-{% if error %}
-  <div class="alert alert-danger" role="alert">
-    {{ error }}
-  </div>
-{% endif %}
+    {% if error %}
+      <div class="alert alert-danger" role="alert">
+        {{ error }}
+      </div>
+    {% endif %}
 
-{% if cities %}
-  <p>
-      {% for city in cities %}
-          <a href="/cities/{{ city.slug }}">{{ city.name }}</a> ({{ city.country.name }}){% if not forloop.last %}, {% endif %}
-      {% endfor %}
-  </p>
-{% else %}
-  {% if not error %}
-    <div class="alert alert-info" role="alert">
-      {% trans "No cities available." %}
+    <!-- Map Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div id="map"></div>
+        </div>
     </div>
-  {% endif %}
-{% endif %}
+
+    <!-- Top Cities by Station Count -->
+    <div class="row mb-4" id="top-cities-cards">
+        <!-- Cards will be populated by JavaScript -->
+    </div>
+    
+</div>
+
+<script>
+    // Set up SVG
+    const width = document.getElementById('map').clientWidth;
+    const height = 500;
+    
+    const svg = d3.select('#map')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height);
+    
+    // Set up projection
+    const projection = d3.geoMercator();
+    const path = d3.geoPath().projection(projection);
+    
+    // Create popup
+    const popup = d3.select('#map')
+        .append('div')
+        .attr('class', 'city-popup')
+        .style('display', 'none');
+    
+    // Close popup when clicking outside
+    d3.select('body').on('click', function(event) {
+        if (!event.target.closest('.city-popup') && !event.target.closest('.city-circle')) {
+            popup.style('display', 'none');
+        }
+    });
+    
+    // City data from Django
+    const citiesData = {{ cities_json|safe }};
+    
+    // Load base layer GeoJSON and draw cities
+    Promise.all([
+        d3.json("{% static 'img/laender_999_geo.json' %}"),
+        Promise.resolve(citiesData)
+    ])
+    .then(function(results) {
+        const geojson = results[0];
+        const cities = results[1];
+        
+        // Scale projection to fit the base layer
+        projection.fitSize([width, height], geojson);
+        
+        // Draw regions (base layer)
+        svg.selectAll('.region')
+            .data(geojson.features)
+            .enter()
+            .append('path')
+            .attr('class', 'region')
+            .attr('d', path);
+        
+        // Filter cities that have location data
+        const citiesWithLocation = cities.filter(function(city) {
+            return city.location && 
+                   (city.location.latitude !== null && city.location.latitude !== undefined) &&
+                   (city.location.longitude !== null && city.location.longitude !== undefined);
+        });
+        
+        // Draw city circles
+        svg.selectAll('.city-circle')
+            .data(citiesWithLocation)
+            .enter()
+            .append('circle')
+            .attr('class', 'city-circle')
+            .attr('cx', function(d) {
+                const projected = projection([d.location.longitude, d.location.latitude]);
+                return projected ? projected[0] : null;
+            })
+            .attr('cy', function(d) {
+                const projected = projection([d.location.longitude, d.location.latitude]);
+                return projected ? projected[1] : null;
+            })
+            .attr('r', 10)
+            .on('click', function(event, d) {
+                event.stopPropagation();
+                
+                // Get click position relative to map
+                const mapRect = document.getElementById('map').getBoundingClientRect();
+                const x = event.clientX - mapRect.left;
+                const y = event.clientY - mapRect.top;
+                
+                // Update popup content
+                popup.html(`
+                    <button class="close-btn" onclick="d3.select('.city-popup').style('display', 'none')">&times;</button>
+                    <h4>${d.name}</h4>
+                    <p><strong>{% trans "Country" %}:</strong> ${d.country.name}</p>
+                    <a href="/cities/${d.slug}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
+                `)
+                .style('left', `${x + 10}px`)
+                .style('top', `${y - popup.node().offsetHeight / 2}px`)
+                .style('display', 'block');
+            });
+    })
+    .catch(function(error) {
+        console.error('Error loading map:', error);
+    });
+    
+    // Top cities data from statistics endpoint
+    const topCitiesData = {{ top_cities_json|safe }};
+    
+    // Translations from Django
+    const translations = {{ translations_json|safe }};
+    
+    // Display top 4 cities by station count
+    function displayTopCities(topCities) {
+        // Take top 4 (they should already be sorted from the API)
+        const top4 = topCities.slice(0, 4);
+        
+        if (top4.length === 0) {
+            return;
+        }
+        
+        // Create cards
+        const cardsContainer = d3.select('#top-cities-cards');
+        
+        // Add heading
+        cardsContainer.append('div')
+            .attr('class', 'col-12 mb-3')
+            .append('h3')
+            .text(translations.cities_with_most_stations);
+        
+        top4.forEach(function(city, index) {
+            const col = cardsContainer.append('div')
+                .attr('class', 'col-md-3 col-sm-6 mb-3');
+            
+            // Find city slug from citiesData if available
+            let citySlug = city.city.toLowerCase().replace(/\s+/g, '-');
+            if (typeof citiesData !== 'undefined' && citiesData) {
+                const matchingCity = citiesData.find(function(c) {
+                    return c.name === city.city;
+                });
+                if (matchingCity && matchingCity.slug) {
+                    citySlug = matchingCity.slug;
+                }
+            }
+            
+            col.append('div')
+                .attr('class', 'card h-100 shadow-sm')
+                .html(`
+                    <div class="card-body">
+                        <h5 class="card-title">${city.city}</h5>
+                        <p class="card-text">
+                            <strong>${translations.country}:</strong> ${city.country}<br>
+                            <strong>${translations.stations}:</strong> ${city.station_count || 0}
+                        </p>
+                        <a href="/cities/${citySlug}" class="btn btn-primary btn-sm">${translations.view_details}</a>
+                    </div>
+                `);
+        });
+    }
+    
+    // Call displayTopCities when data is available
+    if (typeof topCitiesData !== 'undefined' && topCitiesData && topCitiesData.length > 0) {
+        displayTopCities(topCitiesData);
+    }
+</script>
 {% endblock content %}

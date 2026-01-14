@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-03 08:52+0200\n"
+"POT-Creation-Date: 2026-01-14 15:06+0100\n"
 "PO-Revision-Date: 2024-12-07 01:36+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,12 +19,13 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.5\n"
 
-#: campaign/forms.py:23 templates/devices/detail.html:33
-#: templates/devices/list.html:34 templates/devices/my.html:13
+#: campaign/forms.py:23 organizations/models.py:14
+#: templates/devices/detail.html:36 templates/devices/list.html:34
+#: templates/devices/my.html:13
 msgid "Name"
 msgstr "Name"
 
-#: campaign/forms.py:24 workshops/forms.py:16
+#: campaign/forms.py:24 organizations/models.py:15 workshops/forms.py:16
 msgid "Description"
 msgstr "Beschreibung"
 
@@ -56,17 +57,37 @@ msgstr ""
 "Soll die Messkampagne öffentlich auf dem Datahub verfügbar sein? Wenn nicht, "
 "können nur zugewiesene Benutzer Ergebnisse sehen."
 
-#: devices/views.py:254
+#: devices/views.py:425
 msgid "You are not allowed to delete this device."
 msgstr "Sie sind nicht berechtigt, dieses Gerät zu löschen."
 
-#: main/settings.py:180
+#: log_viewer_custom/views.py:169
+msgid "All Levels"
+msgstr ""
+
+#: main/settings.py:182
 msgid "English"
 msgstr "Englisch"
 
-#: main/settings.py:181
+#: main/settings.py:183
 msgid "German"
 msgstr "Deutsch"
+
+#: organizations/forms.py:10
+msgid "Keep current ownership"
+msgstr "Aktuelles Eigentum beibehalten"
+
+#: organizations/forms.py:11
+msgid ""
+"Select a new owner from the organization members. Leave empty to keep "
+"current ownership."
+msgstr ""
+"Wählen Sie einen neuen Eigentümer aus den Organisationsmitgliedern aus. "
+"Lassen Sie es leer, um das aktuelle Eigentum beizubehalten."
+
+#: organizations/forms.py:26
+msgid "Transfer Ownership"
+msgstr "Eigentum übertragen"
 
 #: templates/_base.html:12 templates/_base.html:32
 msgid "Clean air at the workplace"
@@ -85,7 +106,7 @@ msgstr "Navigation umschalten"
 msgid "Workshops"
 msgstr "Workshops"
 
-#: templates/_base.html:51
+#: templates/_base.html:51 templates/cities/list.html:227
 msgid "Stations"
 msgstr "Stationen"
 
@@ -93,70 +114,74 @@ msgstr "Stationen"
 msgid "Cities"
 msgstr "Städte"
 
-#: templates/_base.html:69 templates/account/dashboard.html:6
+#: templates/_base.html:67 templates/account/dashboard.html:6
 msgid "Dashboard"
 msgstr "Dashboard"
 
-#: templates/_base.html:74 templates/account/settings.html:6
+#: templates/_base.html:68 templates/account/settings.html:6
 #: templates/account/settings.html:9
 msgid "Settings"
 msgstr "Einstellungen"
 
-#: templates/_base.html:80 templates/organizations/my.html:5
+#: templates/_base.html:70 templates/organizations/my.html:5
 msgid "My Organizations"
 msgstr "Meine Organisation"
 
-#: templates/_base.html:85 templates/account/dashboard.html:19
+#: templates/_base.html:71 templates/account/dashboard.html:19
 #: templates/account/dashboard.html:42 templates/campaigns/my.html:4
-#: templates/campaigns/my.html:8
+#: templates/campaigns/my.html:46
 msgid "My Campaigns"
 msgstr "Meine Kampagnen"
 
-#: templates/_base.html:91 templates/workshops/my.html:4
+#: templates/_base.html:73 templates/workshops/my.html:4
 #: templates/workshops/my.html:8
 msgid "My Workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:98 templates/campaigns/participants/detail.html:48
+#: templates/_base.html:78 templates/campaigns/participants/detail.html:48
 #: templates/campaigns/room/detail.html:66 templates/devices/list.html:6
-#: templates/devices/list.html:17 templates/organizations/detail.html:94
-#: templates/workshops/detail.html:107
+#: templates/devices/list.html:17 templates/organizations/detail.html:344
+#: templates/workshops/detail.html:122
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:101
+#: templates/_base.html:79
 msgid "Calibration"
 msgstr "Kalibrierung"
 
-#: templates/_base.html:101 templates/account/users/list.html:6
-#: templates/account/users/list.html:17 templates/organizations/detail.html:17
+#: templates/_base.html:80 templates/account/users/list.html:6
+#: templates/account/users/list.html:17 templates/organizations/detail.html:108
 #: templates/workshops/management.html:17
 msgid "Users"
 msgstr "Nutzer:innen"
 
-#: templates/_base.html:107
+#: templates/_base.html:81
+msgid "Logs"
+msgstr ""
+
+#: templates/_base.html:84
 #, fuzzy
 #| msgid "Log out"
 msgid "Log Out"
 msgstr "Abmelden"
 
-#: templates/_base.html:114
+#: templates/_base.html:89 templates/account/password_reset_from_key.html:119
 #, fuzzy
 #| msgid "Log in"
 msgid "Log In"
 msgstr "Anmelden"
 
-#: templates/_base.html:118
+#: templates/_base.html:93
 #, fuzzy
 #| msgid "Sign up"
 msgid "Sign Up"
 msgstr "Registrieren"
 
-#: templates/_base.html:143
+#: templates/_base.html:118
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:146
+#: templates/_base.html:121
 #, fuzzy
 #| msgid "About us"
 msgid "About Us"
@@ -184,7 +209,12 @@ msgstr "Bestätigen"
 
 #: templates/account/account_confirm_delete.html:13
 #: templates/account/data_confirm_delete.html:13
+#: templates/account/logout.html:47 templates/account/users/edit.html:16
+#: templates/account/users/password_change.html:54
+#: templates/campaigns/add_user.html:38 templates/campaigns/room_form.html:38
 #: templates/devices/edit_notes.html:14 templates/devices/form.html:12
+#: templates/organizations/create.html:36
+#: templates/organizations/detail.html:231
 #: templates/workshops/confirm_delete.html:11
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -198,32 +228,34 @@ msgid " My Measurements"
 msgstr "Meine Messwerte"
 
 #: templates/account/dashboard.html:51 templates/account/dashboard.html:85
-#: templates/campaigns/my.html:19 templates/organizations/my.html:23
+#: templates/campaigns/my.html:59 templates/organizations/detail.html:120
+#: templates/organizations/my.html:60
 msgid "Owner"
 msgstr "Eigentümer"
 
 #: templates/account/dashboard.html:53 templates/account/dashboard.html:87
-#: templates/campaigns/my.html:21 templates/organizations/my.html:25
+#: templates/campaigns/my.html:61 templates/organizations/detail.html:122
+#: templates/organizations/my.html:62
 msgid "Member"
 msgstr "Mitglied"
 
 #: templates/account/dashboard.html:55 templates/account/dashboard.html:89
-#: templates/campaigns/my.html:23 templates/organizations/my.html:27
+#: templates/campaigns/my.html:63 templates/organizations/my.html:64
 msgid "Other"
 msgstr "Andere"
 
-#: templates/account/dashboard.html:59 templates/campaigns/my.html:27
-#: templates/workshops/my.html:23
+#: templates/account/dashboard.html:59 templates/campaigns/my.html:74
+#: templates/organizations/detail.html:298 templates/workshops/my.html:23
 #, fuzzy
 #| msgid "End Date"
 msgid "Date:"
 msgstr "Enddatum:"
 
-#: templates/account/dashboard.html:68 templates/campaigns/my.html:50
+#: templates/account/dashboard.html:68 templates/campaigns/my.html:127
 msgid "No campaigns found."
 msgstr "Keine Messkampagnen gefunden."
 
-#: templates/account/dashboard.html:70 templates/campaigns/my.html:9
+#: templates/account/dashboard.html:70 templates/campaigns/my.html:47
 msgid "Create Campaign"
 msgstr "Kampagne erstellen"
 
@@ -231,12 +263,12 @@ msgstr "Kampagne erstellen"
 msgid "My Organization"
 msgstr "Meine Organisation"
 
-#: templates/account/dashboard.html:101 templates/organizations/my.html:50
+#: templates/account/dashboard.html:101 templates/organizations/my.html:119
 msgid "You are not a member of any organizations."
 msgstr "Du bist nicht Mitglied einer Organisation."
 
-#: templates/account/dashboard.html:103 templates/organizations/create.html:10
-#: templates/organizations/my.html:13
+#: templates/account/dashboard.html:103 templates/organizations/create.html:14
+#: templates/organizations/create.html:33 templates/organizations/my.html:48
 msgid "Create Organization"
 msgstr "Organisation erstellen"
 
@@ -300,6 +332,82 @@ msgstr ""
 msgid "Confirm Your Sign Up"
 msgstr "Bestätige deine Anmeldung"
 
+#: templates/account/email/password_reset_key_message.html:10
+#: templates/account/password_reset.html:4
+#: templates/account/password_reset.html:14
+#: templates/account/password_reset_from_key.html:5
+#: templates/account/password_reset_from_key.html:15
+msgid "Password Reset"
+msgstr "Passwort zurücksetzen"
+
+#: templates/account/email/password_reset_key_message.html:90
+#, fuzzy
+#| msgid "Password Reset"
+msgid "Password Reset Request"
+msgstr "Passwort zurücksetzen"
+
+#: templates/account/email/password_reset_key_message.html:94
+msgid "Hello"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:96
+msgid ""
+"You're receiving this email because you or someone else has requested a "
+"password reset for your user account. It can be safely ignored if you did "
+"not request a password reset."
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:98
+msgid "Click the button below to reset your password:"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:102
+#, fuzzy
+#| msgid "Forgot Password?"
+msgid "Reset My Password"
+msgstr "Passwort vergessen?"
+
+#: templates/account/email/password_reset_key_message.html:107
+msgid "Security Notice:"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:108
+msgid ""
+"This link will expire in 24 hours for security reasons. If you didn't "
+"request this password reset, please ignore this email."
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:111
+msgid ""
+"If the button doesn't work, you can copy and paste this link into your "
+"browser:"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:118
+#, fuzzy
+#| msgid "Username"
+msgid "Your username:"
+msgstr "Benutzername"
+
+#: templates/account/email/password_reset_key_message.html:124
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:125
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:127
+msgid "This is an automated message, please do not reply to this email."
+msgstr ""
+
+#: templates/account/email/password_reset_key_subject.txt:3
+#, fuzzy, python-format
+#| msgid "Password Reset Failed"
+msgid "Password Reset - %(site_name)s"
+msgstr "Passwort-Zurücksetzen fehlgeschlagen"
+
 #: templates/account/email_confirm.html:4
 #: templates/account/email_confirm.html:6
 msgid "Confirm E-mail Address"
@@ -329,17 +437,69 @@ msgstr ""
 "Dieser E-Mail-Bestätigungslink ist abgelaufen oder ungültig. Bitte <a "
 "href=\"%(email_url)s\">fordern Sie eine neue E-Mail-Bestätigung an</a>.\\\n"
 
-#: templates/account/login.html:5 templates/account/login.html:8
-#: templates/account/login.html:12
+#: templates/account/login.html:4 templates/account/login.html:14
+#: templates/account/login.html:85 templates/account/signup.html:107
 msgid "Log in"
 msgstr "Anmelden"
 
-#: templates/account/logout.html:5 templates/account/logout.html:8
-#: templates/account/logout.html:13
+#: templates/account/login.html:24 templates/account/logout.html:36
+#: templates/account/password_reset.html:35
+#: templates/account/password_reset_from_key.html:52
+#: templates/account/signup.html:24
+msgid "Please correct the errors below."
+msgstr "Bitte korrigieren Sie die folgenden Fehler."
+
+#: templates/account/login.html:31 templates/account/password_reset.html:42
+#: templates/account/signup.html:31
+#, fuzzy
+#| msgid "Confirm E-mail Address"
+msgid "Email Address"
+msgstr "Bestätige deine E-Mail-Adresse"
+
+#: templates/account/login.html:38 templates/account/password_reset.html:49
+#: templates/account/signup.html:38
+msgid "Enter your email address"
+msgstr "Geben Sie Ihre E-Mail-Adresse ein"
+
+#: templates/account/login.html:51 templates/account/signup.html:51
+#: templates/account/users/password_change.html:19
+#, fuzzy
+#| msgid "New Password"
+msgid "Password"
+msgstr "Neues Passwort"
+
+#: templates/account/login.html:58 templates/account/signup.html:58
+msgid "Enter your password"
+msgstr "Geben Sie Ihr Passwort ein"
+
+#: templates/account/login.html:77
+msgid "Remember me"
+msgstr "Angemeldet bleiben"
+
+#: templates/account/login.html:93
+msgid "Don't have an account?"
+msgstr "Haben Sie noch kein Konto?"
+
+#: templates/account/login.html:96
+#, fuzzy
+#| msgid "Sign up"
+msgid "Sign up"
+msgstr "Registrieren"
+
+#: templates/account/login.html:103
+msgid "Forgot your password?"
+msgstr "Passwort vergessen?"
+
+#: templates/account/logout.html:4 templates/account/logout.html:14
+#: templates/account/logout.html:43
 msgid "Log out"
 msgstr "Abmelden"
 
-#: templates/account/logout.html:9
+#: templates/account/logout.html:23
+msgid "Confirm Logout"
+msgstr "Abmeldung bestätigen"
+
+#: templates/account/logout.html:27
 #, fuzzy
 #| msgid "Do you really want to delete"
 msgid "Do you really want to log out?"
@@ -348,7 +508,9 @@ msgstr "Möchtest du wirklich löschen"
 #: templates/account/password_change.html:6
 #: templates/account/password_change.html:9
 #: templates/account/password_change.html:13 templates/account/settings.html:11
-#: templates/account/settings.html:12
+#: templates/account/settings.html:13 templates/account/users/edit.html:10
+#: templates/account/users/password_change.html:7
+#: templates/account/users/password_change.html:53
 msgid "Change Password"
 msgstr "Passwort ändern"
 
@@ -356,12 +518,11 @@ msgstr "Passwort ändern"
 msgid "Forgot Password?"
 msgstr "Passwort vergessen?"
 
-#: templates/account/password_reset.html:5
-#: templates/account/password_reset.html:8
-msgid "Password Reset"
-msgstr "Passwort zurücksetzen"
+#: templates/account/password_reset.html:21
+msgid "You are already logged in."
+msgstr "Sie sind bereits angemeldet."
 
-#: templates/account/password_reset.html:13
+#: templates/account/password_reset.html:26
 msgid ""
 "Forgotten your password? Enter your email address below, and we'll send you "
 "an email allowing you to reset it."
@@ -369,85 +530,176 @@ msgstr ""
 "Passwort vergessen? Geben Sie unten Ihre E-Mail-Adresse ein, und wir senden "
 "Ihnen eine E-Mail, mit der Sie es zurücksetzen können."
 
-#: templates/account/password_reset.html:18
-#, fuzzy
-#| msgid "Forgot Password?"
-msgid "Reset My Password"
-msgstr "Passwort vergessen?"
+#: templates/account/password_reset.html:62
+msgid "Send Reset Email"
+msgstr "Zurücksetzen-E-Mail senden"
 
-#: templates/account/password_reset_done.html:12
+#: templates/account/password_reset.html:66
+#: templates/account/password_reset_done.html:34
+#: templates/account/password_reset_from_key.html:36
+msgid "Back to Login"
+msgstr "Zurück zur Anmeldung"
+
+#: templates/account/password_reset_done.html:4
+#: templates/account/password_reset_done.html:14
+msgid "Password Reset Email Sent"
+msgstr "Passwort-Zurücksetzen-E-Mail gesendet"
+
+#: templates/account/password_reset_done.html:23
+msgid "Check Your Email"
+msgstr "Überprüfen Sie Ihre E-Mail"
+
+#: templates/account/password_reset_done.html:28
 msgid ""
-"We have sent you an email. If you have not received it please check your "
-"spam folder. Otherwise contact us if you do not receive it in a few minutes."
+"We have sent you an email with instructions to reset your password. If you "
+"have not received it please check your spam folder. Otherwise contact us if "
+"you do not receive it in a few minutes."
 msgstr ""
-"Wir haben Ihnen eine E-Mail gesendet. Wenn Sie diese nicht erhalten haben, "
-"überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, "
-"wenn Sie sie nicht innerhalb weniger Minuten erhalten."
+"Wir haben Ihnen eine E-Mail mit Anweisungen zum Zurücksetzen Ihres Passworts "
+"gesendet. Wenn Sie diese nicht erhalten haben, überprüfen Sie bitte Ihren "
+"Spam-Ordner. Andernfalls kontaktieren Sie uns, wenn Sie sie nicht innerhalb "
+"weniger Minuten erhalten."
 
-#: templates/account/settings.html:14 templates/account/settings.html:17
+#: templates/account/password_reset_done.html:38
+#: templates/account/password_reset_from_key.html:123
+msgid "Go to Homepage"
+msgstr "Zur Startseite"
+
+#: templates/account/password_reset_from_key.html:22
+msgid "Password Reset Failed"
+msgstr "Passwort-Zurücksetzen fehlgeschlagen"
+
+#: templates/account/password_reset_from_key.html:26
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used or has expired."
+msgstr ""
+"Der Passwort-Zurücksetzen-Link war ungültig, möglicherweise weil er bereits "
+"verwendet wurde oder abgelaufen ist."
+
+#: templates/account/password_reset_from_key.html:32
+msgid "Request New Password Reset"
+msgstr "Neues Passwort-Zurücksetzen anfordern"
+
+#: templates/account/password_reset_from_key.html:43
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+"Bitte geben Sie Ihr neues Passwort zweimal ein, damit wir überprüfen können, "
+"dass Sie es korrekt eingegeben haben."
+
+#: templates/account/password_reset_from_key.html:59
+msgid "New Password"
+msgstr "Neues Passwort"
+
+#: templates/account/password_reset_from_key.html:83
+msgid "Confirm New Password"
+msgstr "Neues Passwort bestätigen"
+
+#: templates/account/password_reset_from_key.html:102
+msgid "Change My Password"
+msgstr "Mein Passwort ändern"
+
+#: templates/account/password_reset_from_key.html:109
+msgid "Password Reset Complete"
+msgstr "Passwort-Zurücksetzen abgeschlossen"
+
+#: templates/account/password_reset_from_key.html:113
+msgid "Your password has been set. You may go ahead and log in now."
+msgstr "Ihr Passwort wurde gesetzt. Sie können sich jetzt anmelden."
+
+#: templates/account/settings.html:12
+msgid ""
+"Update your account password to keep your account secure. Choose a strong "
+"password that you haven't used elsewhere."
+msgstr ""
+"Aktualisieren Sie Ihr Kontopasswort, um Ihr Konto sicher zu halten. Wählen "
+"Sie ein sicheres Passwort, das Sie nicht anderswo verwendet haben."
+
+#: templates/account/settings.html:15 templates/account/settings.html:17
 msgid "Delete Data"
 msgstr "Daten löschen"
 
-#: templates/account/settings.html:11
-msgid "Update your account password to keep your account secure. Choose a strong password that you haven't used elsewhere."
-msgstr "Aktualisieren Sie Ihr Kontopasswort, um Ihr Konto sicher zu halten. Wählen Sie ein sicheres Passwort, das Sie nicht anderswo verwendet haben."
-
-#: templates/account/settings.html:19 templates/account/settings.html:23
-msgid "Delete Account"
-msgstr "Konto löschen"
-
-#: templates/account/settings.html:15
+#: templates/account/settings.html:16
 msgid "Your account is connected to"
 msgstr "Ihr Konto ist mit"
 
-#: templates/account/settings.html:15
+#: templates/account/settings.html:16
 msgid "measurements. Do you really want to delete these?"
 msgstr "Messwerten verbunden. Möchten Sie diese wirklich löschen?"
 
-#: templates/account/settings.html:21
+#: templates/account/settings.html:19 templates/account/settings.html:47
+#: templates/account/settings.html:55
+msgid "Delete Account"
+msgstr "Konto löschen"
+
+#: templates/account/settings.html:22
 msgid "Cannot Delete Account"
 msgstr "Konto kann nicht gelöscht werden"
 
-#: templates/account/settings.html:21
+#: templates/account/settings.html:23
 msgid "Your account is currently an owner in these organizations:"
 msgstr "Ihr Konto ist derzeit Eigentümer dieser Organisationen:"
 
+#: templates/account/settings.html:35
+#, fuzzy
+#| msgid "View Help"
+msgid "View"
+msgstr "Hilfe anschauen"
 
+#: templates/account/settings.html:38 templates/account/users/list.html:50
+#: templates/account/users/list.html:51 templates/campaigns/detail.html:116
+#: templates/campaigns/my.html:110 templates/devices/detail.html:27
+#: templates/devices/list.html:61 templates/devices/my.html:25
+#: templates/organizations/detail.html:325
+#: templates/organizations/detail.html:399 templates/organizations/my.html:102
+#: templates/workshops/detail.html:72 templates/workshops/my.html:34
+msgid "Edit"
+msgstr "Bearbeiten"
 
-#: templates/account/settings.html:21
-msgid "You must remove yourself, transfer ownership, or delete these organizations before you can delete your user."
-msgstr "Sie müssen sich entfernen, das Eigentum übertragen oder diese Organisationen löschen, bevor Sie Ihren Benutzer löschen können."
+#: templates/account/settings.html:44
+msgid ""
+"You must remove yourself, transfer ownership, or delete these organizations "
+"before you can delete your user."
+msgstr ""
+"Sie müssen sich entfernen, das Eigentum übertragen oder diese Organisationen "
+"löschen, bevor Sie Ihren Benutzer löschen können."
 
-#: templates/account/settings.html:21
-msgid "The delete account button will be enabled once you are no longer an owner of any organizations."
-msgstr "Die Konto löschen Schaltfläche wird aktiviert, sobald Sie nicht mehr Eigentümer einer Organisation sind."
+#: templates/account/settings.html:50
+msgid ""
+"The delete account button will be enabled once you are no longer an owner of "
+"any organizations."
+msgstr ""
+"Die Konto löschen Schaltfläche wird aktiviert, sobald Sie nicht mehr "
+"Eigentümer einer Organisation sind."
 
-#: templates/account/settings.html:21
-msgid "You are not an owner of any organizations. You can safely delete your account."
-msgstr "Sie sind nicht Eigentümer einer Organisation. Sie können Ihr Konto sicher löschen."
+#: templates/account/settings.html:53
+msgid ""
+"You are not an owner of any organizations. You can safely delete your "
+"account."
+msgstr ""
+"Sie sind nicht Eigentümer einer Organisation. Sie können Ihr Konto sicher "
+"löschen."
 
-#: templates/organizations/create.html:5
-msgid "Edit Organization"
-msgstr "Organisation bearbeiten"
-
-#: templates/organizations/create.html:15
-msgid "Ownership Transfer"
-msgstr "Eigentümerwechsel"
-
-#: templates/organizations/create.html:16
-msgid "You can transfer ownership of this organization to another member using the form below."
-msgstr "Sie können das Eigentum dieser Organisation an ein anderes Mitglied übergeben, indem Sie das Formular unten verwenden."
-
-#: templates/organizations/create.html:26
-msgid "Update Organization"
-msgstr "Organisation aktualisieren"
-
-
-
-#: templates/account/signup.html:5 templates/account/signup.html:8
-#: templates/account/signup.html:12
+#: templates/account/signup.html:4 templates/account/signup.html:14
+#: templates/account/signup.html:96
 msgid "Register"
 msgstr "Registrieren"
+
+#: templates/account/signup.html:76
+#, fuzzy
+#| msgid "Confirm New Password"
+msgid "Confirm Password"
+msgstr "Neues Passwort bestätigen"
+
+#: templates/account/signup.html:83
+msgid "Confirm your password"
+msgstr "Bestätigen Sie Ihr Passwort"
+
+#: templates/account/signup.html:104
+msgid "Already have an account?"
+msgstr "Haben Sie bereits ein Konto?"
 
 #: templates/account/users/edit.html:8
 #, fuzzy
@@ -455,20 +707,17 @@ msgstr "Registrieren"
 msgid "Edit User"
 msgstr "Lade eine Nutzer:in ein"
 
-#: templates/account/users/edit.html:12 templates/campaigns/form.html:14
-#: templates/campaigns/room_form.html:14 templates/organizations/create.html:14
+#: templates/account/users/edit.html:15 templates/campaigns/form.html:14
 #: templates/workshops/form.html:14 templates/workshops/upload_images.html:14
 msgid "Save"
 msgstr "Speichern"
 
-#: templates/account/users/list.html:31 templates/devices/detail.html:32
+#: templates/account/users/list.html:31 templates/devices/detail.html:35
 #: templates/devices/list.html:33
 msgid "ID"
 msgstr "ID"
 
-#: templates/account/users/list.html:32 templates/campaigns/detail.html:87
-#: templates/organizations/detail.html:24
-#: templates/workshops/management.html:24
+#: templates/account/users/list.html:32 templates/workshops/management.html:24
 msgid "Username"
 msgstr "Benutzername"
 
@@ -492,121 +741,144 @@ msgstr "Letzter Login"
 msgid "Actions"
 msgstr "Aktionen"
 
-#: templates/account/users/list.html:50 templates/account/users/list.html:51
-#: templates/campaigns/detail.html:57 templates/campaigns/my.html:38
-#: templates/devices/detail.html:25 templates/devices/list.html:61
-#: templates/devices/my.html:25 templates/organizations/my.html:39
-#: templates/workshops/detail.html:57 templates/workshops/my.html:34
-msgid "Edit"
-msgstr "Bearbeiten"
-
-#: templates/account/users/list.html:60 templates/organizations/detail.html:42
+#: templates/account/users/list.html:60 templates/organizations/detail.html:155
 #: templates/workshops/management.html:42
 #, fuzzy
 #| msgid "No devices found."
 msgid "No users found."
 msgstr "Keine Nutzer:innen gefunden."
 
-#: templates/campaigns/detail.html:26
+#: templates/account/users/password_change.html:37
+#, fuzzy
+#| msgid "Password Reset"
+msgid "Password (again)"
+msgstr "Passwort zurücksetzen"
+
+#: templates/campaigns/add_user.html:6
+msgid "Add Participants to Campaign"
+msgstr "Teilnehmer zur Kampagne hinzufügen"
+
+#: templates/campaigns/add_user.html:14
+msgid "Select Users to Add:"
+msgstr "Benutzer zum Hinzufügen auswählen:"
+
+#: templates/campaigns/add_user.html:16 templates/campaigns/add_user.html:104
+#: templates/campaigns/add_user.html:113
+msgid "Select All"
+msgstr "Alle auswählen"
+
+#: templates/campaigns/add_user.html:32
+msgid "No users available to add to this campaign."
+msgstr "Keine Benutzer verfügbar, um sie zu dieser Kampagne hinzuzufügen."
+
+#: templates/campaigns/add_user.html:41
+msgid "Add Selected Users"
+msgstr "Ausgewählte Benutzer hinzufügen"
+
+#: templates/campaigns/add_user.html:104 templates/campaigns/add_user.html:113
+msgid "Deselect All"
+msgstr "Alle abwählen"
+
+#: templates/campaigns/detail.html:85
 msgid "Rooms"
 msgstr "Räume"
 
-#: templates/campaigns/detail.html:27
+#: templates/campaigns/detail.html:86 templates/campaigns/room_form.html:10
+#: templates/campaigns/room_form.html:44
 #, fuzzy
 #| msgid "Create workshop"
 msgid "Create Room"
 msgstr "Raum erstellen"
 
-#: templates/campaigns/detail.html:34
-msgid "Room name"
-msgstr "Raumname"
-
-#: templates/campaigns/detail.html:35
+#: templates/campaigns/detail.html:99
 msgid "Current measurements"
 msgstr "Momentane Messwerte"
 
-#: templates/campaigns/detail.html:53 templates/campaigns/detail.html:101
-#: templates/campaigns/my.html:34 templates/devices/my.html:25
-#: templates/organizations/my.html:36 templates/workshops/my.html:30
+#: templates/campaigns/detail.html:112 templates/campaigns/detail.html:166
+#: templates/campaigns/my.html:105 templates/cities/list.html:173
+#: templates/devices/my.html:25 templates/organizations/detail.html:320
+#: templates/organizations/detail.html:395 templates/organizations/my.html:97
+#: templates/workshops/my.html:30
 msgid "Details"
 msgstr "Details"
 
-#: templates/campaigns/detail.html:61 templates/campaigns/my.html:42
-#: templates/devices/list.html:64 templates/organizations/my.html:42
+#: templates/campaigns/detail.html:120 templates/campaigns/my.html:114
+#: templates/devices/list.html:64 templates/organizations/my.html:106
 #: templates/workshops/my.html:38
 msgid "Delete"
 msgstr "Löschen"
 
-#: templates/campaigns/detail.html:79
+#: templates/campaigns/detail.html:130
+msgid "No rooms available for this campaign."
+msgstr "Keine Räume für diese Kampagne verfügbar."
+
+#: templates/campaigns/detail.html:138
 msgid "Participants"
 msgstr "Teilnehmer:innen"
 
-#: templates/log_viewer_custom/logs.html:4
-msgid "System Logs"
-msgstr "Systemprotokolle"
-
-#: templates/log_viewer_custom/logs.html:12
-msgid "Refresh"
-msgstr "Aktualisieren"
-
-
-
-
-
-
-
-
-
-
-
-
-
-#: templates/log_viewer_custom/logs.html:120
-msgid "No log entries found"
-msgstr "Keine Protokolleinträge gefunden"
-
-#: templates/log_viewer_custom/logs.html:121
-msgid "Error loading logs"
-msgstr "Fehler beim Laden der Protokolle"
-
-#: templates/log_viewer_custom/logs.html:123
-msgid "Stop Auto Refresh"
-msgstr "Auto-Aktualisierung stoppen"
-
-#: templates/campaigns/detail.html:80
+#: templates/campaigns/detail.html:139
 msgid "Add Participant"
 msgstr "Teilnehmer:in hinzufügen"
 
-#: templates/campaigns/detail.html:88 templates/organizations/detail.html:25
-#: templates/workshops/management.html:25
-msgid "Email"
-msgstr "E-Mail-Adresse"
+#: templates/campaigns/detail.html:152
+msgid "Contact Information"
+msgstr "Kontaktinformationen"
 
-#: templates/campaigns/detail.html:105
+#: templates/campaigns/detail.html:158
+msgid "Campaign Owner"
+msgstr "Kampagneninhaber"
+
+#: templates/campaigns/detail.html:169
+msgid "Are you sure you want to remove this user from the campaign?"
+msgstr ""
+"Sind Sie sicher, dass Sie diesen Benutzer aus der Kampagne entfernen möchten?"
+
+#: templates/campaigns/detail.html:173
 #: templates/campaigns/participants/detail.html:69
 #: templates/campaigns/room/detail.html:87
-#: templates/organizations/detail.html:36
+#: templates/organizations/detail.html:144
 #: templates/workshops/management.html:36
 msgid "Remove"
 msgstr "Entfernen"
 
-#: templates/campaigns/detail.html:112
+#: templates/campaigns/detail.html:185
 msgid "There are no participants in this campaign yet."
 msgstr "Es sind noch keine Teilnehmer:innen in dieser Kampagne."
 
-#: templates/campaigns/form.html:10 templates/campaigns/room_form.html:10
+#: templates/campaigns/form.html:10
 msgid "Campaign"
 msgstr "Messkampagne"
 
 #: templates/campaigns/home.html:5 templates/campaigns/home.html:8
+#: templates/organizations/detail.html:273
 msgid "Campaigns"
 msgstr "Messkampagnen"
 
-#: templates/campaigns/my.html:28
+#: templates/campaigns/my.html:78
 #, fuzzy
 #| msgid "Public"
 msgid "Public:"
 msgstr "Öffentlich"
+
+#: templates/campaigns/my.html:80
+msgid "Yes"
+msgstr "Ja"
+
+#: templates/campaigns/my.html:82
+msgid "No"
+msgstr "Nein"
+
+#: templates/campaigns/my.html:88
+msgid "Organization:"
+msgstr "Organisation:"
+
+#: templates/campaigns/my.html:93 templates/organizations/detail.html:302
+msgid "Participants:"
+msgstr "Teilnehmer:"
+
+#: templates/campaigns/my.html:97 templates/organizations/detail.html:306
+msgid "Rooms:"
+msgstr "Räume:"
 
 #: templates/campaigns/participants/detail.html:14
 msgid "Participant:"
@@ -614,6 +886,7 @@ msgstr "Teilnehmer:in:"
 
 #: templates/campaigns/participants/detail.html:15
 #: templates/campaigns/room/detail.html:18
+#: templates/organizations/detail.html:386
 #, fuzzy
 #| msgid "Campaign"
 msgid "Campaign:"
@@ -644,8 +917,7 @@ msgid "Add Device"
 msgstr "Gerät bearbeiten"
 
 #: templates/campaigns/participants/detail.html:57
-#: templates/campaigns/room/detail.html:75
-#: templates/organizations/detail.html:102
+#: templates/campaigns/room/detail.html:75 templates/devices/data.html:38
 #, fuzzy
 #| msgid "Devices"
 msgid "Device ID"
@@ -653,15 +925,13 @@ msgstr "Geräte"
 
 #: templates/campaigns/participants/detail.html:58
 #: templates/campaigns/room/detail.html:76
-#: templates/organizations/detail.html:103
 #, fuzzy
 #| msgid "Devices"
 msgid "Device name"
 msgstr "Geräte"
 
 #: templates/campaigns/participants/detail.html:59
-#: templates/campaigns/room/detail.html:77 templates/devices/detail.html:51
-#: templates/organizations/detail.html:104
+#: templates/campaigns/room/detail.html:77 templates/devices/detail.html:54
 #, fuzzy
 #| msgid "Start date"
 msgid "Last update"
@@ -669,7 +939,6 @@ msgstr "Startdatum"
 
 #: templates/campaigns/participants/detail.html:74
 #: templates/campaigns/room/detail.html:92
-#: templates/organizations/detail.html:117
 #, fuzzy
 #| msgid "No devices found."
 msgid "No Device found"
@@ -683,6 +952,7 @@ msgid "Back to Campaign"
 msgstr "Zurück zur Messkampagne"
 
 #: templates/campaigns/room/detail.html:15
+#: templates/organizations/detail.html:380
 msgid "Room:"
 msgstr "Raum:"
 
@@ -698,84 +968,214 @@ msgstr "Momentan CO₂:"
 msgid "Current TVOC:"
 msgstr "Momentan TVOC:"
 
+#: templates/campaigns/room_form.html:8
+#, fuzzy
+#| msgid "Edit Notes"
+msgid "Edit Room"
+msgstr "Notizen bearbeiten"
+
+#: templates/campaigns/room_form.html:42
+#, fuzzy
+#| msgid "Create workshop"
+msgid "Update Room"
+msgstr "Raum erstellen"
+
 #: templates/cities/detail.html:5
 msgid "City/municipality"
 msgstr "Stadt/Gemeinde"
 
-#: templates/cities/detail.html:29 templates/cities/detail.html:30
-#: templates/cities/detail.html:31 templates/home.html:30
-#: templates/workshops/detail.html:35
+#: templates/cities/detail.html:28 templates/cities/detail.html:29
+#: templates/cities/detail.html:30 templates/home.html:29
+#: templates/workshops/detail.html:36
 msgid "Air quality"
 msgstr "Luftqualität"
 
-#: templates/cities/detail.html:29 templates/cities/detail.html:30
-#: templates/cities/detail.html:31 templates/home.html:32
-#: templates/home.html:33 templates/home.html:34
-#: templates/workshops/detail.html:37 templates/workshops/detail.html:38
-#: templates/workshops/detail.html:39 templates/workshops/detail.html:474
-#: templates/workshops/detail.html:475 templates/workshops/detail.html:476
+#: templates/cities/detail.html:28 templates/cities/detail.html:29
+#: templates/cities/detail.html:30 templates/home.html:31
+#: templates/home.html:32 templates/home.html:33
+#: templates/stations/list.html:256 templates/stations/list.html:308
+#: templates/stations/list.html:358 templates/workshops/detail.html:38
+#: templates/workshops/detail.html:39 templates/workshops/detail.html:40
+#: templates/workshops/detail.html:558 templates/workshops/detail.html:559
+#: templates/workshops/detail.html:560
 msgid "Particulate Matter"
 msgstr "Feinstaub"
 
-#: templates/cities/detail.html:40 templates/home.html:37
+#: templates/cities/detail.html:39 templates/home.html:36
+#: templates/stations/list.html:429
 msgid "Method: European Air Quality Index"
 msgstr "Methode: European Air Quality Index"
 
-#: templates/cities/detail.html:76 templates/cities/detail.html:84
-#: templates/cities/detail.html:92 templates/home.html:110
-#: templates/home.html:118 templates/home.html:126
-#: templates/workshops/detail.html:112 templates/workshops/detail.html:120
-#: templates/workshops/detail.html:128
+#: templates/cities/detail.html:75 templates/cities/detail.html:83
+#: templates/cities/detail.html:91 templates/home.html:158
+#: templates/home.html:166 templates/home.html:174
+#: templates/stations/list.html:441 templates/stations/list.html:449
+#: templates/stations/list.html:457 templates/workshops/detail.html:127
+#: templates/workshops/detail.html:135 templates/workshops/detail.html:143
 msgid "Good"
 msgstr "Gut"
 
-#: templates/cities/detail.html:77 templates/cities/detail.html:85
-#: templates/cities/detail.html:93 templates/home.html:111
-#: templates/home.html:119 templates/home.html:127
-#: templates/workshops/detail.html:113 templates/workshops/detail.html:121
-#: templates/workshops/detail.html:129
+#: templates/cities/detail.html:76 templates/cities/detail.html:84
+#: templates/cities/detail.html:92 templates/home.html:159
+#: templates/home.html:167 templates/home.html:175
+#: templates/stations/list.html:442 templates/stations/list.html:450
+#: templates/stations/list.html:458 templates/workshops/detail.html:128
+#: templates/workshops/detail.html:136 templates/workshops/detail.html:144
 msgid "Fair"
 msgstr "Ausreichend"
 
-#: templates/cities/detail.html:78 templates/cities/detail.html:86
-#: templates/cities/detail.html:94 templates/home.html:112
-#: templates/home.html:120 templates/home.html:128
-#: templates/workshops/detail.html:114 templates/workshops/detail.html:122
-#: templates/workshops/detail.html:130
+#: templates/cities/detail.html:77 templates/cities/detail.html:85
+#: templates/cities/detail.html:93 templates/home.html:160
+#: templates/home.html:168 templates/home.html:176
+#: templates/stations/list.html:443 templates/stations/list.html:451
+#: templates/stations/list.html:459 templates/workshops/detail.html:129
+#: templates/workshops/detail.html:137 templates/workshops/detail.html:145
 msgid "Moderate"
 msgstr "Mäßig"
 
-#: templates/cities/detail.html:79 templates/cities/detail.html:87
-#: templates/cities/detail.html:95 templates/home.html:113
-#: templates/home.html:121 templates/home.html:129
-#: templates/workshops/detail.html:115 templates/workshops/detail.html:123
-#: templates/workshops/detail.html:131
+#: templates/cities/detail.html:78 templates/cities/detail.html:86
+#: templates/cities/detail.html:94 templates/home.html:161
+#: templates/home.html:169 templates/home.html:177
+#: templates/stations/list.html:444 templates/stations/list.html:452
+#: templates/stations/list.html:460 templates/workshops/detail.html:130
+#: templates/workshops/detail.html:138 templates/workshops/detail.html:146
 msgid "Poor"
 msgstr "Schlecht"
 
-#: templates/cities/detail.html:80 templates/cities/detail.html:88
-#: templates/cities/detail.html:96 templates/home.html:114
-#: templates/home.html:122 templates/home.html:130
-#: templates/workshops/detail.html:116 templates/workshops/detail.html:124
-#: templates/workshops/detail.html:132
+#: templates/cities/detail.html:79 templates/cities/detail.html:87
+#: templates/cities/detail.html:95 templates/home.html:162
+#: templates/home.html:170 templates/home.html:178
+#: templates/stations/list.html:445 templates/stations/list.html:453
+#: templates/stations/list.html:461 templates/workshops/detail.html:131
+#: templates/workshops/detail.html:139 templates/workshops/detail.html:147
 msgid "Very poor"
 msgstr "Sehr schlecht"
 
-#: templates/cities/detail.html:81 templates/cities/detail.html:89
-#: templates/cities/detail.html:97 templates/home.html:115
-#: templates/home.html:123 templates/home.html:131
-#: templates/workshops/detail.html:117 templates/workshops/detail.html:125
-#: templates/workshops/detail.html:133
+#: templates/cities/detail.html:80 templates/cities/detail.html:88
+#: templates/cities/detail.html:96 templates/home.html:163
+#: templates/home.html:171 templates/home.html:179
+#: templates/stations/list.html:446 templates/stations/list.html:454
+#: templates/stations/list.html:462 templates/workshops/detail.html:132
+#: templates/workshops/detail.html:140 templates/workshops/detail.html:148
 msgid "Extremely poor"
 msgstr "Extrem schlecht"
 
-#: templates/cities/list.html:5 templates/cities/list.html:11
+#: templates/cities/list.html:5 templates/cities/list.html:66
 msgid "Cities and municipalities"
 msgstr "Städte und Gemeinden"
 
-#: templates/cities/list.html:28
-msgid "No cities available."
-msgstr "Keine Stadt verfügbar."
+#: templates/cities/list.html:172 templates/cities/list.html:226
+msgid "Country"
+msgstr "Land"
+
+#: templates/cities/list.html:203
+msgid "Cities with Most Stations"
+msgstr "Städte mit den meisten Stationen"
+
+#: templates/cities/list.html:229
+msgid "View Details"
+msgstr "Details anzeigen"
+
+#: templates/devices/calibration.html:5
+#, fuzzy
+#| msgid "Calibration"
+msgid "Calibration View"
+msgstr "Kalibrierung"
+
+#: templates/devices/calibration.html:28
+msgid "Select Device Dimensions for Calibration"
+msgstr ""
+
+#: templates/devices/data.html:6 templates/devices/data.html:11
+#, fuzzy
+#| msgid "Devices"
+msgid "Device Data:"
+msgstr "Geräte"
+
+#: templates/devices/data.html:13
+#, fuzzy
+#| msgid "Devices"
+msgid "Back to Device"
+msgstr "Zurück zu Geräte"
+
+#: templates/devices/data.html:22
+#, fuzzy
+#| msgid "Workshops"
+msgid "Total Workshops"
+msgstr "Workshops"
+
+#: templates/devices/data.html:30
+#, fuzzy
+#| msgid " My Measurements"
+msgid "Total Measurements"
+msgstr "Meine Messwerte"
+
+#: templates/devices/data.html:48
+msgid "Workshops and Collected Data"
+msgstr ""
+
+#: templates/devices/data.html:55 templates/devices/detail.html:113
+#: templates/workshops/form.html:10 templates/workshops/upload_images.html:10
+msgid "Workshop"
+msgstr "Workshop"
+
+#: templates/devices/data.html:56 workshops/forms.py:15
+msgid "Title"
+msgstr "Titel"
+
+#: templates/devices/data.html:57
+#, fuzzy
+#| msgid "Workshops"
+msgid "Workshop Dates"
+msgstr "Workshops"
+
+#: templates/devices/data.html:58
+msgid "Data Collection Period"
+msgstr ""
+
+#: templates/devices/data.html:59
+#, fuzzy
+#| msgid " My Measurements"
+msgid "Measurements"
+msgstr "Meine Messwerte"
+
+#: templates/devices/data.html:60
+#, fuzzy
+#| msgid "Sensors:"
+msgid "Sensors"
+msgstr "Sensoren:"
+
+#: templates/devices/data.html:61
+msgid "Dimensions"
+msgstr ""
+
+#: templates/devices/data.html:84 templates/devices/detail.html:37
+#: templates/devices/detail.html:38 templates/devices/detail.html:54
+#: templates/devices/detail.html:80 templates/devices/detail.html:91
+#: templates/devices/detail.html:102 templates/devices/detail.html:113
+#: templates/devices/detail.html:129 templates/devices/list.html:47
+#: templates/devices/list.html:48 templates/devices/list.html:49
+#: templates/devices/list.html:50
+msgid "N/A"
+msgstr "N/A"
+
+#: templates/devices/data.html:91
+msgid "new"
+msgstr ""
+
+#: templates/devices/data.html:91
+msgid "legacy"
+msgstr ""
+
+#: templates/devices/data.html:103 templates/devices/data.html:114
+msgid "None"
+msgstr ""
+
+#: templates/devices/data.html:125
+#, fuzzy
+#| msgid "No log updates available for this device."
+msgid "No workshop data found for this device."
+msgstr "Keine Logs verfügbar für dieses Gerät."
 
 #: templates/devices/detail.html:7 templates/devices/detail.html:24
 #, fuzzy
@@ -783,157 +1183,147 @@ msgstr "Keine Stadt verfügbar."
 msgid "Device:"
 msgstr "Geräte"
 
-#: templates/devices/detail.html:34 templates/devices/list.html:35
+#: templates/devices/detail.html:26
+#, fuzzy
+#| msgid "View Details"
+msgid "View Data"
+msgstr "Details anzeigen"
+
+#: templates/devices/detail.html:37 templates/devices/list.html:35
 #, fuzzy
 #| msgid "Moderate"
 msgid "Model"
 msgstr "Modell"
 
-#: templates/devices/detail.html:34 templates/devices/detail.html:35
-#: templates/devices/detail.html:51 templates/devices/detail.html:77
-#: templates/devices/detail.html:88 templates/devices/detail.html:99
-#: templates/devices/detail.html:110 templates/devices/detail.html:126
-#: templates/devices/list.html:47 templates/devices/list.html:48
-#: templates/devices/list.html:49 templates/devices/list.html:50
-msgid "N/A"
-msgstr "N/A"
-
-#: templates/devices/detail.html:35 templates/devices/list.html:36
+#: templates/devices/detail.html:38 templates/devices/list.html:36
 #, fuzzy
 #| msgid "Firmware version"
 msgid "Firmware"
 msgstr "Firmware Version"
 
-#: templates/devices/detail.html:37
+#: templates/devices/detail.html:40
 msgid "Sensors:"
 msgstr "Sensoren:"
 
-#: templates/devices/detail.html:46
+#: templates/devices/detail.html:49
 msgid "No sensors available."
 msgstr "Keine Sensoren verfügbar."
 
-#: templates/devices/detail.html:58
+#: templates/devices/detail.html:61
 msgid "QR-Code Text:"
 msgstr "QR-Code Text:"
 
-#: templates/devices/detail.html:77
+#: templates/devices/detail.html:80
 msgid "Organization"
 msgstr "Organisation"
 
-#: templates/devices/detail.html:81
+#: templates/devices/detail.html:84
 msgid "Organization changed from"
 msgstr "Organisatino geändert von"
 
-#: templates/devices/detail.html:81 templates/devices/detail.html:92
-#: templates/devices/detail.html:103 templates/devices/detail.html:114
+#: templates/devices/detail.html:84 templates/devices/detail.html:95
+#: templates/devices/detail.html:106 templates/devices/detail.html:117
 msgid "to"
 msgstr "zu"
 
-#: templates/devices/detail.html:83 templates/devices/detail.html:94
-#: templates/devices/detail.html:105 templates/devices/detail.html:116
+#: templates/devices/detail.html:86 templates/devices/detail.html:97
+#: templates/devices/detail.html:108 templates/devices/detail.html:119
 msgid "No logs available."
 msgstr "Keine Logs verfügbar."
 
-#: templates/devices/detail.html:88
+#: templates/devices/detail.html:91
 msgid "Room"
 msgstr "Raum"
 
-#: templates/devices/detail.html:92
+#: templates/devices/detail.html:95
 msgid "Room changed from"
 msgstr "Raum geändert von"
 
-#: templates/devices/detail.html:99
+#: templates/devices/detail.html:102
 msgid "User"
 msgstr "Benutzer"
 
-#: templates/devices/detail.html:103
+#: templates/devices/detail.html:106
 msgid "User changed from"
 msgstr "Benutzer geändert von"
 
-#: templates/devices/detail.html:110 templates/workshops/form.html:10
-#: templates/workshops/upload_images.html:10
-msgid "Workshop"
-msgstr "Workshop"
-
-#: templates/devices/detail.html:114
+#: templates/devices/detail.html:117
 #, fuzzy
 #| msgid "Room changed from"
 msgid "Workshop changed from"
 msgstr "Raum geändert von"
 
-#: templates/devices/detail.html:125
+#: templates/devices/detail.html:128
 msgid "Notes:"
 msgstr "Notizen:"
 
-#: templates/devices/detail.html:128
+#: templates/devices/detail.html:131
 msgid "Edit Notes"
 msgstr "Notizen bearbeiten"
 
-#: templates/devices/detail.html:139
+#: templates/devices/detail.html:142
 msgid "Battery Status"
 msgstr "Batteriestatus"
 
-#: templates/devices/detail.html:147
+#: templates/devices/detail.html:150
 msgid "No battery status available for this device."
 msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
 
-#: templates/devices/detail.html:156
+#: templates/devices/detail.html:159
 #, fuzzy
 #| msgid "Start date"
 msgid "Status log"
 msgstr "Startdatum"
 
-#: templates/devices/detail.html:159
+#: templates/devices/detail.html:162
 msgid "Download Status logs"
 msgstr ""
 
-#: templates/devices/detail.html:185
+#: templates/devices/detail.html:188
 msgid "unknown"
 msgstr "unbekannt"
 
-#: templates/devices/detail.html:199
+#: templates/devices/detail.html:202 templates/log_viewer_custom/logs.html:152
 msgid "Log pagination"
 msgstr "Protokollpaginierung"
 
-#: templates/devices/detail.html:203 templates/stations/list.html:64
-#: templates/stations/list.html:121
+#: templates/devices/detail.html:206
 msgid "Previous"
 msgstr "Vorherige"
 
-#: templates/devices/detail.html:227 templates/stations/list.html:88
-#: templates/stations/list.html:145
+#: templates/devices/detail.html:230
 msgid "Next"
 msgstr "Nächste"
 
-#: templates/devices/detail.html:241
+#: templates/devices/detail.html:244
 msgid "No log updates available for this device."
 msgstr "Keine Logs verfügbar für dieses Gerät."
 
-#: templates/devices/detail.html:247
+#: templates/devices/detail.html:250
 #, fuzzy
 #| msgid "Devices"
 msgid "Back to Devices"
 msgstr "Zurück zu Geräte"
 
-#: templates/devices/detail.html:261
+#: templates/devices/detail.html:264
 #, python-format
 msgid "Battery Charge (%%)"
 msgstr "Batterieladung (%%)"
 
-#: templates/devices/detail.html:272
+#: templates/devices/detail.html:275
 msgid "Battery Voltage (V)"
 msgstr "Batteriespannung (V)"
 
-#: templates/devices/detail.html:307 templates/workshops/detail.html:570
+#: templates/devices/detail.html:310 templates/workshops/detail.html:668
 msgid "Time"
 msgstr "Zeit"
 
-#: templates/devices/detail.html:322
+#: templates/devices/detail.html:325
 #, python-format
 msgid "Charge (%%)"
 msgstr "Ladung (%%)"
 
-#: templates/devices/detail.html:336
+#: templates/devices/detail.html:339
 msgid "Voltage (V)"
 msgstr "Spannung (V)"
 
@@ -993,46 +1383,264 @@ msgstr "MAC Adresse"
 msgid "Firmware version"
 msgstr "Firmware Version"
 
-#: templates/organizations/detail.html:10
-#: templates/workshops/management.html:10
-#, fuzzy
-#| msgid "Description"
-msgid "Description:"
-msgstr "Beschreibung"
+#: templates/home.html:71 templates/stations/list.html:205
+msgid "Active Stations"
+msgstr "Aktive Stationen"
 
-#: templates/organizations/detail.html:35
+#: templates/home.html:77 templates/stations/list.html:211
+msgid "Last Hour"
+msgstr "Letzte Stunde"
+
+#: templates/home.html:87 templates/stations/list.html:221
+msgid "Last 24 Hours"
+msgstr "Letzte 24 Stunden"
+
+#: templates/home.html:97 templates/stations/list.html:231
+msgid "Last 7 Days"
+msgstr "Letzte 7 Tage"
+
+#: templates/home.html:107 templates/stations/list.html:241
+msgid "Last 30 Days"
+msgstr "Letzte 30 Tage"
+
+#: templates/log_viewer_custom/logs.html:5
+#: templates/log_viewer_custom/logs.html:14
+msgid "System Logs"
+msgstr "Systemprotokolle"
+
+#: templates/log_viewer_custom/logs.html:18
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+#: templates/log_viewer_custom/logs.html:21 templates/stations/detail.html:89
+#: templates/workshops/detail.html:109
+msgid "Download"
+msgstr "Herunterladen"
+
+#: templates/log_viewer_custom/logs.html:31
+msgid "Log Level"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:41
+msgid "Search"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:42
+msgid "Search in messages..."
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:45
+msgid "Per Page"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:56
+msgid "Clear Filters"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:59
+#: templates/log_viewer_custom/logs.html:375
+#, fuzzy
+#| msgid "Stop Auto Refresh"
+msgid "Auto Refresh"
+msgstr "Auto-Aktualisierung stoppen"
+
+#: templates/log_viewer_custom/logs.html:112
+msgid "Total"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:123
+msgid "Log Entries"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:124
+#: templates/log_viewer_custom/logs.html:141
+msgid "Loading..."
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:132
+#, fuzzy
+#| msgid "Time"
+msgid "Timestamp"
+msgstr "Zeit"
+
+#: templates/log_viewer_custom/logs.html:133
+msgid "Level"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:134
+msgid "Message"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:215
+msgid "Error loading logs"
+msgstr "Fehler beim Laden der Protokolle"
+
+#: templates/log_viewer_custom/logs.html:229
+msgid "No log entries found"
+msgstr "Keine Protokolleinträge gefunden"
+
+#: templates/log_viewer_custom/logs.html:342
+msgid "Showing"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:342
+msgid "of"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:342
+msgid "entries"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:342
+msgid "Page"
+msgstr ""
+
+#: templates/log_viewer_custom/logs.html:383
+msgid "Stop Auto Refresh"
+msgstr "Auto-Aktualisierung stoppen"
+
+#: templates/organizations/create.html:12
+msgid "Edit Organization"
+msgstr "Organisation bearbeiten"
+
+#: templates/organizations/create.html:21
+msgid "Ownership Transfer"
+msgstr "Eigentümerwechsel"
+
+#: templates/organizations/create.html:22
+msgid ""
+"You can transfer ownership of this organization to another member using the "
+"form below."
+msgstr ""
+"Sie können das Eigentum dieser Organisation an ein anderes Mitglied "
+"übergeben, indem Sie das Formular unten verwenden."
+
+#: templates/organizations/create.html:31
+msgid "Update Organization"
+msgstr "Organisation aktualisieren"
+
+#: templates/organizations/detail.html:134
+#, fuzzy
+#| msgid "Name"
+msgid "Name:"
+msgstr "Name"
+
+#: templates/organizations/detail.html:142
 #: templates/workshops/management.html:35
 msgid "Remove User"
 msgstr "Entferne Nutzer:in"
 
-#: templates/organizations/detail.html:55
+#: templates/organizations/detail.html:166
 #: templates/workshops/management.html:55
 msgid "Invite a User"
 msgstr "Lade eine Nutzer:in ein"
 
-#: templates/organizations/detail.html:61
+#: templates/organizations/detail.html:173
 #: templates/workshops/management.html:61
 msgid "User Email"
 msgstr "E-Mail-Adresse"
 
-#: templates/organizations/detail.html:67
+#: templates/organizations/detail.html:179
 #: templates/workshops/management.html:67
 msgid "Enter user email"
 msgstr "Gib E-Mail-Adresse ein"
 
-#: templates/organizations/detail.html:72
-#: templates/workshops/management.html:72
 #: templates/organizations/detail.html:186
+#: templates/workshops/management.html:72
 msgid "Send Invitation"
 msgstr "Einladung schicken"
 
-#: templates/organizations/detail.html:130
+#: templates/organizations/detail.html:196
+msgid "Pending Invitations"
+msgstr "Ausstehende Einladungen"
+
+#: templates/organizations/detail.html:210
+msgid "Pending"
+msgstr "Ausstehend"
+
+#: templates/organizations/detail.html:222
+msgid "Resend invitation email"
+msgstr "Einladungs-E-Mail erneut senden"
+
+#: templates/organizations/detail.html:224
+msgid "Resend"
+msgstr "Erneut senden"
+
+#: templates/organizations/detail.html:229
+msgid "Are you sure you want to cancel this invitation?"
+msgstr "Sind Sie sicher, dass Sie diese Einladung abbrechen möchten?"
+
+#: templates/organizations/detail.html:238
+msgid "Expires:"
+msgstr "Läuft ab:"
+
+#: templates/organizations/detail.html:250
+msgid "No pending invitations."
+msgstr "Keine ausstehenden Einladungen."
+
+#: templates/organizations/detail.html:285 workshops/forms.py:19
+msgid "Public"
+msgstr "Öffentlich"
+
+#: templates/organizations/detail.html:287
+#, fuzzy
+#| msgid "Privacy"
+msgid "Private"
+msgstr "Datenschutz"
+
+#: templates/organizations/detail.html:311 templates/organizations/my.html:88
+#, fuzzy
+#| msgid "Owner"
+msgid "Owner:"
+msgstr "Eigentümer"
+
+#: templates/organizations/detail.html:336
+msgid "No campaigns found for this organization."
+msgstr "Keine Kampagnen für diese Organisation gefunden."
+
+#: templates/organizations/detail.html:364
+#, fuzzy
+#| msgid "Start date"
+msgid "Last Update:"
+msgstr "Startdatum"
+
+#: templates/organizations/detail.html:368
+msgid "Never"
+msgstr "Nie"
+
+#: templates/organizations/detail.html:374
+msgid "Assigned to:"
+msgstr ""
+
+#: templates/organizations/detail.html:409
+msgid "No devices found for this organization."
+msgstr "Keine Geräte für diese Organisation gefunden."
+
+#: templates/organizations/detail.html:418
 msgid "Back to Organizations"
 msgstr "Zurück zu Organisationen"
 
-#: templates/organizations/my.html:12
+#: templates/organizations/my.html:47
 msgid "My Organisations"
 msgstr "Meine Organisation"
+
+#: templates/organizations/my.html:75
+#, fuzzy
+#| msgid "Member"
+msgid "Members:"
+msgstr "Mitglied"
+
+#: templates/organizations/my.html:79
+#, fuzzy
+#| msgid "Campaigns"
+msgid "Campaigns:"
+msgstr "Messkampagnen"
+
+#: templates/organizations/my.html:83
+#, fuzzy
+#| msgid "Devices"
+msgid "Devices:"
+msgstr "Geräte"
 
 #: templates/stations/detail.html:21
 msgid "Station"
@@ -1070,42 +1678,60 @@ msgid "Surroundings"
 msgstr "Umgebung"
 
 #: templates/stations/detail.html:73
+msgid "Connected Sensors"
+msgstr ""
+
+#: templates/stations/detail.html:79
 #, fuzzy
 #| msgid "Download data"
 msgid "Download data in CSV format"
 msgstr "Daten im CSV-Format herunterladen"
 
-#: templates/stations/detail.html:76
+#: templates/stations/detail.html:82
 msgid "Start date:"
 msgstr "Startdatum:"
 
-#: templates/stations/detail.html:80
+#: templates/stations/detail.html:86
 msgid "End date:"
 msgstr "Enddatum:"
 
-#: templates/stations/detail.html:83 templates/workshops/detail.html:94
-msgid "Download"
-msgstr "Herunterladen"
+#: templates/stations/list.html:5 templates/stations/list.html:185
+msgid "All Stations"
+msgstr "Alle Stationen"
 
-#: templates/stations/list.html:5 templates/stations/list.html:36
-msgid "Stations overview"
-msgstr "Übersicht über Stationen"
+#: templates/stations/list.html:263 templates/stations/list.html:315
+#: templates/stations/list.html:365
+msgid "Highest Values"
+msgstr "Höchste Werte"
 
-#: templates/stations/list.html:47
-msgid "Top 10 with the highest values for PM2.5"
-msgstr "Top 10 mit den höchsten Werten für PM2.5"
+#: templates/stations/list.html:282 templates/stations/list.html:332
+#: templates/stations/list.html:382
+msgid "Lowest Values"
+msgstr "Niedrigste Werte"
 
-#: templates/stations/list.html:60
-msgid "Top station pagination"
-msgstr ""
+#: templates/stations/list.html:298
+#, fuzzy
+#| msgid "No log updates available for this device."
+msgid "No data available for PM1.0"
+msgstr "Keine Logs verfügbar für dieses Gerät."
 
-#: templates/stations/list.html:104
-msgid "Top 10 with the lowest values for PM2.5"
-msgstr "Top 10 mit den niedrigsten Werten für PM2.5"
+#: templates/stations/list.html:348
+#, fuzzy
+#| msgid "No log updates available for this device."
+msgid "No data available for PM2.5"
+msgstr "Keine Logs verfügbar für dieses Gerät."
 
-#: templates/stations/list.html:117
-msgid "Lowest station pagination"
-msgstr ""
+#: templates/stations/list.html:398
+#, fuzzy
+#| msgid "No log updates available for this device."
+msgid "No data available for PM10.0"
+msgstr "Keine Logs verfügbar für dieses Gerät."
+
+#: templates/stations/list.html:410
+#, fuzzy
+#| msgid "Air quality"
+msgid "Air Quality Index"
+msgstr "Luftqualität"
 
 #: templates/workshops/confirm_delete.html:7
 msgid "Do you really want to delete"
@@ -1115,89 +1741,111 @@ msgstr "Möchtest du wirklich löschen"
 msgid "Yes, please delete."
 msgstr "Ja, bitte löschen."
 
-#: templates/workshops/detail.html:40
+#: templates/workshops/detail.html:41
 #, fuzzy
 #| msgid "Temperature (°C)"
 msgid "Temperature"
 msgstr "Temperatur (°C)"
 
-#: templates/workshops/detail.html:59
+#: templates/workshops/detail.html:42
+#, fuzzy
+#| msgid "Humidity (%%)"
+msgid "Humidity"
+msgstr "Luftfeuchtigkeit (%%)"
+
+#: templates/workshops/detail.html:43
+msgid "VOC Index"
+msgstr ""
+
+#: templates/workshops/detail.html:51
+msgid "Layers"
+msgstr ""
+
+#: templates/workshops/detail.html:74
 msgid "Access"
 msgstr "Zugang"
 
-#: templates/workshops/detail.html:61
+#: templates/workshops/detail.html:76
 msgid "Upload Images"
 msgstr "Bilder hochladen"
 
-#: templates/workshops/detail.html:73
+#: templates/workshops/detail.html:88
 msgid "Chart-options"
 msgstr "Diagramm Optionen"
 
-#: templates/workshops/detail.html:74
+#: templates/workshops/detail.html:89
 msgid "Skalierung wählen"
 msgstr ""
 
-#: templates/workshops/detail.html:76 templates/workshops/detail.html:591
+#: templates/workshops/detail.html:91 templates/workshops/detail.html:688
 msgid "Logarithmic scale"
 msgstr "Logarithmische Skala"
 
-#: templates/workshops/detail.html:79
+#: templates/workshops/detail.html:94
 msgid "Glättung wählen"
 msgstr ""
 
-#: templates/workshops/detail.html:81 templates/workshops/detail.html:603
+#: templates/workshops/detail.html:96 templates/workshops/detail.html:700
 msgid "Add moving average"
 msgstr "Gleitenden Durchschnitt hinzufügen"
 
-#: templates/workshops/detail.html:84 templates/workshops/detail.html:86
-#: templates/workshops/detail.html:613
+#: templates/workshops/detail.html:99 templates/workshops/detail.html:101
+#: templates/workshops/detail.html:710
 #, python-format
 msgid "Hide outliers (95%% confidence interval)"
 msgstr "Ausreißer ausblenden (95%%-Konfidenzintervall)"
 
-#: templates/workshops/detail.html:97
+#: templates/workshops/detail.html:112
 msgid "CSV"
 msgstr "CSV"
 
-#: templates/workshops/detail.html:108
+#: templates/workshops/detail.html:123
 #, fuzzy
 #| msgid " My Measurements"
 msgid "measurements"
 msgstr "Meine Messwerte"
 
-#: templates/workshops/detail.html:446
+#: templates/workshops/detail.html:524
 msgid "Zoom map to show all points."
 msgstr "Zoomen Sie die Karte, um alle Punkte anzuzeigen."
 
-#: templates/workshops/detail.html:449
+#: templates/workshops/detail.html:527
 msgid "Zoom to all"
 msgstr "Auf alle Punkte zoomen"
 
-#: templates/workshops/detail.html:477
+#: templates/workshops/detail.html:561
 #, fuzzy
 #| msgid "Temperature (°C)"
 msgid "Temperature difference"
 msgstr "Temperatur (°C)"
 
-#: templates/workshops/detail.html:488
+#: templates/workshops/detail.html:572
 msgid "Chart"
 msgstr "Diagramm"
 
-#: templates/workshops/detail.html:548
+#: templates/workshops/detail.html:646
 msgid "Moving average"
 msgstr "Gleitender Durchschnitt"
 
-#: templates/workshops/detail.html:590
+#: templates/workshops/detail.html:687
 msgid "Linear scale"
 msgstr "Lineare Skala"
 
-#: templates/workshops/detail.html:602
+#: templates/workshops/detail.html:699
 msgid "Hide moving average"
 msgstr "Gleitenden Durchschnitt ausblenden"
 
-#: templates/workshops/detail.html:612
+#: templates/workshops/detail.html:709
 msgid "Show outliers"
 msgstr "Ausreißer anzeigen"
+
+#: templates/workshops/detail.html:755
+msgid "Activate or deactivate drawing cool circles on the map."
+msgstr ""
+
+#: templates/workshops/detail.html:763
+msgid "Activate or deactivate drawing hot circles on the map."
+msgstr ""
 
 #: templates/workshops/list.html:9
 msgid ""
@@ -1236,6 +1884,16 @@ msgstr "Ende:"
 msgid "No past workshops."
 msgstr "Keine vergangenen Workshops."
 
+#: templates/workshops/management.html:10
+#, fuzzy
+#| msgid "Description"
+msgid "Description:"
+msgstr "Beschreibung"
+
+#: templates/workshops/management.html:25
+msgid "Email"
+msgstr "E-Mail-Adresse"
+
 #: templates/workshops/management.html:95
 #: templates/workshops/upload_images.html:22
 #, fuzzy
@@ -1254,14 +1912,6 @@ msgstr ""
 #: templates/workshops/my.html:92
 msgid "No workshops found."
 msgstr "Keine Workshops gefunden."
-
-#: workshops/forms.py:15
-msgid "Title"
-msgstr "Titel"
-
-#: workshops/forms.py:19
-msgid "Public"
-msgstr "Öffentlich"
 
 #: workshops/forms.py:22
 msgid "Enter the title of the workshop."
@@ -1284,169 +1934,32 @@ msgstr ""
 "können nur angemeldete Benutzer mit festgelegten Berechtigungen die "
 "Ergebnisse sehen."
 
-#: templates/account/login.html:25
-msgid "Please correct the errors below."
-msgstr "Bitte korrigieren Sie die folgenden Fehler."
+#~ msgid ""
+#~ "We have sent you an email. If you have not received it please check your "
+#~ "spam folder. Otherwise contact us if you do not receive it in a few "
+#~ "minutes."
+#~ msgstr ""
+#~ "Wir haben Ihnen eine E-Mail gesendet. Wenn Sie diese nicht erhalten "
+#~ "haben, überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren "
+#~ "Sie uns, wenn Sie sie nicht innerhalb weniger Minuten erhalten."
 
-#: templates/account/login.html:35
-msgid "Enter your email address"
-msgstr "Geben Sie Ihre E-Mail-Adresse ein"
+#~ msgid "Room name"
+#~ msgstr "Raumname"
 
-#: templates/account/login.html:55
-msgid "Enter your password"
-msgstr "Geben Sie Ihr Passwort ein"
+#~ msgid "No cities available."
+#~ msgstr "Keine Stadt verfügbar."
 
-#: templates/account/login.html:70
-msgid "Remember me"
-msgstr "Angemeldet bleiben"
+#~ msgid "Stations overview"
+#~ msgstr "Übersicht über Stationen"
 
-#: templates/account/login.html:75
-msgid "Send Reset Email"
-msgstr "Zurücksetzen-E-Mail senden"
+#~ msgid "Top 10 with the highest values for PM2.5"
+#~ msgstr "Top 10 mit den höchsten Werten für PM2.5"
 
-#: templates/account/login.html:78
-msgid "Back to Login"
-msgstr "Zurück zur Anmeldung"
+#~ msgid "Top 10 with the lowest values for PM2.5"
+#~ msgstr "Top 10 mit den niedrigsten Werten für PM2.5"
 
-#: templates/account/login.html:85
-msgid "Don't have an account?"
-msgstr "Haben Sie noch kein Konto?"
-
-#: templates/account/login.html:95
-msgid "Forgot your password?"
-msgstr "Passwort vergessen?"
-
-#: templates/account/password_reset.html:25
-msgid "You are already logged in."
-msgstr "Sie sind bereits angemeldet."
-
-#: templates/account/password_reset_done.html:15
-msgid "Password Reset Email Sent"
-msgstr "Passwort-Zurücksetzen-E-Mail gesendet"
-
-#: templates/account/password_reset_done.html:20
-msgid "Check Your Email"
-msgstr "Überprüfen Sie Ihre E-Mail"
-
-#: templates/account/password_reset_done.html:25
-msgid "We have sent you an email with instructions to reset your password. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes."
-msgstr "Wir haben Ihnen eine E-Mail mit Anweisungen zum Zurücksetzen Ihres Passworts gesendet. Wenn Sie diese nicht erhalten haben, überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, wenn Sie sie nicht innerhalb weniger Minuten erhalten."
-
-#: templates/account/password_reset_done.html:38
-msgid "Go to Homepage"
-msgstr "Zur Startseite"
-
-#: templates/account/password_reset_from_key.html:25
-msgid "Password Reset Failed"
-msgstr "Passwort-Zurücksetzen fehlgeschlagen"
-
-#: templates/account/password_reset_from_key.html:30
-msgid "The password reset link was invalid, possibly because it has already been used or has expired."
-msgstr "Der Passwort-Zurücksetzen-Link war ungültig, möglicherweise weil er bereits verwendet wurde oder abgelaufen ist."
-
-#: templates/account/password_reset_from_key.html:35
-msgid "Request New Password Reset"
-msgstr "Neues Passwort-Zurücksetzen anfordern"
-
-#: templates/account/password_reset_from_key.html:45
-msgid "Please enter your new password twice so we can verify you typed it in correctly."
-msgstr "Bitte geben Sie Ihr neues Passwort zweimal ein, damit wir überprüfen können, dass Sie es korrekt eingegeben haben."
-
-#: templates/account/password_reset_from_key.html:55
-msgid "New Password"
-msgstr "Neues Passwort"
-
-#: templates/account/password_reset_from_key.html:75
-msgid "Confirm New Password"
-msgstr "Neues Passwort bestätigen"
-
-#: templates/account/password_reset_from_key.html:95
-msgid "Change My Password"
-msgstr "Mein Passwort ändern"
-
-#: templates/account/password_reset_from_key.html:105
-msgid "Password Reset Complete"
-msgstr "Passwort-Zurücksetzen abgeschlossen"
-
-#: templates/account/password_reset_from_key.html:110
-msgid "Your password has been set. You may go ahead and log in now."
-msgstr "Ihr Passwort wurde gesetzt. Sie können sich jetzt anmelden."
-
-#: templates/account/logout.html:25
-msgid "Confirm Logout"
-msgstr "Abmeldung bestätigen"
-
-
-
-
-
-#: templates/account/signup.html:80
-msgid "Confirm your password"
-msgstr "Bestätigen Sie Ihr Passwort"
-
-#: templates/account/signup.html:105
-msgid "Already have an account?"
-msgstr "Haben Sie bereits ein Konto?"
-
-
-
-#: templates/campaigns/detail.html:130
-msgid "No rooms available for this campaign."
-msgstr "Keine Räume für diese Kampagne verfügbar."
-
-#: templates/campaigns/detail.html:152
-msgid "Contact Information"
-msgstr "Kontaktinformationen"
-
-#: templates/campaigns/detail.html:158
-msgid "Campaign Owner"
-msgstr "Kampagneninhaber"
-
-#: templates/campaigns/detail.html:169
-msgid "Are you sure you want to remove this user from the campaign?"
-msgstr "Sind Sie sicher, dass Sie diesen Benutzer aus der Kampagne entfernen möchten?"
-
-#: templates/campaigns/detail.html:190
-msgid "Back to my Campaigns"
-msgstr "Zurück zu meinen Kampagnen"
-
-
-
-#: templates/campaigns/my.html:88
-msgid "Organization:"
-msgstr "Organisation:"
-
-#: templates/campaigns/my.html:93
-msgid "Participants:"
-msgstr "Teilnehmer:"
-
-#: templates/campaigns/my.html:97
-msgid "Rooms:"
-msgstr "Räume:"
-
-#: templates/campaigns/add_user.html:6
-msgid "Add Participants to Campaign"
-msgstr "Teilnehmer zur Kampagne hinzufügen"
-
-#: templates/campaigns/add_user.html:14
-msgid "Select Users to Add:"
-msgstr "Benutzer zum Hinzufügen auswählen:"
-
-#: templates/campaigns/add_user.html:16
-msgid "Select All"
-msgstr "Alle auswählen"
-
-#: templates/campaigns/add_user.html:32
-msgid "No users available to add to this campaign."
-msgstr "Keine Benutzer verfügbar, um sie zu dieser Kampagne hinzuzufügen."
-
-#: templates/campaigns/add_user.html:41
-msgid "Add Selected Users"
-msgstr "Ausgewählte Benutzer hinzufügen"
-
-#: templates/campaigns/add_user.html:104
-msgid "Deselect All"
-msgstr "Alle abwählen"
+#~ msgid "Back to my Campaigns"
+#~ msgstr "Zurück zu meinen Kampagnen"
 
 #, fuzzy
 #~| msgid "Log in"
@@ -1463,14 +1976,6 @@ msgstr "Alle abwählen"
 #~| msgid "Firmware version"
 #~ msgid "Firmware Version"
 #~ msgstr "Firmware Version"
-
-#~ msgid "Never"
-#~ msgstr "Nie"
-
-#, fuzzy
-#~| msgid "Details"
-#~ msgid "View Details"
-#~ msgstr "Details"
 
 #, fuzzy
 #~| msgid "Details"
@@ -1501,94 +2006,5 @@ msgstr "Alle abwählen"
 #~ msgid "End date"
 #~ msgstr "Enddatum"
 
-#~ msgid "Yes"
-#~ msgstr "Ja"
-
-#~ msgid "No"
-#~ msgstr "Nein"
-
-#: organizations/forms.py:10
-msgid "Keep current ownership"
-msgstr "Aktuelles Eigentum beibehalten"
-
-#: organizations/forms.py:11
-msgid "Select a new owner from the organization members. Leave empty to keep current ownership."
-msgstr "Wählen Sie einen neuen Eigentümer aus den Organisationsmitgliedern aus. Lassen Sie es leer, um das aktuelle Eigentum beizubehalten."
-
-#: organizations/forms.py:22
-msgid "Transfer Ownership"
-msgstr "Eigentum übertragen"
-
-#: templates/organizations/detail.html:345
-msgid "No devices found for this organization."
-msgstr "Keine Geräte für diese Organisation gefunden."
-
-#: templates/organizations/detail.html:272
-msgid "No campaigns found for this organization."
-msgstr "Keine Kampagnen für diese Organisation gefunden."
-
-#: templates/organizations/detail.html:185
-msgid "Pending Invitations"
-msgstr "Ausstehende Einladungen"
-
-#: templates/organizations/detail.html:195
-msgid "Pending"
-msgstr "Ausstehend"
-
-#: templates/organizations/detail.html:200
-msgid "Invitation ID:"
-msgstr "Einladungs-ID:"
-
-#: templates/organizations/detail.html:205
-msgid "Expires:"
-msgstr "Läuft ab:"
-
-
-
-#: templates/organizations/detail.html:217
-msgid "Are you sure you want to cancel this invitation?"
-msgstr "Sind Sie sicher, dass Sie diese Einladung abbrechen möchten?"
-
-#: templates/organizations/detail.html:225
-msgid "No pending invitations."
-msgstr "Keine ausstehenden Einladungen."
-
-#: templates/organizations/detail.html:222
-msgid "Resend invitation email"
-msgstr "Einladungs-E-Mail erneut senden"
-
-#: templates/organizations/detail.html:224
-msgid "Resend"
-msgstr "Erneut senden"
-
-#: templates/home.html:71 templates/stations/list.html:205
-msgid "Active Stations"
-msgstr "Aktive Stationen"
-
-#: templates/home.html:77 templates/stations/list.html:211
-msgid "Last Hour"
-msgstr "Letzte Stunde"
-
-#: templates/home.html:87 templates/stations/list.html:221
-msgid "Last 24 Hours"
-msgstr "Letzte 24 Stunden"
-
-#: templates/home.html:97 templates/stations/list.html:231
-msgid "Last 7 Days"
-msgstr "Letzte 7 Tage"
-
-#: templates/home.html:107 templates/stations/list.html:241
-msgid "Last 30 Days"
-msgstr "Letzte 30 Tage"
-
-#: templates/stations/list.html:5
-msgid "All Stations"
-msgstr "Alle Stationen"
-
-#: templates/stations/list.html:263 templates/stations/list.html:315 templates/stations/list.html:365
-msgid "Highest Values"
-msgstr "Höchste Werte"
-
-#: templates/stations/list.html:282 templates/stations/list.html:332 templates/stations/list.html:382
-msgid "Lowest Values"
-msgstr "Niedrigste Werte"
+#~ msgid "Invitation ID:"
+#~ msgstr "Einladungs-ID:"

@@ -1,4 +1,5 @@
 import requests
+import json
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from django.shortcuts import render, get_object_or_404
@@ -57,9 +58,10 @@ def CitiesListView(request):
     api_url = f"{settings.API_URL}/city/all"
     error_message = None
     cities = []
+    top_cities = []
 
     try:
-        # Perform the GET request
+        # Perform the GET request for cities
         response = requests.get(api_url)
         response.raise_for_status()  # Raise an error for unsuccessful requests
         data = response.json()  # Parse JSON response
@@ -75,4 +77,52 @@ def CitiesListView(request):
         # Catch any other request exceptions that might occur.
         error_message = "There was an error fetching the city data."
 
-    return render(request, "cities/list.html", {"cities": cities, "error": error_message})
+    # Fetch statistics to get station counts per city
+    try:
+        stats_url = f"{settings.API_URL}/statistics"
+        stats_response = requests.get(stats_url)
+        stats_response.raise_for_status()
+        stats_data = stats_response.json()
+        
+        # Extract top cities with station counts
+        distribution = stats_data.get("distribution", {})
+        top_cities = distribution.get("top_cities", [])
+        
+    except (requests.exceptions.HTTPError, requests.exceptions.RequestException) as err:
+        # If statistics endpoint fails, continue without station counts
+        pass
+
+    # Extract city names for map matching
+    city_names = [city.get("name", "") for city in cities if city.get("name")]
+    
+    # Serialize city names to JSON for JavaScript
+    city_names_json = json.dumps(city_names)
+    
+    # Serialize cities data with location for JavaScript
+    cities_json = json.dumps(cities)
+    
+    # Serialize top cities with station counts for JavaScript
+    top_cities_json = json.dumps(top_cities)
+    
+    # Import translation function
+    from django.utils.translation import gettext as _
+    
+    # Prepare translated strings for JavaScript
+    translations = {
+        'cities_with_most_stations': _('Cities with Most Stations'),
+        'country': _('Country'),
+        'stations': _('Stations'),
+        'view_details': _('View Details'),
+    }
+    
+    # Serialize translations to JSON
+    translations_json = json.dumps(translations)
+
+    return render(request, "cities/list.html", {
+        "cities": cities, 
+        "error": error_message,
+        "city_names_json": city_names_json,
+        "cities_json": cities_json,
+        "top_cities_json": top_cities_json,
+        "translations_json": translations_json
+    })

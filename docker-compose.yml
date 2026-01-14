@@ -10,6 +10,7 @@ services:
      - db  
   db:
     image: postgis/postgis
+    platform: linux/amd64
     volumes:
       # - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
       - postgres_data:/var/lib/postgresql/data/
