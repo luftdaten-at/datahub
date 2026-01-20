@@ -41,6 +41,7 @@
                     <option value="temperature">{% trans "Temperature" %} </option>
                     <option value="humidity">{% trans "Humidity" %}</option>
                     <option value="voc">{% trans "VOC Index" %}</option>
+                    <option value="nox">{% trans "NOx Index" %}</option>
                 </select>
                 <div id="legend" style="margin-top: 1rem;"></div>
                 <span id="legend-method" style="font-size: 0.8rem;"></span>
@@ -223,7 +224,7 @@
     function createLegend(pmTypeIndex, colorSteps, scale = null, lo = null, hi = null) {
         var legendDiv = document.getElementById('legend');
         legendDiv.innerHTML = '';
-        if(pmTypeIndex == 'voc' || pmTypeIndex == 'humidity'){
+        if(pmTypeIndex == 'voc' || pmTypeIndex == 'humidity' || pmTypeIndex == 'nox'){
             return;
         }
         if(pmTypeIndex == 'temperature'){
@@ -477,7 +478,7 @@
             // Temp: just set colorString to be the hex color defined in the colorRanges
             let colorString = '';
             // get color string for temperature
-            if(value == 'temperature' || value == 'voc' || value == 'humidity'){
+            if(value == 'temperature' || value == 'voc' || value == 'humidity' || value == 'nox'){
                 colorString = scale(point[value]);
             }else{
                 const [r, g, b] = getColorForPM(pm, colorStepsArray[value]);
@@ -491,9 +492,10 @@
             else if(value == "pm25") unit = " µg/m³";
             else if(value == "pm10") unit = " µg/m³";
             else if(value == "temperature") unit = "°C";
-            // add correct units for voc and humidity
+            // add correct units for voc, humidity, and nox
             else if(value == "voc") unit = "Index";
             else if(value == "humidity") unit = "%";
+            else if(value == "nox") unit = "Index";
             else unit = "";
             marker.bindPopup(pm + unit); // Bind a popup to the marker
             markerList.push(marker);
@@ -558,14 +560,18 @@ const chartLabels = {
     pm1: "{% trans 'Particulate Matter' %} PM1",
     pm25: "{% trans 'Particulate Matter' %} PM2.5",
     pm10: "{% trans 'Particulate Matter' %} PM10",
-    temperature: "{% trans 'Temperature difference' %}"
+    temperature: "{% trans 'Temperature difference' %}",
+    voc: "{% trans 'VOC Index' %}",
+    nox: "{% trans 'NOx Index' %}"
 };
 
 const chartUnits = {
     pm1: "µg/m³",
     pm25: "µg/m³",
     pm10: "µg/m³",
-    temperature: "ΔT in K"
+    temperature: "ΔT in K",
+    voc: "Index",
+    nox: "Index"
 };
 
 function drawChart(value = 'pm25') {

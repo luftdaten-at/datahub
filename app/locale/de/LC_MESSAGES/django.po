@@ -1757,6 +1757,10 @@ msgstr "Luftfeuchtigkeit (%%)"
 msgid "VOC Index"
 msgstr ""
 
+#: templates/workshops/detail.html:44
+msgid "NOx Index"
+msgstr "NOx Index"
+
 #: templates/workshops/detail.html:51
 msgid "Layers"
 msgstr ""
