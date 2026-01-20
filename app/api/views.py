@@ -248,6 +248,8 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
                 'pm10': record.pm10,
                 'temperature': record.temperature,
                 'humidity': record.humidity,
+                'voc': record.voc,
+                'nox': record.nox,
             }
 
             ret.append(data)
