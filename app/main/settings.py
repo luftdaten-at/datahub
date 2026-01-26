@@ -195,7 +195,7 @@ LANGUAGES = [
 
 TIME_ZONE = 'Europe/Vienna'
 USE_I18N = True
-USE_L10N = False
+# USE_L10N removed in Django 6.0 - localization is always enabled
 USE_TZ = True
 
 LOCALE_PATHS = [
