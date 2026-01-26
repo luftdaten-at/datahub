@@ -57,9 +57,26 @@
                     Coolspots
             </div>
         </div>
+        <div class="card mt-2">
+            <div class="card-body">
+                <h5 class="card-title" id="device-list-header"></h5>
+                <ul id="device-list" class="list-unstyled mb-0" style="font-size: 0.9rem;"></ul>
+            </div>
+        </div>
     </div>
 
-    <div id="map"></div>
+    <div id="map" style="position: relative;">
+        <div id="map-loading" class="position-absolute top-50 start-50 translate-middle" style="z-index: 2000; display: none; pointer-events: none;">
+            <div class="card shadow-lg">
+                <div class="card-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">{% trans "Loading..." %}</span>
+                    </div>
+                    <p class="mt-2 mb-0">{% trans "Loading data..." %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
 {% endblock map %}
@@ -83,6 +100,11 @@
     <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
     <p>Code: {{ workshop.name }}</p>
 
+    <div id="no-data-info" class="alert alert-info mt-4" style="display: none;">
+        <i class="bi bi-info-circle me-2"></i>
+        {% trans "No data available for this workshop. You can import data using the 'Import Data' button." %}
+    </div>
+
     <div id="chart-area">
         <h4 id="chart-header"></h4>
         <canvas id="chartCanvas"></canvas>
@@ -104,9 +126,6 @@
             </button>
         </div>
     </div>
-
-    <h4 id="device-list-header"></h4>
-    <ul id="device-list"></ul>
 
     <h4>{% trans "Download" %}</h4>
     <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
@@ -310,41 +329,79 @@
     var points;
 
     async function fetchMarkerData() {
-        const fetch_url = "/api/v1/workshops/{{ workshop.name }}/data/";
-        console.log(fetch_url);
-        const response = await fetch(fetch_url);
-
-        points = [];
-
-        // Parse response JSON
-        const text = await response.text();
-        const json = JSON.parse(text);
-        for (let item in json) {
-            points.push(json[item]);
+        // Show loading indicator
+        const loadingIndicator = document.getElementById('map-loading');
+        if (loadingIndicator) {
+            loadingIndicator.style.display = 'block';
         }
+        
+        try {
+            const fetch_url = "/api/v1/workshops/{{ workshop.name }}/data/";
+            console.log(fetch_url);
+            const response = await fetch(fetch_url);
 
-        // Check if there are points outside Austria
-        let hasPointsOutsideAustria = false;
-        for (let point of points) {
-            if (point.lat && point.lon && isOutsideAustria(point.lat, point.lon)) {
-                hasPointsOutsideAustria = true;
-                console.log(`Point outside Austria found: lat=${point.lat}, lon=${point.lon}`);
-                break;
+            points = [];
+
+            // Parse response JSON
+            const text = await response.text();
+            const json = JSON.parse(text);
+            for (let item in json) {
+                points.push(json[item]);
+            }
+
+            // Check if no data is available
+            const noDataInfo = document.getElementById('no-data-info');
+            if (!points || points.length === 0) {
+                if (noDataInfo) {
+                    noDataInfo.style.display = 'block';
+                }
+                // Hide chart area if no data
+                const chartArea = document.getElementById('chart-area');
+                if (chartArea) {
+                    chartArea.style.display = 'none';
+                }
+                return;
+            } else {
+                if (noDataInfo) {
+                    noDataInfo.style.display = 'none';
+                }
+                // Show chart area if data exists
+                const chartArea = document.getElementById('chart-area');
+                if (chartArea) {
+                    chartArea.style.display = 'block';
+                }
+            }
+
+            // Check if there are points outside Austria
+            let hasPointsOutsideAustria = false;
+            for (let point of points) {
+                if (point.lat && point.lon && isOutsideAustria(point.lat, point.lon)) {
+                    hasPointsOutsideAustria = true;
+                    console.log(`Point outside Austria found: lat=${point.lat}, lon=${point.lon}`);
+                    break;
+                }
+            }
+
+            // Switch to OpenStreetMap if points are outside Austria
+            if (hasPointsOutsideAustria) {
+                console.log('Switching to OpenStreetMap basemap due to points outside Austria');
+                switchToOpenStreetMap();
+            }
+
+            var defaultPmTypeIndex = 'pm25'; // PM2.5
+
+            await addMarkerLayer(defaultPmTypeIndex);
+            showDeviceList();
+            fitMapToAllPoints();
+            drawChart(defaultPmTypeIndex);
+        } catch (error) {
+            console.error('Error fetching marker data:', error);
+        } finally {
+            // Hide loading indicator
+            if (loadingIndicator) {
+                loadingIndicator.style.display = 'none';
             }
         }
-
-        // Switch to OpenStreetMap if points are outside Austria
-        if (hasPointsOutsideAustria) {
-            console.log('Switching to OpenStreetMap basemap due to points outside Austria');
-            switchToOpenStreetMap();
-        }
-
-        var defaultPmTypeIndex = 'pm25'; // PM2.5
-
-        await addMarkerLayer(defaultPmTypeIndex);
-        showDeviceList();
-        fitMapToAllPoints();
-        drawChart(defaultPmTypeIndex);
     }
 
     fetchMarkerData();
@@ -372,6 +429,9 @@
     // Füge den Bild-Layer der Karte hinzu
     imageLayer.addTo(map);
 
+    // Store selected devices
+    let selectedDevices = new Set();
+
     function showDeviceList() {
         // Check if points array is empty
         if (!points || points.length === 0) {
@@ -389,18 +449,61 @@
             deviceCounts[device]++;
         }
 
-        // 2. Füge die Daten in <ul id="device-list"> ein
+        // 2. Füge die Daten in <ul id="device-list"> ein mit Checkboxes
         const device_h4 = document.getElementById("device-list-header");
-        device_h4.innerHTML = "";
-        if (Object.keys(deviceCounts).length > 0) {
-            device_h4.textContent=devicesLabel;
-        }
         const ul = document.getElementById("device-list");
         ul.innerHTML = "";  // ggf. leeren, falls schon was drinsteht
-        for (const device in deviceCounts) {
-            const li = document.createElement("li");
-            li.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
-            ul.appendChild(li);
+        
+        if (Object.keys(deviceCounts).length > 0) {
+            device_h4.textContent = devicesLabel;
+            
+            // Initialize selectedDevices with all devices if empty (first time)
+            if (selectedDevices.size === 0) {
+                for (const device in deviceCounts) {
+                    selectedDevices.add(device);
+                }
+            }
+            
+            for (const device in deviceCounts) {
+                const li = document.createElement("li");
+                li.style.marginBottom = "4px";
+                
+                // Create checkbox
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.className = "form-check-input device-checkbox";
+                checkbox.id = `device-${device.replace(/\s+/g, '-')}`;
+                checkbox.checked = selectedDevices.has(device);
+                checkbox.style.width = "30px";
+                checkbox.style.marginRight = "8px";
+                
+                // Add event listener
+                checkbox.addEventListener("change", function() {
+                    if (this.checked) {
+                        selectedDevices.add(device);
+                    } else {
+                        selectedDevices.delete(device);
+                    }
+                    // Refresh the map with current dimension selection
+                    const select = document.querySelector('.form-select');
+                    if (select) {
+                        addMarkerLayer(select.value);
+                        drawChart(select.value);
+                    }
+                });
+                
+                // Create label
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
+                label.style.cursor = "pointer";
+                
+                li.appendChild(checkbox);
+                li.appendChild(label);
+                ul.appendChild(li);
+            }
+        } else {
+            device_h4.textContent = "";
         }
     }
     
@@ -464,7 +567,10 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
+            // Filter by device if single device specified, or by selected devices if multiple
             if(device != null && point.display_name != device) continue;
+            // Filter by selected devices (if any devices are selected)
+            if(device == null && selectedDevices.size > 0 && !selectedDevices.has(point.display_name)) continue;
             const pm = point[value];
             if(pm === undefined) continue;
             /*
@@ -547,7 +653,13 @@ function fitMapToAllPoints() {
         return;
     }
     
-    const latLngs = points.map(item => [item.lat, item.lon]).filter(coord => coord[0] && coord[1]);
+    // Filter by selected devices
+    let filteredPoints = points;
+    if (selectedDevices.size > 0) {
+        filteredPoints = points.filter(p => selectedDevices.has(p.display_name));
+    }
+    
+    const latLngs = filteredPoints.map(item => [item.lat, item.lon]).filter(coord => coord[0] && coord[1]);
     if (latLngs.length === 0) {
         console.log('No valid coordinates for map bounds');
         return;
@@ -586,8 +698,14 @@ function drawChart(value = 'pm25') {
         return;
     }
     
+    // Filter points by selected devices
+    let filteredPoints = points;
+    if (selectedDevices.size > 0) {
+        filteredPoints = points.filter(p => selectedDevices.has(p.display_name));
+    }
+    
     // Sort points by time
-    const sorted = points.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
+    const sorted = filteredPoints.slice().sort((a, b) => new Date(a.time) - new Date(b.time));
     
     // Check if sorted array is empty
     if (sorted.length === 0) {

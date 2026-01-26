@@ -248,7 +248,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             
             ret.append(data)
         
-        air_quality_records = AirQualityRecord.objects.filter(workshop=workshop_obj)
+        air_quality_records = AirQualityRecord.objects.filter(workshop=workshop_obj).select_related('device', 'participant', 'mode')
         logger.info(f"Workshop {pk}: Processing {air_quality_records.count()} AirQualityRecords")
         
         for record in air_quality_records:
@@ -262,15 +262,92 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
                 # Still skip but log the issue
                 logger.info(f"Skipping AirQualityRecord {record.id}: participant={record.participant}, mode={record.mode}, device={record.device}, time={record.time}")
                 continue
+            
+            # Get device name - fetch device by id to get device_name
+            # The record.device might only have the id, so we need to look up the full device object
+            # If device ID ends with "AAA" and device doesn't have device_name, try correcting it
+            device_name = None
+            if record.device:
+                device_id = record.device.id if hasattr(record.device, 'id') else str(record.device)
+                try:
+                    # First try with the original device ID
+                    device = Device.objects.get(id=device_id)
+                    # If device has a device_name, use it
+                    if device.device_name:
+                        device_name = device.device_name
+                    else:
+                        # Device found but no device_name, try correction if ID ends with "AAA"
+                        if device_id and len(device_id) >= 3 and device_id.endswith("AAA"):
+                            try:
+                                # Remove last 3 characters "AAA"
+                                base_id = device_id[:-3]
+                                if len(base_id) > 0:
+                                    # Get the last character and increment hex by 1
+                                    last_char = base_id[-1]
+                                    try:
+                                        # Convert last char to int (hex), increment, convert back to hex
+                                        last_char_int = int(last_char, 16)
+                                        last_char_int = (last_char_int + 1) % 16  # Wrap around if needed
+                                        corrected_last_char = format(last_char_int, 'X')
+                                        # Replace last character
+                                        corrected_base = base_id[:-1] + corrected_last_char
+                                        corrected_device_id = corrected_base + "AAA"
+                                        
+                                        # Try to find device with corrected ID
+                                        corrected_device = Device.objects.get(id=corrected_device_id)
+                                        device_name = corrected_device.device_name if corrected_device.device_name else corrected_device.id
+                                        logger.info(f"Found device with corrected ID: {corrected_device_id} (original: {device_id})")
+                                    except (ValueError, Device.DoesNotExist):
+                                        # If correction fails, fallback to original device id
+                                        device_name = device_id
+                            except Exception as e:
+                                logger.warning(f"Error correcting device ID {device_id}: {e}")
+                                device_name = device_id
+                        else:
+                            # No device_name and can't correct, use device id
+                            device_name = device_id
+                except Device.DoesNotExist:
+                    # Device not found, try correction if ID ends with "AAA"
+                    if device_id and len(device_id) >= 3 and device_id.endswith("AAA"):
+                        try:
+                            # Remove last 3 characters "AAA"
+                            base_id = device_id[:-3]
+                            if len(base_id) > 0:
+                                # Get the last character and increment hex by 1
+                                last_char = base_id[-1]
+                                try:
+                                    # Convert last char to int (hex), increment, convert back to hex
+                                    last_char_int = int(last_char, 16)
+                                    last_char_int = (last_char_int + 1) % 16  # Wrap around if needed
+                                    corrected_last_char = format(last_char_int, 'X')
+                                    # Replace last character
+                                    corrected_base = base_id[:-1] + corrected_last_char
+                                    corrected_device_id = corrected_base + "AAA"
+                                    
+                                    # Try to find device with corrected ID
+                                    corrected_device = Device.objects.get(id=corrected_device_id)
+                                    device_name = corrected_device.device_name if corrected_device.device_name else corrected_device.id
+                                    logger.info(f"Found device with corrected ID: {corrected_device_id} (original: {device_id})")
+                                except (ValueError, Device.DoesNotExist):
+                                    # If correction fails, fallback to original device id
+                                    device_name = device_id
+                        except Exception as e:
+                            logger.warning(f"Error correcting device ID {device_id}: {e}")
+                            device_name = device_id
+                    else:
+                        # Device not found and can't correct, use device id
+                        device_name = device_id
+            else:
+                device_name = None
                 
             data = {
                 "time": record.time.isoformat() if hasattr(record.time, 'isoformat') else str(record.time),
-                "device": record.device.id if record.device else None,
+                "device": device_name,
                 "participant": record.participant.name if record.participant else None,
                 "mode": record.mode.name if record.mode else None,
                 "lat": record.lat,
                 "lon": record.lon,
-                "display_name": record.device.device_name if record.device and record.device.device_name else (record.device.id if record.device else None),
+                "display_name": device_name,
                 'pm1': record.pm1,
                 'pm25': record.pm25,
                 'pm10': record.pm10,
