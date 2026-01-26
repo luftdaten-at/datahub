@@ -240,11 +240,10 @@ EMAIL_PORT=env.str('EMAIL_PORT')
 EMAIL_USE_TLS=env.str('EMAIL_USE_TLS')
 
 ACCOUNT_SESSION_REMEMBER = True
-ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
+# New django-allauth settings (replacing deprecated ones)
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*']
 ACCOUNT_UNIQUE_EMAIL = True
 
 # Custom account adapter for redirects
