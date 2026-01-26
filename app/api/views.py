@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from django.db import IntegrityError, transaction
 from django.utils.dateparse import parse_datetime
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
 
 from devices.models import DeviceLogs, Measurement, Values
 from rest_framework.views import APIView
@@ -295,6 +296,12 @@ class AirQualityDataAddView(APIView):
                 if serializer.is_valid():
                     serializer.save()
                     records.append(serializer.data)
+                    # Invalidate cache for this workshop when new data is added
+                    workshop_name = record.get('workshop')
+                    if workshop_name:
+                        cache_key = f'workshop_data_{workshop_name}'
+                        cache.delete(cache_key)
+                        logger.info(f"Invalidated cache for workshop {workshop_name}")
                 else:
                     errors.append(serializer.errors)
             except Workshop.DoesNotExist:
@@ -424,6 +431,13 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
 
         return Response(serializer.data)
         '''
+
+        # Check cache first
+        cache_key = f'workshop_data_{pk}'
+        cached_data = cache.get(cache_key)
+        if cached_data is not None:
+            logger.info(f"Workshop {pk}: Returning cached data")
+            return JsonResponse(cached_data, status=200, safe=False)
 
         # Get the workshop object by name (pk is the workshop name)
         try:
@@ -580,6 +594,10 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             }
 
             ret.append(data)
+
+        # Cache the result for 15 minutes (900 seconds)
+        cache.set(cache_key, ret, 900)
+        logger.info(f"Workshop {pk}: Cached data for 15 minutes")
 
         return JsonResponse(ret, status=200, safe=False)
 

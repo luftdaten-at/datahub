@@ -492,6 +492,13 @@ class WorkshopImportDataView(LoginRequiredMixin, FormView):
                     errors.append(f"Error processing data point: {str(e)}")
                     logger.error(f"Error importing data point: {str(e)}", exc_info=True)
             
+            # Invalidate cache for this workshop when new data is added
+            if created_count > 0:
+                from django.core.cache import cache
+                cache_key = f'workshop_data_{workshop.name}'
+                cache.delete(cache_key)
+                logger.info(f"Invalidated cache for workshop {workshop.name} after import")
+            
             # Show success/error messages
             if created_count > 0:
                 messages.success(self.request, f'Successfully imported {created_count} records.')
