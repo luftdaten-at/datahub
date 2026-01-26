@@ -262,8 +262,13 @@ class WorkshopExportCsvView(View):
         except Workshop.DoesNotExist:
             raise Http404("Workshop nicht gefunden.")
 
-        if not workshop.public and workshop.owner != request.user:
-            raise Http404("Workshop nicht gefunden.")
+        # Allow access if workshop is public, or if user is superuser, or if user is in workshop.users
+        # This matches the access logic in WorkshopDetailView.get_object()
+        if not workshop.public:
+            if not request.user.is_authenticated:
+                raise Http404("Workshop nicht gefunden.")
+            if not request.user.is_superuser and not workshop.users.filter(id=request.user.id).exists():
+                raise Http404("Workshop nicht gefunden.")
 
         records = AirQualityRecord.objects.filter(workshop__name=pk)
 
