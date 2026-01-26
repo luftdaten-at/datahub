@@ -1139,6 +1139,10 @@ msgstr ""
 msgid "Measurements"
 msgstr "Messungen"
 
+#: templates/workshops/detail.html:174
+msgid "Points"
+msgstr "Punkte"
+
 #: templates/devices/data.html:60
 #, fuzzy
 #| msgid "Sensors:"
