@@ -13,7 +13,8 @@ from rest_framework.generics import RetrieveAPIView
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 from main.util import get_or_create_station, get_avg_temp_per_spot
 from .models import AirQualityRecord, MobilityMode
@@ -26,8 +27,49 @@ from .serializers import AirQualityRecordSerializer, AirQualityRecordWorkshopSer
 logger = logging.getLogger('myapp')
 
 
-@extend_schema(tags=['workshops'])
+@extend_schema(
+    tags=['workshops'],
+    summary='Create a workshop spot',
+    description='Creates a new hot or cool spot (circle) on a workshop map. Requires authentication and workshop owner permissions.',
+    request=WorkshopSpotSerializer,
+    responses={
+        201: {'description': 'Spot created successfully'},
+        400: {'description': 'Invalid request data'},
+        403: {'description': 'Permission denied - user is not the workshop owner'},
+        404: {'description': 'Workshop not found'}
+    },
+    examples=[
+        OpenApiExample(
+            'Create hot spot',
+            value={
+                'workshop': 'homrh8',
+                'lat': 48.2112,
+                'lon': 16.3736,
+                'radius': 100.0,
+                'type': 'hot'
+            },
+            request_only=True
+        ),
+        OpenApiExample(
+            'Create cool spot',
+            value={
+                'workshop': 'homrh8',
+                'lat': 48.2200,
+                'lon': 16.3800,
+                'radius': 150.0,
+                'type': 'cool'
+            },
+            request_only=True
+        )
+    ]
+)
 class CreateWorkshopSpotAPIView(APIView):
+    """
+    Creates a new workshop spot (hot or cool area) on the map.
+    
+    The spot is defined by a center point (latitude, longitude) and a radius in meters.
+    The type can be either 'hot' or 'cool' to indicate temperature zones.
+    """
     serializer_class = WorkshopSpotSerializer
     permission_classes = (IsAuthenticated,)
     def post(self, request, *args, **kwargs):
@@ -54,8 +96,34 @@ class CreateWorkshopSpotAPIView(APIView):
         return Response(status=status.HTTP_201_CREATED)
 
 
-@extend_schema(tags=['workshops'])
+@extend_schema(
+    tags=['workshops'],
+    summary='Delete a workshop spot',
+    description='Deletes an existing workshop spot. Requires authentication and workshop owner permissions.',
+    request=WorkshopSpotPkSerializer,
+    responses={
+        200: {'description': 'Spot deleted successfully'},
+        400: {'description': 'Invalid request data'},
+        403: {'description': 'Permission denied - user is not the workshop owner'},
+        404: {'description': 'Workshop or workshop spot not found'}
+    },
+    examples=[
+        OpenApiExample(
+            'Delete spot',
+            value={
+                'workshop': 'homrh8',
+                'workshop_spot': 123
+            },
+            request_only=True
+        )
+    ]
+)
 class DeleteWorkshopSpotAPIView(APIView):
+    """
+    Deletes an existing workshop spot by its primary key.
+    
+    Requires the workshop name and the workshop spot ID (pk).
+    """
     permission_classes = (IsAuthenticated,)
     serializer_class = WorkshopSpotPkSerializer 
     def post(self, request, *args, **kwargs):
@@ -76,8 +144,37 @@ class DeleteWorkshopSpotAPIView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-@extend_schema(tags=['workshops'])
+@extend_schema(
+    tags=['workshops'],
+    summary='Get workshop spots',
+    description='Retrieves all spots (hot and cool areas) for a specific workshop, including their average temperatures.',
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description='Workshop name (primary key)',
+            required=True,
+            examples=[
+                OpenApiExample('Example workshop', value='homrh8')
+            ]
+        )
+    ],
+    responses={
+        200: {
+            'description': 'List of workshop spots with coordinates, radius, type, and average temperature'
+        },
+        400: {'description': 'Invalid workshop name'},
+        404: {'description': 'Workshop not found'}
+    }
+)
 class GetWorkshopSpotsAPIView(APIView):
+    """
+    Retrieves all spots for a workshop.
+    
+    Returns a list of spots with their coordinates, radius, type (hot/cool),
+    and average temperature calculated from measurements within the spot area.
+    """
     serializer_class = WorkshopSpotPkSerializer 
     def get(self, request, pk, *args, **kwargs):
         workshop = Workshop.objects.filter(pk=pk).first()
@@ -99,13 +196,56 @@ class GetWorkshopSpotsAPIView(APIView):
         return JsonResponse(ret, status=200, safe=False)
 
 
-@extend_schema(tags=['workshops']) 
+@extend_schema(
+    tags=['workshops'],
+    summary='Add air quality data',
+    description='Adds one or more air quality records to a workshop. Creates or retrieves related Device, Participant, and MobilityMode objects as needed. Records must be within the workshop timeframe. Accepts a JSON array of records.',
+    request=AirQualityRecordSerializer(many=True),
+    responses={
+        201: {'description': 'Records created successfully'},
+        400: {'description': 'Validation errors - check errors array for details'}
+    },
+    examples=[
+        OpenApiExample(
+            'Add single record',
+            value=[
+                {
+                    'time': '2026-01-15T13:45:39.889337Z',
+                    'device': '28372F821AE5',
+                    'participant': 'Air Around 0007',
+                    'mode': 'walking',
+                    'workshop': 'homrh8',
+                    'pm1': 33.8,
+                    'pm25': 36.3,
+                    'pm10': 37.4,
+                    'temperature': 22.2,
+                    'humidity': 39.2,
+                    'voc': 15.0,
+                    'lat': 48.1769523,
+                    'lon': 16.3654834
+                }
+            ],
+            request_only=True
+        )
+    ]
+)
 class AirQualityDataAddView(APIView):
     """
-    Processes a POST request containing JSON data about air quality records. Each record includes information
-    about air quality metrics, the device reporting the data, the workshop associated with the data,
-    and the location of the measurement. This view attempts to parse the JSON data, create or retrieve
-    related instances (Device, Workshop), and save each air quality record to the database.
+    Adds air quality measurement records to a workshop.
+    
+    Accepts a list of air quality records. Each record must include:
+    - time: ISO 8601 datetime string
+    - device: Device identifier (MAC address will be converted to device ID)
+    - participant: Participant name
+    - mode: Mobility mode (e.g., 'walking', 'cycling')
+    - workshop: Workshop name
+    
+    Optional fields: pm1, pm25, pm10, temperature, humidity, voc, nox, lat, lon
+    
+    Records are validated to ensure:
+    - They are within the workshop's start and end dates
+    - No duplicate records (same time and device)
+    - Required fields are present
     """    
     serializer_class = AirQualityRecordSerializer
 
@@ -167,30 +307,112 @@ class AirQualityDataAddView(APIView):
         return Response(records, status=status.HTTP_201_CREATED)
 
 
+@extend_schema(
+    tags=['devices'],
+    summary='Get device details',
+    description='Retrieves detailed information about a specific device including device name, model, firmware, and current assignments.',
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description='Device ID (primary key)',
+            required=True,
+            examples=[
+                OpenApiExample('Example device', value='D83BDA6E37DDAAA')
+            ]
+        )
+    ],
+    responses={
+        200: DeviceSerializer,
+        404: {'description': 'Device not found'}
+    }
+)
 class DeviceDetailView(RetrieveAPIView):
     """
-    Processes a GET request by returning the details of the requested Device as JSON.
+    Retrieves detailed information about a device.
     
+    Returns all device fields including:
+    - Identification: id, device_name
+    - Hardware: model, firmware, btmac_address
+    - Status: test_mode, calibration_mode, last_update
+    - Assignments: current_room, current_organization, current_user, current_campaign
     """
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
 
 
-@extend_schema(tags=['workshops'])
+@extend_schema(
+    tags=['workshops'],
+    summary='Get workshop details',
+    description='Retrieves detailed information about a specific workshop including title, description, dates, and settings.',
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description='Workshop name (primary key)',
+            required=True,
+            examples=[
+                OpenApiExample('Example workshop', value='homrh8')
+            ]
+        )
+    ],
+    responses={
+        200: WorkshopSerializer,
+        404: {'description': 'Workshop not found'}
+    }
+)
 class WorkshopDetailView(RetrieveAPIView):
     """
-    Processes a GET request by returning the details of the requested Workshop as JSON.
+    Retrieves detailed information about a workshop.
     
+    Returns all workshop fields including:
+    - Basic info: name, title, description
+    - Dates: start_date, end_date
+    - Settings: public, heat_hotspots_enabled
+    - Map boundaries: mapbox coordinates
+    - Relations: owner, users
     """
     queryset = Workshop.objects.all()
     serializer_class = WorkshopSerializer
 
 
-@extend_schema(tags=['workshops'])
+@extend_schema(
+    tags=['workshops'],
+    summary='Get workshop air quality data',
+    description='Retrieves all air quality measurement data for a workshop. Returns data from both the Measurement model (new) and AirQualityRecord model (legacy). Records without participant or mode are excluded.',
+    parameters=[
+        OpenApiParameter(
+            name='pk',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.PATH,
+            description='Workshop name (primary key)',
+            required=True,
+            examples=[
+                OpenApiExample('Example workshop', value='homrh8')
+            ]
+        )
+    ],
+    responses={
+        200: {
+            'description': 'List of air quality records with sensor measurements and location data'
+        },
+        404: {'description': 'Workshop not found'}
+    }
+)
 class WorkshopAirQualityDataView(RetrieveAPIView):
     """
-    Processes a GET request by returning the AirQualityRecords connected with the workshop name
-
+    Retrieves all air quality data for a workshop.
+    
+    Combines data from:
+    - Measurement model (new format with dimension-based values)
+    - AirQualityRecord model (legacy format with direct fields)
+    
+    Only includes records that have both participant and mode assigned.
+    Device names are resolved, with automatic correction for device IDs ending in "AAA".
+    
+    Returns a JSON array of records with all available sensor dimensions.
     """
     queryset = AirQualityRecord.objects.all()
     serializer_class = AirQualityRecordWorkshopSerializer
@@ -362,8 +584,58 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         return JsonResponse(ret, status=200, safe=False)
 
 
-@extend_schema(tags=['devices'])
+@extend_schema(
+    tags=['devices'],
+    summary='Add station status logs',
+    description='Adds status log entries for a station/device. Requires valid API key authentication. Updates device test_mode and calibration_mode flags.',
+    request=StationStatusSerializer,
+    responses={
+        200: {'description': 'Status logs created successfully. Returns status and device flags.'},
+        400: {'description': 'Validation error - wrong API key or invalid data'}
+    },
+    examples=[
+        OpenApiExample(
+            'Add status logs',
+            value={
+                'station': {
+                    'time': '2025-01-07T11:23:23.439Z',
+                    'device': 'D83BDA6E37DDAAA',
+                    'firmware': '2.0',
+                    'model': 1,
+                    'apikey': 'your-api-key-here',
+                    'battery': {
+                        'voltage': 3.7,
+                        'percentage': 85.0
+                    }
+                },
+                'status_list': [
+                    {
+                        'time': '2025-01-07T11:06:21.222Z',
+                        'level': 1,
+                        'message': 'Device started successfully'
+                    },
+                    {
+                        'time': '2025-01-07T11:06:22.222Z',
+                        'level': 0,
+                        'message': 'Sensor calibration complete'
+                    }
+                ]
+            },
+            request_only=True
+        )
+    ]
+)
 class CreateStationStatusAPIView(APIView):
+    """
+    Adds status log entries for a station/device.
+    
+    Accepts:
+    - station: Station information including device ID, API key, battery status
+    - status_list: Array of status log entries with timestamp, level, and message
+    
+    Validates API key and updates device flags (test_mode, calibration_mode).
+    Creates DeviceLogs entries for each status in the list.
+    """
     serializer_class = StationStatusSerializer 
     def post(self, request, *args, **kwargs):
         station_data = request.data.get('station')
@@ -410,8 +682,69 @@ class CreateStationStatusAPIView(APIView):
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-@extend_schema(tags=['devices'])
+@extend_schema(
+    tags=['devices'],
+    summary='Add station measurement data',
+    description='Adds measurement data from sensors for a station/device. Requires valid API key authentication. Creates Measurement and Values records. Prevents duplicate measurements.',
+    request=StationDataSerializer,
+    responses={
+        200: {'description': 'Measurements created successfully, or no sensor data found'},
+        400: {'description': 'Validation error - wrong API key or invalid data'},
+        422: {'description': 'Duplicate measurement - measurement with same device, time, and sensor_model already exists'}
+    },
+    examples=[
+        OpenApiExample(
+            'Add measurement data',
+            value={
+                'station': {
+                    'time': '2025-01-07T11:23:23.439Z',
+                    'device': 'D83BDA6E37DDAAA',
+                    'firmware': '2.0',
+                    'model': 1,
+                    'apikey': 'your-api-key-here',
+                    'workshop': 'homrh8'
+                },
+                'sensors': {
+                    '1': {
+                        'type': 1,
+                        'data': {
+                            '2': 5.0,  # PM1.0
+                            '3': 6.0,  # PM2.5
+                            '5': 7.0,  # PM10.0
+                            '6': 0.67, # Humidity
+                            '7': 20.0, # Temperature
+                            '8': 100   # VOC Index
+                        }
+                    },
+                    '2': {
+                        'type': 6,
+                        'data': {
+                            '6': 0.72, # Humidity
+                            '7': 20.1  # Temperature
+                        }
+                    }
+                }
+            },
+            request_only=True
+        )
+    ]
+)
 class CreateStationDataAPIView(APIView):
+    """
+    Adds measurement data from sensors for a station/device.
+    
+    Accepts:
+    - station: Station information including device ID, API key, timestamp, optional workshop
+    - sensors: Dictionary of sensor data, keyed by sensor ID
+    
+    Each sensor entry contains:
+    - type: Sensor model ID
+    - data: Dictionary mapping dimension IDs to values
+    
+    Validates API key and prevents duplicate measurements (same device, time, sensor_model).
+    Creates Measurement records and associated Values for each dimension.
+    Updates station's last_update timestamp.
+    """
     serializer_class = StationDataSerializer 
     def post(self, request, *args, **kwargs):
         # Parse the incoming JSON data
