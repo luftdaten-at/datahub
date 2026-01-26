@@ -266,11 +266,13 @@ class WorkshopImportDataViewTests(TestCase):
         self.client.login(username='testuser', password='testpass123')
         url = reverse('workshop-import-data', kwargs={'workshop_id': self.workshop.pk})
         
-        # Create data with timestamp outside workshop timeframe
+        # Create data with timestamp outside workshop timeframe (with 30-day buffer)
+        # Workshop end_date is timezone.now() + 1 day, so with 30-day buffer = 31 days total
+        # Use 35 days to be clearly outside the buffer
         data = self.valid_json_data.copy()
         data['data'] = [
             {
-                "timestamp": (timezone.now() + timedelta(days=10)).strftime("%Y-%m-%dT%H:%M:%S.%f"),  # Outside timeframe
+                "timestamp": (timezone.now() + timedelta(days=35)).strftime("%Y-%m-%dT%H:%M:%S.%f"),  # Outside timeframe (35 > 31)
                 "location": {
                     "coordinates": [16.3654834, 48.1769523],
                     "precision": 14.666999816894531
