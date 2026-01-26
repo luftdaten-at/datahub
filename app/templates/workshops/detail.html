@@ -95,6 +95,10 @@
                 {% endif %}
                 <a href="{% url 'workshop-image-upload' workshop.pk %}" class="btn btn-outline-primary">{% trans "Upload Images" %}</a>
                 <a href="{% url 'workshop-import-data' workshop.pk %}" class="btn btn-outline-primary">{% trans "Import Data" %}</a>
+                <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-outline-primary">
+                    <i class="bi bi-download me-1"></i>
+                    {% trans "Download CSV" %}
+                </a>
             {% endif %}
         </span>
     </div>
@@ -128,9 +132,13 @@
         {% trans "No data available for this workshop. You can import data using the 'Import Data' button." %}
     </div>
 
-    <div id="chart-area">
-        <h4 id="chart-header"></h4>
-        <canvas id="chartCanvas"></canvas>
+    <div class="card mb-3">
+        <div class="card-body">
+            <div id="chart-area">
+                <h4 id="chart-header"></h4>
+                <canvas id="chartCanvas"></canvas>
+            </div>
+        </div>
     </div>
     <div id="chart-controls" class="btn-toolbar mt-2 mb-4" role="toolbar" aria-label="{% trans 'Chart-options' %}">
         <div class="btn-group me-2" role="group" aria-label="{% trans 'Skalierung wählen' %}">
@@ -149,12 +157,6 @@
             </button>
         </div>
     </div>
-
-    <h4>{% trans "Download" %}</h4>
-    <a href="{% url 'workshop_export_csv' workshop.pk %}" class="btn btn-primary btn-sm">
-        <i class="bi bi-download me-1"></i>
-        {% trans "CSV" %}
-    </a>
 </div>
 
 
