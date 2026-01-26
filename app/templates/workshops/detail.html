@@ -459,6 +459,9 @@
         if (Object.keys(deviceCounts).length > 0) {
             device_h4.textContent = devicesLabel;
             
+            // Check if there's only one device
+            const isSingleDevice = Object.keys(deviceCounts).length === 1;
+            
             // Initialize selectedDevices with all devices if empty (first time)
             if (selectedDevices.size === 0) {
                 for (const device in deviceCounts) {
@@ -479,26 +482,38 @@
                 checkbox.style.width = "30px";
                 checkbox.style.marginRight = "8px";
                 
-                // Add event listener
-                checkbox.addEventListener("change", function() {
-                    if (this.checked) {
-                        selectedDevices.add(device);
-                    } else {
-                        selectedDevices.delete(device);
-                    }
-                    // Refresh the map with current dimension selection
-                    const select = document.querySelector('.form-select');
-                    if (select) {
-                        addMarkerLayer(select.value);
-                        drawChart(select.value);
-                    }
-                });
+                // If only one device, disable and grey out the checkbox
+                if (isSingleDevice) {
+                    checkbox.disabled = true;
+                    checkbox.style.opacity = "0.5";
+                    checkbox.style.cursor = "not-allowed";
+                } else {
+                    // Add event listener only if not single device
+                    checkbox.addEventListener("change", function() {
+                        if (this.checked) {
+                            selectedDevices.add(device);
+                        } else {
+                            selectedDevices.delete(device);
+                        }
+                        // Refresh the map with current dimension selection
+                        const select = document.querySelector('.form-select');
+                        if (select) {
+                            addMarkerLayer(select.value);
+                            drawChart(select.value);
+                        }
+                    });
+                }
                 
                 // Create label
                 const label = document.createElement("label");
                 label.htmlFor = checkbox.id;
                 label.textContent = `${device}: ${deviceCounts[device]} ${measurementsLabel}`;
-                label.style.cursor = "pointer";
+                if (isSingleDevice) {
+                    label.style.cursor = "not-allowed";
+                    label.style.opacity = "1";
+                } else {
+                    label.style.cursor = "pointer";
+                }
                 
                 li.appendChild(checkbox);
                 li.appendChild(label);
