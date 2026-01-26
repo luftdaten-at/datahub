@@ -1,6 +1,7 @@
 import requests
 import json
 from django.shortcuts import render
+from django.conf import settings
 from django.core.cache import cache
 from main.enums import OutputFormat, Precision, Order, SensorModel, Dimension
 from requests.exceptions import HTTPError, RequestException
