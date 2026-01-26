@@ -1134,10 +1134,10 @@ msgid "Data Collection Period"
 msgstr ""
 
 #: templates/devices/data.html:59
-#, fuzzy
+#: templates/workshops/detail.html:118
 #| msgid " My Measurements"
 msgid "Measurements"
-msgstr "Meine Messwerte"
+msgstr "Messungen"
 
 #: templates/devices/data.html:60
 #, fuzzy
