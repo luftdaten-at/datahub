@@ -59,7 +59,7 @@
             </div>
         </div>
         {% endif %}
-        <div class="card mt-2">
+        <div id="device-box" class="card mt-2" style="display: none;">
             <div class="card-body">
                 <h5 class="card-title" id="device-list-header"></h5>
                 <ul id="device-list" class="list-unstyled mb-0" style="font-size: 0.9rem;"></ul>
@@ -382,13 +382,17 @@
             // Check if no data is available
             const noDataInfo = document.getElementById('no-data-info');
             const chartBox = document.getElementById('chart-box');
+            const deviceBox = document.getElementById('device-box');
             if (!points || points.length === 0) {
                 if (noDataInfo) {
                     noDataInfo.style.display = 'block';
                 }
-                // Hide chart box if no data
+                // Hide chart box and device box if no data
                 if (chartBox) {
                     chartBox.style.display = 'none';
+                }
+                if (deviceBox) {
+                    deviceBox.style.display = 'none';
                 }
                 updateStatistics();
                 return;
@@ -396,9 +400,12 @@
                 if (noDataInfo) {
                     noDataInfo.style.display = 'none';
                 }
-                // Show chart box if data exists
+                // Show chart box and device box if data exists
                 if (chartBox) {
                     chartBox.style.display = 'block';
+                }
+                if (deviceBox) {
+                    deviceBox.style.display = 'block';
                 }
             }
 
