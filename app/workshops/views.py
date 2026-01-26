@@ -48,7 +48,7 @@ class WorkshopListView(ListView):
         upcoming_qs = Workshop.objects.filter(
             end_date__gt=timezone.now(), public=True
         ).order_by('-end_date')
-        paginator_upcoming = Paginator(upcoming_qs, 10)
+        paginator_upcoming = Paginator(upcoming_qs, 9)
         page_upcoming = self.request.GET.get('page_upcoming')
         try:
             upcoming_page = paginator_upcoming.page(page_upcoming)
@@ -62,7 +62,7 @@ class WorkshopListView(ListView):
         past_qs = Workshop.objects.filter(
             end_date__lte=timezone.now(), public=True
         ).order_by('-end_date')
-        paginator_past = Paginator(past_qs, 10)
+        paginator_past = Paginator(past_qs, 9)
         page_past = self.request.GET.get('page_past')
         try:
             past_page = paginator_past.page(page_past)
