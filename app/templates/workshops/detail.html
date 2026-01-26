@@ -132,29 +132,29 @@
         {% trans "No data available for this workshop. You can import data using the 'Import Data' button." %}
     </div>
 
-    <div class="card mb-3">
+    <div id="chart-box" class="card mb-3" style="display: none;">
         <div class="card-body">
             <div id="chart-area">
                 <h4 id="chart-header"></h4>
                 <canvas id="chartCanvas"></canvas>
             </div>
-        </div>
-    </div>
-    <div id="chart-controls" class="btn-toolbar mt-2 mb-4" role="toolbar" aria-label="{% trans 'Chart-options' %}">
-        <div class="btn-group me-2" role="group" aria-label="{% trans 'Skalierung wählen' %}">
-            <button id="toggleScaleBtn" type="button" class="btn btn-outline-secondary btn-sm">
-                {% trans "Logarithmic scale" %}
-            </button>
-        </div>
-        <div class="btn-group" role="group" aria-label="{% trans 'Glättung wählen' %}">
-            <button id="toggleAvgBtn" type="button" class="btn btn-outline-secondary btn-sm">
-                {% trans "Add moving average" %}
-            </button>
-        </div>
-        <div class="btn-group ms-2" role="group" aria-label="{% trans 'Hide outliers (95% confidence interval)' %}">
-            <button id="toggleCIBtn" type="button" class="btn btn-outline-secondary btn-sm">
-                {% trans "Hide outliers (95% confidence interval)" %}
-            </button>
+            <div id="chart-controls" class="btn-toolbar mt-2" role="toolbar" aria-label="{% trans 'Chart-options' %}">
+                <div class="btn-group me-2" role="group" aria-label="{% trans 'Skalierung wählen' %}">
+                    <button id="toggleScaleBtn" type="button" class="btn btn-outline-secondary btn-sm">
+                        {% trans "Logarithmic scale" %}
+                    </button>
+                </div>
+                <div class="btn-group" role="group" aria-label="{% trans 'Glättung wählen' %}">
+                    <button id="toggleAvgBtn" type="button" class="btn btn-outline-secondary btn-sm">
+                        {% trans "Add moving average" %}
+                    </button>
+                </div>
+                <div class="btn-group ms-2" role="group" aria-label="{% trans 'Hide outliers (95% confidence interval)' %}">
+                    <button id="toggleCIBtn" type="button" class="btn btn-outline-secondary btn-sm">
+                        {% trans "Hide outliers (95% confidence interval)" %}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -376,14 +376,14 @@
 
             // Check if no data is available
             const noDataInfo = document.getElementById('no-data-info');
+            const chartBox = document.getElementById('chart-box');
             if (!points || points.length === 0) {
                 if (noDataInfo) {
                     noDataInfo.style.display = 'block';
                 }
-                // Hide chart area if no data
-                const chartArea = document.getElementById('chart-area');
-                if (chartArea) {
-                    chartArea.style.display = 'none';
+                // Hide chart box if no data
+                if (chartBox) {
+                    chartBox.style.display = 'none';
                 }
                 updateStatistics();
                 return;
@@ -391,10 +391,9 @@
                 if (noDataInfo) {
                     noDataInfo.style.display = 'none';
                 }
-                // Show chart area if data exists
-                const chartArea = document.getElementById('chart-area');
-                if (chartArea) {
-                    chartArea.style.display = 'block';
+                // Show chart box if data exists
+                if (chartBox) {
+                    chartBox.style.display = 'block';
                 }
             }
 
