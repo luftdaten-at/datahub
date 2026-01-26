@@ -15,6 +15,7 @@ class Workshop(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     public = models.BooleanField(default=True)
+    heat_hotspots_enabled = models.BooleanField(default=False)
     mapbox_top_left_lat = models.FloatField(null=True, blank=True)
     mapbox_top_left_lon = models.FloatField(null=True, blank=True)
     mapbox_top_right_lat = models.FloatField(null=True, blank=True)

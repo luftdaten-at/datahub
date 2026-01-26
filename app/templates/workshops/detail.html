@@ -47,16 +47,18 @@
                 <span id="legend-method" style="font-size: 0.8rem;"></span>
             </div>
         </div>
+        {% if workshop.heat_hotspots_enabled %}
         <div class="card mt-2">
             <div class="card-body">
                 <h5 class="card-title">{% trans "Layers" %}</h5>
                     <input class="form-check-input" id="hotspots" type="checkbox" id="layerToggle" style="width: 30px" checked>
-                    Hotspots
+                    {% trans "Hotspots" %}
                     <br>
                     <input class="form-check-input" id="coolspots" type="checkbox" id="layerToggle" style="width: 30px" checked>
-                    Coolspots
+                    {% trans "Coolspots" %}
             </div>
         </div>
+        {% endif %}
         <div class="card mt-2">
             <div class="card-body">
                 <h5 class="card-title" id="device-list-header"></h5>
@@ -87,7 +89,7 @@
         <h2>{{ workshop.title }}</h2>
         <span>
             {% if is_owner or is_admin %}
-                <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-outline-primary">{% trans "Edit" %}</a>
+                <a href="{% url 'workshop-update' workshop.pk %}" class="btn btn-outline-primary">{% trans "Settings" %}</a>
                 {% if not workshop.public %}
                 <a href="{% url 'workshop-management' workshop.pk %}" class="btn btn-outline-primary">{% trans "Access" %}</a>
                 {% endif %}
@@ -839,6 +841,7 @@ document.getElementById('toggleScaleBtn').addEventListener('click', toggleScale)
 document.getElementById('toggleAvgBtn').addEventListener('click', toggleRollingAvg);
 document.getElementById('toggleCIBtn').addEventListener('click', toggleCI);
 
+{% if workshop.heat_hotspots_enabled %}
 var drawControl;
 
 let selectedCircleType = "cool"; // Default type
@@ -867,7 +870,9 @@ function toggleDraw(type) {
         map.addControl(drawControl);
     }
 }
+{% endif %}
 
+{% if workshop.heat_hotspots_enabled %}
 var drawControlButton = L.control({ position: 'topleft' });
 
 drawControlButton.onAdd = function(map) {
@@ -894,6 +899,7 @@ drawControlButton.onAdd = function(map) {
 };
 
 drawControlButton.addTo(map);
+{% endif %}
 
 document.addEventListener("click", function(e) {
     if (e.target.closest("#toggleCoolDrawBtn")) {
@@ -903,6 +909,7 @@ document.addEventListener("click", function(e) {
     }
 });
 
+{% if workshop.heat_hotspots_enabled %}
 map.on('draw:created', function (e) {
     var type = e.layerType;
     var layer = e.layer;
@@ -916,7 +923,9 @@ map.on('draw:created', function (e) {
         handleCircle(center, radius);
     }
 });
+{% endif %}
 
+{% if workshop.heat_hotspots_enabled %}
 async function handleCircle(center, radius) {
     console.log('Circle drawn with center:', center, 'and radius:', radius, 'Type:', selectedCircleType);
     let data = JSON.stringify({
@@ -936,7 +945,9 @@ async function handleCircle(center, radius) {
     });
     updateCircles();
 }
+{% endif %}
 
+{% if workshop.heat_hotspots_enabled %}
 let circleLayerGroupHot = L.layerGroup().addTo(map);
 let circleLayerGroupCool = L.layerGroup().addTo(map);
 
@@ -1019,6 +1030,7 @@ async function removeCircle(workshop_spot) {
 }
 
 updateCircles();
+{% endif %}
 
 // Example usage:
 // updateCircles([
