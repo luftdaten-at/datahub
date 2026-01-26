@@ -10,8 +10,8 @@ class AirQualityDataTests(TestCase):
         self.client = APIClient()
 
         # Create initial objects required for the test
-        self.device = Device.objects.create(name="B040")
-        self.workshop = Workshop.objects.create(id="i7847g", title="Test Workshop",start_date="2019-01-01T00:00:00+00:00", end_date="2019-01-01T00:00:00+00:00")
+        self.device = Device.objects.create(id="B040")
+        self.workshop = Workshop.objects.create(name="i7847g", title="Test Workshop",start_date="2019-01-01T00:00:00+00:00", end_date="2019-01-01T00:00:00+00:00")
 
         self.valid_payload = [{
             "time": "2019-01-01T00:00:00+00:00",

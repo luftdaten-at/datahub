@@ -13,10 +13,14 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 from environs import Env
 import os
+import sys
 
 # Environs setup
 env = Env()
 env.read_env()
+
+# Check if we're running tests
+TESTING = 'test' in sys.argv or 'pytest' in sys.argv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -57,7 +61,8 @@ INTERNAL_IPS = [
 ]
 
 DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG
+    'SHOW_TOOLBAR_CALLBACK': lambda request: DEBUG,
+    'IS_RUNNING_TESTS': TESTING
 }
 
 # Application definition
@@ -82,7 +87,6 @@ INSTALLED_APPS = [
     'drf_spectacular_sidecar',
     'oauth2_provider',
     'auditlog',
-    'debug_toolbar',
     # Local
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
@@ -96,13 +100,14 @@ INSTALLED_APPS = [
     'log_viewer_custom.apps.LogViewerCustomConfig'
 ]
 
+# Only add debug_toolbar when not running tests
+if not TESTING:
+    INSTALLED_APPS.insert(INSTALLED_APPS.index('auditlog') + 1, 'debug_toolbar')
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -111,6 +116,10 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'auditlog.middleware.AuditlogMiddleware',  # Tracks the actor
 ]
+
+# Only add debug_toolbar middleware when not running tests
+if not TESTING:
+    MIDDLEWARE.insert(MIDDLEWARE.index('django.middleware.common.CommonMiddleware') + 1, 'debug_toolbar.middleware.DebugToolbarMiddleware')
 
 ROOT_URLCONF = 'main.urls'
 

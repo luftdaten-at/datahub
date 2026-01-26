@@ -118,7 +118,11 @@ class AirQualityDataAddView(APIView):
         errors = []
         for record in data:
             try:
-                mac = record.get('device').upper()
+                device_str = record.get('device')
+                if not device_str:
+                    errors.append({'error': 'Device field is required'})
+                    continue
+                mac = device_str.upper()
                 rmac = ''.join(reversed([mac[i:i+2] for i in range(0, len(mac), 2)]))
 
                 device_id = f'{rmac}AAA'
@@ -199,15 +203,25 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         return Response(serializer.data)
         '''
 
+        # Get the workshop object by name (pk is the workshop name)
+        try:
+            workshop_obj = Workshop.objects.get(name=pk)
+        except Workshop.DoesNotExist:
+            return JsonResponse({'error': 'Workshop not found'}, status=404)
+
         aqr_reverse = {v: k for k, v in enums.AQR_DIMENSION_MAP.items()}
-        measurements = Measurement.objects.filter(workshop = pk).all()
+        measurements = Measurement.objects.filter(workshop=workshop_obj).all()
 
         ret = []
+        
+        # Debug: Log counts
+        logger.info(f"Workshop {pk}: Found {measurements.count()} measurements, {AirQualityRecord.objects.filter(workshop=workshop_obj).count()} AirQualityRecords")
 
         for measurement in measurements:
             values = {v.dimension: v.value for v in measurement.values.all()}
 
             if measurement.participant is None or measurement.mode is None:
+                logger.debug(f"Skipping measurement {measurement.id}: participant={measurement.participant}, mode={measurement.mode}")
                 continue
         
             data = {
@@ -234,15 +248,29 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             
             ret.append(data)
         
-        for record in AirQualityRecord.objects.filter(workshop = pk):
+        air_quality_records = AirQualityRecord.objects.filter(workshop=workshop_obj)
+        logger.info(f"Workshop {pk}: Processing {air_quality_records.count()} AirQualityRecords")
+        
+        for record in air_quality_records:
+            # Skip records without participant or mode (similar to Measurement filtering)
+            # But log them for debugging
+            if record.participant is None:
+                logger.warning(f"AirQualityRecord {record.id} has no participant")
+            if record.mode is None:
+                logger.warning(f"AirQualityRecord {record.id} has no mode")
+            if record.participant is None or record.mode is None:
+                # Still skip but log the issue
+                logger.info(f"Skipping AirQualityRecord {record.id}: participant={record.participant}, mode={record.mode}, device={record.device}, time={record.time}")
+                continue
+                
             data = {
-                "time": record.time,
-                "device": record.device.id,  # or another unique identifier
-                "participant": record.participant.name,
-                "mode": record.mode.name,  # assumes user has a mode field
+                "time": record.time.isoformat() if hasattr(record.time, 'isoformat') else str(record.time),
+                "device": record.device.id if record.device else None,
+                "participant": record.participant.name if record.participant else None,
+                "mode": record.mode.name if record.mode else None,
                 "lat": record.lat,
                 "lon": record.lon,
-                "display_name": record.device.device_name if record.device.device_name is not None else record.device.id,
+                "display_name": record.device.device_name if record.device and record.device.device_name else (record.device.id if record.device else None),
                 'pm1': record.pm1,
                 'pm25': record.pm25,
                 'pm10': record.pm10,

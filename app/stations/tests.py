@@ -68,8 +68,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_success(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test successful StationListView with all data fetched"""
         # Setup cache miss
@@ -155,8 +155,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_cache_hit(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test StationListView when cache hit occurs"""
         # Setup cache hit
@@ -209,7 +209,7 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
+    @patch('django.core.cache.cache.get')
     def test_station_list_view_api_error_handling(self, mock_cache_get, mock_requests_get, mock_render):
         """Test StationListView error handling when API calls fail"""
         # Setup cache miss
@@ -233,8 +233,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_json_parsing(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test JSON parsing logic for /station/all endpoint"""
         # Setup cache miss
@@ -318,8 +318,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_active_stations(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test active stations statistics from /statistics endpoint"""
         # Setup cache miss
@@ -366,8 +366,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_dimension_data_structure(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test that dimension data has correct structure for all PM types"""
         # Setup cache miss
@@ -418,7 +418,7 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
+    @patch('django.core.cache.cache.get')
     def test_station_list_view_invalid_json_data(self, mock_cache_get, mock_requests_get, mock_render):
         """Test handling of invalid JSON data"""
         # Setup cache miss
@@ -491,8 +491,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_cache_timeout(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test that cache is set with correct timeout"""
         # Setup cache miss
@@ -536,8 +536,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_json_missing_location(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test JSON parsing with missing location data"""
         # Setup cache miss
@@ -599,7 +599,7 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
+    @patch('django.core.cache.cache.get')
     def test_station_list_view_statistics_error(self, mock_cache_get, mock_requests_get, mock_render):
         """Test handling of statistics endpoint errors"""
         # Setup cache miss
@@ -644,8 +644,8 @@ class StationListViewTests(TestCase):
     
     @patch('stations.views.render')
     @patch('stations.views.requests.get')
-    @patch('stations.views.cache.get')
-    @patch('stations.views.cache.set')
+    @patch('django.core.cache.cache.get')
+    @patch('django.core.cache.cache.set')
     def test_station_list_view_json_non_list_structure(self, mock_cache_set, mock_cache_get, mock_requests_get, mock_render):
         """Test handling of non-list JSON structure"""
         # Setup cache miss
