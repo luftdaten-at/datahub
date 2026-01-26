@@ -1,99 +1,13 @@
 import requests
 import json
-from datetime import datetime, timedelta, timezone
-from collections import defaultdict
 from django.shortcuts import render
-from django.http import Http404
-from django.conf import settings
 from django.core.cache import cache
 from main.enums import OutputFormat, Precision, Order, SensorModel, Dimension
 from requests.exceptions import HTTPError, RequestException
 
 def StationDetailView(request, pk):
-    # Beispiel API-URL, die von der Station-ID abhängt
-    api_url = f"{settings.API_URL}/station/current?station_ids={pk}&last_active=3600&output_format=geojson"
-    params = {
-        'station_ids': pk,
-        'last_active': 3600,
-        'output_format': 'geojson',
-    }
-    try:
-        response = requests.get(api_url, params=params)
-        response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
-        station_data = response.json()  # Daten im JSON-Format
-
-        # Überprüfen, ob "features" vorhanden und nicht leer sind
-        if station_data.get('features'):
-            feature = station_data['features'][0]  # Da nur eine Station erwartet wird
-            properties = feature.get('properties', {})
-            geometry = feature.get('geometry', {})
-            
-            # Extrahieren der relevanten Informationen
-            station_info = {
-                'id': properties.get('device'),
-                'time': properties.get('time'),
-                'height': properties.get('height'),
-                'coordinates': geometry.get('coordinates'),
-                'sensors': [],
-            }
-            current_time = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
-            time_minus_48h = current_time - timedelta(hours=47)
-            formatted_current_time = current_time.isoformat(timespec='minutes')
-            formatted_time_minus_48h = time_minus_48h.isoformat(timespec='minutes')
-            # api query
-            api_sensor_data_48h = f"{settings.API_URL}/station/historical"
-            params = {
-                'station_ids': pk,
-                'output_format': OutputFormat.JSON.value,
-                'precision': Precision.HOURLY.value,
-                'start': formatted_time_minus_48h,
-                'end': formatted_current_time,
-            }
-            response = requests.get(api_sensor_data_48h, params=params)
-            response.raise_for_status()
-            data_48h = response.json()
-            dim_hour_val = defaultdict(lambda: [0 for _ in range(48)])
-            for data_hour in data_48h:
-                hour = datetime.fromisoformat(data_hour["time_measured"])
-                hour = hour.replace(tzinfo=timezone.utc)
-
-                for dim_val in data_hour["values"]:
-                    dim = dim_val["dimension"]
-                    val = dim_val["value"]
-                    # Calculate hour index and ensure it's within bounds [0, 47]
-                    hour_index = int((hour - time_minus_48h).total_seconds() // 3600)
-                    if 0 <= hour_index < 48:
-                        dim_hour_val[str(dim)][hour_index] = val
-                    else:
-                        # Log out-of-range data for debugging
-                        print(f"Warning: Hour index {hour_index} out of range [0, 47] for station {pk}, hour: {hour}, time_minus_48h: {time_minus_48h}")
-
-            dims_for_display = [2, 3, 5, 6, 7]
-            for dim in dims_for_display:
-                dim = str(dim)
-                if dim not in dim_hour_val:
-                    dim_hour_val[dim] = 'false' 
-            station_info["data_48h"] = dim_hour_val
-
-            # build sensor info
-            api_url = f"{settings.API_URL}/station/info"
-            params = {
-                'station_id': pk,
-            }
-            response = requests.get(api_url, params=params)
-            response.raise_for_status()  # Prüft, ob die Anfrage erfolgreich war
-            info = response.json()  # Daten im JSON-Format
-            sensors = [SensorModel.get_sensor_name(v['type']) for _, v in info['sensors'].items()]
-        else:
-            raise Http404(f"Station mit ID {pk} nicht gefunden.")
-
-    except requests.exceptions.HTTPError as err:
-        raise Http404(f"Station mit ID {pk} nicht gefunden: {err}")
-    except requests.exceptions.RequestException as e:
-        return render(request, 'stations/error.html', {'error': str(e)})
-
-    # Render die Daten im Template
-    return render(request, 'stations/detail.html', {'station': station_info, 'sensors' : sensors})
+    # Only pass the station ID to the template - API calls are now in JavaScript
+    return render(request, 'stations/detail.html', {'station_id': pk})
 
 def StationListView(request):
     """

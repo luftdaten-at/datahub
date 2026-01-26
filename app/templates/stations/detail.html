@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{{ station.id }}{% endblock title %}
+{% block title %}{{ station_id }}{% endblock title %}
 
 {% block styles %}
 <!-- Leaflet CSS -->
@@ -18,76 +18,140 @@
 {% block content %}
 <div class="row">
   <div class="col-lg-12">
-    <h2 class="mt-5">{% trans "Station" %} {{ station.id }}</h2>
+    <h2 class="mt-5">{% trans "Station" %} <span id="station-id">{{ station_id }}</span></h2>
     
   </div>
 </div>
 
 <div class="row">
-  <!-- Linke Spalte: Chart.js Diagramme -->
-  <div class="col-lg-6 col-md-12">
-    <h3>{% trans "48-hour overview (1-hour average)" %}</h3>
+  <!-- Main Column: Data Visualizations -->
+  <div class="col-lg-8 col-md-12">
+    <div class="mb-4 mt-3">
+      <h3 class="mb-2" style="font-weight: 600; color: #333;">{% trans "48-hour overview (1-hour average)" %}</h3>
+      <p class="text-muted small mb-0">{% trans "Hourly averaged measurements from the past 48 hours" %}</p>
+    </div>
+    <div id="loading-message" class="alert alert-info mb-4">
+      {% trans "Loading data..." %}
+    </div>
 
-    {% if station.data_48h.2|length > 0 %}
-    <div id="chart-pm1-div" class="mb-4">
-      <h5>{% trans "Particulate Matter (PM1)" %}</h5>
-      <canvas id="chart-pm1" style="height: 100px;"></canvas>
+    <div id="chart-pm1-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM1)" %}</h5>
+        <canvas id="chart-pm1" style="height: 100px;"></canvas>
+      </div>
     </div>
-    {% endif %}
     
-    {% if station.data_48h.3|length > 0 %}
-    <div id="chart-pm25-div" class="mb-4">
-      <h5>{% trans "Particulate Matter (PM2.5)" %}</h5>
-      <canvas id="chart-pm25" style="height: 100px;"></canvas>
+    <div id="chart-pm25-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM2.5)" %}</h5>
+        <canvas id="chart-pm25" style="height: 100px;"></canvas>
+      </div>
     </div>
-    {% endif %}
 
-    {% if station.data_48h.5|length > 0 %}
-    <div id="chart-pm10-div" class="mb-4">
-      <h5>{% trans "Particulate Matter (PM10)" %}</h5>
-      <canvas id="chart-pm10" style="height: 100px;"></canvas>
+    <div id="chart-pm10-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM10)" %}</h5>
+        <canvas id="chart-pm10" style="height: 100px;"></canvas>
+      </div>
     </div>
-    {% endif %}
     
-    {% if station.data_48h.7|length > 0 %}
-    <div id="chart-temperature-div" class="mb-4">
-      <h5>{% trans "Temperature (°C)" %}</h5>
-      <canvas id="chart-temperature" class="chart-height"></canvas>
+    <div id="chart-temperature-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Temperature (°C)" %}</h5>
+        <canvas id="chart-temperature" class="chart-height"></canvas>
+      </div>
     </div>
-    {% endif %}
     
-    {% if station.data_48h.6|length > 0 %}
-    <div id="chart-humidity-div" class="mb-4">
-      <h5>{% trans "Humidity (%)" %}</h5>
-      <canvas id="chart-humidity" class="chart-height"></canvas>
+    <div id="chart-humidity-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Humidity (%)" %}</h5>
+        <canvas id="chart-humidity" class="chart-height"></canvas>
+      </div>
     </div>
-    {% endif %}
 
-</div>
-    
-  <!-- Rechte Spalte: Leaflet-Karte -->
-  <div class="col-lg-6 col-md-12 mb-4">
-    <h3>{% trans "Surroundings" %}</h3>
-    <div id="map" style="width: 100%; height: 400px;"></div>
-    <div class="mt-3">
-        <h3 class="mt-3">{% trans "Connected Sensors" %}</h3>
-        <ul>
-          {% for sensor in sensors %}
-            <li>{{ sensor }}</li>
-          {% endfor %}
-        </ul>
-        <h3 class="mt-3">{% trans "Download data in CSV format" %}</h3>
-        <form method="get" action="" id="dateForm" class="d-flex align-items-end gap-3 mb-2">
-          <div class="form-group mr-3">
-            <label for="startDate" class="mr-2">{% trans "Start date:" %}</label>
-            <input type="date" class="form-control" id="startDate" name="start_date" required>
+    <!-- Air Quality Index Legend -->
+    <div id="aqi-legend-container" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Air Quality Index" %}</h5>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <h6 class="small">PM1.0</h6>
+            <div id="legend-pm1"></div>
           </div>
-          <div class="form-group mr-3">
-            <label for="endDate" class="mr-2">{% trans "End date:" %}</label>
-            <input type="date" class="form-control" id="endDate" name="end_date" required>
+          <div class="col-md-4 mb-3">
+            <h6 class="small">PM2.5</h6>
+            <div id="legend-pm25"></div>
           </div>
-          <button type="submit" class="btn btn-primary">{% trans "Download" %}</button>
+          <div class="col-md-4 mb-3">
+            <h6 class="small">PM10.0</h6>
+            <div id="legend-pm10"></div>
+          </div>
+        </div>
+        <div class="mt-2">
+          <small class="text-muted">
+            <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a>
+          </small>
+        </div>
+      </div>
+    </div>
+  </div>
+    
+  <!-- Sidebar: Station Information -->
+  <div class="col-lg-4 col-md-12">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Station Information" %}</h5>
+        <p class="card-text mb-2">
+          <strong>{% trans "Station ID" %}:</strong><br>
+          <span id="station-id-display">{{ station_id }}</span>
+        </p>
+        <p class="card-text mb-2" id="station-time-display" style="display: none;">
+          <strong>{% trans "Last Update" %}:</strong><br>
+          <span id="station-time"></span>
+        </p>
+        <p class="card-text mb-0" id="station-height-display" style="display: none;">
+          <strong>{% trans "Height" %}:</strong><br>
+          <span id="station-height"></span> m
+        </p>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Location" %}</h5>
+        <div id="map" style="width: 100%; height: 300px; border-radius: 0.375rem;"></div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Connected Sensors" %}</h5>
+        <div id="sensors-list" class="d-flex flex-wrap gap-2">
+          <div class="card" style="min-width: 120px;">
+            <div class="card-body p-2">
+              <p class="card-text mb-0" style="font-size: 0.9rem;">{% trans "Loading..." %}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Download Data" %}</h5>
+        <p class="card-text small text-muted mb-3">{% trans "Download data in CSV format" %}</p>
+        <form method="get" action="" id="dateForm">
+          <div class="mb-2">
+            <label for="startDate" class="form-label small">{% trans "Start date:" %}</label>
+            <input type="date" class="form-control form-control-sm" id="startDate" name="start_date" required>
+          </div>
+          <div class="mb-3">
+            <label for="endDate" class="form-label small">{% trans "End date:" %}</label>
+            <input type="date" class="form-control form-control-sm" id="endDate" name="end_date" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm w-100">{% trans "Download CSV" %}</button>
         </form>
+      </div>
     </div>
   </div>
 </div>
@@ -95,53 +159,37 @@
 
 <!-- JavaScript-Code zur Initialisierung der Karte und Diagramme -->
 <script>
-// Initialisierung der Leaflet-Karte
-var map = L.map('map').setView([{{ station.coordinates.1|stringformat:"f" }}, {{ station.coordinates.0|stringformat:"f" }}], 13);
+const API_URL = "{{ API_URL }}";
+const STATION_ID = "{{ station_id }}";
+
+// Initialize map with default view (will be updated when data loads)
+var map = L.map('map').setView([48.2082, 16.3738], 13); // Default to Vienna
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
-// Marker hinzufügen
-L.marker([{{ station.coordinates.1|stringformat:"f" }}, {{ station.coordinates.0|stringformat:"f" }}]).addTo(map)
-  .bindPopup('Station {{ station.id }}')
-  .openPopup();
+var marker = null;
+var stationCoordinates = null;
 
+// Generate labels for 48 hours
 var labels = [];
-var now = new Date(); // Aktuelle Zeit
-
-
+var now = new Date();
 for (var i = 48; i > 0; i--) {
-  var pastTime = new Date(now.getTime() - i * 60 * 60 * 1000); // Subtrahiere i Stunden
-
-  var day = pastTime.getDate().toString().padStart(2, '0'); // Tag
-  var month = (pastTime.getMonth() + 1).toString().padStart(2, '0'); // Monat
-  var hours = pastTime.getHours().toString().padStart(2, '0'); // Stunden
-
-  var formattedLabel = `${day}.${month}. ${hours}:00`; // Format TT.MM. HH
+  var pastTime = new Date(now.getTime() - i * 60 * 60 * 1000);
+  var day = pastTime.getDate().toString().padStart(2, '0');
+  var month = (pastTime.getMonth() + 1).toString().padStart(2, '0');
+  var hours = pastTime.getHours().toString().padStart(2, '0');
+  var formattedLabel = `${day}.${month}. ${hours}:00`;
   labels.push(formattedLabel);
 }
 
-
-var dataPM25 = [];
-var dataPM10 = [];
-var dataPM1 = [];
-var dataTemperature = [];
-var dataHumidity = [];
-
-dataPM25 = {{ station.data_48h.3 }};
-dataPM10 = {{ station.data_48h.5 }};
-dataPM1 = {{ station.data_48h.2 }};
-dataTemperature = {{ station.data_48h.7 }};
-dataHumidity = {{ station.data_48h.6 }}
-
-
-// Gemeinsame Optionen für alle Diagramme
+// Common chart options
 var commonOptions = {
   responsive: true,
   aspectRatio: 3,
   plugins: {
     legend: {
-      display: false // Legende ausblenden
+      display: false
     }
   },
   scales: {
@@ -165,17 +213,107 @@ var commonOptions = {
       beginAtZero: true,
       title: {
         display: true,
-        text: '' // Wird individuell gesetzt
+        text: ''
       }
     }
   }
 };
 
-// Funktion zum Erstellen eines Diagramms
-function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
-  var options = JSON.parse(JSON.stringify(commonOptions)); // Kopie der gemeinsamen Optionen
+// European Air Quality Index color steps for PM
+const colorStepsPM1 = [
+  [0,    [80, 240, 230],  "Good"],
+  [10,   [80, 204, 170],  "Fair"],
+  [20,   [240, 230, 65],  "Moderate"],
+  [25,   [255, 80, 80],   "Poor"],
+  [50,   [150, 0, 50],    "Very poor"],
+  [75,   [125, 33, 129],  "Extremely poor"]
+];
+const colorStepsPM25 = [
+  [0,    [80, 240, 230],  "Good"],
+  [10,   [80, 204, 170],  "Fair"],
+  [20,   [240, 230, 65],  "Moderate"],
+  [25,   [255, 80, 80],   "Poor"],
+  [50,   [150, 0, 50],    "Very poor"],
+  [75,   [125, 33, 129],  "Extremely poor"]
+];
+const colorStepsPM10 = [
+  [0,    [80, 240, 230],  "Good"],
+  [20,   [80, 204, 170],  "Fair"],
+  [40,   [240, 230, 65],  "Moderate"],
+  [50,   [255, 80, 80],   "Poor"],
+  [100,  [150, 0, 50],    "Very poor"],
+  [150,  [125, 33, 129],  "Extremely poor"]
+];
+
+// Get color for PM value based on European AQI
+function getColorForPM(value, colorSteps) {
+  if (isNaN(value) || value === null || value === undefined) {
+    return [128, 128, 128]; // Gray for invalid values
+  }
+  for (let i = 0; i < colorSteps.length - 1; i++) {
+    if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
+      return colorSteps[i][1];
+    }
+  }
+  return colorSteps[colorSteps.length - 1][1];
+}
+
+// Create legend for European Air Quality Index
+function createLegend(legendId, colorSteps) {
+  const legendDiv = document.getElementById(legendId);
+  if (!legendDiv) return;
+  
+  legendDiv.innerHTML = '';
+  
+  for (let i = 0; i < colorSteps.length; i++) {
+    const from = colorSteps[i][0];
+    const to = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
+    const rgb = colorSteps[i][1];
+    const description = colorSteps[i][2];
+    
+    const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+    
+    const item = document.createElement('div');
+    item.style.display = 'flex';
+    item.style.flexDirection = 'row';
+    item.style.alignItems = 'center';
+    item.style.marginBottom = '4px';
+    
+    const colorBox = document.createElement('span');
+    colorBox.style.background = colorString;
+    colorBox.style.width = '18px';
+    colorBox.style.height = '18px';
+    colorBox.style.display = 'inline-block';
+    colorBox.style.marginRight = '8px';
+    colorBox.style.border = '1px solid #ccc';
+    colorBox.style.borderRadius = '50%';
+    
+    const labelText = document.createElement('span');
+    labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
+    labelText.style.fontSize = '0.8rem';
+    
+    item.appendChild(colorBox);
+    item.appendChild(labelText);
+    legendDiv.appendChild(item);
+  }
+}
+
+// Function to create a bar chart with European AQI colors
+function createPMChart(ctx, label, data, yAxisLabel, colorSteps) {
+  var options = JSON.parse(JSON.stringify(commonOptions));
   options.scales.y.title.text = yAxisLabel;
-  new Chart(ctx, {
+  
+  // Create color arrays based on data values
+  var backgroundColor = data.map(function(val) {
+    var rgb = getColorForPM(val, colorSteps);
+    return 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.5)';
+  });
+  var borderColor = data.map(function(val) {
+    var rgb = getColorForPM(val, colorSteps);
+    return 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 1)';
+  });
+  
+  return new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
@@ -193,92 +331,306 @@ function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor)
   });
 }
 
-// Diagramme erstellen
-console.log(dataPM25);
-if(dataPM25 != false){
-  createChart(
-    document.getElementById('chart-pm25').getContext('2d'),
-    'PM2.5 (µg/m³)',
-    dataPM25,
-    'Konzentration (µg/m³)',
-    'rgba(54, 162, 235, 0.5)',
-    'rgba(54, 162, 235, 1)'
-  );
-}else{
-  document.getElementById('chart-pm25-div').remove();
+// Function to create a bar chart (for non-PM charts)
+function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
+  var options = JSON.parse(JSON.stringify(commonOptions));
+  options.scales.y.title.text = yAxisLabel;
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        borderWidth: 0,
+        barPercentage: 1.0,
+        categoryPercentage: 1.0
+      }]
+    },
+    options: options
+  });
 }
 
-if(dataPM10 != false){
-  createChart(
-    document.getElementById('chart-pm10').getContext('2d'),
-    'PM10 (µg/m³)',
-    dataPM10,
-    'Konzentration (µg/m³)',
-    'rgba(255, 99, 132, 0.5)',
-    'rgba(255, 99, 132, 1)'
-  );
-}else{
-  document.getElementById('chart-pm10-div').remove();
+// Function to create a line chart
+function createLineChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
+  var options = JSON.parse(JSON.stringify(commonOptions));
+  options.scales.y.title.text = yAxisLabel;
+  options.scales.y.beginAtZero = false;
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: backgroundColor,
+        borderColor: borderColor,
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        spanGaps: true // Draw lines across null values to connect data points
+      }]
+    },
+    options: options
+  });
 }
 
-if(dataPM1 != false){
-  createChart(
-    document.getElementById('chart-pm1').getContext('2d'),
-    'PM1 (µg/m³)',
-    dataPM1,
-    'Konzentration (µg/m³)',
-    'rgba(75, 192, 192, 0.5)',
-    'rgba(75, 192, 192, 1)'
-  );
-}else{
-  document.getElementById('chart-pm1-div').remove();
+// Process 48h data similar to Python view
+function process48hData(data48h, timeMinus48h) {
+  var dimHourVal = {};
+  var dimsForDisplay = ['2', '3', '5', '6', '7']; // PM1, PM2.5, PM10, Humidity, Temperature
+  var lineChartDims = ['6', '7']; // Humidity and Temperature use line charts - use null for missing values
+  
+  // Initialize all dimensions
+  dimsForDisplay.forEach(function(dim) {
+    // Use null for line charts (so Chart.js skips missing points), 0 for bar charts
+    var initialValue = lineChartDims.includes(dim) ? null : 0;
+    dimHourVal[dim] = new Array(48).fill(initialValue);
+  });
+  
+  // Process each hour of data
+  data48h.forEach(function(dataHour) {
+    var hour = new Date(dataHour.time_measured);
+    var hourIndex = Math.floor((hour - timeMinus48h) / (1000 * 60 * 60));
+    
+    if (hourIndex >= 0 && hourIndex < 48) {
+      dataHour.values.forEach(function(dimVal) {
+        var dim = String(dimVal.dimension);
+        if (dimsForDisplay.includes(dim)) {
+          dimHourVal[dim][hourIndex] = dimVal.value;
+        }
+      });
+    }
+  });
+  
+  // Mark dimensions with no data as false
+  dimsForDisplay.forEach(function(dim) {
+    var hasData = dimHourVal[dim].some(function(val) { 
+      return val !== null && val !== 0; 
+    });
+    if (!hasData) {
+      dimHourVal[dim] = false;
+    }
+  });
+  
+  return dimHourVal;
 }
 
-if(dataTemperature != false){
-  createChart(
-    document.getElementById('chart-temperature').getContext('2d'),
-    'Temperatur (°C)',
-    dataTemperature,
-    'Temperatur (°C)',
-    'rgba(255, 159, 64, 0.5)',
-    'rgba(255, 159, 64, 1)'
-  );
-}else{
-  document.getElementById('chart-temperature-div').remove();
+// Fetch station data
+async function loadStationData() {
+  try {
+    // Fetch current station info
+    const currentUrl = `${API_URL}/station/current?station_ids=${STATION_ID}&last_active=3600&output_format=geojson`;
+    const currentResponse = await fetch(currentUrl);
+    
+    if (!currentResponse.ok) {
+      throw new Error('Failed to fetch station data');
+    }
+    
+    const stationData = await currentResponse.json();
+    
+    if (!stationData.features || stationData.features.length === 0) {
+      throw new Error('Station not found');
+    }
+    
+    const feature = stationData.features[0];
+    const properties = feature.properties || {};
+    const geometry = feature.geometry || {};
+    const coordinates = geometry.coordinates || [];
+    
+    // Update station ID display in header
+    document.getElementById('station-id').textContent = properties.device || STATION_ID;
+    
+    // Update sidebar station information
+    document.getElementById('station-id-display').textContent = properties.device || STATION_ID;
+    
+    if (properties.time) {
+      const timeDisplay = document.getElementById('station-time-display');
+      const timeElement = document.getElementById('station-time');
+      const timeDate = new Date(properties.time);
+      timeElement.textContent = timeDate.toLocaleString();
+      timeDisplay.style.display = 'block';
+    }
+    
+    if (properties.height !== undefined && properties.height !== null) {
+      const heightDisplay = document.getElementById('station-height-display');
+      const heightElement = document.getElementById('station-height');
+      heightElement.textContent = properties.height;
+      heightDisplay.style.display = 'block';
+    }
+    
+    // Update map
+    if (coordinates.length >= 2) {
+      stationCoordinates = [coordinates[1], coordinates[0]]; // [lat, lon]
+      map.setView(stationCoordinates, 13);
+      
+      if (marker) {
+        map.removeLayer(marker);
+      }
+      marker = L.marker(stationCoordinates).addTo(map)
+        .bindPopup('Station ' + (properties.device || STATION_ID))
+        .openPopup();
+    }
+    
+    // Fetch 48h historical data
+    const now = new Date();
+    const currentTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
+    const timeMinus48h = new Date(currentTime.getTime() - 47 * 60 * 60 * 1000);
+    
+    // Format dates as ISO 8601 without seconds (YYYY-MM-DDTHH:MM)
+    const startTime = timeMinus48h.toISOString().slice(0, 16);
+    const endTime = currentTime.toISOString().slice(0, 16);
+    
+    // Use "hour" not "hourly" for precision (matches Precision.HOURLY.value)
+    const historicalUrl = `${API_URL}/station/historical?station_ids=${STATION_ID}&output_format=json&precision=hour&start=${startTime}&end=${endTime}`;
+    console.log('Fetching historical data from:', historicalUrl);
+    
+    const historicalResponse = await fetch(historicalUrl);
+    
+    if (!historicalResponse.ok) {
+      const errorText = await historicalResponse.text();
+      console.error('Historical data fetch failed:', historicalResponse.status, errorText);
+      throw new Error(`Failed to fetch historical data: ${historicalResponse.status} ${errorText}`);
+    }
+    
+    const data48h = await historicalResponse.json();
+    console.log('Received historical data:', data48h.length, 'records');
+    const dimHourVal = process48hData(data48h, timeMinus48h);
+    
+    // Fetch sensor info
+    const infoUrl = `${API_URL}/station/info?station_id=${STATION_ID}`;
+    const infoResponse = await fetch(infoUrl);
+    
+    let sensors = [];
+    if (infoResponse.ok) {
+      const info = await infoResponse.json();
+      if (info.sensors) {
+        sensors = Object.values(info.sensors).map(function(sensor) {
+          // Use SensorModel enum to get the correct sensor name
+          if (sensor.type && !isNaN(Number(sensor.type))) {
+            return SensorModel.getSensorName(Number(sensor.type));
+          }
+          return 'Sensor ' + (sensor.type || 'Unknown');
+        });
+      }
+    }
+    
+    // Update sensors list
+    const sensorsList = document.getElementById('sensors-list');
+    if (sensors.length > 0) {
+      sensorsList.innerHTML = sensors.map(function(sensor) {
+        return '<div class="card" style="min-width: 120px;">' +
+               '<div class="card-body p-2">' +
+               '<p class="card-text mb-0" style="font-size: 0.9rem; font-weight: bold;">' + sensor + '</p>' +
+               '</div>' +
+               '</div>';
+      }).join('');
+    } else {
+      sensorsList.innerHTML = '<div class="card" style="min-width: 120px;">' +
+                               '<div class="card-body p-2">' +
+                               '<p class="card-text mb-0" style="font-size: 0.9rem;">{% trans "No sensors found" %}</p>' +
+                               '</div>' +
+                               '</div>';
+    }
+    
+    // Create charts with European AQI colors
+    var hasPMCharts = false;
+    
+    if (dimHourVal['3'] !== false) {
+      document.getElementById('chart-pm25-div').style.display = 'block';
+      createPMChart(
+        document.getElementById('chart-pm25').getContext('2d'),
+        'PM2.5 (µg/m³)',
+        dimHourVal['3'],
+        'Konzentration (µg/m³)',
+        colorStepsPM25
+      );
+      hasPMCharts = true;
+    }
+    
+    if (dimHourVal['5'] !== false) {
+      document.getElementById('chart-pm10-div').style.display = 'block';
+      createPMChart(
+        document.getElementById('chart-pm10').getContext('2d'),
+        'PM10 (µg/m³)',
+        dimHourVal['5'],
+        'Konzentration (µg/m³)',
+        colorStepsPM10
+      );
+      hasPMCharts = true;
+    }
+    
+    if (dimHourVal['2'] !== false) {
+      document.getElementById('chart-pm1-div').style.display = 'block';
+      createPMChart(
+        document.getElementById('chart-pm1').getContext('2d'),
+        'PM1 (µg/m³)',
+        dimHourVal['2'],
+        'Konzentration (µg/m³)',
+        colorStepsPM1
+      );
+      hasPMCharts = true;
+    }
+    
+    // Show and create legend if any PM charts are displayed
+    if (hasPMCharts) {
+      document.getElementById('aqi-legend-container').style.display = 'block';
+      createLegend('legend-pm1', colorStepsPM1);
+      createLegend('legend-pm25', colorStepsPM25);
+      createLegend('legend-pm10', colorStepsPM10);
+    }
+    
+    if (dimHourVal['7'] !== false) {
+      document.getElementById('chart-temperature-div').style.display = 'block';
+      createLineChart(
+        document.getElementById('chart-temperature').getContext('2d'),
+        'Temperatur (°C)',
+        dimHourVal['7'],
+        'Temperatur (°C)',
+        'rgba(255, 99, 132, 0.5)',
+        'rgba(255, 99, 132, 1)'
+      );
+    }
+    
+    if (dimHourVal['6'] !== false) {
+      document.getElementById('chart-humidity-div').style.display = 'block';
+      createLineChart(
+        document.getElementById('chart-humidity').getContext('2d'),
+        'Luftfeuchtigkeit (%)',
+        dimHourVal['6'],
+        'Relative Luftfeuchtigkeit (%)',
+        'rgba(54, 162, 235, 0.5)',
+        'rgba(54, 162, 235, 1)'
+      );
+    }
+    
+    // Hide loading message
+    document.getElementById('loading-message').style.display = 'none';
+    
+  } catch (error) {
+    console.error('Error loading station data:', error);
+    const errorMsg = error.message || 'Unknown error';
+    document.getElementById('loading-message').innerHTML = 
+      '{% trans "Error loading data" %}: ' + errorMsg + '<br><small>{% trans "Please try again later." %}</small>';
+    document.getElementById('loading-message').className = 'alert alert-danger';
+  }
 }
 
-if(dataHumidity != false){
-  createChart(
-    document.getElementById('chart-humidity').getContext('2d'),
-    'Luftfeuchtigkeit (%)',
-    dataHumidity,
-    'Relative Luftfeuchtigkeit (%)',
-    'rgba(153, 102, 255, 0.5)',
-    'rgba(153, 102, 255, 1)'
-  );
-}else{
-  document.getElementById('chart-humidity-div').remove();
-}
-// messwerte herunterladen
+// Download form handler
 document.getElementById("dateForm").addEventListener("submit", function(event) {
-    // Prevent the form from submitting normally
-    event.preventDefault();
-
-    // Extract the station ID from the current URL (e.g., /stations/34106)
-    const pathname = window.location.pathname;
-
-    // Get the values from the form fields
-    const startDate = document.getElementById("startDate").value;
-    const endDate = document.getElementById("endDate").value;
-
-    const stationId = window.location.pathname.split("/").filter(i => i).pop();
-    // Build the URL with the query parameters
-    const api_url = "{{API_URL}}";
-    const url = `${api_url}/station/historical?station_ids=${stationId}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
-
-    // Redirect the browser to the constructed URL
-    window.location.href = url;
+  event.preventDefault();
+  const startDate = document.getElementById("startDate").value;
+  const endDate = document.getElementById("endDate").value;
+  const url = `${API_URL}/station/historical?station_ids=${STATION_ID}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
+  window.location.href = url;
 });
+
+// Load data when page loads
+loadStationData();
 
 </script>
 {% endblock content %}
