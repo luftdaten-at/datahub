@@ -1797,6 +1797,12 @@ msgstr "Laden Sie eine JSON-Datei im Luftdaten.at JSON Trip Format hoch."
 msgid "Import air quality data from a JSON file in the Luftdaten.at JSON Trip format."
 msgstr "Importieren Sie Luftqualitätsdaten aus einer JSON-Datei im Luftdaten.at JSON Trip Format."
 
+msgid "Heat Hotspots Enabled"
+msgstr "Heat Hotspots aktiviert"
+
+msgid "Enable heat hotspots and coolspots functionality on the workshop map. This allows users to draw and visualize hot and cool areas."
+msgstr "Aktivieren Sie die Heat Hotspots- und Coolspots-Funktionalität auf der Workshop-Karte. Dies ermöglicht es Benutzern, heiße und kühle Bereiche zu zeichnen und zu visualisieren."
+
 #: templates/workshops/detail.html:88
 msgid "Chart-options"
 msgstr "Diagramm Optionen"
