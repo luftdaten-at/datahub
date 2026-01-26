@@ -102,6 +102,27 @@
     <p>Von {{ workshop.start_date }} bis {{ workshop.end_date }}</p>
     <p>Code: {{ workshop.name }}</p>
 
+    <div class="d-flex flex-wrap gap-2 mb-3" id="workshop-statistics">
+        <div class="card" style="min-width: 120px;">
+            <div class="card-body p-2">
+                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.75rem;">{% trans "Devices" %}</h6>
+                <p class="card-text mb-0" style="font-size: 1.1rem; font-weight: bold;" id="stat-devices">-</p>
+            </div>
+        </div>
+        <div class="card" style="min-width: 120px;">
+            <div class="card-body p-2">
+                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.75rem;">{% trans "Measurements" %}</h6>
+                <p class="card-text mb-0" style="font-size: 1.1rem; font-weight: bold;" id="stat-measurements">-</p>
+            </div>
+        </div>
+        <div class="card" style="min-width: 120px;">
+            <div class="card-body p-2">
+                <h6 class="card-subtitle mb-1 text-muted" style="font-size: 0.75rem;">{% trans "Dimensions" %}</h6>
+                <p class="card-text mb-0" style="font-size: 0.9rem;" id="stat-dimensions">-</p>
+            </div>
+        </div>
+    </div>
+
     <div id="no-data-info" class="alert alert-info mt-4" style="display: none;">
         <i class="bi bi-info-circle me-2"></i>
         {% trans "No data available for this workshop. You can import data using the 'Import Data' button." %}
@@ -362,6 +383,7 @@
                 if (chartArea) {
                     chartArea.style.display = 'none';
                 }
+                updateStatistics();
                 return;
             } else {
                 if (noDataInfo) {
@@ -396,6 +418,7 @@
             showDeviceList();
             fitMapToAllPoints();
             drawChart(defaultPmTypeIndex);
+            updateStatistics();
         } catch (error) {
             console.error('Error fetching marker data:', error);
         } finally {
@@ -404,6 +427,59 @@
                 loadingIndicator.style.display = 'none';
             }
         }
+    }
+
+    function updateStatistics() {
+        if (!points || points.length === 0) {
+            document.getElementById('stat-devices').textContent = '0';
+            document.getElementById('stat-measurements').textContent = '0';
+            document.getElementById('stat-dimensions').textContent = '-';
+            return;
+        }
+
+        // Calculate number of unique devices
+        const uniqueDevices = new Set();
+        points.forEach(point => {
+            if (point.display_name) {
+                uniqueDevices.add(point.display_name);
+            } else if (point.device) {
+                uniqueDevices.add(point.device);
+            }
+        });
+        const numDevices = uniqueDevices.size;
+
+        // Total measurements is just the number of points
+        const totalMeasurements = points.length;
+
+        // Calculate dimensions from available fields
+        const dimensionMap = {
+            'pm1': 'PM1.0',
+            'pm25': 'PM2.5',
+            'pm10': 'PM10.0',
+            'temperature': 'Temperature',
+            'humidity': 'Humidity',
+            'voc': 'VOC Index',
+            'nox': 'NOx Index',
+            'pressure': 'Pressure',
+            'co2': 'CO2',
+            'o3': 'Ozone (O3)'
+        };
+        
+        const availableDimensions = new Set();
+        points.forEach(point => {
+            for (const [field, name] of Object.entries(dimensionMap)) {
+                if (point[field] !== null && point[field] !== undefined) {
+                    availableDimensions.add(name);
+                }
+            }
+        });
+        
+        const dimensionNames = Array.from(availableDimensions).sort();
+
+        // Update the display
+        document.getElementById('stat-devices').textContent = numDevices;
+        document.getElementById('stat-measurements').textContent = totalMeasurements;
+        document.getElementById('stat-dimensions').textContent = dimensionNames.length > 0 ? dimensionNames.join(', ') : '-';
     }
 
     fetchMarkerData();
