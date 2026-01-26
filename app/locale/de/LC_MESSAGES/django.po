@@ -1454,8 +1454,17 @@ msgstr ""
 
 #: templates/log_viewer_custom/logs.html:124
 #: templates/log_viewer_custom/logs.html:141
+#: templates/workshops/detail.html:72
 msgid "Loading..."
-msgstr ""
+msgstr "Lädt..."
+
+#: templates/workshops/detail.html:73
+msgid "Loading data..."
+msgstr "Daten werden geladen..."
+
+#: templates/workshops/detail.html:104
+msgid "No data available for this workshop. You can import data using the 'Import Data' button."
+msgstr "Keine Daten für diesen Workshop verfügbar. Sie können Daten über die Schaltfläche 'Daten importieren' importieren."
 
 #: templates/log_viewer_custom/logs.html:132
 #, fuzzy
