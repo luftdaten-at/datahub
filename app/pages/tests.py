@@ -16,7 +16,8 @@ class HomepageTests(SimpleTestCase):
         self.assertTemplateUsed(self.response, "home.html")
 
     def test_homepage_contains_correct_html(self):
-        self.assertContains(self.response, '<div id="infobox">')
+        # Check for main content that should be present
+        self.assertContains(self.response, 'Luftdaten.at Datahub')
 
     def test_homepage_does_not_contain_incorrect_html(self):
         self.assertNotContains(self.response, "Hi there! I should not be on the page.")

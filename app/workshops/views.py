@@ -1,6 +1,8 @@
 import csv
+import json
 import logging
 import os
+from datetime import datetime, timedelta
 
 from django.utils import timezone
 from django.views import View
@@ -14,17 +16,19 @@ from django.http import HttpResponse, Http404
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q
+from django.utils.dateparse import parse_datetime
 
 from zoneinfo import ZoneInfo
-from .models import Workshop, WorkshopInvitation
-from .forms import WorkshopForm, FileFieldForm
+from .models import Workshop, WorkshopInvitation, Participant
+from .forms import WorkshopForm, FileFieldForm, ImportDataForm
 from accounts.models import CustomUser
-from api.models import AirQualityRecord
+from api.models import AirQualityRecord, MobilityMode
+from devices.models import Device
 from main import settings
 from main.util import workshop_add_image
 
@@ -312,3 +316,198 @@ class WorkshopImageUploadView(FormView):
                 return self.form_invalid(form)
 
         return super().form_valid(form)
+
+
+class WorkshopImportDataView(LoginRequiredMixin, FormView):
+    form_class = ImportDataForm
+    template_name = 'workshops/import_data.html'
+
+    def get_success_url(self):
+        return reverse_lazy('workshop-detail', kwargs={'pk': self.kwargs['workshop_id']})
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        workshop = get_object_or_404(Workshop, pk=self.kwargs['workshop_id'])
+        
+        # Check permissions
+        if not self.request.user.is_superuser and self.request.user != workshop.owner:
+            raise PermissionDenied("You don't have permission to import data for this workshop.")
+        
+        context['workshop'] = workshop
+        context['workshop_id'] = self.kwargs['workshop_id']
+        return context
+
+    def form_valid(self, form):
+        workshop = get_object_or_404(Workshop, pk=self.kwargs['workshop_id'])
+        
+        # Check permissions
+        if not self.request.user.is_superuser and self.request.user != workshop.owner:
+            raise PermissionDenied("You don't have permission to import data for this workshop.")
+        
+        json_file = form.cleaned_data['json_file']
+        
+        try:
+            # Read and parse JSON file
+            file_content = json_file.read().decode('utf-8')
+            data = json.loads(file_content)
+            
+            # Validate JSON structure
+            if 'version' not in data or 'device' not in data or 'data' not in data:
+                messages.error(self.request, 'Invalid JSON format. Expected version, device, and data fields.')
+                return self.form_invalid(form)
+            
+            # Extract device information
+            device_info = data.get('device', {})
+            chip_id = device_info.get('chipId', {})
+            mac = chip_id.get('mac', '')
+            four_letter_code = device_info.get('fourLetterCode', '')
+            display_name = device_info.get('displayName', '')
+            
+            # Create or get device
+            # Convert MAC address format: "28372F821AE5" -> reverse byte pairs -> "AAA" suffix
+            if mac:
+                mac_upper = mac.upper()
+                # Reverse byte pairs: "28372F821AE5" -> ["28", "37", "2F", "82", "1A", "E5"] -> reversed -> join
+                rmac = ''.join(reversed([mac_upper[i:i+2] for i in range(0, len(mac_upper), 2)]))
+                device_id = f'{rmac}AAA'
+            else:
+                # Fallback: use four letter code if MAC is not available
+                device_id = f'{four_letter_code}AAA' if four_letter_code else 'UNKNOWN'
+            
+            device, _ = Device.objects.get_or_create(id=device_id)
+            if display_name and not device.device_name:
+                device.device_name = display_name
+                device.save()
+            
+            # Create or get participant (using display name or device name)
+            participant_name = display_name or device.device_name or device_id
+            participant, _ = Participant.objects.get_or_create(
+                name=participant_name,
+                defaults={'workshop': workshop}
+            )
+            if participant.workshop != workshop:
+                participant.workshop = workshop
+                participant.save()
+            
+            # Process data points
+            data_points = data.get('data', [])
+            created_count = 0
+            skipped_count = 0
+            error_count = 0
+            errors = []
+            
+            for point in data_points:
+                try:
+                    # Parse timestamp
+                    timestamp_str = point.get('timestamp')
+                    if not timestamp_str:
+                        skipped_count += 1
+                        continue
+                    
+                    # Parse datetime (handle microseconds and timezones)
+                    try:
+                        time = parse_datetime(timestamp_str)
+                        if time is None:
+                            # Try parsing with different format
+                            if timestamp_str.endswith('Z'):
+                                timestamp_str = timestamp_str.replace('Z', '+00:00')
+                            time = datetime.fromisoformat(timestamp_str)
+                        
+                        # Ensure timezone awareness
+                        if time.tzinfo is None:
+                            time = timezone.make_aware(time)
+                    except (ValueError, AttributeError, TypeError) as e:
+                        errors.append(f"Invalid timestamp format: {timestamp_str}")
+                        error_count += 1
+                        continue
+                    
+                    # Check if time is within workshop timeframe
+                    # Allow a 30-day buffer before start and after end to accommodate data collection
+                    # This is more lenient for imports since users are explicitly choosing to import the data
+                    buffer_before = timedelta(days=30)
+                    buffer_after = timedelta(days=30)
+                    if not ((workshop.start_date - buffer_before) <= time <= (workshop.end_date + buffer_after)):
+                        skipped_count += 1
+                        logger.warning(f"Record timestamp {time} is outside workshop timeframe (with buffer: {workshop.start_date - buffer_before} to {workshop.end_date + buffer_after})")
+                        continue
+                    
+                    # Extract location
+                    location_data = point.get('location', {})
+                    coordinates = location_data.get('coordinates', [])
+                    if len(coordinates) != 2:
+                        skipped_count += 1
+                        continue
+                    
+                    lon, lat = coordinates[0], coordinates[1]
+                    location_precision = location_data.get('precision')
+                    
+                    # Extract sensor data
+                    sensor_data_list = point.get('sensorData', [])
+                    if not sensor_data_list:
+                        skipped_count += 1
+                        continue
+                    
+                    # Get first sensor data entry (usually only one)
+                    sensor_data = sensor_data_list[0] if sensor_data_list else {}
+                    
+                    # Extract mobility mode
+                    mode_name = point.get('mode', 'unknown')
+                    mode, _ = MobilityMode.objects.get_or_create(
+                        name=mode_name,
+                        defaults={'title': mode_name.title(), 'description': ''}
+                    )
+                    
+                    # Check if record already exists
+                    if AirQualityRecord.objects.filter(time=time, device=device).exists():
+                        skipped_count += 1
+                        continue
+                    
+                    # Map sensor data fields to AirQualityRecord fields
+                    # JSON uses: PM1.0, PM2.5, PM4.0, PM10.0, Luftfeuchtigkeit, Temperatur, VOCs
+                    # Model uses: pm1, pm25, pm10, humidity, temperature, voc
+                    record_data = {
+                        'time': time,
+                        'pm1': sensor_data.get('PM1.0'),
+                        'pm25': sensor_data.get('PM2.5'),
+                        'pm10': sensor_data.get('PM10.0'),
+                        'humidity': sensor_data.get('Luftfeuchtigkeit'),
+                        'temperature': sensor_data.get('Temperatur'),
+                        'voc': sensor_data.get('VOCs'),
+                        'device': device,
+                        'workshop': workshop,
+                        'participant': participant,
+                        'mode': mode,
+                        'lat': lat,
+                        'lon': lon,
+                        'location_precision': location_precision,
+                    }
+                    
+                    # Create AirQualityRecord
+                    record = AirQualityRecord(**record_data)
+                    record.save()
+                    created_count += 1
+                    
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f"Error processing data point: {str(e)}")
+                    logger.error(f"Error importing data point: {str(e)}", exc_info=True)
+            
+            # Show success/error messages
+            if created_count > 0:
+                messages.success(self.request, f'Successfully imported {created_count} records.')
+            if skipped_count > 0:
+                messages.warning(self.request, f'Skipped {skipped_count} records (duplicates or outside workshop timeframe).')
+            if error_count > 0:
+                messages.error(self.request, f'Encountered {error_count} errors during import.')
+                if errors:
+                    logger.error(f"Import errors: {errors}")
+            
+            return super().form_valid(form)
+            
+        except json.JSONDecodeError as e:
+            messages.error(self.request, f'Invalid JSON file: {str(e)}')
+            return self.form_invalid(form)
+        except Exception as e:
+            messages.error(self.request, f'Error processing file: {str(e)}')
+            logger.error(f"Error importing data: {str(e)}", exc_info=True)
+            return self.form_invalid(form)

@@ -57,3 +57,10 @@ class MultipleFileField(forms.FileField):
 
 class FileFieldForm(forms.Form):
     file_field = MultipleFileField()
+
+
+class ImportDataForm(forms.Form):
+    json_file = forms.FileField(
+        label=_('JSON File'),
+        help_text=_('Upload a JSON file in the Luftdaten.at JSON Trip format.')
+    )

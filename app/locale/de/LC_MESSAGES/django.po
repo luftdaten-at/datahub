@@ -1773,6 +1773,21 @@ msgstr "Zugang"
 msgid "Upload Images"
 msgstr "Bilder hochladen"
 
+msgid "Import Data"
+msgstr "Daten importieren"
+
+msgid "Import"
+msgstr "Importieren"
+
+msgid "JSON File"
+msgstr "JSON-Datei"
+
+msgid "Upload a JSON file in the Luftdaten.at JSON Trip format."
+msgstr "Laden Sie eine JSON-Datei im Luftdaten.at JSON Trip Format hoch."
+
+msgid "Import air quality data from a JSON file in the Luftdaten.at JSON Trip format."
+msgstr "Importieren Sie Luftqualitätsdaten aus einer JSON-Datei im Luftdaten.at JSON Trip Format."
+
 #: templates/workshops/detail.html:88
 msgid "Chart-options"
 msgstr "Diagramm Optionen"

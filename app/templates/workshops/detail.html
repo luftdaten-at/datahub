@@ -75,6 +75,7 @@
                 <a href="{% url 'workshop-management' workshop.pk %}" class="btn btn-outline-primary">{% trans "Access" %}</a>
                 {% endif %}
                 <a href="{% url 'workshop-image-upload' workshop.pk %}" class="btn btn-outline-primary">{% trans "Upload Images" %}</a>
+                <a href="{% url 'workshop-import-data' workshop.pk %}" class="btn btn-outline-primary">{% trans "Import Data" %}</a>
             {% endif %}
         </span>
     </div>
