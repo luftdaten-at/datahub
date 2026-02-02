@@ -85,7 +85,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     'drf_spectacular_sidecar',
-    'oauth2_provider',
     'auditlog',
     # Local
     'accounts.apps.AccountsConfig',
@@ -264,6 +263,10 @@ CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=True)
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # API versioning: request.version is set from URL namespace (e.g. 'v1' for /api/v1/...)
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    'DEFAULT_VERSION': 'v1',
+    'ALLOWED_VERSIONS': ['v1'],
 }
 
 SPECTACULAR_SETTINGS = {
@@ -274,21 +277,6 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
     'REDOC_DIST': 'SIDECAR',
     'VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
-}
-
-# Django OAuth Toolkit settings
-OAUTH2_PROVIDER = {
-    'ACCESS_TOKEN_EXPIRE_SECONDS': 36000,  # Token expiration time
-    'SCOPES': {
-        'read': 'Read scope',
-        'write': 'Write scope',
-    },
-    'OIDC_RSA_PRIVATE_KEY': env("OIDC_RSA_PRIVATE_KEY"),
-    'ALLOWED_REDIRECT_URI_SCHEMES': {
-        "http",
-        "https",
-        "at.luftdaten.pmble"
-    },
 }
 
 # Bestimme die API-URL basierend auf der Umgebung
