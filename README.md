@@ -104,6 +104,14 @@ Development version:
     docker compose exec app python manage.py migrate
     docker compose exec app python manage.py createsuperuser
 
+If you don't have a `.env` file yet, copy it from the template: `cp project.env .env`.
+
+**Shortcut:** run manage.py via the app container with:
+
+    ./manage <command>
+
+Examples: `./manage check`, `./manage migrate`, `./manage test`.
+
 open in web browser: http://localhost
 
 Create migrations after doing changes at the data models:

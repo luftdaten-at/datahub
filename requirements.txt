@@ -16,7 +16,6 @@ django-cache-url==3.4.5
 django-crispy-forms==2.3
 django-debug-toolbar==5.0.1
 django-log-viewer==1.1.8
-django-oauth-toolkit==3.0.1
 djangorestframework==3.16.1
 drf-spectacular==0.28.0
 drf-spectacular-sidecar==2024.12.1

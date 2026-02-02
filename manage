@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Run Django manage.py inside the Docker app container.
+# Usage: ./manage check | migrate | test | ...
+# Requires: docker compose up (and .env, e.g. cp project.env .env)
+set -e
+cd "$(dirname "$0")"
+docker compose exec app python manage.py "$@"
