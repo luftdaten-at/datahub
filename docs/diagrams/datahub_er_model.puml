@@ -1,0 +1,272 @@
+@startuml datahub.luftdaten.at
+' CustomUser (Django AUTH_USER_MODEL)
+entity "CustomUser" as CustomUser {
+    + id : Integer [PK]
+    + username : String
+    + email : String
+    + password : String
+    + first_name : String
+    + last_name : String
+    + is_active : Boolean
+    + is_staff : Boolean
+    + date_joined : DateTime
+}
+
+entity "Organization" as Organization {
+    + id : Integer [PK]
+    + name : String
+    + description : Text
+    --
+    + owner_id : Integer [FK]
+}
+
+entity "OrganizationInvitation" as OrganizationInvitation {
+    + id : Integer [PK]
+    + expiring_date : Date
+    + email : String
+    + code : String [unique]
+    --
+    + organization_id : Integer [FK]
+}
+
+entity "Campaign" as Campaign {
+    + id : Integer [PK]
+    + name : String
+    + description : Text
+    + start_date : DateTime
+    + end_date : DateTime
+    + public : Boolean
+    + id_token : String
+    --
+    + owner_id : Integer [FK]
+    + organization_id : Integer [FK]
+}
+
+entity "Room" as Room {
+    + id : Integer [PK]
+    + name : String
+    --
+    + campaign_id : Integer [FK]
+}
+
+entity "Device" as Device {
+    + id : String [PK]
+    + device_name : String
+    + model : Integer
+    + firmware : String
+    + btmac_address : String
+    + last_update : DateTime
+    + notes : Text
+    + api_key : String
+    + auto_number : Integer
+    + created_at : DateTime
+    + test_mode : Boolean
+    + calibration_mode : Boolean
+    --
+    + current_room_id : Integer [FK]
+    + current_organization_id : Integer [FK]
+    + current_user_id : Integer [FK]
+    + current_campaign_id : Integer [FK]
+}
+
+entity "ModelCounter" as ModelCounter {
+    + model : Integer [PK]
+    + last_auto_number : Integer
+}
+
+entity "Sensor" as Sensor {
+    + id : Integer [PK]
+    + name : String
+    + product_type : String
+    + serial : String
+    + firmware : String
+    + hardware : String
+    + protocol : String
+}
+
+entity "DeviceStatus" as DeviceStatus {
+    + id : Integer [PK]
+    + time_received : DateTime
+    + battery_voltage : Float
+    + battery_soc : Float
+    + sensor_list : JSON
+    --
+    + device_id : String [FK]
+}
+
+entity "DeviceLogs" as DeviceLogs {
+    + id : Integer [PK]
+    + timestamp : DateTime
+    + level : Integer
+    + message : Text
+    --
+    + device_id : String [FK]
+}
+
+entity "Workshop" as Workshop {
+    + name : String [PK]
+    + title : String
+    + description : Text
+    + start_date : DateTime
+    + end_date : DateTime
+    + public : Boolean
+    + heat_hotspots_enabled : Boolean
+    + mapbox_top_left_lat : Float
+    + mapbox_top_left_lon : Float
+    + mapbox_top_right_lat : Float
+    + mapbox_top_right_lon : Float
+    + mapbox_bottom_left_lat : Float
+    + mapbox_bottom_left_lon : Float
+    + mapbox_bottom_right_lat : Float
+    + mapbox_bottom_right_lon : Float
+    --
+    + owner_id : Integer [FK]
+}
+
+entity "WorkshopInvitation" as WorkshopInvitation {
+    + id : Integer [PK]
+    + expiring_date : Date
+    + email : String
+    --
+    + workshop_id : String [FK]
+}
+
+entity "Participant" as Participant {
+    + name : String [PK]
+    --
+    + workshop_id : String [FK]
+    + device_id : String [FK]
+}
+
+entity "WorkshopImage" as WorkshopImage {
+    + id : Integer [PK]
+    + image : String
+    + time_created : DateTime
+    --
+    + workshop_id : String [FK]
+    + location_id : Integer [FK]
+}
+
+entity "WorkshopSpot" as WorkshopSpot {
+    + id : Integer [PK]
+    + center : Point
+    + radius : Float
+    + area : Polygon
+    + type : String
+    --
+    + workshop_id : String [FK]
+}
+
+entity "Location" as Location {
+    + id : Integer [PK]
+    + coordinates : Point
+    + height : Float
+}
+
+entity "MobilityMode" as MobilityMode {
+    + name : String [PK]
+    + title : String
+    + description : Text
+}
+
+entity "Measurement" as Measurement {
+    + id : Integer [PK]
+    + time_received : DateTime
+    + time_measured : DateTime
+    + sensor_model : Integer
+    --
+    + device_id : String [FK]
+    + room_id : Integer [FK]
+    + user_id : Integer [FK]
+    + workshop_id : String [FK]
+    + location_id : Integer [FK]
+    + mode_id : String [FK]
+    + participant_id : String [FK]
+}
+
+entity "Values" as Values {
+    + id : Integer [PK]
+    + dimension : Integer
+    + value : Float
+    --
+    + measurement_id : Integer [FK]
+}
+
+entity "AirQualityRecord" as AirQualityRecord {
+    + id : Integer [PK]
+    + time : DateTime
+    + pm1 : Float
+    + pm25 : Float
+    + pm10 : Float
+    + temperature : Float
+    + humidity : Float
+    + voc : Float
+    + nox : Float
+    + co2 : Float
+    + o3 : Float
+    + iaq_index : Float
+    + pressure : Float
+    + lat : Float
+    + lon : Float
+    + location_precision : Float
+    --
+    + device_id : String [FK]
+    + workshop_id : String [FK]
+    + participant_id : String [FK]
+    + location_id : Integer [FK]
+    + mode_id : String [FK]
+}
+
+' Relationships
+CustomUser ||--o{ Organization : "owned_organizations"
+CustomUser ||--o{ Campaign : "owned_campaigns"
+CustomUser ||--o{ Workshop : "owned_workshops"
+CustomUser ||--o{ Device : "current_devices"
+CustomUser ||--o{ Measurement : "measurements"
+
+Organization ||--o{ OrganizationInvitation : "invitations"
+Organization ||--o{ Campaign : "campaigns"
+Organization ||--o{ Device : "current_devices"
+Organization }o--o{ CustomUser : "users (M2M)"
+
+Campaign ||--o{ Room : "rooms"
+Campaign ||--o{ Device : "current_devices"
+Campaign }o--o| CustomUser : "owner"
+Campaign }o--o{ CustomUser : "users (M2M)"
+
+Room ||--o{ Device : "current_devices"
+Room ||--o{ Measurement : "measurements"
+
+Device ||--o{ Measurement : "records"
+Device ||--o{ DeviceStatus : "status_list"
+Device ||--o{ DeviceLogs : "logs"
+Device ||--o{ Participant : "participants"
+Device ||--o{ AirQualityRecord : "air_quality_records"
+
+Measurement ||--o{ Values : "values"
+Measurement }o--o| Room : "room"
+Measurement }o--o| CustomUser : "user"
+Measurement }o--o| Workshop : "workshop"
+Measurement }o--o| Location : "location"
+Measurement }o--o| MobilityMode : "mode"
+Measurement }o--o| Participant : "participant"
+
+Workshop ||--o{ WorkshopInvitation : "invitations"
+Workshop ||--o{ Participant : "participants"
+Workshop ||--o{ WorkshopImage : "workshop_images"
+Workshop ||--o{ WorkshopSpot : "workshop_spots"
+Workshop ||--o{ Measurement : "measurements"
+Workshop ||--o{ AirQualityRecord : "air_quality_records"
+Workshop }o--o| CustomUser : "owner"
+Workshop }o--o{ CustomUser : "users (M2M)"
+
+Location ||--o{ Measurement : "measurements"
+Location ||--o{ WorkshopImage : "workshop_images"
+Location ||--o{ AirQualityRecord : "air_quality_records"
+
+MobilityMode ||--o{ Measurement : "measurements"
+MobilityMode ||--o{ AirQualityRecord : "air_quality_records"
+
+Participant ||--o{ Measurement : "measurements"
+Participant ||--o{ AirQualityRecord : "air_quality_records"
+@enduml
