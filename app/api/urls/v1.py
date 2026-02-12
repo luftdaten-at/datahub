@@ -4,9 +4,13 @@ API v1 URL configuration.
 Names are under namespace 'v1': reverse('api:v1:workshop-detail', kwargs={'pk': ...}).
 """
 from django.urls import include, path
+from drf_spectacular.utils import extend_schema
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from api.views import (
     AirQualityDataAddView,
+    CreateDeviceDataAPIView,
+    CreateDeviceStatusAPIView,
     CreateWorkshopSpotAPIView,
     DeleteWorkshopSpotAPIView,
     GetWorkshopSpotsAPIView,
@@ -14,9 +18,19 @@ from api.views import (
     WorkshopDetailView,
 )
 
+@extend_schema(exclude=True)
+class SchemaView(SpectacularAPIView):
+    api_version = "v1"
+
+
 urlpatterns = [
-    # Devices (station data and status)
-    path("devices/", include(("api.urls.devices", "devices"), namespace="devices")),
+    # OpenAPI schema and docs (under v1 for URL path; versioning disabled for schema gen)
+    path("schema/", SchemaView.as_view(), name="schema"),
+    path("docs/", SpectacularSwaggerView.as_view(url_name="api:v1:schema"), name="swagger-ui"),
+
+    # Devices (status and data)
+    path("devices/status/", CreateDeviceStatusAPIView.as_view(), name="device-status"),
+    path("devices/data/", CreateDeviceDataAPIView.as_view(), name="device-data"),
 
     # Workshops
     path("workshops/data/add/", AirQualityDataAddView.as_view(), name="workshop-data-add"),

@@ -1,4 +1,4 @@
-"""Serializers for device/station API (status, data)."""
+"""Serializers for device API (status, data)."""
 from django.utils import timezone
 from rest_framework import serializers
 
@@ -75,7 +75,7 @@ class BatteryDataSerializer(serializers.Serializer):
     percentage = serializers.FloatField()
 
 
-class StationInfoSerializer(serializers.Serializer):
+class DeviceInfoSerializer(serializers.Serializer):
     time = serializers.DateTimeField()
     device = serializers.CharField()
     firmware = serializers.CharField()
@@ -102,7 +102,7 @@ class WorkshopContextSerializer(serializers.Serializer):
     mode = serializers.CharField()
 
 
-class StationDataSerializer(serializers.Serializer):
+class DeviceDataSerializer(serializers.Serializer):
     """Request body for POST /v1/devices/data/: device, workshop, sensors."""
 
     device = DevicePayloadSerializer()
@@ -110,12 +110,14 @@ class StationDataSerializer(serializers.Serializer):
     sensors = serializers.DictField(child=SensorDataSerializer())
 
 
-class StationStatusDataSerializer(serializers.Serializer):
+class DeviceStatusLogSerializer(serializers.Serializer):
     time = serializers.DateTimeField()
     level = serializers.IntegerField()
     message = serializers.CharField()
 
 
-class StationStatusSerializer(serializers.Serializer):
-    station_info = StationInfoSerializer()
-    status_list = serializers.ListField(child=StationStatusDataSerializer())
+class DeviceStatusRequestSerializer(serializers.Serializer):
+    """Request body for POST /v1/devices/status/: device, status_list."""
+
+    device = DeviceInfoSerializer()
+    status_list = serializers.ListField(child=DeviceStatusLogSerializer())

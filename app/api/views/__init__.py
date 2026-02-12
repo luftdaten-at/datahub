@@ -1,11 +1,13 @@
 """API views package. Re-exports all views for backward compatibility."""
 from .devices import (
-    CreateStationDataAPIView,
-    CreateStationStatusAPIView,
+    CreateDeviceDataAPIView,
+    CreateDeviceStatusAPIView,
     DeviceDetailView,
 )
 from .workshops import (
     AirQualityDataAddView,
+    LegacyAirQualityDataAddView,
+    LegacyWorkshopDetailView,
     WorkshopAirQualityDataView,
     WorkshopDetailView,
 )
@@ -17,8 +19,10 @@ from .workshop_spots import (
 
 __all__ = [
     "AirQualityDataAddView",
-    "CreateStationDataAPIView",
-    "CreateStationStatusAPIView",
+    "LegacyAirQualityDataAddView",
+    "LegacyWorkshopDetailView",
+    "CreateDeviceDataAPIView",
+    "CreateDeviceStatusAPIView",
     "CreateWorkshopSpotAPIView",
     "DeleteWorkshopSpotAPIView",
     "DeviceDetailView",

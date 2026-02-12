@@ -1,34 +1,32 @@
-# API test request for the endpoint /api/device/data/add
-# 
+# API test request for the endpoint /api/v1/devices/data
+# Request body: device, workshop, sensors (see API docs)
 
-POST http://localhost/api/device/data/add/ HTTP/1.1
+POST http://localhost/api/v1/devices/data/ HTTP/1.1
 content-type: application/json
 
-[
-  {
+{
+  "device": {
     "time": "2024-04-29T08:25:20.766Z",
-    "device": "string",
-    "lat": 0,
-    "lon": 0,
-    "location_precision": 0,
-    "mode": "string",
-    "measurements": [
-      {
-        "sensor": "string",
-        "pm1": 0,
-        "pm25": 0,
-        "pm10": 0,
-        "temperature": 0,
-        "humidity": 0,
-        "voc_index": 0,
-        "nox_index": 0,
-        "co2": 0,
-        "o3": 0,
-        "iaq_index": 0,
-        "iaq_acc": 0,
-        "iaq_static": 0,
-        "pressure": 0
+    "id": "string",
+    "firmware": "1.0",
+    "model": 1,
+    "apikey": "your-api-key"
+  },
+  "workshop": {
+    "id": "workshop-name",
+    "participant": "participant-uuid",
+    "mode": "walking"
+  },
+  "sensors": {
+    "1": {
+      "type": 1,
+      "data": {
+        "2": 5.0,
+        "3": 6.0,
+        "5": 7.0,
+        "6": 0.67,
+        "7": 20.0
       }
-    ]
+    }
   }
-]
+}
