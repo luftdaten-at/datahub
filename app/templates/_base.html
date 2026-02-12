@@ -8,11 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>
         {% block title %}
-            {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
-                {% trans "Clean air at the workplace" %}
-            {% else %}
-                {% trans "Luftdaten.at Datahub" %}
-            {% endif %}
+            {% trans "Luftdaten.at Datahub" %}
         {% endblock title %}
     </title>
     <!-- Bootstrap CSS -->
@@ -27,15 +23,9 @@
     <!-- Navigation Bar -->
     <nav class="navbar navbar-expand-md navbar-light fixed-top bg-light">
         <div class="container-fluid">
-            {% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
-                <a class="navbar-brand" href="{% url 'home' %}">
-                    {% trans "Clean air at the workplace" %}
-                </a>
-            {% else %}
-                <a class="navbar-brand" href="{% url 'home' %}">
-                    {% trans "Luftdaten.at Datahub" %}
-                </a>
-            {% endif %}
+            <a class="navbar-brand" href="{% url 'home' %}">
+                {% trans "Luftdaten.at Datahub" %}
+            </a>
             <!-- Navbar Toggler: this button appears on mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                     aria-controls="navbarCollapse" aria-expanded="false" aria-label="{% trans 'Toggle navigation' %}">
@@ -43,17 +33,15 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarCollapse">
                 <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                    {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at" %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'workshops-list' %}">{% trans "Workshops" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'stations-list' %}">{% trans "Stations" %}</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'cities-list' %}">{% trans "Cities" %}</a>
-                        </li>
-                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'workshops-list' %}">{% trans "Workshops" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'stations-list' %}">{% trans "Stations" %}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'cities-list' %}">{% trans "Cities" %}</a>
+                    </li>
                 </ul>
                 <!-- Right-side Navigation Items -->
                 <ul class="navbar-nav flex-column flex-md-row ms-auto mb-2 mb-md-0">
@@ -69,9 +57,7 @@
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{% url 'organizations-my' %}">{% trans "My Organizations" %}</a></li>
                                 <li><a class="dropdown-item" href="{% url 'campaigns-my' %}">{% trans "My Campaigns" %}</a></li>
-                                {% if host != "arbeitsplatz.luftdaten.at" or host != "staging.arbeitsplatz.luftdaten.at"  %}
                                 <li><a class="dropdown-item" href="{% url 'workshops-my' %}">{% trans "My Workshops" %}</a></li>
-                                {% endif %}
                                 {% if user.is_authenticated and user.is_superuser %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item disabled" href="">Admin</a></li>

@@ -5,8 +5,6 @@
 {% block title %}Luftdaten.at Datahub{% endblock title %}
 
 {% block styles %}
-{% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
-{% else %}
 <!-- Leaflet CSS -->
 <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
@@ -22,13 +20,10 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.css"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
 
-{% endif %}
 {% endblock styles %}
 
 
 {% block map %}
-{% if host == "arbeitsplatz.luftdaten.at" or host == "staging.arbeitsplatz.luftdaten.at" %}
-{% else %}
 <div class=".container-fluid">
     <div class="position-absolute top-0 end-0" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card">
@@ -80,7 +75,6 @@
         </div>
     </div>
 </div>
-{% endif %}
 {% endblock map %}
 
 {% block content %}
