@@ -1,28 +1,25 @@
-# API test request for the endpoint /api/device/status
+# API test request for the endpoint /api/v1/devices/status
 # 
 
-POST http://localhost/api/v1/device/status/ HTTP/1.1
+POST http://localhost/api/v1/devices/status/ HTTP/1.1
 content-type: application/json
 
-[
-  {
+{
+  "device": {
+    "time": "2025-01-07T12:00:00Z",
     "device": "00112233AABB",
+    "firmware": "1.0",
+    "model": 1,
+    "apikey": "your-api-key",
     "battery": {
-        "voltage": 3.3,
-        "percentage": 100
+      "voltage": 3.3,
+      "percentage": 100
     },
-    "sensors": [
-        {
-            "name": "sen5x",
-            "product_type": "",
-            "serial": "123456",
-            "firmware": "1.0",
-            "hardware": "1.0",
-            "protocol": "1.0"
-        },
-        {
-            "name": "bme680"
-        }
+    "sensor_list": [
+      { "model_id": 1, "dimension_list": [2, 3, 5] }
     ]
-}   
-]
+  },
+  "status_list": [
+    { "time": "2025-01-07T12:00:00Z", "level": 1, "message": "Device started" }
+  ]
+}
