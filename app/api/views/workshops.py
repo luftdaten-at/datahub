@@ -145,6 +145,26 @@ class WorkshopDetailView(RetrieveAPIView):
 
 @extend_schema(
     tags=["workshops"],
+    summary="Add air quality data",
+    description="**Legacy.** Use POST /api/v1/workshops/data/add/ instead. Adds one or more air quality records to a workshop.",
+    deprecated=True,
+)
+class LegacyAirQualityDataAddView(AirQualityDataAddView):
+    """Root-level /api/workshop/data/add/ – prefer /api/v1/workshops/data/add/."""
+
+
+@extend_schema(
+    tags=["workshops"],
+    summary="Get workshop details",
+    description="**Legacy.** Use GET /api/v1/workshops/{pk}/ instead. Retrieves detailed information about a specific workshop.",
+    deprecated=True,
+)
+class LegacyWorkshopDetailView(WorkshopDetailView):
+    """Root-level /api/workshop/detail/{pk}/ – prefer /api/v1/workshops/{pk}/."""
+
+
+@extend_schema(
+    tags=["workshops"],
     summary="Get workshop air quality data",
     description="Retrieves all air quality measurement data for a workshop. Returns data from both the Measurement model (new) and AirQualityRecord model (legacy). Records without participant or mode are excluded.",
     parameters=[

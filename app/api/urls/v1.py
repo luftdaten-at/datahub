@@ -9,6 +9,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from api.views import (
     AirQualityDataAddView,
+    CreateDeviceDataAPIView,
+    CreateDeviceStatusAPIView,
     CreateWorkshopSpotAPIView,
     DeleteWorkshopSpotAPIView,
     GetWorkshopSpotsAPIView,
@@ -26,8 +28,9 @@ urlpatterns = [
     path("schema/", SchemaView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="api:v1:schema"), name="swagger-ui"),
 
-    # Devices (station data and status)
-    path("devices/", include(("api.urls.devices", "devices"), namespace="devices")),
+    # Devices (status and data)
+    path("devices/status/", CreateDeviceStatusAPIView.as_view(), name="device-status"),
+    path("devices/data/", CreateDeviceDataAPIView.as_view(), name="device-data"),
 
     # Workshops
     path("workshops/data/add/", AirQualityDataAddView.as_view(), name="workshop-data-add"),
