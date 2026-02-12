@@ -263,20 +263,20 @@ CSRF_COOKIE_SECURE = env.bool("DJANGO_CSRF_COOKIE_SECURE", default=True)
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # API versioning: request.version is set from URL namespace (e.g. 'v1' for /api/v1/...)
-    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
-    'DEFAULT_VERSION': 'v1',
-    'ALLOWED_VERSIONS': ['v1'],
+    # Versioning disabled: NamespaceVersioning caused 404 on /api/v1/schema/
+    # API versioning can be re-enabled via per-view versioning_class if needed
+    'DEFAULT_VERSIONING_CLASS': None,
 }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Luftdaten.at Datahub API',
     'DESCRIPTION': '',
     'VERSION': '1.0.0',
-    'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
-    'SWAGGER_UI_FAVICON_HREF': 'SIDECAR',
-    'REDOC_DIST': 'SIDECAR',
-    'VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning',
+    # Use CDN so /api/docs/ works without collectstatic; use 'SIDECAR' for offline
+    'SWAGGER_UI_DIST': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0',
+    'SWAGGER_UI_FAVICON_HREF': 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.9.0/favicon-32x32.png',
+    'REDOC_DIST': 'https://cdn.jsdelivr.net/npm/redoc@latest/bundles/redoc.standalone.js',
+    'VERSIONING_CLASS': None,
 }
 
 # Bestimme die API-URL basierend auf der Umgebung
