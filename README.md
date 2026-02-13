@@ -190,4 +190,4 @@ Open API Standard 3.1
 https://datahub.luftdaten.at/api/docs
 
 ## License
-This project is licensed under GNU General Public License v3.0.
+This project is licensed under the European Union Public Licence v. 1.2 (EUPL-1.2).
