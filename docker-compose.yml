@@ -9,10 +9,10 @@ services:
     depends_on:
      - db  
   db:
-    image: postgis/postgis:17-3.5
+    image: postgis/postgis:18-3.6
     platform: linux/amd64
     volumes:
-      # - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
+      - ./db_backup/read:/docker-entrypoint-initdb.d/:ro
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - .env
