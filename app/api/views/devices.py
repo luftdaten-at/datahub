@@ -12,9 +12,11 @@ from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
+from django.contrib.gis.geos import Point
+
 from devices.models import Device, DeviceLogs, Measurement, Values
 from main.util import get_or_create_station
-from api.models import MobilityMode
+from api.models import Location, MobilityMode
 from workshops.models import Participant, Workshop
 
 from api.serializers import DeviceSerializer, DeviceDataSerializer, DeviceStatusRequestSerializer
@@ -122,7 +124,7 @@ class CreateDeviceStatusAPIView(APIView):
 @extend_schema(
     tags=["devices"],
     summary="Add device measurement data",
-    description="Adds measurement data from sensors for a device. Request body: device, workshop, sensors. Creates Measurement and Values records. Prevents duplicate measurements.",
+    description="Adds measurement data from sensors for a device. Request body: device, workshop, sensors. Optional location {lat, lon} in device block. Creates Measurement and Values records. Prevents duplicate measurements.",
     request=DeviceDataSerializer,
     responses={
         200: {"description": "Measurements created successfully, or no sensor data found"},
@@ -141,6 +143,7 @@ class CreateDeviceStatusAPIView(APIView):
                     "apikey": "your-api-key-here",
                 },
                 "workshop": {"id": "homrh8", "participant": "8133a310-ffaf-11f0-8794-bbb756d19a96", "mode": "walking"},
+                "location": {"lat": 48.1769523, "lon": 16.3654834},
                 "sensors": {
                     "1": {"type": 1, "data": {"2": 5, "3": 6, "5": 7, "6": 0.67, "7": 20, "8": 100}},
                     "2": {"type": 6, "data": {"6": 0.72, "7": 20.1}},
@@ -158,6 +161,7 @@ class CreateDeviceDataAPIView(APIView):
             device_data = request.data.get("device")
             workshop_data = request.data.get("workshop")
             sensors_data = request.data.get("sensors")
+            location_data = request.data.get("location")
 
             if not device_data:
                 raise ValidationError("'device' is required.")
@@ -187,8 +191,16 @@ class CreateDeviceDataAPIView(APIView):
             participant_obj = Participant.objects.filter(name=workshop_data["participant"]).first()
             mode_obj = MobilityMode.objects.filter(name=workshop_data["mode"]).first()
 
+            lat = location_data.get("lat") if location_data else None
+            lon = location_data.get("lon") if location_data else None
+
             try:
                 with transaction.atomic():
+                    # Create location if lat/lon provided (same as workshops/data/add)
+                    location_obj = None
+                    if lat is not None and lon is not None:
+                        point = Point(float(lon), float(lat))
+                        location_obj = Location.objects.create(coordinates=point)
                     for sensor_id, sensor_data in sensors_data.items():
                         existing_measurement = Measurement.objects.filter(
                             device=device,
@@ -212,6 +224,7 @@ class CreateDeviceDataAPIView(APIView):
                             workshop=workshop_obj,
                             participant=participant_obj,
                             mode=mode_obj,
+                            location=location_obj,
                         )
                         measurement.save()
 
