@@ -84,6 +84,13 @@ class DeviceInfoSerializer(serializers.Serializer):
     apikey = serializers.CharField()
 
 
+class LocationPayloadSerializer(serializers.Serializer):
+    """Location block with lat/lon in POST /v1/devices/data/"""
+
+    lat = serializers.FloatField()
+    lon = serializers.FloatField()
+
+
 class DevicePayloadSerializer(serializers.Serializer):
     """Device block in POST /v1/devices/data/"""
 
@@ -103,11 +110,12 @@ class WorkshopContextSerializer(serializers.Serializer):
 
 
 class DeviceDataSerializer(serializers.Serializer):
-    """Request body for POST /v1/devices/data/: device, workshop, sensors."""
+    """Request body for POST /v1/devices/data/: device, workshop, sensors, location."""
 
     device = DevicePayloadSerializer()
     workshop = WorkshopContextSerializer()
     sensors = serializers.DictField(child=SensorDataSerializer())
+    location = LocationPayloadSerializer(required=False, allow_null=True)
 
 
 class DeviceStatusLogSerializer(serializers.Serializer):
