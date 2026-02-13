@@ -10,6 +10,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "Device Data:" %} {{ device.device_name }}</h2>
         <div>
+            <a href="{% url 'device-measurements' device.pk %}" class="btn btn-primary me-2">{% trans "View All Measurements" %}</a>
             <a href="{% url 'device-detail' device.pk %}" class="btn btn-secondary">{% trans "Back to Device" %}</a>
         </div>
     </div>
@@ -19,16 +20,16 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{% trans "Total Workshops" %}</h5>
-                    <p class="card-text display-4">{{ total_workshops }}</p>
+                    <h6 class="card-title text-muted small text-uppercase mb-1">{% trans "Total Workshops" %}</h6>
+                    <p class="card-text mb-0 display-6">{{ total_workshops }}</p>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">{% trans "Total Measurements" %}</h5>
-                    <p class="card-text display-4">{{ total_measurements|intcomma }}</p>
+                    <h6 class="card-title text-muted small text-uppercase mb-1">{% trans "Total Measurements" %}</h6>
+                    <p class="card-text mb-0 display-6">{{ total_measurements|intcomma }}</p>
                 </div>
             </div>
         </div>
@@ -58,16 +59,17 @@
                                 <th>{% trans "Data Collection Period" %}</th>
                                 <th>{% trans "Measurements" %}</th>
                                 <th>{% trans "Sensors" %}</th>
-                                <th>{% trans "Dimensions" %}</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for data in workshop_data %}
                                 <tr>
                                     <td>
-                                        <strong>{{ data.workshop.name }}</strong>
+                                        <a href="{% url 'workshop-detail' data.workshop.pk %}"><strong>{{ data.workshop.name }}</strong></a>
                                     </td>
-                                    <td>{{ data.workshop.title }}</td>
+                                    <td>
+                                        <a href="{% url 'workshop-detail' data.workshop.pk %}">{{ data.workshop.title }}</a>
+                                    </td>
                                     <td>
                                         <small>
                                             {{ data.workshop.start_date|date:"Y-m-d H:i" }}<br>
@@ -97,17 +99,6 @@
                                             <ul class="list-unstyled mb-0">
                                                 {% for sensor in data.sensors %}
                                                     <li><small>{{ sensor }}</small></li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% else %}
-                                            <span class="text-muted">{% trans "None" %}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if data.dimensions %}
-                                            <ul class="list-unstyled mb-0">
-                                                {% for dimension in data.dimensions %}
-                                                    <li><small>{{ dimension }}</small></li>
                                                 {% endfor %}
                                             </ul>
                                         {% else %}
