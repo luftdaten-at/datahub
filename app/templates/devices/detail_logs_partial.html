@@ -1,0 +1,78 @@
+{% load i18n %}
+{% load humanize %}
+{% load custom_tags %}
+    {% if device_logs %}
+        <ul class="list-group mb-3">
+            {% for log in device_logs %}
+                <li class="list-group-item py-1">
+                    <small class="text-muted">{{ log.timestamp|naturaltime }}</small>
+                    {% with badge_class=level_badge_map|get:log.level %}
+                        {% if badge_class %}
+                            <span class="badge {{ badge_class }} ms-2">
+                                {% if log.level == 0 %}
+                                    <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                {% elif log.level == 1 %}
+                                    <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                {% elif log.level == 2 %}
+                                    <i class="bi bi-exclamation-triangle"></i> {{ level_map|get:log.level|capfirst }}
+                                {% elif log.level == 3 %}
+                                    <i class="bi bi-exclamation-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                {% elif log.level == 4 %}
+                                    <i class="bi bi-x-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                {% else %}
+                                    {{ level_map|get:log.level|default:_("unknown") }}
+                                {% endif %}
+                            </span>
+                        {% else %}
+                            <span class="badge bg-light text-dark ms-2">{{ level_map|get:log.level|capfirst }}</span>
+                        {% endif %}
+                    {% endwith %}
+                    <span class="ms-2">{{ log.message }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <nav aria-label="{% trans 'Log pagination' %}">
+            <ul class="pagination justify-content-center">
+                {% if device_logs.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link status-log-page-link" href="#" data-page="{{ device_logs.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&laquo;</span>
+                    </li>
+                {% endif %}
+
+                {% for num in device_logs.paginator.page_range %}
+                    {% if device_logs.number == num %}
+                        <li class="page-item active" aria-current="page">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > device_logs.number|add:'-3' and num < device_logs.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link status-log-page-link" href="#" data-page="{{ num }}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if device_logs.has_next %}
+                    <li class="page-item">
+                        <a class="page-link status-log-page-link" href="#" data-page="{{ device_logs.next_page_number }}" aria-label="{% trans 'Next' %}">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&raquo;</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            {% trans "No log updates available for this device." %}
+        </div>
+    {% endif %}

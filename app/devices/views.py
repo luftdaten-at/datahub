@@ -4,6 +4,7 @@ from collections import defaultdict
 import csv
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404
 from django.views import View
 from django.views.generic.list import ListView
@@ -18,7 +19,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
 from django.db import transaction
 
-from .models import Device, DeviceStatus, DeviceLogs, Measurement
+from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
 from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm
 from main.enums import SensorModel, Dimension
@@ -56,6 +57,16 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         # Only superusers can access this view
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
+    def render_to_response(self, context, **response_kwargs):
+        if self.request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return TemplateResponse(
+                self.request,
+                'devices/detail_logs_partial.html',
+                context,
+                **response_kwargs
+            )
+        return super().render_to_response(context, **response_kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         device = self.object
@@ -68,10 +79,13 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context['battery_status'] = device_status_qs.exists()
 
         if context['battery_status']:
-            # Prepare data for Chart.js
+            # Prepare data for Chart.js (two-line labels: date on first line, time on second)
             battery_times = [
-                status.time_received.strftime('%Y-%m-%d %H:%M') 
-                for status in device_status_qs 
+                [
+                    status.time_received.strftime('%Y-%m-%d'),
+                    status.time_received.strftime('%H:%M')
+                ]
+                for status in device_status_qs
                 if status.battery_soc is not None and status.battery_voltage is not None
             ]
             battery_charges = [
@@ -148,7 +162,14 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         # Fetch all DeviceLogs entries related to this Device, ordered by timestamp descendingly
         device_logs_qs = DeviceLogs.objects.filter(device=device).order_by('-timestamp')
-        
+
+        # Apply search filter
+        search_q = self.request.GET.get('q', '').strip()
+        if search_q:
+            device_logs_qs = device_logs_qs.filter(message__icontains=search_q)
+
+        context['status_log_search'] = search_q
+
         # Implement pagination (10 logs per page)
         paginator = Paginator(device_logs_qs, 10)
         page_number = self.request.GET.get('page')
@@ -351,6 +372,124 @@ class DeviceDataView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context['workshop_data'] = workshop_data
         context['total_measurements'] = Measurement.objects.filter(device=device).count() + AirQualityRecord.objects.filter(device=device).count()
         context['total_workshops'] = len(workshop_data)
+
+        return context
+
+
+class DeviceMeasurementsView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """View to show a paginated table of all measurements for a device."""
+    model = Device
+    context_object_name = 'device'
+    template_name = 'devices/measurements.html'
+    pk_url_kwarg = 'pk'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        device = self.object
+
+        # Parse filter params
+        filter_workshop = self.request.GET.get('workshop')
+        filter_participant = self.request.GET.get('participant')
+        filter_sensor = self.request.GET.get('sensor')
+
+        measurements_qs = (
+            Measurement.objects.filter(device=device)
+            .select_related('workshop', 'participant', 'mode')
+            .prefetch_related('values')
+            .order_by('-time_measured')
+        )
+
+        # Apply filters
+        if filter_workshop:
+            measurements_qs = measurements_qs.filter(workshop__pk=filter_workshop)
+        if filter_participant:
+            measurements_qs = measurements_qs.filter(participant__name=filter_participant)
+        filter_sensor_id = None
+        if filter_sensor:
+            try:
+                filter_sensor_id = int(filter_sensor)
+                measurements_qs = measurements_qs.filter(sensor_model=filter_sensor_id)
+            except (ValueError, TypeError):
+                pass
+
+        # Build filter options from unfiltered base
+        base_qs = Measurement.objects.filter(device=device)
+        workshops = list(
+            Workshop.objects.filter(measurements__device=device)
+            .distinct().order_by('name')
+            .values_list('pk', 'title')
+        )
+        participants = list(
+            base_qs.exclude(participant__isnull=True)
+            .values_list('participant__name', flat=True).distinct()
+        )
+        sensor_ids = list(base_qs.values_list('sensor_model', flat=True).distinct())
+        sensors = [(sid, SensorModel.get_sensor_name(sid)) for sid in sorted(sensor_ids)]
+
+        # Get dimensions (from filtered set for correct columns)
+        all_dim_ids = set(
+            Values.objects.filter(measurement__in=measurements_qs)
+            .values_list('dimension', flat=True)
+            .distinct()
+        )
+        if not all_dim_ids:
+            all_dim_ids = set(
+                Values.objects.filter(measurement__device=device)
+                .values_list('dimension', flat=True)
+                .distinct()
+            )
+        dimension_names = {d: Dimension.get_name(d) for d in all_dim_ids}
+        common_dims = [
+            Dimension.PM1_0, Dimension.PM2_5, Dimension.PM10_0,
+            Dimension.TEMPERATURE, Dimension.HUMIDITY,
+            Dimension.VOC_INDEX, Dimension.NOX_INDEX, Dimension.PRESSURE,
+            Dimension.CO2, Dimension.PM0_1, Dimension.PM4_0,
+        ]
+        dimension_columns = [d for d in common_dims if d in dimension_names] + sorted(all_dim_ids - set(common_dims))
+
+        paginator = Paginator(measurements_qs, 50)
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        measurements = page_obj.object_list
+
+        table_rows = []
+        for m in measurements:
+            values_dict = {v.dimension: (v.value, Dimension.get_unit(v.dimension)) for v in m.values.all()}
+            table_rows.append({
+                'measurement': m,
+                'values': values_dict,
+                'sensor_name': SensorModel.get_sensor_name(m.sensor_model),
+            })
+
+        # Build query string for pagination (preserve filters)
+        filter_params = []
+        if filter_workshop:
+            filter_params.append(f'workshop={filter_workshop}')
+        if filter_participant:
+            filter_params.append(f'participant={filter_participant}')
+        if filter_sensor:
+            filter_params.append(f'sensor={filter_sensor}')
+        filter_query = '&'.join(filter_params)
+
+        context['page_obj'] = page_obj
+        context['measurements'] = measurements
+        context['table_rows'] = table_rows
+        context['dimension_columns'] = dimension_columns
+        context['dimension_names'] = dimension_names
+        context['total_count'] = paginator.count
+        context['filter_workshop'] = filter_workshop
+        context['filter_participant'] = filter_participant
+        context['filter_sensor'] = filter_sensor
+        context['filter_sensor_id'] = filter_sensor_id
+        context['filter_query'] = filter_query
+        context['filter_options'] = {
+            'workshops': workshops,
+            'participants': participants,
+            'sensors': sensors,
+        }
 
         return context
 

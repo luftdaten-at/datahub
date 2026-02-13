@@ -1,0 +1,141 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+{% load custom_tags %}
+
+{% block title %}{% trans "Measurements:" %} {{ device.device_name }}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Measurements:" %} {{ device.device_name }}</h2>
+        <div>
+            <a href="{% url 'device-data' device.pk %}" class="btn btn-secondary me-2">{% trans "Back to Device Data" %}</a>
+            <a href="{% url 'device-detail' device.pk %}" class="btn btn-outline-secondary">{% trans "Back to Device" %}</a>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label for="filter-workshop" class="form-label">{% trans "Workshop" %}</label>
+            <select name="workshop" id="filter-workshop" class="form-select form-select-sm">
+                <option value="">{% trans "All" %}</option>
+                {% for pk, title in filter_options.workshops %}
+                    <option value="{{ pk }}" {% if filter_workshop == pk %}selected{% endif %}>{{ title }} ({{ pk }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="filter-participant" class="form-label">{% trans "Participant" %}</label>
+            <select name="participant" id="filter-participant" class="form-select form-select-sm">
+                <option value="">{% trans "All" %}</option>
+                {% for name in filter_options.participants %}
+                    <option value="{{ name }}" {% if filter_participant == name %}selected{% endif %}>{{ name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="filter-sensor" class="form-label">{% trans "Sensor" %}</label>
+            <select name="sensor" id="filter-sensor" class="form-select form-select-sm">
+                <option value="">{% trans "All" %}</option>
+                {% for sid, sname in filter_options.sensors %}
+                    <option value="{{ sid }}" {% if filter_sensor_id == sid %}selected{% endif %}>{{ sname }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary btn-sm me-2">{% trans "Apply" %}</button>
+            <a href="{% url 'device-measurements' device.pk %}" class="btn btn-outline-secondary btn-sm">{% trans "Reset" %}</a>
+        </div>
+    </form>
+
+    <p class="text-muted mb-3">
+        {% blocktrans count total=total_count %}{{ total }} measurement{% plural %}{{ total }} measurements{% endblocktrans %}
+    </p>
+
+    {% if table_rows %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>{% trans "Time" %}</th>
+                        <th>{% trans "Workshop" %}</th>
+                        <th>{% trans "Participant" %}</th>
+                        <th>{% trans "Mode" %}</th>
+                        <th>{% trans "Sensor" %}</th>
+                        {% for dim_id in dimension_columns %}
+                            <th>{{ dimension_names|get:dim_id|default:"—" }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in table_rows %}
+                        <tr>
+                            <td><small>{{ row.measurement.time_measured|date:"Y-m-d H:i:s" }}</small></td>
+                            <td>
+                                {% if row.measurement.workshop %}
+                                    <a href="{% url 'workshop-detail' row.measurement.workshop.pk %}">{{ row.measurement.workshop.name }}</a>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ row.measurement.participant.name|default:"—" }}</td>
+                            <td>{{ row.measurement.mode.name|default:"—" }}</td>
+                            <td><small>{{ row.sensor_name }}</small></td>
+                            {% for dim_id in dimension_columns %}
+                                <td>
+                                    {% with val=row.values|get:dim_id %}
+                                        {% if val %}
+                                            {{ val.0|floatformat:2 }} <small class="text-muted">{{ val.1 }}</small>
+                                        {% else %}
+                                            <span class="text-muted">—</span>
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="{% trans 'Measurements pagination' %}">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">{% trans "Previous" %}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">{% trans "Previous" %}</span>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        {% blocktrans with num=page_obj.number total=page_obj.paginator.num_pages %}Page {{ num }} of {{ total }}{% endblocktrans %}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filter_query %}&{{ filter_query }}{% endif %}">{% trans "Next" %}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">{% trans "Next" %}</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            {% trans "No measurements found for this device." %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}

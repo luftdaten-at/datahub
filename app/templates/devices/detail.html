@@ -12,8 +12,12 @@
 <style>
     .chart-container {
         position: relative;
-        height: 40vh;
-        width: 80vw;
+        width: 100%;
+        height: 240px;
+        max-height: 100%;
+    }
+    .chart-container canvas {
+        max-width: 100%;
     }
     </style>
 {% endblock styles %}
@@ -23,7 +27,9 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "Device:" %} {{ device.device_name }}</h2>
         <div>
+            <a href="{% url 'devices-list' %}" class="btn btn-outline-secondary me-2">{% trans "Back to Devices" %}</a>
             <a href="{% url 'device-data' device.pk %}" class="btn btn-info me-2">{% trans "View Data" %}</a>
+            <a href="{% url 'device-measurements' device.pk %}" class="btn btn-outline-info me-2">{% trans "All Measurements" %}</a>
             <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
         </div>
     </div>    
@@ -110,11 +116,28 @@
                     </ul>
                 </li>
                 <li class="list-group-item">
-                    <strong>{% trans "Workshop" %}:</strong> {{ current_workshop|default:_("N/A") }}
+                    <strong>{% trans "Workshop" %}:</strong>
+                    {% if current_workshop %}
+                        <a href="{% url 'workshop-detail' current_workshop %}">{{ current_workshop }}</a>
+                    {% else %}
+                        {% trans "N/A" %}
+                    {% endif %}
                     <!-- change log -->
                     <ul class="list-group">
                         {% for entry in workshop_change_log %}
-                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "Workshop changed from" %} {{ entry.prev }} {% trans "to" %}  {{ entry.next }}</li>
+                            <li class="list-group-item">{{ entry.timestamp|naturaltime }}, {% trans "Workshop changed from" %}
+                                {% if entry.prev %}
+                                    <a href="{% url 'workshop-detail' entry.prev %}">{{ entry.prev }}</a>
+                                {% else %}
+                                    {{ entry.prev|default:_("N/A") }}
+                                {% endif %}
+                                {% trans "to" %}
+                                {% if entry.next %}
+                                    <a href="{% url 'workshop-detail' entry.next %}">{{ entry.next }}</a>
+                                {% else %}
+                                    {{ entry.next|default:_("N/A") }}
+                                {% endif %}
+                            </li>
                         {% empty %}
                             <li class="list-group-item">{% trans "No logs available." %}</li>
                         {% endfor %} 
@@ -138,117 +161,124 @@
 
     
     <!-- Battery Status Chart -->
-    <div class="row">
-        <h3 class="mt-4 mb-4">{% trans "Battery Status" %}</h3>
-
-        {% if battery_status %}
-            <div class="chart-container">
-                <canvas id="chart-battery"></canvas> 
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{% trans "Battery Status" %}</h5>
+                </div>
+                <div class="card-body">
+                    {% if battery_status %}
+                        <div class="chart-container">
+                            <canvas id="chart-battery"></canvas>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0" role="alert">
+                            {% trans "No battery status available for this device." %}
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                {% trans "No battery status available for this device." %}
-            </div>
-        {% endif %}
+        </div>
     </div>
 
     <!-- Device Logs -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h3 class="mt-4 mb-4">{% trans "Status log" %}</h3>
-                {% if device_logs %}
-                <a href="{% url 'device-logs-csv' device.pk %}" class="btn btn-sm btn-outline-secondary">
-                    {% trans "Download Status logs" %}
-                </a>
-                {% endif %}
-
-            </div>
-        {% if device_logs %}
-            <ul class="list-group mb-3">
-                {% for log in device_logs %}
-                    <li class="list-group-item">
-                        <div class="d-flex w-100 justify-content-start">
-                            <small class="text-muted">{{ log.timestamp|naturaltime }}</small>
-                            <!-- Display log level with badge using the mapping -->
-                            {% with badge_class=level_badge_map|get:log.level %}
-                                {% if badge_class %}
-                                    <span class="badge {{ badge_class }} ms-2">
-                                        {% if log.level == 0 %}
-                                            <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
-                                        {% elif log.level == 1 %}
-                                            <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
-                                        {% elif log.level == 2 %}
-                                            <i class="bi bi-exclamation-triangle"></i> {{ level_map|get:log.level|capfirst }}
-                                        {% elif log.level == 3 %}
-                                            <i class="bi bi-exclamation-octagon"></i> {{ level_map|get:log.level|capfirst }}
-                                        {% elif log.level == 4 %}
-                                            <i class="bi bi-x-octagon"></i> {{ level_map|get:log.level|capfirst }}
-                                        {% else %}
-                                            {{ level_map|get:log.level|default:_("unknown") }}
-                                        {% endif %}
-                                    </span>
-                                {% else %}
-                                    <span class="badge bg-light text-dark">{{ level_map|get:log.level|capfirst }}</span>
-                                {% endif %}
-                            {% endwith %}
-                        </div>
-                        <p class="mb-1">{{ log.message }}</p>
-                    </li>
-                {% endfor %}
-            </ul>
-
-            <!-- Pagination Controls -->
-            <nav aria-label="{% trans 'Log pagination' %}">
-                <ul class="pagination justify-content-center">
-                    {% if device_logs.has_previous %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ device_logs.previous_page_number }}" aria-label="{% trans 'Previous' %}">
-                                <span aria-hidden="true">&laquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&laquo;</span>
-                        </li>
-                    {% endif %}
-                    
-                    {% for num in device_logs.paginator.page_range %}
-                        {% if device_logs.number == num %}
-                            <li class="page-item active" aria-current="page">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > device_logs.number|add:'-3' and num < device_logs.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
-                            </li>
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="card-title mb-0">{% trans "Status log" %}</h5>
+                    <div class="d-flex align-items-center gap-2">
+                        <form id="status-log-search-form" class="d-flex gap-1" style="min-width: 200px;">
+                            <input type="search" name="q" id="status-log-search" class="form-control form-control-sm" placeholder="{% trans 'Search...' %}" value="{{ status_log_search }}">
+                            <button type="submit" class="btn btn-sm btn-outline-secondary">{% trans "Search" %}</button>
+                        </form>
+                        {% if device_logs %}
+                        <a href="{% url 'device-logs-csv' device.pk %}" class="btn btn-sm btn-outline-secondary">
+                            {% trans "Download Status logs" %}
+                        </a>
                         {% endif %}
-                    {% endfor %}
-                    
-                    {% if device_logs.has_next %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ device_logs.next_page_number }}" aria-label="{% trans 'Next' %}">
-                                <span aria-hidden="true">&raquo;</span>
-                            </a>
-                        </li>
-                    {% else %}
-                        <li class="page-item disabled">
-                            <span class="page-link" aria-hidden="true">&raquo;</span>
-                        </li>
-                    {% endif %}
-                </ul>
-            </nav>
-            
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                {% trans "No log updates available for this device." %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="status-log-container">
+                {% if device_logs %}
+                    <ul class="list-group mb-3">
+                        {% for log in device_logs %}
+                            <li class="list-group-item py-1">
+                                <small class="text-muted">{{ log.timestamp|naturaltime }}</small>
+                                {% with badge_class=level_badge_map|get:log.level %}
+                                    {% if badge_class %}
+                                        <span class="badge {{ badge_class }} ms-2">
+                                            {% if log.level == 0 %}
+                                                <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                            {% elif log.level == 1 %}
+                                                <i class="bi bi-info-circle"></i> {{ level_map|get:log.level|capfirst }}
+                                            {% elif log.level == 2 %}
+                                                <i class="bi bi-exclamation-triangle"></i> {{ level_map|get:log.level|capfirst }}
+                                            {% elif log.level == 3 %}
+                                                <i class="bi bi-exclamation-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                            {% elif log.level == 4 %}
+                                                <i class="bi bi-x-octagon"></i> {{ level_map|get:log.level|capfirst }}
+                                            {% else %}
+                                                {{ level_map|get:log.level|default:_("unknown") }}
+                                            {% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-light text-dark ms-2">{{ level_map|get:log.level|capfirst }}</span>
+                                    {% endif %}
+                                {% endwith %}
+                                <span class="ms-2">{{ log.message }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <nav aria-label="{% trans 'Log pagination' %}">
+                        <ul class="pagination justify-content-center">
+                            {% if device_logs.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link status-log-page-link" href="#" data-page="{{ device_logs.previous_page_number }}" aria-label="{% trans 'Previous' %}">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                            {% endif %}
+                            {% for num in device_logs.paginator.page_range %}
+                                {% if device_logs.number == num %}
+                                    <li class="page-item active" aria-current="page">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > device_logs.number|add:'-3' and num < device_logs.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link status-log-page-link" href="#" data-page="{{ num }}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            {% if device_logs.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link status-log-page-link" href="#" data-page="{{ device_logs.next_page_number }}" aria-label="{% trans 'Next' %}">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                {% else %}
+                    <div class="alert alert-info mb-0" role="alert">
+                        {% trans "No log updates available for this device." %}
+                    </div>
+                {% endif %}
+                    </div>
+                </div>
             </div>
-        {% endif %}
-    </div></div>
-    <!-- Back Button -->
-    
-    <a href="{% url 'devices-list' %}" class="btn btn-outline-secondary mt-4 mb-4">{% trans "Back to Devices" %}</a>
-     </div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -268,8 +298,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         backgroundColor: '#28a745',
                         tension: 0.1,
                         yAxisID: 'y1',
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointRadius: 1,
+                        pointHoverRadius: 3,
                     },
                     {
                         label: '{% trans "Battery Voltage (V)" %}',
@@ -279,8 +309,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         backgroundColor: '#007bff',
                         tension: 0.1,
                         yAxisID: 'y2',
-                        pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointRadius: 1,
+                        pointHoverRadius: 3,
                     }
                 ]
             },
@@ -307,13 +337,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         display: true,
                         title: {
                             display: true,
-                            text: '{% trans "Time" %}'
+                            text: '{% trans "Time" %}',
+                            font: { size: 10 }
                         },
                         ticks: {
                             maxRotation: 45,
                             minRotation: 45,
                             autoSkip: true,
                             maxTicksLimit: 20,
+                            font: { size: 9 }
                         }
                     },
                     y1: {
@@ -348,6 +380,56 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     {% endif %}
+
+    // AJAX pagination and search for status log
+    const statusLogContainer = document.getElementById('status-log-container');
+    const statusLogSearchForm = document.getElementById('status-log-search-form');
+    const statusLogSearchInput = document.getElementById('status-log-search');
+
+    function loadStatusLog(params) {
+        const baseUrl = "{% url 'device-detail' device.pk %}";
+        const qs = new URLSearchParams(params).toString();
+        const url = baseUrl + (qs ? '?' + qs : '');
+        statusLogContainer.style.opacity = '0.6';
+        statusLogContainer.style.pointerEvents = 'none';
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(r => r.text())
+            .then(html => {
+                statusLogContainer.innerHTML = html;
+                statusLogContainer.style.opacity = '';
+                statusLogContainer.style.pointerEvents = '';
+                window.history.pushState({}, '', url);
+            })
+            .catch(() => {
+                statusLogContainer.style.opacity = '';
+                statusLogContainer.style.pointerEvents = '';
+            });
+    }
+
+    if (statusLogContainer) {
+        statusLogContainer.addEventListener('click', function(e) {
+            const link = e.target.closest('.status-log-page-link');
+            if (link && link.dataset.page) {
+                e.preventDefault();
+                const params = { page: link.dataset.page };
+                if (statusLogSearchInput && statusLogSearchInput.value.trim()) {
+                    params.q = statusLogSearchInput.value.trim();
+                }
+                loadStatusLog(params);
+            }
+        });
+    }
+
+    if (statusLogSearchForm) {
+        statusLogSearchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const params = { page: '1' };
+            if (statusLogSearchInput && statusLogSearchInput.value.trim()) {
+                params.q = statusLogSearchInput.value.trim();
+            }
+            loadStatusLog(params);
+        });
+    }
 });
 
 function generateQRCode() {

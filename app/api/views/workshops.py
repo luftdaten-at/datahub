@@ -166,7 +166,7 @@ class LegacyWorkshopDetailView(WorkshopDetailView):
 @extend_schema(
     tags=["workshops"],
     summary="Get workshop air quality data",
-    description="Retrieves all air quality measurement data for a workshop. Returns data from both the Measurement model (new) and AirQualityRecord model (legacy). Records without participant or mode are excluded.",
+    description="Retrieves all air quality measurement data for a workshop. Returns data from both the Measurement model (new) and AirQualityRecord model (legacy). Records without participant or mode use '—' as placeholder.",
     parameters=[
         OpenApiParameter(
             name="pk",
@@ -206,15 +206,12 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
 
         for measurement in measurements:
             values = {v.dimension: v.value for v in measurement.values.all()}
-            if measurement.participant is None or measurement.mode is None:
-                logger.debug(f"Skipping measurement {measurement.id}: participant={measurement.participant}, mode={measurement.mode}")
-                continue
 
             data = {
                 "time": measurement.time_measured.isoformat(),
                 "device": measurement.device.id,
-                "participant": measurement.participant.name,
-                "mode": measurement.mode.name,
+                "participant": measurement.participant.name if measurement.participant else "—",
+                "mode": measurement.mode.name if measurement.mode else "—",
                 "lat": None,
                 "lon": None,
                 "display_name": measurement.device.device_name if measurement.device.device_name is not None else measurement.device.id,
@@ -230,14 +227,6 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
         logger.info(f"Workshop {pk}: Processing {air_quality_records.count()} AirQualityRecords")
 
         for record in air_quality_records:
-            if record.participant is None:
-                logger.warning(f"AirQualityRecord {record.id} has no participant")
-            if record.mode is None:
-                logger.warning(f"AirQualityRecord {record.id} has no mode")
-            if record.participant is None or record.mode is None:
-                logger.info(f"Skipping AirQualityRecord {record.id}: participant={record.participant}, mode={record.mode}, device={record.device}, time={record.time}")
-                continue
-
             device_name = None
             if record.device:
                 device_id = record.device.id if hasattr(record.device, "id") else str(record.device)
@@ -293,8 +282,8 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             data = {
                 "time": record.time.isoformat() if hasattr(record.time, "isoformat") else str(record.time),
                 "device": device_name,
-                "participant": record.participant.name if record.participant else None,
-                "mode": record.mode.name if record.mode else None,
+                "participant": record.participant.name if record.participant else "—",
+                "mode": record.mode.name if record.mode else "—",
                 "lat": record.lat,
                 "lon": record.lon,
                 "display_name": device_name,
