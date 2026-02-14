@@ -64,6 +64,7 @@
                         <th>{% trans "Workshop" %}</th>
                         <th>{% trans "Participant" %}</th>
                         <th>{% trans "Mode" %}</th>
+                        <th>{% trans "Location" %}</th>
                         <th>{% trans "Sensor" %}</th>
                         {% for dim_id in dimension_columns %}
                             <th>{{ dimension_names|get:dim_id|default:"—" }}</th>
@@ -83,6 +84,13 @@
                             </td>
                             <td>{{ row.measurement.participant.name|default:"—" }}</td>
                             <td>{{ row.measurement.mode.name|default:"—" }}</td>
+                            <td>
+                                {% if row.measurement.location %}
+                                    <i class="bi bi-geo-alt-fill text-success" title="lat {{ row.measurement.location.coordinates.y|floatformat:4 }}, lon {{ row.measurement.location.coordinates.x|floatformat:4 }}"></i>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                             <td><small>{{ row.sensor_name }}</small></td>
                             {% for dim_id in dimension_columns %}
                                 <td>
