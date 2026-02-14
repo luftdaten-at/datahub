@@ -188,8 +188,15 @@ class CreateDeviceDataAPIView(APIView):
                 return JsonResponse({"status": "success, but no sensor data found"}, status=200)
 
             workshop_obj = Workshop.objects.filter(name=workshop_data["id"]).first()
-            participant_obj = Participant.objects.filter(name=workshop_data["participant"]).first()
-            mode_obj = MobilityMode.objects.filter(name=workshop_data["mode"]).first()
+            participant_obj, _ = Participant.objects.get_or_create(
+                name=workshop_data["participant"],
+                defaults={"workshop": workshop_obj},
+            )
+            mode_name = workshop_data["mode"]
+            mode_obj, _ = MobilityMode.objects.get_or_create(
+                name=mode_name,
+                defaults={"title": mode_name.title(), "description": ""},
+            )
 
             lat = location_data.get("lat") if location_data else None
             lon = location_data.get("lon") if location_data else None
