@@ -397,7 +397,7 @@ class DeviceMeasurementsView(LoginRequiredMixin, UserPassesTestMixin, DetailView
 
         measurements_qs = (
             Measurement.objects.filter(device=device)
-            .select_related('workshop', 'participant', 'mode')
+            .select_related('workshop', 'participant', 'mode', 'location')
             .prefetch_related('values')
             .order_by('-time_measured')
         )
