@@ -44,7 +44,7 @@ class AirQualityRecord(models.Model):
         if self.lat is not None and self.lon is not None and not self.location:
             from django.contrib.gis.geos import Point
             Location = self._meta.get_field('location').related_model
-            point = Point(self.lon, self.lat)
+            point = Point(self.lon, self.lat, srid=4326)
             location_obj = Location.objects.create(coordinates=point)
             self.location = location_obj
         super().save(*args, **kwargs)

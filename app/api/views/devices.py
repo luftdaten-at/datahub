@@ -124,7 +124,7 @@ class CreateDeviceStatusAPIView(APIView):
 @extend_schema(
     tags=["devices"],
     summary="Add device measurement data",
-    description="Adds measurement data from sensors for a device. Request body: device, workshop, sensors. Optional location {lat, lon} in device block. Creates Measurement and Values records. Prevents duplicate measurements.",
+    description="Adds measurement data from sensors for a device. Request body: device, sensors. Optional workshop (requires location when present), optional location {lat, lon}. Creates Measurement and Values records. Prevents duplicate measurements.",
     request=DeviceDataSerializer,
     responses={
         200: {"description": "Measurements created successfully, or no sensor data found"},
@@ -165,8 +165,8 @@ class CreateDeviceDataAPIView(APIView):
 
             if not device_data:
                 raise ValidationError("'device' is required.")
-            if not workshop_data:
-                raise ValidationError("'workshop' is required.")
+            if workshop_data and not location_data:
+                raise ValidationError("'location' is required when 'workshop' is provided.")
 
             device_info = {
                 "device": device_data["id"],
@@ -187,9 +187,20 @@ class CreateDeviceDataAPIView(APIView):
             if not sensors_data:
                 return JsonResponse({"status": "success, but no sensor data found"}, status=200)
 
-            workshop_obj = Workshop.objects.filter(name=workshop_data["id"]).first()
-            participant_obj = Participant.objects.filter(name=workshop_data["participant"]).first()
-            mode_obj = MobilityMode.objects.filter(name=workshop_data["mode"]).first()
+            workshop_obj = None
+            participant_obj = None
+            mode_obj = None
+            if workshop_data:
+                workshop_obj = Workshop.objects.filter(name=workshop_data["id"]).first()
+                participant_obj, _ = Participant.objects.get_or_create(
+                    name=workshop_data["participant"],
+                    defaults={"workshop": workshop_obj},
+                )
+                mode_name = workshop_data["mode"]
+                mode_obj, _ = MobilityMode.objects.get_or_create(
+                    name=mode_name,
+                    defaults={"title": mode_name.title(), "description": ""},
+                )
 
             lat = location_data.get("lat") if location_data else None
             lon = location_data.get("lon") if location_data else None
@@ -199,7 +210,7 @@ class CreateDeviceDataAPIView(APIView):
                     # Create location if lat/lon provided (same as workshops/data/add)
                     location_obj = None
                     if lat is not None and lon is not None:
-                        point = Point(float(lon), float(lat))
+                        point = Point(float(lon), float(lat), srid=4326)
                         location_obj = Location.objects.create(coordinates=point)
                     for sensor_id, sensor_data in sensors_data.items():
                         existing_measurement = Measurement.objects.filter(
@@ -224,7 +235,7 @@ class CreateDeviceDataAPIView(APIView):
                             workshop=workshop_obj,
                             participant=participant_obj,
                             mode=mode_obj,
-                            location=location_obj,
+                            location_id=location_obj.pk if location_obj else None,
                         )
                         measurement.save()
 
