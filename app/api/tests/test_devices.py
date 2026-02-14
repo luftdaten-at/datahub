@@ -105,6 +105,7 @@ class DeviceDataEndpointTest(TestCase):
                 "participant": self.participant.name,
                 "mode": "walking",
             },
+            "location": {"lat": 48.1769523, "lon": 16.3654834},
             "sensors": {
                 "1": {
                     "type": 1,
@@ -127,11 +128,25 @@ class DeviceDataEndpointTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_device_data_missing_workshop_returns_400(self):
+    def test_device_data_without_workshop_returns_200(self):
+        """Workshop is optional; request without workshop succeeds."""
         response = self.client.post(
             reverse("api:v1:device-data"),
             data={
-                "device": {"time": "2025-01-07T11:23:23Z", "id": "D1", "firmware": "1", "model": 1, "apikey": "k"},
+                "device": {"time": "2025-01-07T11:23:23Z", "id": self.device.id, "firmware": "1", "model": 1, "apikey": self.device.api_key},
+                "sensors": {},
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_device_data_workshop_without_location_returns_400(self):
+        """When workshop is provided, location is required."""
+        response = self.client.post(
+            reverse("api:v1:device-data"),
+            data={
+                "device": {"time": "2025-01-07T11:23:23Z", "id": self.device.id, "firmware": "1", "model": 1, "apikey": self.device.api_key},
+                "workshop": {"id": self.workshop.name, "participant": self.participant.name, "mode": "walking"},
                 "sensors": {},
             },
             format="json",

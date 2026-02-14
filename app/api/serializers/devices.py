@@ -110,10 +110,10 @@ class WorkshopContextSerializer(serializers.Serializer):
 
 
 class DeviceDataSerializer(serializers.Serializer):
-    """Request body for POST /v1/devices/data/: device, workshop, sensors, location."""
+    """Request body for POST /v1/devices/data/: device, sensors. Optional workshop (requires location when present), location."""
 
     device = DevicePayloadSerializer()
-    workshop = WorkshopContextSerializer()
+    workshop = WorkshopContextSerializer(required=False, allow_null=True)
     sensors = serializers.DictField(child=SensorDataSerializer())
     location = LocationPayloadSerializer(required=False, allow_null=True)
 
