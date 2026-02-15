@@ -500,6 +500,7 @@
     const imageLayer = L.layerGroup();
     imageData.forEach(item => {
         const [time, lat, lon, imageUrl] = item;
+        if (lat == null || lon == null || typeof lat !== 'number' || typeof lon !== 'number') return;
         console.log(imageUrl);
         const marker = L.marker([lat, lon]);
         const popupContent = `
@@ -651,8 +652,9 @@
 
         const markerList = [];
 
-        const lo = Math.min(...points.filter(j => j[value] !== undefined).map(j => j[value]));
-        const hi = Math.max(...points.filter(j => j[value] !== undefined).map(j => j[value]));
+        const pointsWithValue = points.filter(j => j[value] !== undefined && j[value] !== null);
+        const lo = pointsWithValue.length > 0 ? Math.min(...pointsWithValue.map(j => j[value])) : 0;
+        const hi = pointsWithValue.length > 0 ? Math.max(...pointsWithValue.map(j => j[value])) : 0;
 
         const scale = chroma.scale(['blue', 'red']).domain([lo, hi]);
 
@@ -667,6 +669,8 @@
         // Add markers for each point
         for (let i in points) {
             const point = points[i];
+            // Skip points without valid location (process rest of data)
+            if (point.lat == null || point.lon == null || typeof point.lat !== 'number' || typeof point.lon !== 'number') continue;
             // Filter by device if single device specified, or by selected devices if multiple
             if(device != null && point.display_name != device) continue;
             // Filter by selected devices (if any devices are selected)
@@ -759,7 +763,9 @@ function fitMapToAllPoints() {
         filteredPoints = points.filter(p => selectedDevices.has(p.display_name));
     }
     
-    const latLngs = filteredPoints.map(item => [item.lat, item.lon]).filter(coord => coord[0] && coord[1]);
+    const latLngs = filteredPoints
+        .filter(item => item.lat != null && item.lon != null && typeof item.lat === 'number' && typeof item.lon === 'number')
+        .map(item => [item.lat, item.lon]);
     if (latLngs.length === 0) {
         console.log('No valid coordinates for map bounds');
         return;
@@ -1080,6 +1086,7 @@ function updateCircles() {
                 }
 
                 j.forEach(circle => {
+            if (circle.lat == null || circle.lon == null || typeof circle.lat !== 'number' || typeof circle.lon !== 'number') return;
             const leafletCircle = L.circle([circle.lat, circle.lon], circle.radius);
             if(circle.type == 'cool'){
                 leafletCircle.setStyle({color: 'blue'});

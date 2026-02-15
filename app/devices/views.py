@@ -2,7 +2,7 @@ import json
 import logging
 from collections import defaultdict
 import csv
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.shortcuts import get_object_or_404
@@ -18,6 +18,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.contrib import messages
 
 from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
 from accounts.models import CustomUser
@@ -494,16 +495,31 @@ class DeviceMeasurementsView(LoginRequiredMixin, UserPassesTestMixin, DetailView
         return context
 
 
+class MeasurementDeleteView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """Delete a measurement. Requires superuser. Redirects back to measurements list."""
+    http_method_names = ['post']
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def post(self, request, pk, measurement_pk):
+        device = get_object_or_404(Device, pk=pk)
+        measurement = get_object_or_404(Measurement, pk=measurement_pk, device=device)
+        measurement.delete()
+        messages.success(request, _('Measurement deleted.'))
+        next_url = request.POST.get('next') or reverse('device-measurements', kwargs={'pk': device.pk})
+        return HttpResponseRedirect(next_url)
+
+
 class DeviceMyView(UserPassesTestMixin, ListView):
     model = Device
     context_object_name = 'device'
     template_name = 'devices/my.html'
 
     def test_func(self):
-        return self.request.user.is_authenticated 
+        return self.request.user.is_authenticated
 
     def get_queryset(self):
-        # Return the Device queryset ordered by 'id' in ascending order
         return Device.objects.all().order_by('id')
 
 
