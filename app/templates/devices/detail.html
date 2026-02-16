@@ -354,12 +354,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         position: 'left',
                         title: {
                             display: true,
-                            text: '{% trans "Charge (%)" %}'
+                            text: '{% trans "Charge (%)" %}',
+                            color: '#28a745'
                         },
-                        suggestedMin: 0,
-                        suggestedMax: 100,
+                        min: 0,
+                        max: 100,
+                        ticks: {
+                            color: '#28a745'
+                        },
                         grid: {
-                            drawOnChartArea: false,  // Only draw grid lines for y1
+                            drawOnChartArea: false,
                         },
                     },
                     y2: {
@@ -368,12 +372,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         position: 'right',
                         title: {
                             display: true,
-                            text: '{% trans "Voltage (V)" %}'
+                            text: '{% trans "Voltage (V)" %}',
+                            color: '#007bff'
                         },
-                        suggestedMin: 0,
-                        suggestedMax: 5,  // Adjust based on expected voltage range
+                        min: 2.5,
+                        max: 4.2,
+                        ticks: {
+                            color: '#007bff'
+                        },
                         grid: {
-                            drawOnChartArea: false,  // Only draw grid lines for y2
+                            drawOnChartArea: false,
                         },
                     }
                 }
