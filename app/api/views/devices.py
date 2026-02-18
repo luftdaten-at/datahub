@@ -79,7 +79,7 @@ class CreateDeviceStatusAPIView(APIView):
     serializer_class = DeviceStatusRequestSerializer
 
     def post(self, request, *args, **kwargs):
-        device_data = request.data.get("device")
+        device_data = request.data.get("device") or request.data.get("station")
         status_list = request.data.get("status_list", [])
 
         if not device_data or not status_list:
