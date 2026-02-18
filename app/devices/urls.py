@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import DeviceDetailView, DeviceEditView, DeviceListView, DeviceLogsCSVView, DeviceMyView, DeviceNotesUpdateView, DeviceDataView, DeviceMeasurementsView, MeasurementDeleteView, calibrationView
+from .views import DeviceDetailView, DeviceEditView, DeviceListView, DeviceLogsCSVView, DeviceMyView, DeviceNotesUpdateView, DeviceApikeyUpdateView, DeviceDataView, DeviceMeasurementsView, MeasurementDeleteView, calibrationView
 
 urlpatterns = [
     path('', DeviceListView.as_view(), name='devices-list'),
@@ -12,5 +12,6 @@ urlpatterns = [
     path('<str:pk>/delete/', DeviceEditView.as_view(), name='device-delete'),
     path('<str:pk>/edit/', DeviceEditView.as_view(), name='device-edit'),
     path('<str:pk>/edit-notes/', DeviceNotesUpdateView.as_view(), name='device-edit-notes'),
+    path('<str:pk>/edit-apikey/', DeviceApikeyUpdateView.as_view(), name='device-edit-apikey'),
     path('<str:pk>/logs.csv', DeviceLogsCSVView.as_view(), name='device-logs-csv'),
 ]

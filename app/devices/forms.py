@@ -18,3 +18,16 @@ class DeviceNotesForm(forms.ModelForm):
                 'placeholder': 'Enter notes here...',
             }),
         }
+
+
+class DeviceApikeyForm(forms.ModelForm):
+    class Meta:
+        model = Device
+        fields = ['api_key']
+        widgets = {
+            'api_key': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Enter API key...',
+                'autocomplete': 'off',
+            }),
+        }
