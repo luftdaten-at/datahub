@@ -59,6 +59,19 @@
                 <li class="list-group-item">
                     <strong>{% trans "Last update" %}:</strong> {{ device.last_update|naturaltime|default:_("N/A") }}
                 </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{% trans "API Key" %}:</strong>
+                        {% if device.api_key %}
+                            <code class="ms-2">••••••••</code>
+                        {% else %}
+                            <span class="text-muted ms-2">{% trans "N/A" %}</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'device-edit-apikey' device.pk %}" class="btn btn-sm btn-outline-primary">
+                        {% trans "Update API Key" %}
+                    </a>
+                </li>
             </ul>
             <!-- QrCode Section -->
             <ul class="list-group">

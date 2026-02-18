@@ -22,7 +22,7 @@ from django.contrib import messages
 
 from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
 from accounts.models import CustomUser
-from .forms import DeviceForm, DeviceNotesForm
+from .forms import DeviceForm, DeviceNotesForm, DeviceApikeyForm
 from main.enums import SensorModel, Dimension
 from organizations.models import Organization
 from campaign.models import Room
@@ -539,7 +539,7 @@ class DeviceEditView(UpdateView):
         return queryset
 
 
-class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
+class DeviceNotesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Device
     form_class = DeviceNotesForm
     template_name = 'devices/edit_notes.html'
@@ -549,11 +549,8 @@ class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
         After successfully updating the notes, redirect to the device's detail page.
         """
         return reverse('device-detail', kwargs={'pk': self.object.pk})
-    
+
     def test_func(self):
-        """
-        Only superusers can edit notes.
-        """
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
     def get_queryset(self):
@@ -563,7 +560,22 @@ class DeviceNotesUpdateView(LoginRequiredMixin, UpdateView):
         Adjust the filter based on your application's logic.
         """
         return Device.objects.all()
-    
+
+
+class DeviceApikeyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Device
+    form_class = DeviceApikeyForm
+    template_name = 'devices/edit_apikey.html'
+
+    def get_success_url(self):
+        return reverse('device-detail', kwargs={'pk': self.object.pk})
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_queryset(self):
+        return Device.objects.all()
+
 
 class DeviceDeleteView(LoginRequiredMixin, DeleteView):
     model = Device
