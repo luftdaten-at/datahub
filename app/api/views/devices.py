@@ -83,11 +83,13 @@ class CreateDeviceStatusAPIView(APIView):
         status_list = request.data.get("status_list", [])
 
         if not device_data or not status_list:
+            logger.warning("Device status 400: missing device or status_list. Request body: %s", request.data)
             raise ValidationError("Both 'device' and 'status_list' are required.")
 
         device = get_or_create_station(station_info=device_data)
 
         if device.api_key != device_data.get("apikey"):
+            logger.warning("Device status 400: wrong API key. Request body: %s", request.data)
             raise ValidationError("Wrong API Key")
 
         if device.test_mode is None:
@@ -118,6 +120,7 @@ class CreateDeviceStatusAPIView(APIView):
             )
 
         except Exception as e:
+            logger.warning("Device status 400: %s. Request body: %s", str(e), request.data, exc_info=True)
             return Response({"status": "error", "message": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 

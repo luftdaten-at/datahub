@@ -316,6 +316,11 @@ LOGGING = {
             'filename': os.path.join(logs_dir, 'log.log'),
             'formatter': 'simple',
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
     },
     'loggers': {
         # Django root logger
@@ -326,7 +331,7 @@ LOGGING = {
         },
         # Application logger
         'myapp': {
-            'handlers': ['file'],
+            'handlers': ['file', 'console'],
             'level': 'DEBUG',
             'propagate': False,
         },
