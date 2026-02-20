@@ -90,11 +90,10 @@
                     <hr class="my-4">
                     
                     <div class="text-center">
-                        <p class="text-muted mb-2">{% trans "Don't have an account?" %}</p>
-                        <a href="{% url 'account_signup' %}" class="btn btn-outline-secondary">
-                            <i class="bi bi-person-plus me-2"></i>
-                            {% trans "Sign up" %}
-                        </a>
+                        <p class="text-muted small mb-0">
+                            {% trans "Don't have an account?" %}
+                            <a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
+                        </p>
                     </div>
                     
                     <div class="text-center mt-3">
