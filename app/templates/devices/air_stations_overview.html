@@ -1,0 +1,76 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Air Stations Overview" %}{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+{% endblock styles %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Air Stations Overview" %}</h2>
+    </div>
+    
+    {% if air_stations %}
+        <table
+            id="table"
+            data-toggle="table"
+            data-search="true"
+            data-sortable="true"
+            data-pagination="true"
+            data-page-size="50"
+            data-page-list="[50, 100, 200]"
+            class="table">
+            <thead class="table-light">
+                <tr>
+                    <th data-field="name" data-sortable="true">{% trans "Name" %}</th>
+                    <th data-field="firmware" data-sortable="true">{% trans "Firmware" %}</th>
+                    <th data-field="last_status" data-sortable="true">{% trans "Last Status" %}</th>
+                    <th data-field="last_send_data" data-sortable="true">{% trans "Last Send Data" %}</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for device in air_stations %}
+                    <tr>
+                        <td><a href="{% url 'device-detail' device.pk %}" class="link-primary">{{ device.device_name|default:device.id }}</a></td>
+                        <td>{{ device.firmware|default:_("N/A") }}</td>
+                        <td>
+                            {% if device.last_log_time %}
+                                <span title="{{ device.last_log_message|default:'' }}">{{ device.last_log_time|date:"Y-m-d H:i" }}</span>
+                                {% if device.last_log_message %}
+                                    <br><small class="text-muted">{{ device.last_log_message|truncatechars:50 }}</small>
+                                {% endif %}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if device.last_send_data %}
+                                {{ device.last_send_data|date:"Y-m-d H:i" }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'device-detail' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'View Device' %}">
+                                <i class="bi bi-eye"></i> <span class="d-none d-sm-inline">{% trans "View" %}</span>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            {% trans "No air stations found." %}
+        </div>
+    {% endif %}
+</div>
+{% endblock content %}
