@@ -5,10 +5,14 @@ from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = get_user_model()
-        fields = (
-            "email",
-            "username",
-        )
+        fields = ("email", "password1", "password2")
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.username = user.email
+        if commit:
+            user.save()
+        return user
 
 
 class CustomUserEditForm(UserChangeForm):
