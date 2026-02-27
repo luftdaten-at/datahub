@@ -23,12 +23,13 @@ from django.contrib import messages
 from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
 from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm, DeviceApikeyForm
-from main.enums import SensorModel, Dimension
+from main.enums import SensorModel, Dimension, LdProduct
 from organizations.models import Organization
 from campaign.models import Room
 from workshops.models import Workshop
 from api.models import AirQualityRecord
-from django.db.models import Count, Min, Max, Q
+from django.db.models import Count, Min, Max, Q, OuterRef, Subquery
+from django.db.models.functions import Length
 
 
 logger = logging.getLogger('myapp')
@@ -48,6 +49,41 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         device_list = [device for device in device_list if len(device.id) >= 15]
 
         return device_list
+
+
+class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """Admin-only overview of Air Stations with last status and last send data."""
+    model = Device
+    context_object_name = 'air_stations'
+    template_name = 'devices/air_stations_overview.html'
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get_queryset(self):
+        latest_log = DeviceLogs.objects.filter(device=OuterRef('pk')).order_by('-timestamp')
+        return (
+            Device.objects.filter(model=LdProduct.AIR_STATION)
+            .annotate(id_len=Length('id'))
+            .filter(id_len__gte=15)
+            .select_related('current_organization')
+            .annotate(
+                last_log_time=Subquery(latest_log.values('timestamp')[:1]),
+                last_log_message=Subquery(latest_log.values('message')[:1]),
+                last_measurement_time=Max('measurements__time_measured'),
+                last_aqr_time=Max('air_quality_records__time'),
+            )
+            .order_by('id')
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Compute last_send_data for each device (max of measurement and aqr times)
+        for device in context['air_stations']:
+            times = [t for t in (device.last_measurement_time, device.last_aqr_time) if t is not None]
+            device.last_send_data = max(times) if times else None
+        return context
+
 
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device

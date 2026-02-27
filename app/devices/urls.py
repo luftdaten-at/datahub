@@ -1,8 +1,22 @@
 from django.urls import path
-from .views import DeviceDetailView, DeviceEditView, DeviceListView, DeviceLogsCSVView, DeviceMyView, DeviceNotesUpdateView, DeviceApikeyUpdateView, DeviceDataView, DeviceMeasurementsView, MeasurementDeleteView, calibrationView
+from .views import (
+    AirStationsOverviewView,
+    DeviceDetailView,
+    DeviceEditView,
+    DeviceListView,
+    DeviceLogsCSVView,
+    DeviceMyView,
+    DeviceNotesUpdateView,
+    DeviceApikeyUpdateView,
+    DeviceDataView,
+    DeviceMeasurementsView,
+    MeasurementDeleteView,
+    calibrationView,
+)
 
 urlpatterns = [
     path('', DeviceListView.as_view(), name='devices-list'),
+    path('air-stations/', AirStationsOverviewView.as_view(), name='air-stations-overview'),
     path('calibration/', calibrationView, name='calibration'),
     path('my/', DeviceMyView.as_view(), name='devices-my'),
     path('<str:pk>/', DeviceDetailView.as_view(), name='device-detail'),
