@@ -1,10 +1,14 @@
-from django.test import TestCase, RequestFactory
-from unittest.mock import patch, Mock, MagicMock
-from django.core.cache import cache
-from django.conf import settings
+from unittest.mock import MagicMock, Mock, patch
 
-from stations.views import StationListView
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
+from django.test import RequestFactory, TestCase
+from django.urls import reverse
+
 from main.enums import Dimension, Order, OutputFormat
+from stations.models import FavoriteStation
+from stations.views import StationListView
 
 
 class StationListViewTests(TestCase):
@@ -313,7 +317,7 @@ class StationListViewTests(TestCase):
         # Verify cache was set with parsed data
         cache_key, cached_data, timeout = mock_cache_set.call_args[0]
         self.assertEqual(cache_key, 'station_all_data')
-        self.assertEqual(timeout, 3600)
+        self.assertEqual(timeout, settings.LUFTDATEN_API_JSON_CACHE_TTL)
         self.assertEqual(len(cached_data), 3)
     
     @patch('stations.views.render')
@@ -525,10 +529,10 @@ class StationListViewTests(TestCase):
         # Call the view
         StationListView(self.request)
         
-        # Verify cache.set was called with correct timeout (3600 seconds = 1 hour)
+        # Verify cache.set was called with configured TTL
         mock_cache_set.assert_called_once()
         cache_key, cached_data, timeout = mock_cache_set.call_args[0]
-        self.assertEqual(timeout, 3600)
+        self.assertEqual(timeout, settings.LUFTDATEN_API_JSON_CACHE_TTL)
         
         # Verify cached data includes last_active
         if cached_data:
@@ -699,3 +703,53 @@ class StationListViewTests(TestCase):
         
         # Should have empty all_stations when structure is unexpected
         self.assertIsInstance(context['all_stations'], list)
+
+
+class FavoriteStationTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="favuser",
+            email="fav@test.com",
+            password="secret123",
+        )
+        self.client.login(username="favuser", password="secret123")
+
+    def test_toggle_adds_then_removes(self):
+        sid = "device-abc-123"
+        url_toggle = reverse("station-favorite-toggle", kwargs={"pk": sid})
+        self.assertFalse(
+            FavoriteStation.objects.filter(user=self.user, station_id=sid).exists()
+        )
+        r = self.client.post(url_toggle)
+        self.assertRedirects(
+            r,
+            reverse("station-detail", kwargs={"pk": sid}),
+            fetch_redirect_response=False,
+        )
+        self.assertTrue(
+            FavoriteStation.objects.filter(user=self.user, station_id=sid).exists()
+        )
+        r2 = self.client.post(url_toggle)
+        self.assertRedirects(
+            r2,
+            reverse("station-detail", kwargs={"pk": sid}),
+            fetch_redirect_response=False,
+        )
+        self.assertFalse(
+            FavoriteStation.objects.filter(user=self.user, station_id=sid).exists()
+        )
+
+    def test_detail_shows_remove_when_favorite(self):
+        sid = "x1"
+        FavoriteStation.objects.create(user=self.user, station_id=sid)
+        r = self.client.get(reverse("station-detail", kwargs={"pk": sid}))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Remove from favourites")
+
+    def test_anonymous_toggle_redirects_to_login(self):
+        self.client.logout()
+        url_toggle = reverse("station-favorite-toggle", kwargs={"pk": "foo"})
+        r = self.client.post(url_toggle)
+        self.assertEqual(r.status_code, 302)
+        self.assertIn("login", r.url.lower())

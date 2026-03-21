@@ -101,6 +101,24 @@
     <div class="card mb-3">
       <div class="card-body">
         <h5 class="card-title">{% trans "Station Information" %}</h5>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'station-favorite-toggle' station_id %}" class="mb-3">
+          {% csrf_token %}
+          {% if is_favorite %}
+          <button type="submit" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Remove from favourites" %}
+          </button>
+          {% else %}
+          <button type="submit" class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-star" aria-hidden="true"></i> {% trans "Add to favourites" %}
+          </button>
+          {% endif %}
+        </form>
+        {% else %}
+        <p class="small text-muted mb-3">
+          <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this station to your favourites." %}</a>
+        </p>
+        {% endif %}
         <p class="card-text mb-2">
           <strong>{% trans "Station ID" %}:</strong><br>
           <span id="station-id-display">{{ station_id }}</span>

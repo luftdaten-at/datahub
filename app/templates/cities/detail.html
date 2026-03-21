@@ -47,6 +47,24 @@
 <div class="row">
   <div class="col-lg-12 mt-3">
     <h1>{{ city.name }}</h1>
+    {% if user.is_authenticated %}
+    <form method="post" action="{% url 'city-favorite-toggle' city_slug %}" class="mb-3">
+      {% csrf_token %}
+      {% if is_favorite %}
+      <button type="submit" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Remove city from favourites" %}
+      </button>
+      {% else %}
+      <button type="submit" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-star" aria-hidden="true"></i> {% trans "Add city to favourites" %}
+      </button>
+      {% endif %}
+    </form>
+    {% else %}
+    <p class="small text-muted mb-3">
+      <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this city to your favourites." %}</a>
+    </p>
+    {% endif %}
   </div>
 </div>  
 <div class="row">

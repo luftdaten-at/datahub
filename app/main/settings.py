@@ -285,6 +285,11 @@ if env("DJANGO_ENV") == 'production':
 else:
     API_URL = 'https://staging.api.luftdaten.at/v1'
 
+# Outbound HTTP to api.luftdaten.at: (connect, read) timeouts in seconds.
+LUFTDATEN_API_REQUEST_TIMEOUT = (15, 60)
+# Shared TTL (seconds) for cached JSON from Luftdaten API (e.g. statistics proxy, station/all list).
+LUFTDATEN_API_JSON_CACHE_TTL = 3600
+
 LOG_VIEWER_FILES = ['logs/log.log']
 #LOG_VIEWER_FILES_PATTERN = '*.log*'
 #LOG_VIEWER_FILES_DIR = 'logs/'

@@ -1,106 +1,60 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
-{% load humanize %}
 
 {% block title %}{% trans "Dashboard" %}{% endblock title %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">{% trans "Welcome," %} {{ user.username }}</h2>
+    <h2 class="mb-4">{% trans "Welcome," %} {{ user.email }}</h2>
 
-    <!-- Summary Cards Row -->
+    <!-- Row for favourite cities and favourite stations -->
     <div class="row mb-4">
-        <!-- Card: My Campaigns Count -->
-        <div class="col-md-6 col-lg-6 mb-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="bi bi-flag-fill"></i> {% trans "My Campaigns" %}
-                    </h5>
-                    <p class="display-6">{{ campaigns|length }}</p>
-                </div>
-            </div>
-        </div>
-        <!-- Card: My measurements -->
-        <div class="col-md-6 col-lg-6 mb-3">
-            <div class="card text-center shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">
-                        <i class="bi bi-clipboard-data"></i> {% trans " My Measurements" %}
-                    </h5>
-                    <p class="display-6">{{ user.measurements.count|intcomma }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Row for My Campaigns and My Organizations details -->
-    <div class="row mb-4">
-        <!-- My Campaigns Column -->
+        <!-- Favourite cities -->
         <div class="col-lg-6 mb-4">
-            <h3><i class="bi bi-flag-fill"></i> {% trans "My Campaigns" %}</h3>
-            {% if campaigns %}
-                <div class="list-group">
-                    {% for campaign in campaigns %}
-                        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                            <div class="mb-2 mb-md-0">
-                                <h5 class="mb-1">
-                                    <a href="{% url 'campaigns-detail' campaign.pk %}">{{ campaign.name }}</a>
-                                    {% if campaign in owner_campaigns %}
-                                        <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                                    {% elif campaign in member_campaigns %}
-                                        <span class="badge bg-secondary">{% trans "Member" %}</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{% trans "Other" %}</span>
-                                    {% endif %}
-                                </h5>
-                                <p class="mb-1">
-                                    <strong>{% trans "Date:" %}</strong>
-                                    {{ campaign.start_date|date:"d.m.Y H:i" }} – {{ campaign.end_date|date:"d.m.Y H:i" }}
-                                </p>
-                            </div>
-                        </div>
+            <h3><i class="bi bi-star-fill"></i> {% trans "Favourite cities" %}</h3>
+            {% if favorite_city_rows %}
+                <div class="list-group list-group-flush gap-2">
+                    {% for row in favorite_city_rows %}
+                    <a href="{{ row.url }}"
+                       class="list-group-item list-group-item-action text-dark text-decoration-none d-block rounded border py-3 px-3"
+                       style="background-color: rgb({{ row.r }}, {{ row.g }}, {{ row.b }});">
+                        <span class="fw-semibold">{{ row.label }}</span>
+                        {% if row.pm25 is not None %}
+                        <span class="small ms-1">{% trans "PM2.5" %} {{ row.pm25|floatformat:1 }} µg/m³</span>
+                        {% endif %}
+                    </a>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="alert alert-warning mt-3" role="alert">
-                    {% trans "No campaigns found." %}
+                <div class="alert alert-info mt-3" role="alert">
+                    {% trans "No favourite cities yet." %}
                 </div>
-                <a href="{% url 'campaigns-create' %}" class="btn btn-sm btn-outline-primary">{% trans "Create Campaign" %}</a>
+                <a href="{% url 'cities-list' %}" class="btn btn-sm btn-outline-primary">{% trans "Browse cities" %}</a>
             {% endif %}
         </div>
 
-        <!-- My Organizations Column -->
+        <!-- Favourite stations -->
         <div class="col-lg-6 mb-4">
-            <h3><i class="bi bi-people-fill"></i> {% trans "My Organization" %}</h3>
-            {% if member_organizations %}
-                <div class="list-group">
-                    {% for organization in organizations %}
-                        <div class="list-group-item list-group-item-action d-flex flex-column flex-md-row justify-content-between align-items-start">
-                            <div class="mb-2 mb-md-0">
-                                <h5 class="mb-1">
-                                    <a href="{% url 'organizations-detail' organization.pk %}">{{ organization.name }}</a>
-                                    {% if organization in owner_organizations %}
-                                        <span class="badge bg-secondary">{% trans "Owner" %}</span>
-                                    {% elif organization in member_organizations %}
-                                        <span class="badge bg-secondary">{% trans "Member" %}</span>
-                                    {% else %}
-                                        <span class="badge bg-secondary">{% trans "Other" %}</span>
-                                    {% endif %}
-                                </h5>
-                                <p class="mb-1">
-                                    {{ organization.description|truncatewords:20 }}
-                                </p>
-                            </div>
-                        </div>
+            <h3><i class="bi bi-star-fill"></i> {% trans "Favourite stations" %}</h3>
+            {% if favorite_station_rows %}
+                <div class="list-group list-group-flush gap-2">
+                    {% for row in favorite_station_rows %}
+                    <a href="{{ row.url }}"
+                       class="list-group-item list-group-item-action text-dark text-decoration-none d-block rounded border py-3 px-3"
+                       style="background-color: rgb({{ row.r }}, {{ row.g }}, {{ row.b }});">
+                        <span class="fw-semibold">{{ row.label }}</span>
+                        {% if row.pm25 is not None %}
+                        <span class="small ms-1">{% trans "PM2.5" %} {{ row.pm25|floatformat:1 }} µg/m³</span>
+                        {% endif %}
+                    </a>
                     {% endfor %}
                 </div>
             {% else %}
-                <div class="alert alert-warning mt-3" role="alert">
-                    {% trans "You are not a member of any organizations." %}
+                <div class="alert alert-info mt-3" role="alert">
+                    {% trans "No favourite stations yet." %}
                 </div>
-                <a href="{% url 'organizations-create' %}" class="btn btn-sm btn-outline-primary">{% trans "Create Organization" %}</a>
+                <a href="{% url 'stations-list' %}" class="btn btn-sm btn-outline-primary">{% trans "Browse stations" %}</a>
             {% endif %}
         </div>
     </div>

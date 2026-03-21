@@ -1,11 +1,12 @@
 from unittest.mock import Mock, patch
 
+from django.conf import settings
 from django.core.cache import cache
 from django.test import SimpleTestCase
 from django.urls import resolve, reverse
 from requests.exceptions import RequestException
 
-from .views import HomePageView, LUFTDATEN_STATISTICS_REQUEST_TIMEOUT
+from .views import HomePageView
 
 
 class HomepageTests(SimpleTestCase):
@@ -53,7 +54,7 @@ class LuftdatenStatisticsProxyTests(SimpleTestCase):
         mock_get.assert_called_once()
         self.assertEqual(
             mock_get.call_args.kwargs["timeout"],
-            LUFTDATEN_STATISTICS_REQUEST_TIMEOUT,
+            settings.LUFTDATEN_API_REQUEST_TIMEOUT,
         )
 
     @patch("pages.views.requests.get")

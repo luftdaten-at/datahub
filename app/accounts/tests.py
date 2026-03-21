@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse, resolve
 
+from main.pm25_colors import pm25_to_rgb
+
 
 class CustomUserTests(TestCase):
     def test_create_user(self):
@@ -25,6 +27,23 @@ class CustomUserTests(TestCase):
         self.assertTrue(admin_user.is_active)
         self.assertTrue(admin_user.is_staff)
         self.assertTrue(admin_user.is_superuser)
+
+
+class Pm25ToRgbTests(TestCase):
+    def test_missing_is_grey(self):
+        self.assertEqual(pm25_to_rgb(None), (128, 128, 128))
+
+    def test_band_boundaries_match_map_scale(self):
+        self.assertEqual(pm25_to_rgb(0), (80, 240, 230))
+        self.assertEqual(pm25_to_rgb(9.9), (80, 240, 230))
+        self.assertEqual(pm25_to_rgb(10), (80, 204, 170))
+        self.assertEqual(pm25_to_rgb(24.9), (240, 230, 65))
+        self.assertEqual(pm25_to_rgb(25), (255, 80, 80))
+        self.assertEqual(pm25_to_rgb(49.9), (255, 80, 80))
+        self.assertEqual(pm25_to_rgb(50), (150, 0, 50))
+        self.assertEqual(pm25_to_rgb(74.9), (150, 0, 50))
+        self.assertEqual(pm25_to_rgb(75), (125, 33, 129))
+        self.assertEqual(pm25_to_rgb(200), (125, 33, 129))
 
 
 class SignupPageTests(TestCase):
