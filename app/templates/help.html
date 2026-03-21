@@ -8,6 +8,133 @@
 {% endblock styles %}
 
 {% block content %}
-<h2 class="mb-4 mt-5">{% trans "Help" %}></h2>
-<p>.</p>
+<div class="container mt-5 mb-5">
+    <h1 class="mb-2">{% trans "Help" %}</h1>
+    <p class="text-muted mb-4">{% trans "Frequently asked questions" %}</p>
+
+    {% if can_edit_faq %}
+    <div class="alert alert-secondary mb-3" role="status">
+        {% trans "You can reorder entries using the drag handle, or add, edit, and delete questions." %}
+    </div>
+    <button type="button" class="btn btn-primary mb-3" id="faqAddBtn">
+        {% trans "Add question" %}
+    </button>
+    <div id="faq-edit-api" class="visually-hidden" aria-hidden="true"
+         data-reorder-url="{% url 'faq_api_reorder' %}"
+         data-create-url="{% url 'faq_api_create' %}"
+         data-detail-url-template="{% url 'faq_api_detail' pk=faq_api_detail_placeholder_pk %}"
+         data-detail-pk-placeholder="{{ faq_api_detail_placeholder_pk }}"
+         data-draft-label="{% trans 'Draft' %}"></div>
+    {{ faq_entries_data|json_script:"faq-entries-json" }}
+    {% endif %}
+
+    {% if faq_entries %}
+    <div class="accordion" id="faqAccordion">
+        {% for entry in faq_entries %}
+        <div class="accordion-item faq-accordion-item" data-entry-id="{{ entry.pk }}">
+            {% if can_edit_faq %}
+            <div class="d-flex align-items-stretch border-bottom">
+                <button type="button" class="btn btn-light border-0 rounded-0 faq-drag-handle px-2 py-3"
+                        aria-label="{% trans 'Drag to reorder' %}">
+                    <i class="bi bi-grip-vertical fs-4 text-muted" aria-hidden="true"></i>
+                </button>
+                <div class="flex-grow-1 min-w-0">
+                    <h2 class="accordion-header" id="faqHeading{{ entry.pk }}">
+                        <button class="accordion-button {% if not forloop.first %}collapsed{% endif %} text-start" type="button"
+                                data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ entry.pk }}"
+                                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                                aria-controls="faqCollapse{{ entry.pk }}">
+                            <span class="faq-question-text">{{ entry.question }}</span>
+                            {% if not entry.is_published %}
+                            <span class="badge bg-secondary ms-2">{% trans "Draft" %}</span>
+                            {% endif %}
+                        </button>
+                    </h2>
+                    <div id="faqCollapse{{ entry.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                         aria-labelledby="faqHeading{{ entry.pk }}" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            <div class="faq-answer-text" style="white-space: pre-line;">{{ entry.answer }}</div>
+                            <div class="mt-3 d-flex flex-wrap gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary faq-edit-btn" data-entry-id="{{ entry.pk }}">
+                                    {% trans "Edit" %}
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger faq-delete-btn" data-entry-id="{{ entry.pk }}"
+                                        data-confirm="{% trans 'Delete this FAQ entry?' %}">
+                                    {% trans "Delete" %}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <h2 class="accordion-header" id="faqHeading{{ entry.pk }}">
+                <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#faqCollapse{{ entry.pk }}"
+                        aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                        aria-controls="faqCollapse{{ entry.pk }}">
+                    {{ entry.question }}
+                </button>
+            </h2>
+            <div id="faqCollapse{{ entry.pk }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+                 aria-labelledby="faqHeading{{ entry.pk }}" data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    {{ entry.answer|linebreaksbr }}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% elif can_edit_faq %}
+    <p class="text-muted" id="faqStaffEmptyMsg">{% trans "No FAQ entries yet." %}</p>
+    <div class="accordion" id="faqAccordion"></div>
+    {% else %}
+    <div class="alert alert-info" role="status">
+        {% trans "No questions have been published yet. Please check back later." %}
+    </div>
+    {% endif %}
+</div>
+
+{% if can_edit_faq %}
+<div class="modal fade" id="faqEntryModal" tabindex="-1" aria-labelledby="faqEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="faqEntryModalLabel"
+                    data-add-title="{% trans 'Add FAQ entry' %}"
+                    data-edit-title="{% trans 'Edit FAQ entry' %}">{% trans "Add FAQ entry" %}</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger d-none" id="faqFormError" role="alert"></div>
+                <div class="mb-3">
+                    <label class="form-label" for="faqQuestionInput">{% trans "Question" %}</label>
+                    <input type="text" class="form-control" id="faqQuestionInput" maxlength="255" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="faqAnswerInput">{% trans "Answer" %}</label>
+                    <textarea class="form-control" id="faqAnswerInput" rows="8" required></textarea>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="faqPublishedInput" checked>
+                    <label class="form-check-label" for="faqPublishedInput">{% trans "Published" %}</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" id="faqSaveBtn">{% trans "Save" %}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endif %}
 {% endblock content %}
+
+{% block extra_js %}
+{% if can_edit_faq %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" crossorigin="anonymous"></script>
+<script src="{% static 'js/help-faq-edit.js' %}"></script>
+{% endif %}
+{% endblock extra_js %}

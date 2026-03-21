@@ -218,9 +218,65 @@ msgstr "Du bist nicht Mitglied einer Organisation."
 msgid "Create Organization"
 msgstr "Organisation erstellen"
 
-#: templates/account/dashboard.html:111 templates/help.html:5 templates/help.html:11
+#: templates/_base.html:113 templates/account/dashboard.html:111 templates/help.html:5 templates/help.html:11
 msgid "Help"
 msgstr "Hilfe"
+
+#: templates/help.html:13
+msgid "Frequently asked questions"
+msgstr "Häufig gestellte Fragen"
+
+#: templates/help.html:38
+msgid "No questions have been published yet. Please check back later."
+msgstr "Es wurden noch keine Fragen veröffentlicht. Bitte schauen Sie später wieder vorbei."
+
+#: templates/help.html:18
+msgid "You can reorder entries using the drag handle, or add, edit, and delete questions."
+msgstr "Sie können Einträge über den Ziehpunkt sortieren oder Fragen hinzufügen, bearbeiten und löschen."
+
+#: templates/help.html:21
+msgid "Add question"
+msgstr "Frage hinzufügen"
+
+#: templates/help.html:36
+msgid "Drag to reorder"
+msgstr "Zum Sortieren ziehen"
+
+#: templates/help.html:49 templates/help.html:28
+msgid "Draft"
+msgstr "Entwurf"
+
+#: templates/help.html:85
+msgid "No FAQ entries yet."
+msgstr "Noch keine FAQ-Einträge."
+
+#: templates/help.html:66
+msgid "Delete this FAQ entry?"
+msgstr "Diesen FAQ-Eintrag löschen?"
+
+#: templates/help.html:99 templates/help.html:101
+msgid "Add FAQ entry"
+msgstr "FAQ-Eintrag hinzufügen"
+
+#: templates/help.html:102
+msgid "Edit FAQ entry"
+msgstr "FAQ-Eintrag bearbeiten"
+
+#: templates/help.html:107
+msgid "Question"
+msgstr "Frage"
+
+#: templates/help.html:111
+msgid "Answer"
+msgstr "Antwort"
+
+#: templates/help.html:115
+msgid "Published"
+msgstr "Veröffentlicht"
+
+#: templates/help.html:100
+msgid "Close"
+msgstr "Schließen"
 
 #: templates/account/dashboard.html:112
 msgid "Here you can find FAQs and support if you run into issues."

@@ -86,7 +86,7 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="content-wrapper" style="padding-top: 50px;">  {# Added top padding to avoid fixed navbar overlap #}
+    <div class="content-wrapper">
         {% block map %}{% endblock map %}
         <div class="container">
             {% block content %}
@@ -106,6 +106,9 @@
                             </li>
                             <li class="list-inline-item">
                                 <a href="https://luftdaten.at/impressum/" class="text-white">{% trans "About Us" %}</a>
+                            </li>
+                            <li class="list-inline-item">
+                                <a href="{% url 'help' %}" class="text-white">{% trans "Help" %}</a>
                             </li>
                         </ul>
                     </div>
@@ -128,11 +131,12 @@
             </nav>
         </div>
     </footer>
-    <img referrerpolicy="no-referrer-when-downgrade" src="https://matomo.luftdaten.at/matomo.php?idsite=2&amp;rec=1" style="border:0" alt="" />
+    <img class="analytics-pixel" referrerpolicy="no-referrer-when-downgrade" src="https://matomo.luftdaten.at/matomo.php?idsite=2&amp;rec=1" width="1" height="1" style="border:0" alt="" />
     <!-- Bootstrap JavaScript (Bundle includes Popper) -->
     <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
     <!-- Custom JavaScript -->
     <script src="{% static 'js/base.js' %}"></script>
+    {% block extra_js %}{% endblock extra_js %}
     <!-- SensorModel and Dimension JS classes for frontend use -->
     <script>
     class SensorModel {
