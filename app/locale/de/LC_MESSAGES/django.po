@@ -1006,6 +1006,10 @@ msgstr "Feinstaub"
 msgid "Method: European Air Quality Index"
 msgstr "Methode: European Air Quality Index"
 
+#: templates/home.html:38
+msgid "Loading station data"
+msgstr "Messstationsdaten werden geladen"
+
 #: templates/cities/detail.html:75 templates/cities/detail.html:83
 #: templates/cities/detail.html:91 templates/home.html:158
 #: templates/home.html:166 templates/home.html:174
