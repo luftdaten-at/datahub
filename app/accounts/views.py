@@ -12,10 +12,13 @@ from .forms import CustomUserCreationForm, CustomUserEditForm
 from .models import CustomUser
 from organizations.models import OrganizationInvitation
 from workshops.models import Workshop, WorkshopInvitation
-from cities.models import FavoriteCity
+from municipalities.models import FavoriteMunicipality
 from stations.models import FavoriteStation
 
-from .dashboard_air import build_favorite_city_rows, build_favorite_station_rows
+from .dashboard_air import (
+    build_favorite_municipality_rows,
+    build_favorite_station_rows,
+)
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
@@ -39,11 +42,15 @@ def DashboardView(request):
     If the user is not authenticated, display the login form.
     """
     if request.user.is_authenticated:
-        favorite_cities = FavoriteCity.objects.filter(user=request.user)
+        favorite_municipalities = FavoriteMunicipality.objects.filter(
+            user=request.user
+        )
         favorite_stations = FavoriteStation.objects.filter(user=request.user)
         context = {
             "user": request.user,
-            "favorite_city_rows": build_favorite_city_rows(favorite_cities),
+            "favorite_municipality_rows": build_favorite_municipality_rows(
+                favorite_municipalities
+            ),
             "favorite_station_rows": build_favorite_station_rows(favorite_stations),
         }
 

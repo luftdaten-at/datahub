@@ -90,7 +90,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'api.apps.ApiConfig',
     'campaign.apps.CampaignConfig',
-    'cities.apps.CitiesConfig',
+    'municipalities.apps.MunicipalitiesConfig',
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
     'stations.apps.StationsConfig',

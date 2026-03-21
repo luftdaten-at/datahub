@@ -8,14 +8,14 @@
 <div class="container mt-5">
     <h2 class="mb-4">{% trans "Welcome," %} {{ user.email }}</h2>
 
-    <!-- Row for favourite cities and favourite stations -->
+    <!-- Row for favourite municipalities and favourite stations -->
     <div class="row mb-4">
-        <!-- Favourite cities -->
+        <!-- Favourite municipalities -->
         <div class="col-lg-6 mb-4">
-            <h3><i class="bi bi-star-fill"></i> {% trans "Favourite cities" %}</h3>
-            {% if favorite_city_rows %}
+            <h3><i class="bi bi-star-fill"></i> {% trans "Favourite municipalities" %}</h3>
+            {% if favorite_municipality_rows %}
                 <div class="list-group list-group-flush gap-2">
-                    {% for row in favorite_city_rows %}
+                    {% for row in favorite_municipality_rows %}
                     <a href="{{ row.url }}"
                        class="list-group-item list-group-item-action text-dark text-decoration-none d-block rounded border py-3 px-3"
                        style="background-color: rgb({{ row.r }}, {{ row.g }}, {{ row.b }});">
@@ -28,9 +28,9 @@
                 </div>
             {% else %}
                 <div class="alert alert-info mt-3" role="alert">
-                    {% trans "No favourite cities yet." %}
+                    {% trans "No favourite municipalities yet." %}
                 </div>
-                <a href="{% url 'cities-list' %}" class="btn btn-sm btn-outline-primary">{% trans "Browse cities" %}</a>
+                <a href="{% url 'municipalities-list' %}" class="btn btn-sm btn-outline-primary">{% trans "Browse municipalities" %}</a>
             {% endif %}
         </div>
 
