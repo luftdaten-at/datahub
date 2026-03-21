@@ -1,12 +1,15 @@
+import json
 from unittest.mock import Mock, patch
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.test import SimpleTestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import resolve, reverse
 from requests.exceptions import RequestException
 
-from .views import HomePageView
+from .models import FAQEntry
+from .views import HelpPageView, HomePageView
 
 
 class HomepageTests(SimpleTestCase):
@@ -91,3 +94,165 @@ class LuftdatenStatisticsProxyTests(SimpleTestCase):
             reverse("luftdaten_statistics_proxy"),
             "/proxy/luftdaten-statistics/",
         )
+
+
+class HelpPageTests(TestCase):
+    def test_help_page_200(self):
+        response = self.client.get(reverse("help"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "help.html")
+
+    def test_help_empty_faq_message(self):
+        response = self.client.get(reverse("help"))
+        self.assertContains(
+            response, "No questions have been published yet", html=False
+        )
+
+    def test_help_lists_published_faq_only(self):
+        FAQEntry.objects.create(
+            question="Public Q?",
+            answer="Public A.",
+            sort_order=1,
+            is_published=True,
+        )
+        FAQEntry.objects.create(
+            question="Draft Q",
+            answer="Draft A",
+            sort_order=0,
+            is_published=False,
+        )
+        response = self.client.get(reverse("help"))
+        self.assertContains(response, "Public Q?")
+        self.assertContains(response, "Public A.")
+        self.assertNotContains(response, "Draft Q")
+
+    def test_help_url_resolves_helppageview(self):
+        match = resolve("/help")
+        self.assertEqual(match.func.view_class, HelpPageView)
+
+    def test_help_staff_sees_unpublished_faq(self):
+        User = get_user_model()
+        staff = User.objects.create_user(
+            username="faqstaff",
+            email="faqstaff@example.com",
+            password="secret",
+            is_staff=True,
+        )
+        FAQEntry.objects.create(
+            question="Public Q?",
+            answer="Public A.",
+            sort_order=0,
+            is_published=True,
+        )
+        FAQEntry.objects.create(
+            question="Draft Q",
+            answer="Draft A",
+            sort_order=1,
+            is_published=False,
+        )
+        self.client.force_login(staff)
+        response = self.client.get(reverse("help"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Public Q?")
+        self.assertContains(response, "Draft Q")
+
+
+class FAQAPITests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.staff = User.objects.create_user(
+            username="apistaff",
+            email="apistaff@example.com",
+            password="secret",
+            is_staff=True,
+        )
+        self.regular = User.objects.create_user(
+            username="apiuser",
+            email="apiuser@example.com",
+            password="secret",
+            is_staff=False,
+        )
+
+    def test_reorder_requires_staff(self):
+        a = FAQEntry.objects.create(question="a", answer="a", sort_order=0)
+        b = FAQEntry.objects.create(question="b", answer="b", sort_order=1)
+        url = reverse("faq_api_reorder")
+        body = json.dumps({"order": [b.pk, a.pk]})
+
+        response = self.client.post(url, data=body, content_type="application/json")
+        self.assertEqual(response.status_code, 403)
+
+        self.client.force_login(self.regular)
+        response = self.client.post(url, data=body, content_type="application/json")
+        self.assertEqual(response.status_code, 403)
+
+    def test_reorder_staff_updates_sort_order(self):
+        a = FAQEntry.objects.create(question="a", answer="a", sort_order=0)
+        b = FAQEntry.objects.create(question="b", answer="b", sort_order=1)
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse("faq_api_reorder"),
+            data=json.dumps({"order": [b.pk, a.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"ok": True})
+        a.refresh_from_db()
+        b.refresh_from_db()
+        self.assertEqual(a.sort_order, 1)
+        self.assertEqual(b.sort_order, 0)
+
+    def test_reorder_rejects_incomplete_id_list(self):
+        FAQEntry.objects.create(question="a", answer="a", sort_order=0)
+        b = FAQEntry.objects.create(question="b", answer="b", sort_order=1)
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse("faq_api_reorder"),
+            data=json.dumps({"order": [b.pk]}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_create_staff(self):
+        self.client.force_login(self.staff)
+        response = self.client.post(
+            reverse("faq_api_create"),
+            data=json.dumps(
+                {
+                    "question": "New?",
+                    "answer": "Yes.",
+                    "is_published": True,
+                }
+            ),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 201)
+        data = response.json()
+        self.assertTrue(data["ok"])
+        self.assertEqual(data["entry"]["question"], "New?")
+        entry = FAQEntry.objects.get(pk=data["entry"]["id"])
+        self.assertEqual(entry.updated_by, self.staff)
+
+    def test_patch_staff(self):
+        entry = FAQEntry.objects.create(
+            question="Old?", answer="Old.", sort_order=0, is_published=True
+        )
+        self.client.force_login(self.staff)
+        response = self.client.patch(
+            reverse("faq_api_detail", kwargs={"pk": entry.pk}),
+            data=json.dumps({"question": "New Q"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        entry.refresh_from_db()
+        self.assertEqual(entry.question, "New Q")
+        self.assertEqual(entry.updated_by, self.staff)
+
+    def test_delete_staff(self):
+        entry = FAQEntry.objects.create(question="x", answer="y", sort_order=0)
+        self.client.force_login(self.staff)
+        response = self.client.delete(
+            reverse("faq_api_detail", kwargs={"pk": entry.pk}),
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(FAQEntry.objects.filter(pk=entry.pk).exists())
