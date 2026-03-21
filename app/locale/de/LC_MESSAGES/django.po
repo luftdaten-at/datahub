@@ -1616,6 +1616,90 @@ msgstr "Schreibe einige Zeilen über den Workshop. Wo findet er statt? Ist er mi
 msgid "Should the workshop be publicly available on the Datahub? If not, only logged-in users with set permissions can see the results."
 msgstr "Soll der Workshop öffentlich auf dem Datahub verfügbar sein? Wenn nicht, können nur angemeldete Benutzer mit festgelegten Berechtigungen die Ergebnisse sehen."
 
+#: templates/account/dashboard.html:76
+msgid "Favourite stations"
+msgstr "Favoriten-Stationen"
+
+#: templates/account/dashboard.html:95
+msgid "No favourite stations yet."
+msgstr "Noch keine Favoriten-Stationen."
+
+#: templates/account/dashboard.html:98
+msgid "Browse stations"
+msgstr "Stationen anzeigen"
+
+#: templates/account/dashboard.html:101
+msgid "My organizations"
+msgstr "Meine Organisationen"
+
+#: templates/stations/detail.html:30
+msgid "Remove from favourites"
+msgstr "Aus Favoriten entfernen"
+
+#: templates/stations/detail.html:34
+msgid "Add to favourites"
+msgstr "Zu Favoriten hinzufügen"
+
+#: templates/stations/detail.html:40
+msgid "Log in to save this station to your favourites."
+msgstr "Melden Sie sich an, um diese Station als Favorit zu speichern."
+
+#: stations/views.py:40
+msgid "Invalid station."
+msgstr "Ungültige Station."
+
+#: stations/views.py:50
+msgid "Removed from favourite stations."
+msgstr "Aus den Favoriten entfernt."
+
+#: stations/views.py:53
+msgid "Added to favourite stations."
+msgstr "Zu den Favoriten hinzugefügt."
+
+#: templates/account/dashboard.html:15
+msgid "Favourite cities"
+msgstr "Favoriten-Städte"
+
+#: templates/account/dashboard.html:34
+msgid "No favourite cities yet."
+msgstr "Noch keine Favoriten-Städte."
+
+#: templates/account/dashboard.html:37
+msgid "Browse cities"
+msgstr "Städte anzeigen"
+
+#: templates/account/dashboard.html:40
+msgid "My campaigns"
+msgstr "Meine Messkampagnen"
+
+#: templates/cities/detail.html:54
+msgid "Remove city from favourites"
+msgstr "Stadt aus Favoriten entfernen"
+
+#: templates/cities/detail.html:58
+msgid "Add city to favourites"
+msgstr "Stadt zu Favoriten hinzufügen"
+
+#: templates/cities/detail.html:64
+msgid "Log in to save this city to your favourites."
+msgstr "Melden Sie sich an, um diese Stadt als Favorit zu speichern."
+
+#: cities/views.py:88
+msgid "Invalid city."
+msgstr "Ungültige Stadt."
+
+#: cities/views.py:97
+msgid "Removed from favourite cities."
+msgstr "Aus den Favoriten-Städten entfernt."
+
+#: cities/views.py:100
+msgid "Added to favourite cities."
+msgstr "Zu den Favoriten-Städten hinzugefügt."
+
+#: templates/account/dashboard.html:24 templates/account/dashboard.html:48
+msgid "PM2.5"
+msgstr "PM2.5"
+
 #~ msgid "We have sent you an email. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes."
 #~ msgstr ""
 #~ "Wir haben Ihnen eine E-Mail gesendet. Wenn Sie diese nicht erhalten haben, überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, wenn Sie sie nicht innerhalb "

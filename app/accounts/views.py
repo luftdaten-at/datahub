@@ -10,9 +10,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 
 from .forms import CustomUserCreationForm, CustomUserEditForm
 from .models import CustomUser
-from organizations.models import Organization, OrganizationInvitation
+from organizations.models import OrganizationInvitation
 from workshops.models import Workshop, WorkshopInvitation
-from campaign.models import Campaign
+from cities.models import FavoriteCity
+from stations.models import FavoriteStation
+
+from .dashboard_air import build_favorite_city_rows, build_favorite_station_rows
 
 
 class AccountDeleteView(LoginRequiredMixin, DeleteView):
@@ -36,16 +39,13 @@ def DashboardView(request):
     If the user is not authenticated, display the login form.
     """
     if request.user.is_authenticated:
+        favorite_cities = FavoriteCity.objects.filter(user=request.user)
+        favorite_stations = FavoriteStation.objects.filter(user=request.user)
         context = {
-            'user': request.user,
-            'member_campaigns': Campaign.objects.filter(users=request.user),
-            'owner_campaigns': Campaign.objects.filter(owner=request.user),
-            'member_organizations': Organization.objects.filter(users=request.user),
-            'owner_organizations': Organization.objects.filter(owner=request.user),
+            "user": request.user,
+            "favorite_city_rows": build_favorite_city_rows(favorite_cities),
+            "favorite_station_rows": build_favorite_station_rows(favorite_stations),
         }
-
-        context['campaigns'] = Campaign.objects.all() if request.user.is_superuser else context['member_campaigns']
-        context['organizations'] = context['member_organizations'] if not request.user.is_superuser else Organization.objects.all()
 
         return render(request, "account/dashboard.html", context)
     else:

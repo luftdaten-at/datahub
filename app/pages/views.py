@@ -1,6 +1,7 @@
 import logging
 
 import requests
+from django.conf import settings
 from django.core.cache import cache
 from django.http import JsonResponse
 from django.views import View
@@ -10,11 +11,6 @@ from requests.exceptions import RequestException
 from main.settings import API_URL
 
 logger = logging.getLogger(__name__)
-
-# Successful /statistics JSON is cached to limit load on api.luftdaten.at (browser polls via home page).
-LUFTDATEN_STATISTICS_CACHE_TIMEOUT = 3600  # 1 hour
-# Upstream can be slow on staging; (connect, read) in seconds.
-LUFTDATEN_STATISTICS_REQUEST_TIMEOUT = (15, 60)
 
 
 class HelpPageView(TemplateView):
@@ -58,10 +54,12 @@ class LuftdatenStatisticsProxyView(View):
 
         url = f"{API_URL}/statistics"
         try:
-            response = requests.get(url, timeout=LUFTDATEN_STATISTICS_REQUEST_TIMEOUT)
+            response = requests.get(
+                url, timeout=settings.LUFTDATEN_API_REQUEST_TIMEOUT
+            )
             response.raise_for_status()
             data = response.json()
-            cache.set(cache_key, data, LUFTDATEN_STATISTICS_CACHE_TIMEOUT)
+            cache.set(cache_key, data, settings.LUFTDATEN_API_JSON_CACHE_TTL)
             return JsonResponse(data)
         except (RequestException, ValueError, TypeError) as e:
             logger.warning("Luftdaten statistics proxy failed: %s", e)
