@@ -54,6 +54,43 @@ html {
     width: 100vw;
 }
 
+.home-map-wrap {
+    position: relative;
+}
+
+.home-map-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 500;
+}
+
+.home-map-loading-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem;
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.12);
+}
+
+.home-map-loading-spinner {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-width: 0.2em;
+}
+
+.home-map-loading-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
 #infobox {
     height: 100vh;
     padding-top: 15vh;
