@@ -91,13 +91,13 @@ msgstr "Navigation umschalten"
 msgid "Workshops"
 msgstr "Workshops"
 
-#: templates/_base.html:51 templates/cities/list.html:227
+#: templates/_base.html:51
 msgid "Stations"
 msgstr "Stationen"
 
-#: templates/_base.html:54
-msgid "Cities"
-msgstr "Städte"
+#: templates/_base.html:43 templates/municipalities/list.html:5 templates/municipalities/list.html:66
+msgid "Municipalities"
+msgstr "Gemeinden"
 
 #: templates/_base.html:67 templates/account/dashboard.html:6
 msgid "Dashboard"
@@ -684,7 +684,7 @@ msgstr "Erstelle einen Raum"
 msgid "Current measurements"
 msgstr "Momentane Messwerte"
 
-#: templates/campaigns/detail.html:112 templates/campaigns/detail.html:166 templates/campaigns/my.html:105 templates/cities/list.html:173 templates/devices/my.html:25
+#: templates/campaigns/detail.html:112 templates/campaigns/detail.html:166 templates/campaigns/my.html:105 templates/municipalities/list.html:173 templates/devices/my.html:25
 #: templates/organizations/detail.html:320 templates/organizations/detail.html:395 templates/organizations/my.html:97 templates/workshops/my.html:30
 msgid "Details"
 msgstr "Details"
@@ -826,21 +826,21 @@ msgstr "Raum bearbeiten"
 msgid "Update Room"
 msgstr "Raum aktualisieren"
 
-#: templates/cities/detail.html:5
-msgid "City/municipality"
-msgstr "Stadt/Gemeinde"
+#: templates/municipalities/detail.html:5
+msgid "Municipality"
+msgstr "Gemeinde"
 
-#: templates/cities/detail.html:28 templates/cities/detail.html:29 templates/cities/detail.html:30 templates/home.html:29 templates/workshops/detail.html:36
+#: templates/municipalities/detail.html:28 templates/municipalities/detail.html:29 templates/municipalities/detail.html:30 templates/home.html:29 templates/workshops/detail.html:36
 msgid "Air quality"
 msgstr "Luftqualität"
 
-#: templates/cities/detail.html:28 templates/cities/detail.html:29 templates/cities/detail.html:30 templates/home.html:31 templates/home.html:32 templates/home.html:33
+#: templates/municipalities/detail.html:28 templates/municipalities/detail.html:29 templates/municipalities/detail.html:30 templates/home.html:31 templates/home.html:32 templates/home.html:33
 #: templates/stations/list.html:256 templates/stations/list.html:308 templates/stations/list.html:358 templates/workshops/detail.html:38 templates/workshops/detail.html:39
 #: templates/workshops/detail.html:40 templates/workshops/detail.html:558 templates/workshops/detail.html:559 templates/workshops/detail.html:560
 msgid "Particulate Matter"
 msgstr "Feinstaub"
 
-#: templates/cities/detail.html:39 templates/home.html:36 templates/stations/list.html:429
+#: templates/municipalities/detail.html:39 templates/home.html:36 templates/stations/list.html:429
 msgid "Method: European Air Quality Index"
 msgstr "Methode: European Air Quality Index"
 
@@ -848,55 +848,51 @@ msgstr "Methode: European Air Quality Index"
 msgid "Loading station data"
 msgstr "Messstationsdaten werden geladen"
 
-#: templates/cities/detail.html:75 templates/cities/detail.html:83 templates/cities/detail.html:91 templates/home.html:158 templates/home.html:166 templates/home.html:174
+#: templates/municipalities/detail.html:75 templates/municipalities/detail.html:83 templates/municipalities/detail.html:91 templates/home.html:158 templates/home.html:166 templates/home.html:174
 #: templates/stations/list.html:441 templates/stations/list.html:449 templates/stations/list.html:457 templates/workshops/detail.html:127 templates/workshops/detail.html:135
 #: templates/workshops/detail.html:143
 msgid "Good"
 msgstr "Gut"
 
-#: templates/cities/detail.html:76 templates/cities/detail.html:84 templates/cities/detail.html:92 templates/home.html:159 templates/home.html:167 templates/home.html:175
+#: templates/municipalities/detail.html:76 templates/municipalities/detail.html:84 templates/municipalities/detail.html:92 templates/home.html:159 templates/home.html:167 templates/home.html:175
 #: templates/stations/list.html:442 templates/stations/list.html:450 templates/stations/list.html:458 templates/workshops/detail.html:128 templates/workshops/detail.html:136
 #: templates/workshops/detail.html:144
 msgid "Fair"
 msgstr "Ausreichend"
 
-#: templates/cities/detail.html:77 templates/cities/detail.html:85 templates/cities/detail.html:93 templates/home.html:160 templates/home.html:168 templates/home.html:176
+#: templates/municipalities/detail.html:77 templates/municipalities/detail.html:85 templates/municipalities/detail.html:93 templates/home.html:160 templates/home.html:168 templates/home.html:176
 #: templates/stations/list.html:443 templates/stations/list.html:451 templates/stations/list.html:459 templates/workshops/detail.html:129 templates/workshops/detail.html:137
 #: templates/workshops/detail.html:145
 msgid "Moderate"
 msgstr "Mäßig"
 
-#: templates/cities/detail.html:78 templates/cities/detail.html:86 templates/cities/detail.html:94 templates/home.html:161 templates/home.html:169 templates/home.html:177
+#: templates/municipalities/detail.html:78 templates/municipalities/detail.html:86 templates/municipalities/detail.html:94 templates/home.html:161 templates/home.html:169 templates/home.html:177
 #: templates/stations/list.html:444 templates/stations/list.html:452 templates/stations/list.html:460 templates/workshops/detail.html:130 templates/workshops/detail.html:138
 #: templates/workshops/detail.html:146
 msgid "Poor"
 msgstr "Schlecht"
 
-#: templates/cities/detail.html:79 templates/cities/detail.html:87 templates/cities/detail.html:95 templates/home.html:162 templates/home.html:170 templates/home.html:178
+#: templates/municipalities/detail.html:79 templates/municipalities/detail.html:87 templates/municipalities/detail.html:95 templates/home.html:162 templates/home.html:170 templates/home.html:178
 #: templates/stations/list.html:445 templates/stations/list.html:453 templates/stations/list.html:461 templates/workshops/detail.html:131 templates/workshops/detail.html:139
 #: templates/workshops/detail.html:147
 msgid "Very poor"
 msgstr "Sehr schlecht"
 
-#: templates/cities/detail.html:80 templates/cities/detail.html:88 templates/cities/detail.html:96 templates/home.html:163 templates/home.html:171 templates/home.html:179
+#: templates/municipalities/detail.html:80 templates/municipalities/detail.html:88 templates/municipalities/detail.html:96 templates/home.html:163 templates/home.html:171 templates/home.html:179
 #: templates/stations/list.html:446 templates/stations/list.html:454 templates/stations/list.html:462 templates/workshops/detail.html:132 templates/workshops/detail.html:140
 #: templates/workshops/detail.html:148
 msgid "Extremely poor"
 msgstr "Extrem schlecht"
 
-#: templates/cities/list.html:5 templates/cities/list.html:66
-msgid "Cities and municipalities"
-msgstr "Städte und Gemeinden"
-
-#: templates/cities/list.html:172 templates/cities/list.html:226
+#: templates/municipalities/list.html:172 templates/municipalities/list.html:226
 msgid "Country"
 msgstr "Land"
 
-#: templates/cities/list.html:203
-msgid "Cities with Most Stations"
-msgstr "Städte mit den meisten Stationen"
+#: municipalities/views.py:168
+msgid "Municipalities with most stations"
+msgstr "Gemeinden mit den meisten Stationen"
 
-#: templates/cities/list.html:229
+#: templates/municipalities/list.html:229
 msgid "View Details"
 msgstr "Details anzeigen"
 
@@ -1713,44 +1709,44 @@ msgid "Added to favourite stations."
 msgstr "Zu den Favoriten hinzugefügt."
 
 #: templates/account/dashboard.html:15
-msgid "Favourite cities"
-msgstr "Favoriten-Städte"
+msgid "Favourite municipalities"
+msgstr "Favorisierte Gemeinden"
 
 #: templates/account/dashboard.html:34
-msgid "No favourite cities yet."
-msgstr "Noch keine Favoriten-Städte."
+msgid "No favourite municipalities yet."
+msgstr "Noch keine favorisierten Gemeinden."
 
 #: templates/account/dashboard.html:37
-msgid "Browse cities"
-msgstr "Städte anzeigen"
+msgid "Browse municipalities"
+msgstr "Gemeinden durchsuchen"
 
 #: templates/account/dashboard.html:40
 msgid "My campaigns"
 msgstr "Meine Messkampagnen"
 
-#: templates/cities/detail.html:54
-msgid "Remove city from favourites"
-msgstr "Stadt aus Favoriten entfernen"
+#: templates/municipalities/detail.html:54
+msgid "Remove municipality from favourites"
+msgstr "Gemeinde aus Favoriten entfernen"
 
-#: templates/cities/detail.html:58
-msgid "Add city to favourites"
-msgstr "Stadt zu Favoriten hinzufügen"
+#: templates/municipalities/detail.html:58
+msgid "Add municipality to favourites"
+msgstr "Gemeinde zu Favoriten hinzufügen"
 
-#: templates/cities/detail.html:64
-msgid "Log in to save this city to your favourites."
-msgstr "Melden Sie sich an, um diese Stadt als Favorit zu speichern."
+#: templates/municipalities/detail.html:64
+msgid "Log in to save this municipality to your favourites."
+msgstr "Melden Sie sich an, um diese Gemeinde als Favorit zu speichern."
 
-#: cities/views.py:88
-msgid "Invalid city."
-msgstr "Ungültige Stadt."
+#: municipalities/views.py:97
+msgid "Invalid municipality."
+msgstr "Ungültige Gemeinde."
 
-#: cities/views.py:97
-msgid "Removed from favourite cities."
-msgstr "Aus den Favoriten-Städten entfernt."
+#: municipalities/views.py:103
+msgid "Removed from favourite municipalities."
+msgstr "Aus den Favoriten-Gemeinden entfernt."
 
-#: cities/views.py:100
-msgid "Added to favourite cities."
-msgstr "Zu den Favoriten-Städten hinzugefügt."
+#: municipalities/views.py:110
+msgid "Added to favourite municipalities."
+msgstr "Zu den Favoriten-Gemeinden hinzugefügt."
 
 #: templates/account/dashboard.html:24 templates/account/dashboard.html:48
 msgid "PM2.5"

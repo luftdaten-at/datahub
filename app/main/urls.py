@@ -23,6 +23,7 @@ from django.conf import settings
 from debug_toolbar.toolbar import debug_toolbar_urls
 
 from accounts.views import DashboardView
+from municipalities.views import cities_legacy_redirect
 
 
 urlpatterns = [
@@ -37,7 +38,9 @@ urlpatterns = [
     path('', include('pages.urls')),
     path('api/', include('api.urls')),
     path('campaigns/', include('campaign.urls')),
-    path('cities/', include('cities.urls')),
+    path('cities/', cities_legacy_redirect),
+    path('cities/<path:remainder>', cities_legacy_redirect),
+    path('municipalities/', include('municipalities.urls')),
     path('devices/', include('devices.urls')),
     path('stations/', include('stations.urls')),
     path('workshops/', include('workshops.urls')),

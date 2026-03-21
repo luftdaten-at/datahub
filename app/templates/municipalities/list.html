@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "Cities and municipalities" %}{% endblock title %}
+{% block title %}{% trans "Municipalities" %}{% endblock title %}
 
 {% block styles %}
 <!-- D3.js -->
@@ -20,16 +20,16 @@
         stroke: #ccc;
         stroke-width: 1;
     }
-    .city-circle {
+    .municipality-circle {
         fill: #007bff;
         stroke: #fff;
         stroke-width: 2;
         cursor: pointer;
     }
-    .city-circle:hover {
+    .municipality-circle:hover {
         fill: #0056b3;
     }
-    .city-popup {
+    .municipality-popup {
         position: absolute;
         background-color: white;
         border: 1px solid #ccc;
@@ -40,11 +40,11 @@
         z-index: 1000;
         display: none;
     }
-    .city-popup h4 {
+    .municipality-popup h4 {
         margin-top: 0;
         margin-bottom: 8px;
     }
-    .city-popup .close-btn {
+    .municipality-popup .close-btn {
         position: absolute;
         top: 8px;
         right: 8px;
@@ -55,7 +55,7 @@
         color: #999;
         line-height: 1;
     }
-    .city-popup .close-btn:hover {
+    .municipality-popup .close-btn:hover {
         color: #333;
     }
 </style>
@@ -63,7 +63,7 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">{% trans "Cities and municipalities" %}</h2>
+    <h2 class="mb-4">{% trans "Municipalities" %}</h2>
 
     {% if error %}
       <div class="alert alert-danger" role="alert">
@@ -78,55 +78,57 @@
         </div>
     </div>
 
-    <!-- Top Cities by Station Count -->
-    <div class="row mb-4" id="top-cities-cards">
+    <!-- Top municipalities by station count -->
+    <div class="row mb-4" id="top-municipalities-cards">
         <!-- Cards will be populated by JavaScript -->
     </div>
-    
+
 </div>
 
 <script>
+    const municipalityDetailUrlTemplate = "{{ municipality_detail_url_template|escapejs }}";
+
     // Set up SVG
     const width = document.getElementById('map').clientWidth;
     const height = 500;
-    
+
     const svg = d3.select('#map')
         .append('svg')
         .attr('width', width)
         .attr('height', height);
-    
+
     // Set up projection
     const projection = d3.geoMercator();
     const path = d3.geoPath().projection(projection);
-    
+
     // Create popup
     const popup = d3.select('#map')
         .append('div')
-        .attr('class', 'city-popup')
+        .attr('class', 'municipality-popup')
         .style('display', 'none');
-    
+
     // Close popup when clicking outside
     d3.select('body').on('click', function(event) {
-        if (!event.target.closest('.city-popup') && !event.target.closest('.city-circle')) {
+        if (!event.target.closest('.municipality-popup') && !event.target.closest('.municipality-circle')) {
             popup.style('display', 'none');
         }
     });
-    
-    // City data from Django
-    const citiesData = {{ cities_json|safe }};
-    
-    // Load base layer GeoJSON and draw cities
+
+    // Municipality data from Django (API still returns "cities" key)
+    const municipalitiesData = {{ municipalities_json|safe }};
+
+    // Load base layer GeoJSON and draw municipalities
     Promise.all([
         d3.json("{% static 'img/laender_999_geo.json' %}"),
-        Promise.resolve(citiesData)
+        Promise.resolve(municipalitiesData)
     ])
     .then(function(results) {
         const geojson = results[0];
-        const cities = results[1];
-        
+        const municipalities = results[1];
+
         // Scale projection to fit the base layer
         projection.fitSize([width, height], geojson);
-        
+
         // Draw regions (base layer)
         svg.selectAll('.region')
             .data(geojson.features)
@@ -134,20 +136,20 @@
             .append('path')
             .attr('class', 'region')
             .attr('d', path);
-        
-        // Filter cities that have location data
-        const citiesWithLocation = cities.filter(function(city) {
-            return city.location && 
-                   (city.location.latitude !== null && city.location.latitude !== undefined) &&
-                   (city.location.longitude !== null && city.location.longitude !== undefined);
+
+        // Filter municipalities that have location data
+        const municipalitiesWithLocation = municipalities.filter(function(m) {
+            return m.location &&
+                   (m.location.latitude !== null && m.location.latitude !== undefined) &&
+                   (m.location.longitude !== null && m.location.longitude !== undefined);
         });
-        
-        // Draw city circles
-        svg.selectAll('.city-circle')
-            .data(citiesWithLocation)
+
+        // Draw circles
+        svg.selectAll('.municipality-circle')
+            .data(municipalitiesWithLocation)
             .enter()
             .append('circle')
-            .attr('class', 'city-circle')
+            .attr('class', 'municipality-circle')
             .attr('cx', function(d) {
                 const projected = projection([d.location.longitude, d.location.latitude]);
                 return projected ? projected[0] : null;
@@ -159,18 +161,20 @@
             .attr('r', 10)
             .on('click', function(event, d) {
                 event.stopPropagation();
-                
+
                 // Get click position relative to map
                 const mapRect = document.getElementById('map').getBoundingClientRect();
                 const x = event.clientX - mapRect.left;
                 const y = event.clientY - mapRect.top;
-                
+
+                const detailUrl = municipalityDetailUrlTemplate.replace('__SLUG__', d.slug);
+
                 // Update popup content
                 popup.html(`
-                    <button class="close-btn" onclick="d3.select('.city-popup').style('display', 'none')">&times;</button>
+                    <button class="close-btn" onclick="d3.select('.municipality-popup').style('display', 'none')">&times;</button>
                     <h4>${d.name}</h4>
                     <p><strong>{% trans "Country" %}:</strong> ${d.country.name}</p>
-                    <a href="/cities/${d.slug}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
+                    <a href="${detailUrl}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
                 `)
                 .style('left', `${x + 10}px`)
                 .style('top', `${y - popup.node().offsetHeight / 2}px`)
@@ -180,64 +184,60 @@
     .catch(function(error) {
         console.error('Error loading map:', error);
     });
-    
-    // Top cities data from statistics endpoint
-    const topCitiesData = {{ top_cities_json|safe }};
-    
+
+    // Top municipalities (statistics API still uses top_cities)
+    const topMunicipalitiesData = {{ top_municipalities_json|safe }};
+
     // Translations from Django
     const translations = {{ translations_json|safe }};
-    
-    // Display top 4 cities by station count
-    function displayTopCities(topCities) {
-        // Take top 4 (they should already be sorted from the API)
-        const top4 = topCities.slice(0, 4);
-        
+
+    function displayTopMunicipalities(topList) {
+        const top4 = topList.slice(0, 4);
+
         if (top4.length === 0) {
             return;
         }
-        
-        // Create cards
-        const cardsContainer = d3.select('#top-cities-cards');
-        
-        // Add heading
+
+        const cardsContainer = d3.select('#top-municipalities-cards');
+
         cardsContainer.append('div')
             .attr('class', 'col-12 mb-3')
             .append('h3')
-            .text(translations.cities_with_most_stations);
-        
-        top4.forEach(function(city, index) {
+            .text(translations.municipalities_with_most_stations);
+
+        top4.forEach(function(row) {
             const col = cardsContainer.append('div')
                 .attr('class', 'col-md-3 col-sm-6 mb-3');
-            
-            // Find city slug from citiesData if available
-            let citySlug = city.city.toLowerCase().replace(/\s+/g, '-');
-            if (typeof citiesData !== 'undefined' && citiesData) {
-                const matchingCity = citiesData.find(function(c) {
-                    return c.name === city.city;
+
+            let municipalitySlug = row.city.toLowerCase().replace(/\s+/g, '-');
+            if (typeof municipalitiesData !== 'undefined' && municipalitiesData) {
+                const matching = municipalitiesData.find(function(m) {
+                    return m.name === row.city;
                 });
-                if (matchingCity && matchingCity.slug) {
-                    citySlug = matchingCity.slug;
+                if (matching && matching.slug) {
+                    municipalitySlug = matching.slug;
                 }
             }
-            
+
+            const detailUrl = municipalityDetailUrlTemplate.replace('__SLUG__', municipalitySlug);
+
             col.append('div')
                 .attr('class', 'card h-100 shadow-sm')
                 .html(`
                     <div class="card-body">
-                        <h5 class="card-title">${city.city}</h5>
+                        <h5 class="card-title">${row.city}</h5>
                         <p class="card-text">
-                            <strong>${translations.country}:</strong> ${city.country}<br>
-                            <strong>${translations.stations}:</strong> ${city.station_count || 0}
+                            <strong>${translations.country}:</strong> ${row.country}<br>
+                            <strong>${translations.stations}:</strong> ${row.station_count || 0}
                         </p>
-                        <a href="/cities/${citySlug}" class="btn btn-primary btn-sm">${translations.view_details}</a>
+                        <a href="${detailUrl}" class="btn btn-primary btn-sm">${translations.view_details}</a>
                     </div>
                 `);
         });
     }
-    
-    // Call displayTopCities when data is available
-    if (typeof topCitiesData !== 'undefined' && topCitiesData && topCitiesData.length > 0) {
-        displayTopCities(topCitiesData);
+
+    if (typeof topMunicipalitiesData !== 'undefined' && topMunicipalitiesData && topMunicipalitiesData.length > 0) {
+        displayTopMunicipalities(topMunicipalitiesData);
     }
 </script>
 {% endblock content %}

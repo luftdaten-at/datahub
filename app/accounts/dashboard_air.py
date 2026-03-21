@@ -1,5 +1,5 @@
 """
-Resolve current PM2.5 for dashboard favourite cities/stations (Luftdaten API).
+Resolve current PM2.5 for dashboard favourite municipalities/stations (Luftdaten API).
 """
 
 import logging
@@ -69,9 +69,9 @@ def fetch_station_pm25_map(station_ids: List[str]) -> Dict[str, Optional[float]]
     return {str(sid): by_dev.get(str(sid)) for sid in station_ids}
 
 
-def fetch_city_pm25_and_name(city_slug: str) -> Tuple[str, Optional[float]]:
-    """GET /city/current — returns (display_name, pm25 or None)."""
-    slug = str(city_slug).strip()
+def fetch_municipality_pm25_and_name(municipality_slug: str) -> Tuple[str, Optional[float]]:
+    """GET /city/current — returns (display_name, pm25 or None). API uses city_slug param."""
+    slug = str(municipality_slug).strip()
     url = f"{settings.API_URL}/city/current"
     params = {"city_slug": slug}
     try:
@@ -83,7 +83,7 @@ def fetch_city_pm25_and_name(city_slug: str) -> Tuple[str, Optional[float]]:
         resp.raise_for_status()
         data = resp.json()
     except (requests.RequestException, ValueError, TypeError) as e:
-        logger.warning("Dashboard city PM2.5 fetch failed for %s: %s", slug, e)
+        logger.warning("Dashboard municipality PM2.5 fetch failed for %s: %s", slug, e)
         return slug, None
 
     properties = data.get("properties") or {}
@@ -125,16 +125,16 @@ def build_favorite_station_rows(favorites) -> List[dict]:
     return rows
 
 
-def build_favorite_city_rows(favorites) -> List[dict]:
-    """favorites: queryset of FavoriteCity (ordered)."""
+def build_favorite_municipality_rows(favorites) -> List[dict]:
+    """favorites: queryset of FavoriteMunicipality (ordered)."""
     rows = []
     for fav in favorites:
-        slug = str(fav.city_slug)
-        name, pm = fetch_city_pm25_and_name(slug)
+        slug = str(fav.municipality_slug)
+        name, pm = fetch_municipality_pm25_and_name(slug)
         r, g, b = pm25_to_rgb(pm)
         rows.append(
             {
-                "url": reverse("cities-detail", kwargs={"pk": slug}),
+                "url": reverse("municipalities-detail", kwargs={"pk": slug}),
                 "label": name,
                 "pm25": pm,
                 "r": r,

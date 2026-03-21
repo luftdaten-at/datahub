@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{% trans "City/municipality" %}: {{ city.name }}{% endblock title %}
+{% block title %}{% trans "Municipality" %}: {{ municipality.name }}{% endblock title %}
 
 {% block styles %}
 <!-- Leaflet CSS -->
@@ -46,31 +46,31 @@
 
 <div class="row">
   <div class="col-lg-12 mt-3">
-    <h1>{{ city.name }}</h1>
+    <h1>{{ municipality.name }}</h1>
     {% if user.is_authenticated %}
-    <form method="post" action="{% url 'city-favorite-toggle' city_slug %}" class="mb-3">
+    <form method="post" action="{% url 'municipality-favorite-toggle' municipality_slug %}" class="mb-3">
       {% csrf_token %}
       {% if is_favorite %}
       <button type="submit" class="btn btn-outline-danger btn-sm">
-        <i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Remove city from favourites" %}
+        <i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Remove municipality from favourites" %}
       </button>
       {% else %}
       <button type="submit" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-star" aria-hidden="true"></i> {% trans "Add city to favourites" %}
+        <i class="bi bi-star" aria-hidden="true"></i> {% trans "Add municipality to favourites" %}
       </button>
       {% endif %}
     </form>
     {% else %}
     <p class="small text-muted mb-3">
-      <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this city to your favourites." %}</a>
+      <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this municipality to your favourites." %}</a>
     </p>
     {% endif %}
   </div>
-</div>  
+</div>
 <div class="row">
-  <p>Es gibt {{ city.station_count }} Citizen Science Stationen in {{ city.name }}. Bitte beachten Sie, dass einzelne Messstationen durch ungünstige Aufstellorte die Mittelwerte verfälschen können. In unserer <a href="https://luftdaten.at/datahub-methodik/">Methodik</a> setzen wir jedoch gezielte statistische Verfahren ein, um diese Einflüsse so gut wie möglich zu korrigieren.</p>
+  <p>Es gibt {{ municipality.station_count }} Citizen Science Stationen in {{ municipality.name }}. Bitte beachten Sie, dass einzelne Messstationen durch ungünstige Aufstellorte die Mittelwerte verfälschen können. In unserer <a href="https://luftdaten.at/datahub-methodik/">Methodik</a> setzen wir jedoch gezielte statistische Verfahren ein, um diese Einflüsse so gut wie möglich zu korrigieren.</p>
   <h3>Mittelwerte der letzten Stunde (1h-Mittelwert)</h3>
-  {% for value in city.values %}
+  {% for value in municipality.values %}
   {% if value.dimension in "PM1.0,PM2.5,PM10.0,Humidity,Temperature" %}
   <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
     <div class="card text-center">
@@ -86,6 +86,8 @@
 </div>
 
 <script>
+    function createHeatmaps() {}
+
     // Farbdefinitionen für die PM-Werte (jetzt direkt in RGB)
     // Du kannst hier selbstverständlich andere Farben einsetzen.
     const colorStepsPM1 = [
@@ -185,7 +187,7 @@
     }
 
     // Leaflet-Karte (Ausschnitt, Tiles etc.) – dein vorhandener Code
-    var map = L.map('map').setView([{{ city.coordinates.1|stringformat:"f" }}, {{ city.coordinates.0|stringformat:"f" }}], 13);
+    var map = L.map('map').setView([{{ municipality.coordinates.1|stringformat:"f" }}, {{ municipality.coordinates.0|stringformat:"f" }}], 13);
     const tiles = L.tileLayer('https://mapsneu.wien.gv.at/basemap/bmapgrau/{type}/google3857/{z}/{y}/{x}.{format}', {
         maxZoom: 19,
         attribution: 'Datenquelle: basemap.at',
@@ -252,14 +254,14 @@
                     html: `
                         <div class="clickable"
                              style="
-                                height: 3.5em; 
-                                width: 3.5em; 
-                                background-color: ${colorString}; 
-                                border-radius: 50%; 
-                                display: flex; 
-                                align-items: center; 
-                                justify-content: center; 
-                                font-size: 10pt; 
+                                height: 3.5em;
+                                width: 3.5em;
+                                background-color: ${colorString};
+                                border-radius: 50%;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                font-size: 10pt;
                                 border: 1px solid white;
                              ">
                              <span style="color: ${textColor};">${displayValue}</span>
@@ -283,13 +285,13 @@
             const html = `
                 <a class="hiddenlink clickable" href="/stations/${station.stationID}">
                     <div style="
-                        height: 3.5em; 
-                        width: 3.5em; 
-                        background-color: ${colorString}; 
-                        border-radius: 50%; 
-                        display: flex; 
-                        align-items: center; 
-                        justify-content: center; 
+                        height: 3.5em;
+                        width: 3.5em;
+                        background-color: ${colorString};
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                         font-size: 10pt;
                     ">
                         <span style="color: ${textColor};">
