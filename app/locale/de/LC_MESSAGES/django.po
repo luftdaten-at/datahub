@@ -286,17 +286,61 @@ msgstr "Hier finden Sie FAQs und Support, falls Probleme auftreten."
 msgid "View Help"
 msgstr "Hilfe anschauen"
 
-#: templates/account/dashboard.html:116 templates/documentation.html:5 templates/documentation.html:11
+#: templates/account/dashboard.html:70 templates/documentation.html:5 templates/documentation.html:11
 msgid "Documentation"
 msgstr "Dokumentation"
 
-#: templates/account/dashboard.html:117
+#: templates/account/dashboard.html:71
 msgid "Read detailed guides and manuals to make the most out of our platform."
 msgstr "Lesen Sie ausführliche Anleitungen und Handbücher, um das Beste aus unserer Plattform herauszuholen."
 
-#: templates/account/dashboard.html:118
+#: templates/account/dashboard.html:72
 msgid "View Docs"
 msgstr "Dokumentation anzeigen"
+
+#: templates/documentation.html:13
+msgid "Official step-by-step guides on Luftdaten.at for the mobile app, this Datahub, and the Air Station device."
+msgstr "Offizielle Schritt-für-Schritt-Anleitungen auf Luftdaten.at zur mobilen App, zu diesem Datahub und zur Air Station."
+
+#: templates/documentation.html:24
+msgid "Open guide"
+msgstr "Zur Anleitung"
+
+#: pages/views.py:168
+msgid "App"
+msgstr "App"
+
+#: pages/views.py:170
+msgid ""
+"Step-by-step guides for the Luftdaten.at mobile app, including exporting "
+"measurements as JSON or CSV."
+msgstr ""
+"Schritt-für-Schritt-Anleitungen zur Luftdaten.at-App, inklusive Export der "
+"Messungen als JSON oder CSV."
+
+#: pages/views.py:176
+msgid "Datahub"
+msgstr "Datahub"
+
+#: pages/views.py:178
+msgid ""
+"Instructions for using the Datahub on the web: explore data, devices, and "
+"citizen science features."
+msgstr ""
+"Anleitung zur Nutzung des Datahub im Web: Daten, Geräte und Citizen-Science-"
+"Funktionen erkunden."
+
+#: pages/views.py:184
+msgid "Air Station"
+msgstr "Air Station"
+
+#: pages/views.py:186
+msgid ""
+"Assembly, configuration, and WiFi setup for the Air Station 3 measuring "
+"device."
+msgstr ""
+"Zusammenbau, Konfiguration und WLAN-Einrichtung der Messstation Air Station "
+"3."
 
 #: templates/account/data_confirm_delete.html:8
 msgid "Delete Your Data"

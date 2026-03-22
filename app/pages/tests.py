@@ -9,7 +9,7 @@ from django.urls import resolve, reverse
 from requests.exceptions import RequestException
 
 from .models import FAQEntry
-from .views import HelpPageView, HomePageView
+from .views import DocumentationPageView, HelpPageView, HomePageView
 
 
 class HomepageTests(SimpleTestCase):
@@ -256,3 +256,27 @@ class FAQAPITests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertFalse(FAQEntry.objects.filter(pk=entry.pk).exists())
+
+
+class DocumentationPageTests(SimpleTestCase):
+    def test_documentation_get_200(self):
+        response = self.client.get(reverse("documentation"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "documentation.html")
+
+    def test_documentation_includes_external_guide_links(self):
+        response = self.client.get(reverse("documentation"))
+        self.assertContains(
+            response, "https://luftdaten.at/anleitungen/anleitung-app/"
+        )
+        self.assertContains(
+            response, "https://luftdaten.at/anleitungen/anleitung-datahub/"
+        )
+        self.assertContains(
+            response,
+            "https://luftdaten.at/anleitungen/anleitung-air-station-3-wifi/",
+        )
+
+    def test_documentation_url_resolves_documentationpageview(self):
+        match = resolve("/documentation")
+        self.assertEqual(match.func.view_class, DocumentationPageView)
