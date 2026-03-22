@@ -8,6 +8,7 @@ from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
 from requests.exceptions import RequestException
@@ -161,7 +162,33 @@ class DocumentationPageView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['host'] = self.request.get_host()
+        context["host"] = self.request.get_host()
+        context["documentation_sections"] = [
+            {
+                "title": _("App"),
+                "description": _(
+                    "Step-by-step guides for the Luftdaten.at mobile app, "
+                    "including exporting measurements as JSON or CSV."
+                ),
+                "url": "https://luftdaten.at/anleitungen/anleitung-app/",
+            },
+            {
+                "title": _("Datahub"),
+                "description": _(
+                    "Instructions for using the Datahub on the web: explore "
+                    "data, devices, and citizen science features."
+                ),
+                "url": "https://luftdaten.at/anleitungen/anleitung-datahub/",
+            },
+            {
+                "title": _("Air Station"),
+                "description": _(
+                    "Assembly, configuration, and WiFi setup for the "
+                    "Air Station 3 measuring device."
+                ),
+                "url": "https://luftdaten.at/anleitungen/anleitung-air-station-3-wifi/",
+            },
+        ]
         return context
 
 
