@@ -100,10 +100,11 @@ class AirStationsOverviewTests(TestCase):
             level=1,
             message='Device online',
         )
+        air_station.refresh_from_db()
 
         self.client.login(username='admin', password='testpass123')
         response = self.client.get(self.url)
-        self.assertContains(response, 'Test Station')
+        self.assertContains(response, air_station.device_name)
         self.assertContains(response, 'Device online')
         self.assertContains(response, '2.0')
 

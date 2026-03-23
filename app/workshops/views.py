@@ -23,7 +23,7 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import Q
 from django.utils.dateparse import parse_datetime
 
-from zoneinfo import ZoneInfo
+from main.timezones import NAIVE_LOCAL_TZ
 from .models import Workshop, WorkshopInvitation, Participant
 from .forms import WorkshopForm, FileFieldForm, ImportDataForm
 from accounts.models import CustomUser
@@ -110,7 +110,7 @@ class WorkshopDetailView(DetailView):
         images = []
         for workshop_image in self.object.workshop_images.all():
             images.append([
-                workshop_image.time_created.astimezone(ZoneInfo("Europe/Vienna")).strftime("%d.%m.%Y %H:%M"),
+                workshop_image.time_created.astimezone(NAIVE_LOCAL_TZ).strftime("%d.%m.%Y %H:%M"),
                 workshop_image.location.coordinates.x,
                 workshop_image.location.coordinates.y,
                 os.path.join(settings.MEDIA_URL, workshop_image.image.name)
@@ -418,9 +418,9 @@ class WorkshopImportDataView(LoginRequiredMixin, FormView):
                                 timestamp_str = timestamp_str.replace('Z', '+00:00')
                             time = datetime.fromisoformat(timestamp_str)
                         
-                        # Ensure timezone awareness
+                        # Naive timestamps in uploads are interpreted as Europe/Vienna
                         if time.tzinfo is None:
-                            time = timezone.make_aware(time)
+                            time = timezone.make_aware(time, NAIVE_LOCAL_TZ)
                     except (ValueError, AttributeError, TypeError) as e:
                         errors.append(f"Invalid timestamp format: {timestamp_str}")
                         error_count += 1

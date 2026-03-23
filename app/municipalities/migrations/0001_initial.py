@@ -4,6 +4,8 @@ from django.db import migrations, models
 
 
 def _forwards(apps, schema_editor):
+    # RunPython receives from_state.apps: "municipalities" is not registered yet,
+    # so we cannot apps.get_model("municipalities", ...). Use SQL for fresh DB.
     connection = schema_editor.connection
     old_table = "cities_favoritecity"
     new_table = "municipalities_favoritemunicipality"
@@ -25,10 +27,25 @@ def _forwards(apps, schema_editor):
                 f"{qn('municipalities_favorite_user_municipality_slug_unique')}"
             )
             return
-    FavoriteMunicipality = apps.get_model(
-        "municipalities", "FavoriteMunicipality"
+
+    app_label, model_name = settings.AUTH_USER_MODEL.split(".")
+    User = apps.get_model(app_label, model_name)
+    user_table = User._meta.db_table
+    qn = connection.ops.quote_name
+    sql = (
+        f"CREATE TABLE {qn(new_table)} ("
+        f"{qn('id')} BIGSERIAL NOT NULL PRIMARY KEY, "
+        f"{qn('municipality_slug')} VARCHAR(128) NOT NULL, "
+        f"{qn('created_at')} TIMESTAMPTZ NOT NULL, "
+        f"{qn('user_id')} BIGINT NOT NULL "
+        f"REFERENCES {qn(user_table)} ({qn('id')}) "
+        f"DEFERRABLE INITIALLY DEFERRED, "
+        f"CONSTRAINT {qn('municipalities_favorite_user_municipality_slug_unique')} "
+        f"UNIQUE ({qn('user_id')}, {qn('municipality_slug')})"
+        f")"
     )
-    schema_editor.create_model(FavoriteMunicipality)
+    with connection.cursor() as cursor:
+        cursor.execute(sql)
 
 
 def _backwards(apps, schema_editor):
