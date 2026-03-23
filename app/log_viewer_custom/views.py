@@ -1,12 +1,34 @@
 import os
 import re
 from datetime import datetime
-from django.views.generic import ListView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 from django.conf import settings
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.paginator import Paginator
 from django.http import JsonResponse
+from django.utils import timezone as dj_timezone
 from django.utils.translation import gettext as _
+from django.views.generic import ListView
+
+from main.timezones import NAIVE_LOCAL_TZ
+
+
+def _naive_local_to_aware(dt):
+    """Interpret naive datetimes as Europe/Vienna (log lines have no offset)."""
+    if dt is None:
+        return None
+    if dj_timezone.is_aware(dt):
+        return dt
+    return dj_timezone.make_aware(dt, NAIVE_LOCAL_TZ)
+
+
+def _format_log_timestamp_for_display(dt):
+    """Format for UI in the active/default display zone (TIME_ZONE)."""
+    if dt is None:
+        return ""
+    if dj_timezone.is_naive(dt):
+        dt = dj_timezone.make_aware(dt, NAIVE_LOCAL_TZ)
+    return dj_timezone.localtime(dt).strftime("%Y-%m-%d %H:%M:%S")
 
 
 class CustomLogViewerView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -117,10 +139,10 @@ class CustomLogViewerView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                                 # Handle format without milliseconds: 2025-08-21 23:18:14
                                 timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
                         else:
-                            timestamp = datetime.now()
-                        
+                            timestamp = dj_timezone.now()
+
                         return {
-                            'timestamp': timestamp,
+                            'timestamp': _naive_local_to_aware(timestamp),
                             'level': level.upper(),
                             'message': message.strip(),
                             'raw_line': line
@@ -128,7 +150,7 @@ class CustomLogViewerView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                     except ValueError as e:
                         # If timestamp parsing fails, use current time
                         return {
-                            'timestamp': datetime.now(),
+                            'timestamp': dj_timezone.now(),
                             'level': level.upper(),
                             'message': message.strip(),
                             'raw_line': line
@@ -136,7 +158,7 @@ class CustomLogViewerView(LoginRequiredMixin, UserPassesTestMixin, ListView):
                 elif len(groups) == 2:  # Simple format
                     level, message = groups
                     return {
-                        'timestamp': datetime.now(),
+                        'timestamp': dj_timezone.now(),
                         'level': level.upper(),
                         'message': message.strip(),
                         'raw_line': line
@@ -144,7 +166,7 @@ class CustomLogViewerView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         
         # If parsing fails, return as INFO level
         return {
-            'timestamp': datetime.now(),
+            'timestamp': dj_timezone.now(),
             'level': 'INFO',
             'message': line.strip(),
             'raw_line': line
@@ -238,7 +260,9 @@ def logs_json_view(request):
             formatted_entries = []
             for entry in log_entries:
                 formatted_entries.append({
-                    'timestamp': entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                    'timestamp': _format_log_timestamp_for_display(
+                        entry['timestamp']
+                    ),
                     'level': entry['level'],
                     'message': entry['message'],
                     'raw_line': entry['raw_line']
@@ -260,7 +284,9 @@ def logs_json_view(request):
         formatted_entries = []
         for entry in page_obj:
             formatted_entries.append({
-                'timestamp': entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
+                'timestamp': _format_log_timestamp_for_display(
+                    entry['timestamp']
+                ),
                 'level': entry['level'],
                 'message': entry['message'],
                 'raw_line': entry['raw_line']
