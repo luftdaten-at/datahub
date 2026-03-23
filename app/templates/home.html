@@ -106,30 +106,83 @@
     <script>
         const API_URL = "{{ API_URL }}"; 
     
-        // 1) Hier den Fetch-Aufruf direkt clientseitig
+        // Station markers: /station/current GeoJSON (active within last_active seconds)
         async function fetchMarkerData() {
-            const queryUrl = `${API_URL}/station/historical?end=current&precision=all&output_format=json&include_location=true`;
+            const params = new URLSearchParams({
+                last_active: "3600",
+                output_format: "geojson",
+                calibration_data: "false",
+            });
+            const queryUrl = `${API_URL}/station/current?${params.toString()}`;
             console.log("Requesting: " + queryUrl);
-    
+
             try {
                 const resp = await fetch(queryUrl);
                 if (!resp.ok) {
-                    console.error("Failed to query current endpoint, status:", resp.status);
+                    console.error("Failed to query station/current, status:", resp.status);
                     return [];
                 }
-                // parse JSON
-                const jsonData = await resp.json();
+                const data = await resp.json();
+                const featureList =
+                    data.type === "FeatureCollection" && Array.isArray(data.features)
+                        ? data.features
+                        : data.type === "Feature"
+                          ? [data]
+                          : [];
+
                 const results = [];
-                for (const j of jsonData) {
-                    // Aggregiere values in ein Objekt { PM1_0: x, PM2_5: y, ... }
-                    const valuesObj = {};
-                    for (const d of j['values']) {
-                        valuesObj[d['dimension']] = d['value'];
+                for (const feature of featureList) {
+                    if (!feature || feature.type !== "Feature") {
+                        continue;
                     }
+                    const geom = feature.geometry;
+                    const coords = geom && geom.type === "Point" ? geom.coordinates : null;
+                    if (!coords || coords.length < 2) {
+                        continue;
+                    }
+                    const lon = coords[0];
+                    const lat = coords[1];
+                    const props = feature.properties || {};
+                    const device = props.device;
+                    if (device === undefined || device === null || device === "") {
+                        continue;
+                    }
+
+                    const valuesObj = {};
+                    // GeoJSON nests measurements under properties.sensors[].values (not properties.values)
+                    const sensors = props.sensors;
+                    if (Array.isArray(sensors)) {
+                        for (const sensor of sensors) {
+                            if (!sensor || !Array.isArray(sensor.values)) {
+                                continue;
+                            }
+                            for (const d of sensor.values) {
+                                if (d && d.dimension !== undefined && d.dimension !== null) {
+                                    const dim = Number(d.dimension);
+                                    if (!Number.isNaN(dim)) {
+                                        valuesObj[dim] = d.value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    const flatVals = props.values;
+                    if (Array.isArray(flatVals)) {
+                        for (const d of flatVals) {
+                            if (d && d.dimension !== undefined && d.dimension !== null) {
+                                const dim = Number(d.dimension);
+                                if (!Number.isNaN(dim)) {
+                                    valuesObj[dim] = d.value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Dimension ids: 2 = PM1.0, 3 = PM2.5, 5 = PM10.0 (matches historical JSON)
                     results.push([
-                        String(j['device']),
-                        String(j['location']['lat']),
-                        String(j['location']['lon']),
+                        String(device),
+                        String(lat),
+                        String(lon),
                         String(valuesObj[2] ?? null),
                         String(valuesObj[3] ?? null),
                         String(valuesObj[5] ?? null),
