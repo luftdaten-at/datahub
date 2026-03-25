@@ -1,0 +1,22 @@
+{% extends '_base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Deactivate user" %}{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-3">{% trans "Deactivate user" %}</h2>
+  <div class="alert alert-warning" role="alert">
+    {% blocktrans with name=object.get_username email=object.email %}
+    Deactivate <strong>{{ name }}</strong> ({{ email }})? They will no longer be able to log in.
+    You can turn the account back on later by editing the user and enabling “Active”.
+    {% endblocktrans %}
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-warning">{% trans "Deactivate user" %}</button>
+    <a href="{% url 'users-edit' object.pk %}" class="btn btn-secondary">{% trans "Cancel" %}</a>
+  </form>
+</div>
+{% endblock content %}

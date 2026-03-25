@@ -1,64 +1,120 @@
 {% extends "_base.html" %}
 {% load i18n %}
-{% load static %}
 {% load humanize %}
 
 {% block title %}{% trans "Users" %}{% endblock title %}
 
-{% block styles %}
-<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"/>
-<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-<script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
-{% endblock styles %}
-
 {% block content %}
-<div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{% trans "Users" %}</h2>
+<div class="container mt-4 mb-5">
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white border-bottom py-3">
+      <h2 class="h6 mb-0 text-uppercase text-muted">{% trans "Directory" %}</h2>
+      <p class="small text-muted mb-0 mt-1">{% trans "Active accounts only. Deactivated users stay editable via direct link." %}</p>
     </div>
+
     {% if users %}
-        <table
-            id="table"
-            data-toggle="table"
-            data-search="true"
-            data-sortable="true"
-            data-pagination="true"
-            data-page-size="50"
-            data-page-list="[50, 100, 200]"
-            class="table">
-        <thead class="table-light">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle mb-0">
+          <caption class="visually-hidden">
+            {% trans "Table of active users with roles and activity." %}
+          </caption>
+          <thead class="table-light">
             <tr>
-            <th data-field="id" data-sortable="true">{% trans "ID" %}</th>
-            <th data-field="username" data-sortable="true">{% trans "Username" %}</th>
-            <th data-field="is_staff" data-sortable="true">{% trans "Is Staff" %}</th>
-            <th data-field="is_superuser" data-sortable="true">{% trans "Is Superuser" %}</th>
-            <th data-field="date_joined" data-sortable="true">{% trans "Date joined" %}</th>
-            <th data-field="last_login" data-sortable="true">{% trans "Last login" %}</th>
-            <th data-field="actions" class="text-end">{% trans "Actions" %}</th>
+              <th scope="col" class="text-nowrap">{% trans "ID" %}</th>
+              <th scope="col">{% trans "Username" %}</th>
+              <th scope="col">{% trans "Email" %}</th>
+              <th scope="col" class="text-nowrap">{% trans "Staff" %}</th>
+              <th scope="col" class="text-nowrap">{% trans "Superuser" %}</th>
+              <th scope="col" class="text-nowrap">{% trans "Last login" %}</th>
+              <th scope="col" class="text-end text-nowrap">{% trans "Actions" %}</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for user in users %}
+          </thead>
+          <tbody>
+            {% for u in users %}
             <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.username }}</td>
-                <td>{{ user.is_staff|yesno:"Yes,No" }}</td>
-                <td>{{ user.is_superuser|yesno:"Yes,No" }}</td>
-                <td>{{ user.date_joined|naturaltime }}</td>
-                <td>{{ user.last_login|naturaltime }}</td>
-                <td class="text-end">
-                <a href="{% url 'users-edit' user.id %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit' %}">
-                    <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
+              <td class="font-monospace text-muted">{{ u.id }}</td>
+              <td class="fw-medium">{{ u.username }}</td>
+              <td>
+                {% if u.email %}
+                  <a href="mailto:{{ u.email }}" class="text-decoration-none">{{ u.email }}</a>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_staff %}
+                  <span class="badge rounded-pill bg-primary">{% trans "Yes" %}</span>
+                {% else %}
+                  <span class="badge rounded-pill bg-secondary">{% trans "No" %}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.is_superuser %}
+                  <span class="badge rounded-pill bg-danger">{% trans "Yes" %}</span>
+                {% else %}
+                  <span class="badge rounded-pill bg-secondary">{% trans "No" %}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if u.last_login %}
+                  <time datetime="{{ u.last_login|date:'c' }}">{{ u.last_login|date:"SHORT_DATETIME_FORMAT" }}</time>
+                  <span class="d-block small text-muted">{{ u.last_login|naturaltime }}</span>
+                {% else %}
+                  <span class="text-muted">{% trans "Never" %}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a
+                  href="{% url 'users-edit' u.id %}"
+                  class="btn btn-sm btn-outline-secondary"
+                  aria-label="{% blocktrans with name=u.username %}Edit user {{ name }}{% endblocktrans %}">
+                  <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                  <span class="d-none d-sm-inline ms-1">{% trans "Edit" %}</span>
                 </a>
-                </td>
+              </td>
             </tr>
             {% endfor %}
-        </tbody>
-        </table>  
-    {% else %}
-        <div class="alert alert-warning" role="alert">
-            {% trans "No users found." %}
-        </div>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    {% if is_paginated %}
+    <div class="card-footer bg-white border-top py-3">
+      <nav aria-label="{% trans 'User list pages' %}">
+        <ul class="pagination pagination-sm mb-0 justify-content-center flex-wrap">
+          {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">{% trans "Previous" %}</a>
+          </li>
+          {% else %}
+          <li class="page-item disabled"><span class="page-link">{% trans "Previous" %}</span></li>
+          {% endif %}
+
+          <li class="page-item disabled px-2 d-flex align-items-center small text-muted">
+            {% blocktrans with num=page_obj.number total_pages=paginator.num_pages %}
+              Page {{ num }} of {{ total_pages }}
+            {% endblocktrans %}
+          </li>
+
+          {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">{% trans "Next" %}</a>
+          </li>
+          {% else %}
+          <li class="page-item disabled"><span class="page-link">{% trans "Next" %}</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
     {% endif %}
+
+    {% else %}
+    <div class="card-body text-center py-5">
+      <p class="text-muted mb-0">{% trans "No active users found." %}</p>
+    </div>
+    {% endif %}
+  </div>
 </div>
 {% endblock content %}
