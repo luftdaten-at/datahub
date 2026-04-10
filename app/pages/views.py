@@ -1,9 +1,5 @@
 import json
-import logging
 
-import requests
-from django.conf import settings
-from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Max
 from django.http import JsonResponse
@@ -11,14 +7,11 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
-from requests.exceptions import RequestException
 
 from main.settings import API_URL
 
 from .forms import FAQEntryStaffForm
 from .models import FAQEntry
-
-logger = logging.getLogger(__name__)
 
 
 def _faq_entry_json(entry):
@@ -190,28 +183,3 @@ class DocumentationPageView(TemplateView):
             },
         ]
         return context
-
-
-class LuftdatenStatisticsProxyView(View):
-    """Same-origin JSON proxy for api.luftdaten.at /statistics (avoids browser CORS / redirect limits)."""
-
-    cache_key = "luftdaten_statistics_proxy:payload"
-
-    def get(self, request, *args, **kwargs):
-        cache_key = f"{self.cache_key}:{API_URL}"
-        cached = cache.get(cache_key)
-        if cached is not None:
-            return JsonResponse(cached)
-
-        url = f"{API_URL}/statistics"
-        try:
-            response = requests.get(
-                url, timeout=settings.LUFTDATEN_API_REQUEST_TIMEOUT
-            )
-            response.raise_for_status()
-            data = response.json()
-            cache.set(cache_key, data, settings.LUFTDATEN_API_JSON_CACHE_TTL)
-            return JsonResponse(data)
-        except (RequestException, ValueError, TypeError) as e:
-            logger.warning("Luftdaten statistics proxy failed: %s", e)
-            return JsonResponse({"active_stations": {}})

@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <!-- Active Stations Statistics (values filled by fetchActiveStationsStats) -->
+    <!-- Active Stations Statistics (values filled by fetchActiveStationsStats)
     <div class="row mb-4 mt-4" id="active-stations-section">
         <div class="col-12">
             <h3 class="mb-3">{% trans "Active Stations" %}</h3>
@@ -101,7 +101,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <script>
         const API_URL = "{{ API_URL }}"; 
@@ -196,14 +196,14 @@
         }
 
         async function fetchActiveStationsStats() {
-            var url = "{% url 'luftdaten_statistics_proxy' %}";
+            const statsUrl = `${API_URL}/statistics/`;
             try {
-                var resp = await fetch(url);
+                const resp = await fetch(statsUrl, { credentials: "omit" });
                 if (!resp.ok) {
                     console.error("Failed to fetch statistics, status:", resp.status);
                     return null;
                 }
-                var data = await resp.json();
+                const data = await resp.json();
                 return data.active_stations || {};
             } catch (err) {
                 console.error("Error fetching statistics:", err);
