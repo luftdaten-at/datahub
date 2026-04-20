@@ -116,50 +116,6 @@ class FavoriteMunicipalityToggleView(LoginRequiredMixin, View):
 
 
 def municipalities_list_view(request):
-    api_url = f"{settings.API_URL}/city/all"
-    error_message = None
-    municipalities = []
-    top_municipalities = []
-
-    try:
-        response = requests.get(
-            api_url, timeout=settings.LUFTDATEN_API_REQUEST_TIMEOUT
-        )
-        response.raise_for_status()
-        data = response.json()
-
-        municipalities = data.get("cities", [])
-        municipalities = sorted(
-            municipalities, key=lambda m: m.get("name", "").lower()
-        )
-
-    except requests.exceptions.HTTPError:
-        error_message = "There was an error fetching the municipality data: 404."
-    except requests.exceptions.RequestException:
-        error_message = "There was an error fetching the municipality data."
-
-    try:
-        stats_url = f"{settings.API_URL}/statistics"
-        stats_response = requests.get(
-            stats_url, timeout=settings.LUFTDATEN_API_REQUEST_TIMEOUT
-        )
-        stats_response.raise_for_status()
-        stats_data = stats_response.json()
-
-        distribution = stats_data.get("distribution", {})
-        top_municipalities = distribution.get("top_cities", [])
-
-    except (requests.exceptions.HTTPError, requests.exceptions.RequestException):
-        pass
-
-    municipality_names = [
-        m.get("name", "") for m in municipalities if m.get("name")
-    ]
-
-    municipality_names_json = json.dumps(municipality_names)
-    municipalities_json = json.dumps(municipalities)
-    top_municipalities_json = json.dumps(top_municipalities)
-
     detail_url_template = reverse(
         "municipalities-detail", kwargs={"pk": "__SLUG__"}
     )
@@ -179,11 +135,6 @@ def municipalities_list_view(request):
         request,
         "municipalities/list.html",
         {
-            "municipalities": municipalities,
-            "error": error_message,
-            "municipality_names_json": municipality_names_json,
-            "municipalities_json": municipalities_json,
-            "top_municipalities_json": top_municipalities_json,
             "translations_json": translations_json,
             "municipality_detail_url_template": detail_url_template,
         },

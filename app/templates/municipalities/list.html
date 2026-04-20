@@ -65,11 +65,7 @@
 <div class="container mt-5">
     <h2 class="mb-4">{% trans "Municipalities" %}</h2>
 
-    {% if error %}
-      <div class="alert alert-danger" role="alert">
-        {{ error }}
-      </div>
-    {% endif %}
+    <div id="municipalities-list-error" role="alert"></div>
 
     <!-- Map Section -->
     <div class="row mb-4">
@@ -86,7 +82,65 @@
 </div>
 
 <script>
+    const API_URL = "{{ API_URL }}";
     const municipalityDetailUrlTemplate = "{{ municipality_detail_url_template|escapejs }}";
+    const translations = {{ translations_json|safe }};
+
+    function showMunicipalitiesListError(message) {
+        var el = document.getElementById("municipalities-list-error");
+        if (!el) return;
+        el.innerHTML = '<div class="alert alert-danger" role="alert">' + message + "</div>";
+    }
+
+    function clearMunicipalitiesListError() {
+        var el = document.getElementById("municipalities-list-error");
+        if (el) el.innerHTML = "";
+    }
+
+    async function loadMunicipalitiesPageData() {
+        clearMunicipalitiesListError();
+        var citiesRes;
+        var statsRes;
+        try {
+            var pair = await Promise.all([
+                fetch(API_URL + "/city/all", { credentials: "omit" }),
+                fetch(API_URL + "/statistics/", { credentials: "omit" }),
+            ]);
+            citiesRes = pair[0];
+            statsRes = pair[1];
+        } catch (err) {
+            showMunicipalitiesListError("There was an error fetching the municipality data.");
+            throw err;
+        }
+        if (!citiesRes.ok) {
+            var msg =
+                citiesRes.status === 404
+                    ? "There was an error fetching the municipality data: 404."
+                    : "There was an error fetching the municipality data.";
+            showMunicipalitiesListError(msg);
+            throw new Error(msg);
+        }
+        var data = await citiesRes.json();
+        var municipalities = data.cities || [];
+        municipalities.sort(function (a, b) {
+            return String(a.name || "")
+                .toLowerCase()
+                .localeCompare(String(b.name || "").toLowerCase());
+        });
+
+        var topMunicipalities = [];
+        if (statsRes.ok) {
+            try {
+                var statsData = await statsRes.json();
+                if (statsData.distribution && statsData.distribution.top_cities) {
+                    topMunicipalities = statsData.distribution.top_cities;
+                }
+            } catch (parseErr) {
+                /* same as server: ignore statistics parse errors */
+            }
+        }
+        return { municipalities: municipalities, topMunicipalities: topMunicipalities };
+    }
 
     // Set up SVG
     const width = document.getElementById('map').clientWidth;
@@ -114,104 +168,97 @@
         }
     });
 
-    // Municipality data from Django (API still returns "cities" key)
-    const municipalitiesData = {{ municipalities_json|safe }};
+    function drawMunicipalitiesMap(municipalities) {
+        return Promise.all([
+            d3.json("{% static 'img/laender_999_geo.json' %}"),
+            Promise.resolve(municipalities),
+        ]).then(function (results) {
+            var geojson = results[0];
+            var municipalitiesList = results[1];
 
-    // Load base layer GeoJSON and draw municipalities
-    Promise.all([
-        d3.json("{% static 'img/laender_999_geo.json' %}"),
-        Promise.resolve(municipalitiesData)
-    ])
-    .then(function(results) {
-        const geojson = results[0];
-        const municipalities = results[1];
+            projection.fitSize([width, height], geojson);
 
-        // Scale projection to fit the base layer
-        projection.fitSize([width, height], geojson);
+            svg.selectAll(".region")
+                .data(geojson.features)
+                .enter()
+                .append("path")
+                .attr("class", "region")
+                .attr("d", path);
 
-        // Draw regions (base layer)
-        svg.selectAll('.region')
-            .data(geojson.features)
-            .enter()
-            .append('path')
-            .attr('class', 'region')
-            .attr('d', path);
-
-        // Filter municipalities that have location data
-        const municipalitiesWithLocation = municipalities.filter(function(m) {
-            return m.location &&
-                   (m.location.latitude !== null && m.location.latitude !== undefined) &&
-                   (m.location.longitude !== null && m.location.longitude !== undefined);
-        });
-
-        // Draw circles
-        svg.selectAll('.municipality-circle')
-            .data(municipalitiesWithLocation)
-            .enter()
-            .append('circle')
-            .attr('class', 'municipality-circle')
-            .attr('cx', function(d) {
-                const projected = projection([d.location.longitude, d.location.latitude]);
-                return projected ? projected[0] : null;
-            })
-            .attr('cy', function(d) {
-                const projected = projection([d.location.longitude, d.location.latitude]);
-                return projected ? projected[1] : null;
-            })
-            .attr('r', 10)
-            .on('click', function(event, d) {
-                event.stopPropagation();
-
-                // Get click position relative to map
-                const mapRect = document.getElementById('map').getBoundingClientRect();
-                const x = event.clientX - mapRect.left;
-                const y = event.clientY - mapRect.top;
-
-                const detailUrl = municipalityDetailUrlTemplate.replace('__SLUG__', d.slug);
-
-                // Update popup content
-                popup.html(`
-                    <button class="close-btn" onclick="d3.select('.municipality-popup').style('display', 'none')">&times;</button>
-                    <h4>${d.name}</h4>
-                    <p><strong>{% trans "Country" %}:</strong> ${d.country.name}</p>
-                    <a href="${detailUrl}" class="btn btn-primary btn-sm">{% trans "Details" %}</a>
-                `)
-                .style('left', `${x + 10}px`)
-                .style('top', `${y - popup.node().offsetHeight / 2}px`)
-                .style('display', 'block');
+            var municipalitiesWithLocation = municipalitiesList.filter(function (m) {
+                return (
+                    m.location &&
+                    m.location.latitude !== null &&
+                    m.location.latitude !== undefined &&
+                    m.location.longitude !== null &&
+                    m.location.longitude !== undefined
+                );
             });
-    })
-    .catch(function(error) {
-        console.error('Error loading map:', error);
-    });
 
-    // Top municipalities (statistics API still uses top_cities)
-    const topMunicipalitiesData = {{ top_municipalities_json|safe }};
+            svg.selectAll(".municipality-circle")
+                .data(municipalitiesWithLocation)
+                .enter()
+                .append("circle")
+                .attr("class", "municipality-circle")
+                .attr("cx", function (d) {
+                    var projected = projection([d.location.longitude, d.location.latitude]);
+                    return projected ? projected[0] : null;
+                })
+                .attr("cy", function (d) {
+                    var projected = projection([d.location.longitude, d.location.latitude]);
+                    return projected ? projected[1] : null;
+                })
+                .attr("r", 10)
+                .on("click", function (event, d) {
+                    event.stopPropagation();
 
-    // Translations from Django
-    const translations = {{ translations_json|safe }};
+                    var mapRect = document.getElementById("map").getBoundingClientRect();
+                    var x = event.clientX - mapRect.left;
+                    var y = event.clientY - mapRect.top;
 
-    function displayTopMunicipalities(topList) {
-        const top4 = topList.slice(0, 4);
+                    var detailUrl = municipalityDetailUrlTemplate.replace("__SLUG__", d.slug);
+
+                    popup
+                        .html(
+                            '<button class="close-btn" onclick="d3.select(\'.municipality-popup\').style(\'display\', \'none\')">&times;</button>' +
+                                "<h4>" +
+                                d.name +
+                                "</h4>" +
+                                '<p><strong>{% trans "Country" %}:</strong> ' +
+                                d.country.name +
+                                "</p>" +
+                                '<a href="' +
+                                detailUrl +
+                                '" class="btn btn-primary btn-sm">{% trans "Details" %}</a>'
+                        )
+                        .style("left", x + 10 + "px")
+                        .style("top", y - popup.node().offsetHeight / 2 + "px")
+                        .style("display", "block");
+                });
+        });
+    }
+
+    function displayTopMunicipalities(topList, municipalitiesForSlug) {
+        var top4 = topList.slice(0, 4);
 
         if (top4.length === 0) {
             return;
         }
 
-        const cardsContainer = d3.select('#top-municipalities-cards');
+        var cardsContainer = d3.select("#top-municipalities-cards");
 
-        cardsContainer.append('div')
-            .attr('class', 'col-12 mb-3')
-            .append('h3')
+        cardsContainer
+            .append("div")
+            .attr("class", "col-12 mb-3")
+            .append("h3")
             .text(translations.municipalities_with_most_stations);
 
-        top4.forEach(function(row) {
-            const col = cardsContainer.append('div')
-                .attr('class', 'col-md-3 col-sm-6 mb-3');
+        top4.forEach(function (row) {
+            var col = cardsContainer.append("div").attr("class", "col-md-3 col-sm-6 mb-3");
 
-            let municipalitySlug = row.city.toLowerCase().replace(/\s+/g, '-');
-            if (typeof municipalitiesData !== 'undefined' && municipalitiesData) {
-                const matching = municipalitiesData.find(function(m) {
+            var municipalitySlug = row.city.toLowerCase().replace(/\s+/g, "-");
+            if (municipalitiesForSlug && municipalitiesForSlug.length) {
+                var matching = municipalitiesForSlug.find(function (m) {
                     return m.name === row.city;
                 });
                 if (matching && matching.slug) {
@@ -219,25 +266,46 @@
                 }
             }
 
-            const detailUrl = municipalityDetailUrlTemplate.replace('__SLUG__', municipalitySlug);
+            var detailUrl = municipalityDetailUrlTemplate.replace("__SLUG__", municipalitySlug);
 
-            col.append('div')
-                .attr('class', 'card h-100 shadow-sm')
-                .html(`
-                    <div class="card-body">
-                        <h5 class="card-title">${row.city}</h5>
-                        <p class="card-text">
-                            <strong>${translations.country}:</strong> ${row.country}<br>
-                            <strong>${translations.stations}:</strong> ${row.station_count || 0}
-                        </p>
-                        <a href="${detailUrl}" class="btn btn-primary btn-sm">${translations.view_details}</a>
-                    </div>
-                `);
+            col.append("div")
+                .attr("class", "card h-100 shadow-sm")
+                .html(
+                    '<div class="card-body">' +
+                        '<h5 class="card-title">' +
+                        row.city +
+                        "</h5>" +
+                        '<p class="card-text">' +
+                        "<strong>" +
+                        translations.country +
+                        ":</strong> " +
+                        row.country +
+                        "<br>" +
+                        "<strong>" +
+                        translations.stations +
+                        ":</strong> " +
+                        (row.station_count || 0) +
+                        "</p>" +
+                        '<a href="' +
+                        detailUrl +
+                        '" class="btn btn-primary btn-sm">' +
+                        translations.view_details +
+                        "</a>" +
+                        "</div>"
+                );
         });
     }
 
-    if (typeof topMunicipalitiesData !== 'undefined' && topMunicipalitiesData && topMunicipalitiesData.length > 0) {
-        displayTopMunicipalities(topMunicipalitiesData);
-    }
+    loadMunicipalitiesPageData()
+        .then(function (bundle) {
+            return drawMunicipalitiesMap(bundle.municipalities).then(function () {
+                if (bundle.topMunicipalities && bundle.topMunicipalities.length > 0) {
+                    displayTopMunicipalities(bundle.topMunicipalities, bundle.municipalities);
+                }
+            });
+        })
+        .catch(function (error) {
+            console.error("Error loading municipalities list:", error);
+        });
 </script>
 {% endblock content %}
