@@ -56,7 +56,7 @@
         </div>
     </div>
 
-    <!-- Active Stations Statistics (values filled by fetchActiveStationsStats)
+    <!-- Active Stations Statistics (section disabled; no client statistics fetch)
     <div class="row mb-4 mt-4" id="active-stations-section">
         <div class="col-12">
             <h3 class="mb-3">{% trans "Active Stations" %}</h3>
@@ -195,41 +195,6 @@
             }
         }
 
-        async function fetchActiveStationsStats() {
-            const statsUrl = `${API_URL}/statistics/`;
-            try {
-                const resp = await fetch(statsUrl, { credentials: "omit" });
-                if (!resp.ok) {
-                    console.error("Failed to fetch statistics, status:", resp.status);
-                    return null;
-                }
-                const data = await resp.json();
-                return data.active_stations || {};
-            } catch (err) {
-                console.error("Error fetching statistics:", err);
-                return null;
-            }
-        }
-
-        function renderActiveStationsStats(activeStations) {
-            var keys = [
-                ["stats-last-hour", "last_hour"],
-                ["stats-last-24-hours", "last_24_hours"],
-                ["stats-last-7-days", "last_7_days"],
-                ["stats-last-30-days", "last_30_days"]
-            ];
-            var fallback = activeStations != null ? activeStations : {};
-            for (var i = 0; i < keys.length; i++) {
-                var id = keys[i][0];
-                var key = keys[i][1];
-                var el = document.getElementById(id);
-                if (!el) continue;
-                var v = fallback[key];
-                el.textContent = (v != null && v !== "") ? String(v) : "0";
-                el.setAttribute("aria-busy", "false");
-            }
-        }
-    
         // 2) Farblogik: Direkt RGB-Werte statt HSV
         // Beispielwerte als [R, G, B], alle im Bereich 0..255
         const colorStepsPM1 = [
@@ -423,12 +388,9 @@
             }
         }
 
-        // 3) Daten abrufen und die Karte initialisieren (parallel: Marker + Statistik)
-        Promise.all([fetchMarkerData(), fetchActiveStationsStats()])
-            .then(function (results) {
-                var markerResults = results[0];
-                var stats = results[1];
-                renderActiveStationsStats(stats);
+        // 3) Daten abrufen und die Karte initialisieren
+        fetchMarkerData()
+            .then(function (markerResults) {
                 stationData = markerResults;
                 var defaultPmTypeIndex = 1; // PM2.5
                 var defaultColorSteps = colorStepsArray[defaultPmTypeIndex];
