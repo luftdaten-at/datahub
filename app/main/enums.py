@@ -15,6 +15,10 @@ class Color():
     PURPLE = (200, 0, 80)
     OFF = (0, 0, 0)
 
+    @staticmethod
+    def with_brightness(color, brightness):
+        return tuple(int(x * brightness) for x in color)
+
 
 class SensorModel():
     SEN5X = 1
@@ -39,6 +43,9 @@ class SensorModel():
     BMP388 = 20
     BMP390 = 21
     LSM6DS = 22
+    SEN66 = 23
+    MLX90640 = 24
+    TSL2591 = 25
 
     _names = {
         SEN5X: "SEN5X",
@@ -60,9 +67,12 @@ class SensorModel():
         PMS7003: "PMS7003",
         VIRTUAL_SENSOR: "VIRTUAL_SENSOR",
         LTR390: "LTR390",
-        BMP388: 'BMP388',
-        BMP390: 'BMP390',
-        LSM6DS: 'lsm6ds',
+        BMP388: "BMP388",
+        BMP390: "BMP390",
+        LSM6DS: "lsm6ds",
+        SEN66: "SEN66",
+        MLX90640: "MLX90640",
+        TSL2591: "TSL_2591",
     }
 
     _manufacturer = {
@@ -83,7 +93,14 @@ class SensorModel():
         SPS30: "Sensirion",
         PMS5003: "Plantower",
         PMS7003: "Plantower",
-        VIRTUAL_SENSOR: "Luftdaten.at"
+        VIRTUAL_SENSOR: "Luftdaten.at",
+        LTR390: "Lite-On",
+        BMP388: "Bosch Sensortec",
+        BMP390: "Bosch Sensortec",
+        LSM6DS: "STMicroelectronics",
+        SEN66: "Sensirion",
+        MLX90640: "Mouser Electronics",
+        TSL2591: "Berry Base",
     }
 
     _pins = {
@@ -99,12 +116,12 @@ class SensorModel():
         SHT31: 7,
         SHT35: 7,
         SHT4X: 7,
-        SEN5X: 16
+        SEN5X: 16,
     }
 
     @classmethod
-    def get_pin(cls, model_id: str):
-        return cls._pins[model_id]
+    def get_pin(cls, model_id: int):
+        return cls._pins.get(model_id)
 
     @classmethod
     def get_sensor_name(cls, sensor_model):
@@ -142,6 +159,11 @@ class Dimension():
     GYRO_X = 28
     GYRO_Y = 29
     GYRO_Z = 30
+    THERMAL_ARRAY = 31
+    VISIBLE = 32
+    INFRARED = 33
+    FULL_SPECTRUM = 34
+    RAW_LUMINOSITY = 35
 
     thresholds = {
         TEMPERATURE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
@@ -149,7 +171,7 @@ class Dimension():
         TVOC: ([220, 1430], [Color.GREEN, Color.YELLOW, Color.RED]),
         CO2: ([800, 1000, 1400], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED]),
         ADJUSTED_TEMP_CUBE: ([18, 24], [Color.BLUE, Color.GREEN, Color.RED]),
-        UVI: ([3, 6, 8, 11], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED, Color.PURPLE])
+        UVI: ([3, 6, 8, 11], [Color.GREEN, Color.YELLOW, Color.ORANGE, Color.RED, Color.PURPLE]),
     }
 
     # Dictionary für die Einheiten der Dimensionen
@@ -180,7 +202,12 @@ class Dimension():
         GYRO_Y: "radians/s",
         GYRO_Z: "radians/s",
         UVI: "UV Index",
-        LUX: "lx"
+        LUX: "lx",
+        THERMAL_ARRAY: "°C",
+        VISIBLE: "count",
+        INFRARED: "count",
+        FULL_SPECTRUM: "count",
+        RAW_LUMINOSITY: "count",
     }
 
     _names = {
@@ -212,11 +239,16 @@ class Dimension():
         GYRO_Y: "gyro Y",
         GYRO_Z: "gyro Z",
         UVI: "UV Index",
-        LUX: "Lux"
+        LUX: "Lux",
+        THERMAL_ARRAY: "Thermal Image",
+        VISIBLE: "Visible",
+        INFRARED: "Infrared",
+        FULL_SPECTRUM: "Full spectrum",
+        RAW_LUMINOSITY: "Raw luminosity",
     }
 
     _required_sensors = {
-        ADJUSTED_TEMP_CUBE: set([SensorModel.SHT4X, SensorModel.SEN5X])
+        ADJUSTED_TEMP_CUBE: set([SensorModel.SHT4X, SensorModel.SEN5X]),
     }
 
     _sensor_community_names = {
@@ -235,7 +267,7 @@ class Dimension():
     }
 
     @classmethod
-    def get_required_sensors(cls, dimension_id: int) -> set[SensorModel]:
+    def get_required_sensors(cls, dimension_id: int) -> set[SensorModel] | None:
         return cls._required_sensors.get(dimension_id, None)
 
     @classmethod
@@ -255,7 +287,7 @@ class Dimension():
         :return: Der zugehörige Name oder 'Unknown', wenn kein Name vorhanden ist
         """
         return cls._names.get(dimension_id, "Unknown")
-    
+
     @classmethod
     def get_sensor_community_name(cls, dimension_id: int) -> str:
         """Returns the sensor-community-specific name for the dimension ID or 'Unknown' if none."""
@@ -263,11 +295,15 @@ class Dimension():
 
     @classmethod
     def get_color(cls, dimension_id: int, val: float):
-        th, colors = cls.thresholds.get(dimension_id)
-        th = [-float('inf')] + th + [float('inf')]
+        spec = cls.thresholds.get(dimension_id)
+        if spec is None:
+            return None
+        th, colors = spec
+        th = [-float("inf")] + th + [float("inf")]
         for i in range(len(th)):
             if th[i] <= val < th[i + 1]:
                 return colors[i]
+        return None
 
 
 class LdProduct():
@@ -285,6 +321,68 @@ class LdProduct():
         AIR_BIKE: "Air Bike",
     }
 
+
+class Quality():
+    HIGH = 1
+    LOW = 2
+    MEDIUM = 3
+
+
+class BleCommands:
+    READ_SENSOR_DATA = 0x01
+    READ_SENSOR_DATA_AND_BATTERY_STATUS = 0x02
+    UPDATE_BRIGHTNESS = 0x03
+    TURN_OFF_STATUS_LIGHT = 0x04
+    TURN_ON_STATUS_LIGHT = 0x05
+    SET_AIR_STATION_CONFIGURATION = 0x06
+    SET_CUBE_MQTT_CONFIGURATION = 0x07
+
+
+class AirstationConfigFlags:
+    AUTO_UPDATE_MODE = 0  # Bit 0
+    BATTERY_SAVE_MODE = 1  # Bit 1
+    MEASUREMENT_INTERVAL = 2  # Bit 2
+    LONGITUDE = 3  # Bit 3
+    LATITUDE = 4  # Bit 4
+    HEIGHT = 5  # Bit 5
+    SSID = 6  # Bit 6
+    PASSWORD = 7  # Bit 7
+    DEVICE_ID = 8
+    # Home Assistant / MQTT (same TLV encoding; Air Station: with 0x06, Air Cube: with 0x07)
+    MQTT_ENABLED = 9
+    MQTT_BROKER = 10
+    MQTT_PORT = 11
+    MQTT_USE_TLS = 12
+    MQTT_USERNAME = 13
+    MQTT_PASSWORD = 14  # write-only over BLE; not in read-back characteristic
+    MQTT_DISCOVERY_PREFIX = 15
+    MQTT_DEVICE_NAME = 16
+    MQTT_CERTIFICATE_PATH = 17
+
+
+class AirStationMeasurementInterval:
+    sec30 = 30
+    min1 = 60
+    min3 = 180
+    min5 = 300
+    min10 = 600
+    min15 = 900
+    min30 = 1800
+    h1 = 3600
+
+
+class AutoUpdateMode:
+    off = 0
+    critical = 2
+    on = 3
+
+
+class BatterySaverMode:
+    off = 0
+    normal = 1
+    ultra = 3
+
+
 class Source():
     LD = 1
     LDTTN = 2
@@ -293,7 +391,7 @@ class Source():
     _names = {
         LD: "Luftdaten.at",
         LDTTN: "Luftdaten.at TTN LoRaWAN",
-        SC: "sensor.community"
+        SC: "sensor.community",
     }
 
     @classmethod
@@ -332,20 +430,21 @@ class OutputFormat(str, Enum):
     JSON = "json"
     CSV = "csv"
 
+
 class Order(str, Enum):
-    MIN="min"
-    MAX="max"
+    MIN = "min"
+    MAX = "max"
 
 
 AQR_DIMENSION_MAP = {
-    'pm1': 2,
-    'pm25': 3,
-    'pm10': 5,
-    'humidity': 6,
-    'temperature': 7,
-    'voc': 8,
-    'nox': 9,
-    'pressure': 10,
-    'co2': 11,
-    'o3': 12,
+    "pm1": 2,
+    "pm25": 3,
+    "pm10": 5,
+    "humidity": 6,
+    "temperature": 7,
+    "voc": 8,
+    "nox": 9,
+    "pressure": 10,
+    "co2": 11,
+    "o3": 12,
 }

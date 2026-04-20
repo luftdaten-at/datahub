@@ -13,16 +13,52 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>{% trans "Devices" %}</h2>
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h2 class="mb-0">{% trans "Devices" %}</h2>
+        {% if devices %}
+        <div class="ms-auto" style="min-width: 12rem; max-width: 22rem;">
+            <label for="device-list-table-search" class="visually-hidden">{% trans "Search" %}</label>
+            <input
+                type="search"
+                id="device-list-table-search"
+                class="form-control form-control-sm"
+                placeholder="{% trans 'Search' %}"
+                autocomplete="off"
+            >
+        </div>
+        {% endif %}
     </div>
     
     {% if devices %}
-        
-            <table
+        <div class="d-flex flex-wrap align-items-center gap-4 mb-3">
+            <div
+                id="device-list-firmware-filters"
+                class="d-flex flex-wrap align-items-center gap-2"
+                role="toolbar"
+                aria-label="{% trans 'Filter by firmware' %}"
+                data-label-all="{% trans 'All firmware' %}"
+                data-label-na="{% trans 'N/A' %}"
+            >
+                <span class="text-muted small me-1">{% trans "Firmware" %}:</span>
+                <div class="d-flex flex-wrap gap-2" id="device-list-firmware-filter-buttons"></div>
+            </div>
+            <div
+                id="device-list-model-filters"
+                class="d-flex flex-wrap align-items-center gap-2"
+                role="toolbar"
+                aria-label="{% trans 'Filter by model' %}"
+                data-label-all="{% trans 'All models' %}"
+                data-label-na="{% trans 'N/A' %}"
+            >
+                <span class="text-muted small me-1">{% trans "Model" %}:</span>
+                <div class="d-flex flex-wrap gap-2" id="device-list-model-filter-buttons"></div>
+            </div>
+        </div>
+        <table
                 id="table"
                 data-toggle="table"
                 data-search="true"
+                data-search-selector="#device-list-table-search"
                 data-sortable="true"
                 data-pagination="true"
                 data-page-size="50"
@@ -33,20 +69,25 @@
                         <th data-field="id" data-sortable="true">{% trans "ID" %}</th>
                         <th data-field="name" data-sortable="true">{% trans "Name" %}</th>
                         <th data-field="model" data-sortable="true">{% trans "Model" %}</th>
+                        <th data-field="model_filter" data-visible="false" data-switchable="false">{% trans "Model filter" %}</th>
                         <th data-field="firmware" data-sortable="true">{% trans "Firmware" %}</th>
+                        <th data-field="firmware_filter" data-visible="false" data-switchable="false">{% trans "Firmware filter" %}</th>
                         <th data-field="organisation" data-sortable="true">{% trans "Organisation" %}</th>
                         <th data-field="registered" data-sortable="true">{% trans "Device registered" %}</th>
                         <th data-field="status" data-sortable="true">{% trans "Status update" %}</th>
-                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for device in devices %}
-                        <tr>
-                            <td><a href="{% url 'device-detail' device.pk %}" class="link-primary">{{ device.id }}</a></td>
+                        <tr data-firmware="{{ device.firmware|default:'' }}" data-model="{% if device.model is not None %}{{ device.get_model_name }}{% endif %}">
+                            <td>
+                                <a href="{% url 'device-detail' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'View Device' %}">{{ device.id }}</a>
+                            </td>
                             <td>{{ device.device_name|default:_("N/A") }}</td>
-                            <td>{{ device.model|default:_("N/A") }}</td>
+                            <td>{% if device.model is not None %}{{ device.get_model_name }}{% else %}{% trans "N/A" %}{% endif %}</td>
+                            <td>{% if device.model is not None %}{{ device.get_model_name }}{% endif %}</td>
                             <td>{{ device.firmware|default:_("N/A") }}</td>
+                            <td>{{ device.firmware|default:'' }}</td>
                             <td>{{ device.current_organization.name|default:_("N/A") }}</td>
                             <td>{{ device.created_at|date:"Y-m-d H:i" }}</td>
                             <td>
@@ -56,20 +97,10 @@
                                     {% endif %}
                                 {% endwith %}
                             </td>
-                            <td class="text-end">
-                                <a href="{% url 'device-edit' device.pk %}" class="btn btn-secondary btn-sm" title="{% trans 'Edit Device' %}">
-                                    <i class="bi bi-pencil-square"></i> <span class="d-none d-sm-inline">{% trans "Edit" %}</span>
-                                </a>
-                                <a href="{% url 'device-delete' device.pk %}" class="btn btn-danger btn-sm">
-                                    <i class="bi bi-trash"></i> <span class="d-none d-sm-inline">{% trans "Delete" %}</span>
-                                </a>
-                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>
-            </table>
-        
-        
+        </table>
     {% else %}
         <div class="alert alert-warning" role="alert">
             {% trans "No devices found." %}
@@ -77,3 +108,34 @@
     {% endif %}
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+{% if devices %}
+<script>
+(function () {
+    if (typeof LuftdatenDatahub === "undefined" || !LuftdatenDatahub.initBootstrapTableFilterToolbars) {
+        return;
+    }
+    LuftdatenDatahub.initBootstrapTableFilterToolbars({
+        tableSelector: "#table",
+        filters: [
+            {
+                rowDataKey: "firmware",
+                filterField: "firmware_filter",
+                toolbarSelector: "#device-list-firmware-filters",
+                buttonHostSelector: "#device-list-firmware-filter-buttons",
+                sort: "semver",
+            },
+            {
+                rowDataKey: "model",
+                filterField: "model_filter",
+                toolbarSelector: "#device-list-model-filters",
+                buttonHostSelector: "#device-list-model-filter-buttons",
+                sort: "locale",
+            },
+        ],
+    });
+})();
+</script>
+{% endif %}
+{% endblock extra_js %}

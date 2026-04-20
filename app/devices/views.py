@@ -34,6 +34,30 @@ from django.db.models.functions import Length
 
 logger = logging.getLogger('myapp')
 
+
+def air_station_sensors_display(device):
+    """
+    Sensor names only for the air stations table (no dimensions).
+    Same sources as device detail: measurements at last_update, else latest status sensor_list.
+    """
+    names = set()
+    measurements = Measurement.objects.filter(device=device, time_measured=device.last_update)
+    if measurements.exists():
+        for measurement in measurements:
+            names.add(SensorModel.get_sensor_name(measurement.sensor_model))
+    else:
+        try:
+            status = device.status_list.filter(sensor_list__isnull=False).latest("time_received")
+        except DeviceStatus.DoesNotExist:
+            status = None
+        if status and status.sensor_list:
+            for data in status.sensor_list:
+                names.add(SensorModel.get_sensor_name(data["model_id"]))
+    if not names:
+        return ""
+    return ", ".join(sorted(names))
+
+
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Device
     context_object_name = 'devices'
@@ -52,7 +76,7 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 
 class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView):
-    """Admin-only overview of Air Stations with last status and last send data."""
+    """Admin-only overview of Air Stations with last status and sensors summary."""
     model = Device
     context_object_name = 'air_stations'
     template_name = 'devices/air_stations_overview.html'
@@ -70,18 +94,14 @@ class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView)
             .annotate(
                 last_log_time=Subquery(latest_log.values('timestamp')[:1]),
                 last_log_message=Subquery(latest_log.values('message')[:1]),
-                last_measurement_time=Max('measurements__time_measured'),
-                last_aqr_time=Max('air_quality_records__time'),
             )
             .order_by('id')
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Compute last_send_data for each device (max of measurement and aqr times)
         for device in context['air_stations']:
-            times = [t for t in (device.last_measurement_time, device.last_aqr_time) if t is not None]
-            device.last_send_data = max(times) if times else None
+            device.sensors_display = air_station_sensors_display(device)
         return context
 
 
@@ -111,8 +131,9 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         # Fetch all DeviceStatus entries related to this Device, ordered by time_received ascendingly
         device_status_qs = DeviceStatus.objects.filter(
             device=device,
-            battery_soc__isnull=False
-        ).order_by('time_received')
+            battery_soc__isnull=False,
+            battery_voltage__isnull=False,
+        ).order_by("time_received")
         context['battery_status'] = device_status_qs.exists()
 
         if context['battery_status']:
@@ -251,7 +272,74 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
         context['sensors'] = dict(sensors)
 
+        context["log_level_choices"] = [
+            (0, _("Debug")),
+            (1, _("Info")),
+            (2, _("Warning")),
+            (3, _("Error")),
+            (4, _("Critical")),
+        ]
+
         return context
+
+
+class DeviceMoveMeasurementsView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """Superuser-only POST: reassign all Measurement and AirQualityRecord rows to another device."""
+
+    http_method_names = ["post"]
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def post(self, request, pk):
+        source = get_object_or_404(Device, pk=pk)
+        target_pk = (request.POST.get("target_device") or "").strip()
+        if not target_pk or target_pk == source.pk:
+            messages.error(
+                request,
+                _("Choose a different device to receive the measurements."),
+            )
+            return HttpResponseRedirect(reverse("device-data", kwargs={"pk": source.pk}))
+
+        target = get_object_or_404(Device, pk=target_pk)
+        if len(target.id) < 15:
+            messages.error(
+                request,
+                _("The selected device is not valid for this operation."),
+            )
+            return HttpResponseRedirect(reverse("device-data", kwargs={"pk": source.pk}))
+
+        m_count = source.measurements.count()
+        aqr_count = source.air_quality_records.count()
+        if m_count == 0 and aqr_count == 0:
+            messages.warning(request, _("This device has no measurements or air quality records to move."))
+            return HttpResponseRedirect(reverse("device-data", kwargs={"pk": source.pk}))
+
+        with transaction.atomic():
+            Measurement.objects.filter(device=source).update(device=target)
+            AirQualityRecord.objects.filter(device=source).update(device=target)
+
+        logger.info(
+            "measurements_moved user=%s source=%s target=%s measurements=%s aqr=%s",
+            request.user.pk,
+            source.pk,
+            target.pk,
+            m_count,
+            aqr_count,
+        )
+        messages.success(
+            request,
+            _(
+                "Moved %(m)d measurement(s) and %(a)d air quality record(s) from %(source)s to %(target)s."
+            )
+            % {
+                "m": m_count,
+                "a": aqr_count,
+                "source": source.pk,
+                "target": target.pk,
+            },
+        )
+        return HttpResponseRedirect(reverse("device-data", kwargs={"pk": source.pk}))
 
 
 class DeviceDataView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -409,6 +497,15 @@ class DeviceDataView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         context['workshop_data'] = workshop_data
         context['total_measurements'] = Measurement.objects.filter(device=device).count() + AirQualityRecord.objects.filter(device=device).count()
         context['total_workshops'] = len(workshop_data)
+
+        context["measurement_count"] = device.measurements.count()
+        context["air_quality_record_count"] = device.air_quality_records.count()
+        context["other_devices"] = (
+            Device.objects.exclude(pk=device.pk)
+            .annotate(id_len=Length("id"))
+            .filter(id_len__gte=15)
+            .order_by("id")
+        )
 
         return context
 
@@ -611,6 +708,32 @@ class DeviceApikeyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
     def get_queryset(self):
         return Device.objects.all()
+
+
+class DeviceLogLevelUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """POST: set Device.log_level (superuser only)."""
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def post(self, request, pk, *args, **kwargs):
+        device = get_object_or_404(Device, pk=pk)
+        raw = request.POST.get("log_level", "")
+        if raw == "":
+            device.log_level = None
+        else:
+            try:
+                level = int(raw)
+                if level < 0 or level > 4:
+                    messages.error(request, _("Invalid log level."))
+                    return redirect("device-detail", pk=pk)
+                device.log_level = level
+            except ValueError:
+                messages.error(request, _("Invalid log level."))
+                return redirect("device-detail", pk=pk)
+        device.save(update_fields=["log_level"])
+        messages.success(request, _("Log level updated."))
+        return redirect("device-detail", pk=pk)
 
 
 class DeviceDeleteView(LoginRequiredMixin, DeleteView):
