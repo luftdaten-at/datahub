@@ -1,3 +1,4 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
 from organizations.models import Organization
@@ -26,6 +27,12 @@ class Device(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     test_mode = models.BooleanField(null=True)
     calibration_mode = models.BooleanField(null=True)
+    log_level = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0), MaxValueValidator(4)],
+        help_text="Desired status log level (0=debug .. 4=critical). Sent to device via POST /devices/status/ when it differs from the latest line.",
+    )
 
     current_room = models.ForeignKey(Room, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)
     current_organization = models.ForeignKey(Organization, related_name='current_devices', null=True, on_delete=models.SET_NULL, blank=True)

@@ -56,6 +56,54 @@ class DeviceStatusEndpointTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data.get("status"), "success")
         self.assertTrue(DeviceLogs.objects.filter(device=self.device).exists())
+        self.assertNotIn("log_level", response.data)
+
+    def test_device_status_log_level_null_omits_log_level_in_response(self):
+        self.assertIsNone(self.device.log_level)
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=self.valid_payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotIn("log_level", response.data)
+
+    def test_device_status_log_level_mismatch_includes_log_level(self):
+        self.device.log_level = 0
+        self.device.save(update_fields=["log_level"])
+        payload = {
+            **self.valid_payload,
+            "status_list": [
+                {
+                    "time": "2025-01-07T11:00:00Z",
+                    "level": 4,
+                    "message": "older",
+                },
+                {
+                    "time": "2025-01-07T13:00:00Z",
+                    "level": 1,
+                    "message": "newest by time",
+                },
+            ],
+        }
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get("log_level"), 0)
+
+    def test_device_status_log_level_matches_omits_log_level(self):
+        self.device.log_level = 1
+        self.device.save(update_fields=["log_level"])
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=self.valid_payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotIn("log_level", response.data)
 
     def test_device_status_wrong_api_key_returns_400(self):
         payload = {**self.valid_payload}

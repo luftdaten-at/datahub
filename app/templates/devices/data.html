@@ -7,11 +7,53 @@
 
 {% block content %}
 <div class="container mt-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "Device Data:" %} {{ device.device_name }}</h2>
         <div>
+            {% if other_devices %}
+            <button type="button" class="btn btn-outline-warning me-2" data-bs-toggle="modal" data-bs-target="#moveMeasurementsModal">{% trans "Move measurements" %}</button>
+            {% else %}
+            <button type="button" class="btn btn-outline-secondary me-2" disabled title="{% trans 'No other devices available' %}">{% trans "Move measurements" %}</button>
+            {% endif %}
             <a href="{% url 'device-measurements' device.pk %}" class="btn btn-primary me-2">{% trans "View All Measurements" %}</a>
             <a href="{% url 'device-detail' device.pk %}" class="btn btn-secondary">{% trans "Back to Device" %}</a>
+        </div>
+    </div>
+
+    <div class="modal fade" id="moveMeasurementsModal" tabindex="-1" aria-labelledby="moveMeasurementsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="{% url 'device-move-measurements' device.pk %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="moveMeasurementsModalLabel">{% trans "Move measurements" %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">
+                            {% blocktrans with m=measurement_count a=air_quality_record_count %}This will reassign all sensor measurements ({{ m }}) and legacy air quality records ({{ a }}) from this device to the device you select. This cannot be undone.{% endblocktrans %}
+                        </p>
+                        <label for="id_move_target_device" class="form-label">{% trans "Target device" %}</label>
+                        <select name="target_device" id="id_move_target_device" class="form-select" required>
+                            <option value="" disabled selected>— {% trans "Select device" %} —</option>
+                            {% for d in other_devices %}
+                                <option value="{{ d.pk }}">{{ d.device_name|default:d.pk }} — {{ d.pk }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-warning">{% trans "Transfer measurements" %}</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

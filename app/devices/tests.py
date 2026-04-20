@@ -3,9 +3,9 @@ from django.test import TestCase
 from django.urls import reverse, resolve
 from django.utils import timezone
 
-from devices.models import Device, DeviceLogs, Measurement
-from devices.views import AirStationsOverviewView
-from main.enums import LdProduct
+from devices.models import Device, DeviceLogs, DeviceStatus, Measurement
+from devices.views import AirStationsOverviewView, DeviceMoveMeasurementsView
+from main.enums import LdProduct, Dimension
 from api.models import AirQualityRecord
 
 
@@ -108,14 +108,15 @@ class AirStationsOverviewTests(TestCase):
         self.assertContains(response, 'Device online')
         self.assertContains(response, '2.0')
 
-    def test_last_send_data_from_measurement(self):
-        """Last send data is computed from measurements when present."""
+    def test_sensors_column_from_measurements_at_last_update(self):
+        """Sensors column lists sensor names (not dimensions) from measurements at device.last_update."""
+        measured_time = timezone.now()
         air_station = Device.objects.create(
             id='123456789012345',
             model=LdProduct.AIR_STATION,
             auto_number=1,
+            last_update=measured_time,
         )
-        measured_time = timezone.now()
         Measurement.objects.create(
             device=air_station,
             time_measured=measured_time,
@@ -124,27 +125,108 @@ class AirStationsOverviewTests(TestCase):
 
         self.client.login(username='admin', password='testpass123')
         response = self.client.get(self.url)
-        self.assertContains(response, measured_time.strftime('%Y-%m-%d'))
+        self.assertContains(response, 'SEN5X')
 
-    def test_last_send_data_from_air_quality_record(self):
-        """Last send data is computed from air quality records when present."""
+    def test_sensors_column_from_latest_status_when_no_measurements(self):
+        """When no matching measurements, sensors come from latest DeviceStatus.sensor_list model_ids."""
         air_station = Device.objects.create(
             id='123456789012345',
             model=LdProduct.AIR_STATION,
             auto_number=1,
         )
-        aqr_time = timezone.now()
-        AirQualityRecord.objects.create(
+        DeviceStatus.objects.create(
             device=air_station,
-            time=aqr_time,
+            time_received=timezone.now(),
+            sensor_list=[
+                {'model_id': 1, 'dimension_list': [Dimension.PM10_0]},
+            ],
         )
 
         self.client.login(username='admin', password='testpass123')
         response = self.client.get(self.url)
-        self.assertContains(response, aqr_time.strftime('%Y-%m-%d'))
+        self.assertContains(response, 'SEN5X')
 
     def test_empty_overview_shows_message(self):
         """When no air stations exist, appropriate message is shown."""
         self.client.login(username='admin', password='testpass123')
         response = self.client.get(self.url)
         self.assertContains(response, 'No air stations found')
+
+
+class DeviceMoveMeasurementsTests(TestCase):
+    """POST device-move-measurements: reassign Measurement and AirQualityRecord to another device."""
+
+    def setUp(self):
+        self.superuser = get_user_model().objects.create_superuser(
+            username="admin",
+            email="admin@test.com",
+            password="testpass123",
+        )
+        self.user = get_user_model().objects.create_user(
+            username="user",
+            email="user@test.com",
+            password="testpass123",
+        )
+        self.source = Device.objects.create(
+            id="111111111111111",
+            model=LdProduct.AIR_STATION,
+            auto_number=1,
+            device_name="Source Station",
+        )
+        self.target = Device.objects.create(
+            id="222222222222222",
+            model=LdProduct.AIR_STATION,
+            auto_number=2,
+            device_name="Target Station",
+        )
+
+    def test_url_resolves(self):
+        path = reverse("device-move-measurements", kwargs={"pk": self.source.pk})
+        view = resolve(path)
+        self.assertEqual(view.func.__name__, DeviceMoveMeasurementsView.as_view().__name__)
+
+    def test_regular_user_forbidden(self):
+        self.client.login(username="user", password="testpass123")
+        url = reverse("device-move-measurements", kwargs={"pk": self.source.pk})
+        response = self.client.post(url, {"target_device": self.target.pk})
+        self.assertEqual(response.status_code, 403)
+
+    def test_moves_measurements_and_aqr(self):
+        self.client.login(username="admin", password="testpass123")
+        m = Measurement.objects.create(
+            device=self.source,
+            time_measured=timezone.now(),
+            sensor_model=1,
+        )
+        aqr = AirQualityRecord.objects.create(
+            device=self.source,
+            time=timezone.now(),
+        )
+        url = reverse("device-move-measurements", kwargs={"pk": self.source.pk})
+        response = self.client.post(url, {"target_device": self.target.pk})
+        self.assertEqual(response.status_code, 302)
+        m.refresh_from_db()
+        aqr.refresh_from_db()
+        self.assertEqual(m.device_id, self.target.pk)
+        self.assertEqual(aqr.device_id, self.target.pk)
+        self.assertEqual(self.source.measurements.count(), 0)
+        self.assertEqual(self.target.measurements.count(), 1)
+
+    def test_noop_when_empty(self):
+        self.client.login(username="admin", password="testpass123")
+        url = reverse("device-move-measurements", kwargs={"pk": self.source.pk})
+        response = self.client.post(url, {"target_device": self.target.pk})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.target.measurements.count(), 0)
+
+    def test_rejects_missing_target(self):
+        Measurement.objects.create(
+            device=self.source,
+            time_measured=timezone.now(),
+            sensor_model=1,
+        )
+        self.client.login(username="admin", password="testpass123")
+        url = reverse("device-move-measurements", kwargs={"pk": self.source.pk})
+        response = self.client.post(url, {"target_device": ""})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.source.measurements.count(), 1)

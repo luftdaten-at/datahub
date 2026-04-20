@@ -1,11 +1,18 @@
 {% extends '_base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "Delete device" %}{% endblock title %}
 
 {% block content %}
-<div class="container mt-3">
+<div class="container mt-5">
+    <h2 class="h4 mb-3">{% trans "Delete device" %}</h2>
+    <p class="mb-4">
+        {% blocktrans with name=object.device_name|default:object.pk id=object.pk %}Are you sure you want to delete device “{{ name }}” ({{ id }})? This will remove the device and related data from the database.{% endblocktrans %}
+    </p>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Yes, please delete.</button>
-        <a href="{% url 'devices-list' %}" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-danger me-2">{% trans "Yes, delete device" %}</button>
+        <a href="{% url 'device-detail' object.pk %}" class="btn btn-outline-secondary">{% trans "Cancel" %}</a>
     </form>
 </div>
 {% endblock %}

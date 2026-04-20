@@ -1,7 +1,9 @@
 """Views for device API (status, data, device detail)."""
 import logging
 from datetime import datetime, timezone
+
 from django.db import transaction
+from django.utils import timezone as django_timezone
 from django.utils.dateparse import parse_datetime
 from django.http import JsonResponse
 from rest_framework.views import APIView
@@ -22,6 +24,28 @@ from workshops.models import Participant, Workshop
 from api.serializers import DeviceSerializer, DeviceDataSerializer, DeviceStatusRequestSerializer
 
 logger = logging.getLogger("myapp")
+
+
+def _latest_status_list_level(status_list):
+    """Level of the status_list entry with the greatest `time` (not necessarily last index)."""
+    latest_dt = None
+    latest_level = None
+    for status_data in status_list:
+        t_raw = status_data.get("time")
+        if t_raw is None:
+            continue
+        if isinstance(t_raw, datetime):
+            dt = t_raw
+            if django_timezone.is_naive(dt):
+                dt = django_timezone.make_aware(dt)
+        else:
+            dt = parse_datetime(str(t_raw))
+        if dt is None:
+            continue
+        if latest_dt is None or dt > latest_dt:
+            latest_dt = dt
+            latest_level = status_data.get("level", 1)
+    return latest_level
 
 
 @extend_schema(
@@ -48,10 +72,20 @@ class DeviceDetailView(RetrieveAPIView):
 @extend_schema(
     tags=["devices"],
     summary="Add device status logs",
-    description="Adds status log entries for a device. Requires valid API key authentication. Updates device test_mode and calibration_mode flags.",
+    description=(
+        "Adds status log entries for a device. Requires valid API key authentication. "
+        "Updates device test_mode and calibration_mode flags. "
+        "If the device has a configured log_level and the newest status_list line's level "
+        "differs, the 200 response also includes log_level (integer) for the device to apply."
+    ),
     request=DeviceStatusRequestSerializer,
     responses={
-        200: {"description": "Status logs created successfully. Returns status and device flags."},
+        200: {
+            "description": (
+                "Success: status, flags, and optionally log_level when server log_level "
+                "differs from the latest incoming line's level."
+            )
+        },
         400: {"description": "Validation error - wrong API key or invalid data"},
     },
     examples=[
@@ -108,16 +142,21 @@ class CreateDeviceStatusAPIView(APIView):
                         message=status_data.get("message", ""),
                     )
 
-            return Response(
-                {
-                    "status": "success",
-                    "flags": {
-                        "test_mode": device.test_mode,
-                        "calibration_mode": device.calibration_mode,
-                    },
+            device.refresh_from_db()
+            payload = {
+                "status": "success",
+                "flags": {
+                    "test_mode": device.test_mode,
+                    "calibration_mode": device.calibration_mode,
                 },
-                status=200,
-            )
+            }
+            desired = device.log_level
+            if desired is not None:
+                latest_level = _latest_status_list_level(status_list)
+                if latest_level is not None and latest_level != desired:
+                    payload["log_level"] = desired
+
+            return Response(payload, status=200)
 
         except Exception as e:
             logger.warning("Device status 400: %s. Request body: %s", str(e), request.data, exc_info=True)

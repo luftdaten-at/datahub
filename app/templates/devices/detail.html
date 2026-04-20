@@ -24,15 +24,22 @@
 
 {% block content %}
 <div class="container mt-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2>{% trans "Device:" %} {{ device.device_name }}</h2>
         <div>
             <a href="{% url 'devices-list' %}" class="btn btn-outline-secondary me-2">{% trans "Back to Devices" %}</a>
             <a href="{% url 'device-data' device.pk %}" class="btn btn-info me-2">{% trans "View Data" %}</a>
-            <a href="{% url 'device-measurements' device.pk %}" class="btn btn-outline-info me-2">{% trans "All Measurements" %}</a>
-            <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary">{% trans "Edit" %}</a>
+            <a href="{% url 'device-edit' device.pk %}" class="btn btn-primary me-2">{% trans "Edit" %}</a>
+            <a href="{% url 'device-delete' device.pk %}" class="btn btn-danger">{% trans "Delete device" %}</a>
         </div>
-    </div>    
+    </div>
     
     <div class="row">
         <!-- Device Information -->
@@ -71,6 +78,22 @@
                     <a href="{% url 'device-edit-apikey' device.pk %}" class="btn btn-sm btn-outline-primary">
                         {% trans "Update API Key" %}
                     </a>
+                </li>
+                <li class="list-group-item">
+                    <form method="post" action="{% url 'device-log-level' device.pk %}" class="d-flex align-items-end gap-2 flex-wrap">
+                        {% csrf_token %}
+                        <div class="flex-grow-1" style="min-width: 200px;">
+                            <label class="form-label mb-1" for="id_device_log_level">{% trans "Status log level" %}</label>
+                            <select name="log_level" id="id_device_log_level" class="form-select form-select-sm">
+                                <option value="" {% if device.log_level is None %}selected{% endif %}>{% trans "Not set" %}</option>
+                                {% for value, label in log_level_choices %}
+                                    <option value="{{ value }}" {% if device.log_level == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">{% trans "Save" %}</button>
+                    </form>
+                    <p class="small text-muted mb-0 mt-2">{% trans "If set, the device may receive log_level in the status API response when the latest line level differs." %}</p>
                 </li>
             </ul>
             <!-- QrCode Section -->
@@ -172,7 +195,7 @@
         </div>
     </div>
 
-    
+    {% if battery_status %}
     <!-- Battery Status Chart -->
     <div class="row mt-4">
         <div class="col-12">
@@ -181,19 +204,14 @@
                     <h5 class="card-title mb-0">{% trans "Battery Status" %}</h5>
                 </div>
                 <div class="card-body">
-                    {% if battery_status %}
-                        <div class="chart-container">
-                            <canvas id="chart-battery"></canvas>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info mb-0" role="alert">
-                            {% trans "No battery status available for this device." %}
-                        </div>
-                    {% endif %}
+                    <div class="chart-container">
+                        <canvas id="chart-battery"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Device Logs -->
     <div class="row mt-4">
