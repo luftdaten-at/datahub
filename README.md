@@ -106,6 +106,11 @@ Development version:
 
 If you don't have a `.env` file yet, copy it from the template: `cp project.env .env`.
 
+**Luftdaten API (device / station API key sync):** When a superuser updates a device API key in the Datahub, the app calls `POST {API_URL}/station/apikey` on api.luftdaten.at so `stations.apikey` stays in sync. Configure:
+
+- `LUFTDATEN_ADMIN_API_KEY` — Bearer token; must match the **`ADMIN_API_KEY`** on api.luftdaten.at. If unset, saving a new API key from the Datahub will fail with a clear error (same as remote **503** when not configured).
+- `STATION_APIKEY_MIN_LENGTH` (optional, default **16**) — local minimum length before the request is sent; aligns with the remote API validation.
+
 **Shortcut:** run manage.py via the app container with:
 
     ./manage <command>
