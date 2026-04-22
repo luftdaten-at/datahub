@@ -23,6 +23,7 @@ from django.contrib import messages
 from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
 from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm, DeviceApikeyForm
+from .luftdaten_station_apikey import StationApikeySyncError, sync_station_apikey
 from main.enums import SensorModel, Dimension, LdProduct
 from organizations.models import Organization
 from campaign.models import Room
@@ -708,6 +709,19 @@ class DeviceApikeyUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView
 
     def get_queryset(self):
         return Device.objects.all()
+
+    def form_valid(self, form):
+        new_key = form.cleaned_data.get('api_key')
+        if not new_key:
+            form.add_error('api_key', _('API key is required.'))
+            return self.form_invalid(form)
+        try:
+            sync_station_apikey(self.object.pk, new_key)
+        except StationApikeySyncError as exc:
+            form.add_error('api_key', str(exc))
+            messages.error(self.request, str(exc))
+            return self.form_invalid(form)
+        return super().form_valid(form)
 
 
 class DeviceLogLevelUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
