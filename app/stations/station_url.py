@@ -10,7 +10,7 @@ _AIR_AUTO_PK = re.compile(r"^\d{1,4}$")
 
 @dataclass
 class StationResolution:
-    """Resolve URL pk to canonical station_id and optional Air Station display metadata."""
+    """Resolve URL pk to canonical station_id and optional Air (product) display metadata."""
 
     canonical_id: str
     device: Optional[Device]
@@ -27,10 +27,10 @@ class StationResolution:
 
 def _air_friendly_name(device: Device) -> str:
     if device.auto_number is not None:
-        return f"Air Station {int(device.auto_number)}"
+        return f"Station {int(device.auto_number)}"
     if device.device_name:
         return str(device.device_name)
-    return "Air Station"
+    return "Station"
 
 
 def resolve_station_from_pk(raw_pk: str) -> StationResolution:

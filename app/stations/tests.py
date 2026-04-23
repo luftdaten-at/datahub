@@ -762,7 +762,7 @@ class AirStationUrlResolutionTests(TestCase):
             id="111111111111111",
             model=LdProduct.AIR_STATION,
             auto_number=7,
-            device_name="Air Station 7",
+            device_name="Station 7",
         )
 
     def test_detail_by_long_id_shows_friendly_name(self):
@@ -770,7 +770,7 @@ class AirStationUrlResolutionTests(TestCase):
             reverse("station-detail", kwargs={"pk": "111111111111111"}),
         )
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "Air Station 7")
+        self.assertContains(r, "Station 7")
         self.assertContains(
             r, 'const STATION_ID = "111111111111111'
         )  # API uses full canonical id
@@ -780,7 +780,7 @@ class AirStationUrlResolutionTests(TestCase):
             reverse("station-detail", kwargs={"pk": "7"}),
         )
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "Air Station 7")
+        self.assertContains(r, "Station 7")
         self.assertContains(
             r, 'const STATION_ID = "111111111111111'
         )
@@ -793,7 +793,7 @@ class AirStationUrlResolutionTests(TestCase):
         self.assertContains(r, "12345")
         self.assertContains(r, "Station")
         self.assertNotContains(
-            r, "Air Station 7",
+            r, "Station 7",
         )
         self.assertContains(r, 'const STATION_ID = "12345')
 

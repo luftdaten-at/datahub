@@ -63,19 +63,18 @@ class Device(models.Model):
 
             self.auto_number = counter.last_auto_number
             """
-            Name format: "{model} {n}". Air Station uses n without leading zeros; other models use 4 digits (e.g. Air Cube 0001).
+            Name format: "Station {n}" for Air Station (n unpadded), else "{model} {n:04d}" (e.g. Air Cube 0001).
             """
             self._set_auto_device_name()
         
         super().save(*args, **kwargs)
     
     def _set_auto_device_name(self) -> None:
-        """Set device_name from model + auto_number (Air Station: no leading zeros in the number)."""
-        name = self.get_model_name()
+        """Set device_name from model + auto_number (Air Station: "Station {n}" without leading zeros in n)."""
         if self.model == LdProduct.AIR_STATION:
-            self.device_name = f"{name} {int(self.auto_number)}"
+            self.device_name = f"Station {int(self.auto_number)}"
         else:
-            self.device_name = f"{name} {int(self.auto_number):04d}"
+            self.device_name = f"{self.get_model_name()} {int(self.auto_number):04d}"
 
     def get_ble_id(self):
         # cuts of the 3 last characters that are use for board identification
