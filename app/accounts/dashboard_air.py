@@ -12,6 +12,7 @@ from django.utils.translation import gettext as _
 
 from main.enums import Dimension
 from main.pm25_colors import pm25_to_rgb
+from stations.station_url import resolve_station_from_pk
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,10 @@ def build_favorite_station_rows(favorites) -> List[dict]:
         r, g, b = pm25_to_rgb(pm)
         rows.append(
             {
-                "url": reverse("station-detail", kwargs={"pk": sid}),
+                "url": reverse(
+                    "station-detail",
+                    kwargs={"pk": resolve_station_from_pk(sid).detail_url_pk},
+                ),
                 "label": f"{_('Station')} {sid}",
                 "pm25": pm,
                 "r": r,

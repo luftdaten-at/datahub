@@ -51,7 +51,7 @@ class Device(models.Model):
         if self.auto_number:
             # assign name to update existing devices
             # TODO could be removed
-            self.device_name = f'{self.get_model_name()} {self.auto_number:04d}'
+            self._set_auto_device_name()
             super().save(*args, **kwargs)
             return
 
@@ -62,14 +62,21 @@ class Device(models.Model):
             counter.save()
 
             self.auto_number = counter.last_auto_number
-            '''
-            assigns a unique name for this device in this format: "{model name}{auto_number}"
-            for example "Air Cube 0001"
-            '''
-            self.device_name = f'{self.get_model_name()} {self.auto_number:04d}'
+            """
+            Name format: "{model} {n}". Air Station uses n without leading zeros; other models use 4 digits (e.g. Air Cube 0001).
+            """
+            self._set_auto_device_name()
         
         super().save(*args, **kwargs)
     
+    def _set_auto_device_name(self) -> None:
+        """Set device_name from model + auto_number (Air Station: no leading zeros in the number)."""
+        name = self.get_model_name()
+        if self.model == LdProduct.AIR_STATION:
+            self.device_name = f"{name} {int(self.auto_number)}"
+        else:
+            self.device_name = f"{name} {int(self.auto_number):04d}"
+
     def get_ble_id(self):
         # cuts of the 3 last characters that are use for board identification
         return self.id[:-3]

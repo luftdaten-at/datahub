@@ -2,7 +2,7 @@
 {% load i18n %}
 {% load static %}
 
-{% block title %}{{ station_id }}{% endblock title %}
+{% block title %}{% if is_air_station and air_display_name %}{{ air_display_name }}{% else %}{{ station_id }}{% endif %}{% endblock title %}
 
 {% block styles %}
 <!-- Leaflet CSS -->
@@ -18,7 +18,11 @@
 {% block content %}
 <div class="row">
   <div class="col-lg-12">
+    {% if is_air_station and air_display_name %}
+    <h2 class="mt-5"><span id="station-id">{{ air_display_name }}</span></h2>
+    {% else %}
     <h2 class="mt-5">{% trans "Station" %} <span id="station-id">{{ station_id }}</span></h2>
+    {% endif %}
     
   </div>
 </div>
@@ -102,7 +106,7 @@
       <div class="card-body">
         <h5 class="card-title">{% trans "Station Information" %}</h5>
         {% if user.is_authenticated %}
-        <form method="post" action="{% url 'station-favorite-toggle' station_id %}" class="mb-3">
+        <form method="post" action="{% url 'station-favorite-toggle' station_detail_url_pk %}" class="mb-3">
           {% csrf_token %}
           {% if is_favorite %}
           <button type="submit" class="btn btn-outline-danger btn-sm">
@@ -178,7 +182,9 @@
 <!-- JavaScript-Code zur Initialisierung der Karte und Diagramme -->
 <script>
 const API_URL = "{{ API_URL }}";
-const STATION_ID = "{{ station_id }}";
+const STATION_ID = "{{ station_id|escapejs }}";
+const IS_AIR_STATION = {% if is_air_station %}true{% else %}false{% endif %};
+const AIR_STATION_MAP_LABEL = `{% if air_display_name %}{{ air_display_name|escapejs }}{% endif %}`;
 
 // Initialize map with default view (will be updated when data loads)
 var map = L.map('map').setView([48.2082, 16.3738], 13); // Default to Vienna
@@ -460,11 +466,13 @@ async function loadStationData() {
     const geometry = feature.geometry || {};
     const coordinates = geometry.coordinates || [];
     
+    if (!IS_AIR_STATION) {
     // Update station ID display in header
     document.getElementById('station-id').textContent = properties.device || STATION_ID;
     
     // Update sidebar station information
     document.getElementById('station-id-display').textContent = properties.device || STATION_ID;
+    }
     
     if (properties.time) {
       const timeDisplay = document.getElementById('station-time-display');
@@ -489,8 +497,11 @@ async function loadStationData() {
       if (marker) {
         map.removeLayer(marker);
       }
+      const popupLabel = (IS_AIR_STATION && AIR_STATION_MAP_LABEL)
+        ? AIR_STATION_MAP_LABEL
+        : ('Station ' + (properties.device || STATION_ID));
       marker = L.marker(stationCoordinates).addTo(map)
-        .bindPopup('Station ' + (properties.device || STATION_ID))
+        .bindPopup(popupLabel)
         .openPopup();
     }
     
