@@ -61,7 +61,6 @@ class AirStationsOverviewTests(TestCase):
             id='123456789012345',
             model=LdProduct.AIR_STATION,
             auto_number=1,
-            device_name='Air Station 0001',
             firmware='1.0',
         )
         # Wrong model - should not appear
@@ -91,7 +90,6 @@ class AirStationsOverviewTests(TestCase):
             id='123456789012345',
             model=LdProduct.AIR_STATION,
             auto_number=1,
-            device_name='Test Station',
             firmware='2.0',
         )
         DeviceLogs.objects.create(

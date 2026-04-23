@@ -13,10 +13,12 @@ from requests.exceptions import HTTPError, RequestException
 
 from main.enums import Dimension, Order, OutputFormat
 from .models import FavoriteStation
+from .station_url import air_station_url_pk_by_device_ids, resolve_station_from_pk
 
 
 def StationDetailView(request, pk):
-    station_id = str(pk).strip()
+    r = resolve_station_from_pk(str(pk))
+    station_id = r.canonical_id
     is_favorite = False
     if request.user.is_authenticated and station_id:
         is_favorite = FavoriteStation.objects.filter(
@@ -25,7 +27,13 @@ def StationDetailView(request, pk):
     return render(
         request,
         "stations/detail.html",
-        {"station_id": station_id, "is_favorite": is_favorite},
+        {
+            "station_id": station_id,
+            "station_detail_url_pk": r.detail_url_pk,
+            "is_favorite": is_favorite,
+            "is_air_station": r.is_air_station,
+            "air_display_name": r.air_display_name,
+        },
     )
 
 
@@ -33,7 +41,8 @@ class FavoriteStationToggleView(LoginRequiredMixin, View):
     """POST: add or remove this station from the user's favourites."""
 
     def post(self, request, pk):
-        station_id = str(pk).strip()[:64]
+        r = resolve_station_from_pk(str(pk))
+        station_id = r.canonical_id[:64] if r.canonical_id else ""
         if not station_id:
             messages.error(request, _("Invalid station."))
             return redirect("stations-list")
@@ -45,7 +54,9 @@ class FavoriteStationToggleView(LoginRequiredMixin, View):
         else:
             FavoriteStation.objects.create(user=request.user, station_id=station_id)
             messages.success(request, _("Added to favourite stations."))
-        return redirect(reverse("station-detail", kwargs={"pk": station_id}))
+        return redirect(
+            reverse("station-detail", kwargs={"pk": r.detail_url_pk})
+        )
 
 def StationListView(request):
     """
@@ -173,13 +184,22 @@ def StationListView(request):
     
     # Serialize to JSON for JavaScript
     all_stations_json = json.dumps(all_stations)
-    
+
+    air_lookup_ids: list[str] = [s["station_id"] for s in all_stations]
+    for _dim_key, dim_data in dimension_data.items():
+        for _section in ("top_stations", "lowest_stations"):
+            for row in dim_data.get(_section) or ():
+                if row and len(row) > 0 and row[0]:
+                    air_lookup_ids.append(str(row[0]))
+    air_url_pk = air_station_url_pk_by_device_ids(air_lookup_ids)
+
     context = {
         'dimension_data': dimension_data,
         'error': error_message,
         'active_stations': active_stations,
         'all_stations': all_stations,
         'all_stations_json': all_stations_json,
+        'air_station_url_pk': air_url_pk,
     }
 
     return render(request, 'stations/list.html', context)

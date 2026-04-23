@@ -6,7 +6,8 @@ from django.core.cache import cache
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-from main.enums import Dimension, Order, OutputFormat
+from main.enums import Dimension, LdProduct, Order, OutputFormat
+from devices.models import Device
 from stations.models import FavoriteStation
 from stations.views import StationListView
 
@@ -753,3 +754,81 @@ class FavoriteStationTests(TestCase):
         r = self.client.post(url_toggle)
         self.assertEqual(r.status_code, 302)
         self.assertIn("login", r.url.lower())
+
+
+class AirStationUrlResolutionTests(TestCase):
+    def setUp(self):
+        self.air = Device.objects.create(
+            id="111111111111111",
+            model=LdProduct.AIR_STATION,
+            auto_number=7,
+            device_name="Air Station 7",
+        )
+
+    def test_detail_by_long_id_shows_friendly_name(self):
+        r = self.client.get(
+            reverse("station-detail", kwargs={"pk": "111111111111111"}),
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Air Station 7")
+        self.assertContains(
+            r, 'const STATION_ID = "111111111111111'
+        )  # API uses full canonical id
+
+    def test_detail_by_short_auto_number(self):
+        r = self.client.get(
+            reverse("station-detail", kwargs={"pk": "7"}),
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Air Station 7")
+        self.assertContains(
+            r, 'const STATION_ID = "111111111111111'
+        )
+
+    def test_five_plus_digit_string_not_treated_as_auto_number(self):
+        r = self.client.get(
+            reverse("station-detail", kwargs={"pk": "12345"}),
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "12345")
+        self.assertContains(r, "Station")
+        self.assertNotContains(
+            r, "Air Station 7",
+        )
+        self.assertContains(r, 'const STATION_ID = "12345')
+
+    def test_bare_one_to_four_digits_without_air_stays_literal(self):
+        r = self.client.get(
+            reverse("station-detail", kwargs={"pk": "42"}),
+        )
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "42")
+        self.assertContains(r, "Station")
+        self.assertContains(r, 'const STATION_ID = "42')
+
+    def test_favorite_toggle_short_stores_canonical_id_and_redirects_short(self):
+        User = get_user_model()
+        user = User.objects.create_user(
+            username="airstat",
+            email="airstat@test.com",
+            password="secret123",
+        )
+        self.client.login(username="airstat", password="secret123")
+        self.assertFalse(
+            FavoriteStation.objects.filter(
+                user=user, station_id="111111111111111"
+            ).exists()
+        )
+        r = self.client.post(
+            reverse("station-favorite-toggle", kwargs={"pk": "7"}),
+        )
+        self.assertTrue(
+            FavoriteStation.objects.filter(
+                user=user, station_id="111111111111111"
+            ).exists()
+        )
+        self.assertRedirects(
+            r,
+            reverse("station-detail", kwargs={"pk": "7"}),
+            fetch_redirect_response=False,
+        )

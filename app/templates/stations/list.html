@@ -1,6 +1,7 @@
 {% extends "_base.html" %}
 {% load i18n %}
 {% load static %}
+{% load station_extras %}
 
 {% block title %}{% trans "All Stations" %}{% endblock title %}
 
@@ -266,7 +267,7 @@
                                 {% for station in dimension_data.pm1.top_stations %}
                                     <li class="list-group-item px-0">
                                         <div class="d-flex justify-content-between align-items-center">
-                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                    <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                         Station {{ station.0 }}
                     </a>
                                             <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -285,7 +286,7 @@
                                 {% for station in dimension_data.pm1.lowest_stations %}
                                     <li class="list-group-item px-0">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                            <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                                                 Station {{ station.0 }}
                                             </a>
                                             <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -317,7 +318,7 @@
                             <ul class="list-group list-group-flush">
                                 {% for station in dimension_data.pm25.top_stations %}
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                        <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                                             Station {{ station.0 }}
                                         </a>
                                         <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -335,7 +336,7 @@
                                 {% for station in dimension_data.pm25.lowest_stations %}
                                     <li class="list-group-item px-0">
                                         <div class="d-flex justify-content-between align-items-center">
-                    <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                    <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                         Station {{ station.0 }}
                     </a>
                                             <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -367,7 +368,7 @@
                             <ul class="list-group list-group-flush">
                                 {% for station in dimension_data.pm10.top_stations %}
                                     <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                                        <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                        <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                                             Station {{ station.0 }}
                                         </a>
                                         <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -385,7 +386,7 @@
                                 {% for station in dimension_data.pm10.lowest_stations %}
                                     <li class="list-group-item px-0">
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <a href="{% url 'station-detail' station.0 %}" class="station-link">
+                                            <a href="{% url 'station-detail' air_station_url_pk|get_item:station.0|default:station.0 %}" class="station-link">
                                                 Station {{ station.0 }}
                                             </a>
                                             <span class="badge rounded-pill">{{ station.3 }} µg/m³</span>
@@ -435,7 +436,16 @@
     </div>
 </div>
 
+{{ air_station_url_pk|json_script:"air-station-url-pk" }}
 <script>
+    const airStationUrlPk = JSON.parse(
+        document.getElementById('air-station-url-pk').textContent
+    );
+    function stationDetailHref(stationId) {
+        const sid = String(stationId);
+        const shortPk = airStationUrlPk && airStationUrlPk[sid];
+        return '/stations/' + encodeURIComponent(shortPk || sid) + '/';
+    }
     // Color value map from home page
     const colorStepsPM1 = [
         [0,    [80, 240, 230],  "{% trans 'Good' %}"],
@@ -784,7 +794,7 @@
                             <button class="close-btn" onclick="d3.select('.station-popup').style('display', 'none')">&times;</button>
                             <h4>Station ${d.station_id}</h4>
                             <p><strong>Last Active:</strong> ${lastActiveText}</p>
-                            <a href="/stations/${d.station_id}">View Details</a>
+                            <a href="${stationDetailHref(d.station_id)}">View Details</a>
                         `)
                         .style('left', (x + 10) + 'px')
                         .style('top', (y - 10) + 'px')
@@ -877,7 +887,7 @@
                                     <button class="close-btn" onclick="d3.select('.station-popup').style('display', 'none')">&times;</button>
                                     <h4>Station ${d.station_id}</h4>
                                     <p><strong>Last Active:</strong> ${lastActiveText}</p>
-                                    <a href="/stations/${d.station_id}">View Details</a>
+                                    <a href="${stationDetailHref(d.station_id)}">View Details</a>
                                 `)
                                 .style('left', (x + 10) + 'px')
                                 .style('top', (y - 10) + 'px')
