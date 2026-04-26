@@ -22,6 +22,7 @@
             {% else %}
             <button type="button" class="btn btn-outline-secondary me-2" disabled title="{% trans 'No other devices available' %}">{% trans "Move measurements" %}</button>
             {% endif %}
+            <a href="{% url 'device-data-download' device.pk %}" class="btn btn-success me-2">{% trans "Download all data" %}</a>
             <a href="{% url 'device-measurements' device.pk %}" class="btn btn-primary me-2">{% trans "View All Measurements" %}</a>
             <a href="{% url 'device-detail' device.pk %}" class="btn btn-secondary">{% trans "Back to Device" %}</a>
         </div>

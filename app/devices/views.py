@@ -1,5 +1,7 @@
+import io
 import json
 import logging
+import zipfile
 from collections import defaultdict
 import csv
 from django.http import HttpResponse, HttpResponseRedirect
@@ -776,6 +778,201 @@ def change_device_id(old_id, new_id):
         print("Device with the specified ID does not exist")
     except Exception as e:
         print(f"An error occurred: {e}")
+
+
+def _device_export_filename_part(device_id: str, max_len: int = 80) -> str:
+    s = "".join(c if c.isalnum() or c in "._-" else "_" for c in str(device_id))
+    return s[:max_len] or "device"
+
+
+def _device_metadata_dict(device: Device) -> dict:
+    return {
+        "id": device.id,
+        "device_name": device.device_name,
+        "model": device.model,
+        "model_name": LdProduct._names.get(device.model) if device.model is not None else None,
+        "firmware": device.firmware,
+        "btmac_address": device.btmac_address,
+        "last_update": device.last_update.isoformat() if device.last_update else None,
+        "notes": device.notes,
+        "auto_number": device.auto_number,
+        "created_at": device.created_at.isoformat() if device.created_at else None,
+        "test_mode": device.test_mode,
+        "calibration_mode": device.calibration_mode,
+        "log_level": device.log_level,
+        "current_room_id": device.current_room_id,
+        "current_organization_id": device.current_organization_id,
+        "current_user_id": device.current_user_id,
+        "current_campaign_id": device.current_campaign_id,
+    }
+
+
+def _csv_value(value) -> str:
+    if value is None:
+        return ""
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    if isinstance(value, (dict, list)):
+        return json.dumps(value, ensure_ascii=False)
+    return str(value)
+
+
+class DeviceDataDownloadView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Superuser: ZIP with device.json, measurements.csv, air_quality_records.csv,
+    device_status.csv, and device_logs.csv.
+    """
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
+
+    def get(self, request, pk, *args, **kwargs):
+        device = get_object_or_404(Device, pk=pk)
+        out = io.BytesIO()
+        with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr(
+                "device.json",
+                json.dumps(
+                    {
+                        "exported_at": timezone.now().isoformat(),
+                        "device": _device_metadata_dict(device),
+                    },
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+            )
+
+            m_buf = io.StringIO()
+            m_writer = csv.writer(m_buf)
+            m_writer.writerow(
+                [
+                    "value_id",
+                    "measurement_id",
+                    "time_received",
+                    "time_measured",
+                    "sensor_model",
+                    "sensor_name",
+                    "room_id",
+                    "user_id",
+                    "workshop_id",
+                    "workshop_name",
+                    "participant_id",
+                    "location_id",
+                    "mode_id",
+                    "dimension",
+                    "dimension_name",
+                    "value",
+                ]
+            )
+            for v in (
+                Values.objects.filter(measurement__device=device)
+                .select_related(
+                    "measurement",
+                    "measurement__workshop",
+                    "measurement__participant",
+                    "measurement__mode",
+                    "measurement__location",
+                    "measurement__room",
+                    "measurement__user",
+                )
+                .order_by("measurement__time_measured", "measurement__id", "id")
+                .iterator(chunk_size=2000)
+            ):
+                m = v.measurement
+                wname = m.workshop.name if m.workshop else ""
+                m_writer.writerow(
+                    [
+                        v.id,
+                        m.id,
+                        _csv_value(m.time_received),
+                        _csv_value(m.time_measured),
+                        m.sensor_model,
+                        SensorModel.get_sensor_name(m.sensor_model),
+                        m.room_id,
+                        m.user_id,
+                        m.workshop_id,
+                        wname,
+                        m.participant_id,
+                        m.location_id,
+                        m.mode_id,
+                        v.dimension,
+                        Dimension.get_name(v.dimension),
+                        v.value,
+                    ]
+                )
+            zf.writestr("measurements.csv", m_buf.getvalue().encode("utf-8"))
+
+            a_buf = io.StringIO()
+            a_writer = csv.writer(a_buf)
+            a_iter = (
+                AirQualityRecord.objects.filter(device=device)
+                .order_by("time", "id")
+                .values()
+                .iterator(chunk_size=2000)
+            )
+            aqr_keys = None
+            for row in a_iter:
+                if aqr_keys is None:
+                    aqr_keys = list(row.keys())
+                    a_writer.writerow(aqr_keys)
+                a_writer.writerow([_csv_value(row[k]) for k in aqr_keys])
+            if aqr_keys is None:
+                a_writer.writerow(
+                    [f.name for f in AirQualityRecord._meta.concrete_fields]
+                )
+            zf.writestr("air_quality_records.csv", a_buf.getvalue().encode("utf-8"))
+
+            st_buf = io.StringIO()
+            st_writer = csv.writer(st_buf)
+            st_writer.writerow(
+                [
+                    "id",
+                    "time_received",
+                    "battery_voltage",
+                    "battery_soc",
+                    "sensor_list_json",
+                ]
+            )
+            for st in (
+                DeviceStatus.objects.filter(device=device)
+                .order_by("time_received", "id")
+                .iterator(chunk_size=2000)
+            ):
+                st_writer.writerow(
+                    [
+                        st.id,
+                        _csv_value(st.time_received),
+                        st.battery_voltage,
+                        st.battery_soc,
+                        json.dumps(st.sensor_list, ensure_ascii=False) if st.sensor_list is not None else "",
+                    ]
+                )
+            zf.writestr("device_status.csv", st_buf.getvalue().encode("utf-8"))
+
+            lg_buf = io.StringIO()
+            lg_writer = csv.writer(lg_buf)
+            lg_writer.writerow(["timestamp", "level", "message"])
+            for log in (
+                DeviceLogs.objects.filter(device=device)
+                .order_by("-timestamp", "-id")
+                .iterator(chunk_size=2000)
+            ):
+                lg_writer.writerow(
+                    [
+                        log.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
+                        log.level,
+                        log.message,
+                    ]
+                )
+            zf.writestr("device_logs.csv", lg_buf.getvalue().encode("utf-8"))
+
+        out.seek(0)
+        part = _device_export_filename_part(device.id)
+        response = HttpResponse(
+            out.getvalue(), content_type="application/zip"
+        )
+        response["Content-Disposition"] = f'attachment; filename="device_{part}_all_data.zip"'
+        return response
 
 
 # View to export DeviceLogs for a given Device as CSV
