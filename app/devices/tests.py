@@ -1,4 +1,8 @@
 from django.contrib.auth import get_user_model
+import json
+import zipfile
+from io import BytesIO
+
 from django.test import TestCase
 from django.urls import reverse, resolve
 from django.utils import timezone
@@ -228,3 +232,48 @@ class DeviceMoveMeasurementsTests(TestCase):
         response = self.client.post(url, {"target_device": ""})
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.source.measurements.count(), 1)
+
+
+class DeviceDataDownloadTests(TestCase):
+    """device-data-download returns a ZIP with device metadata and CSV appendices."""
+
+    def setUp(self):
+        self.url = reverse("device-data-download", kwargs={"pk": "devdl1234567890"})
+        self.superuser = get_user_model().objects.create_superuser(
+            username="admin",
+            email="admin@test.com",
+            password="testpass123",
+        )
+        self.device = Device.objects.create(
+            id="devdl1234567890",
+            model=LdProduct.AIR_STATION,
+            auto_number=1,
+        )
+
+    def test_regular_user_forbidden(self):
+        user = get_user_model().objects.create_user(
+            username="u",
+            email="u@test.com",
+            password="x",
+        )
+        self.client.login(username="u", password="x")
+        self.assertEqual(self.client.get(self.url).status_code, 403)
+
+    def test_superuser_gets_zip_with_expected_entries(self):
+        self.client.login(username="admin", password="testpass123")
+        r = self.client.get(self.url)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r["Content-Type"], "application/zip")
+        self.assertIn("attachment", r["Content-Disposition"])
+        self.assertIn("all_data.zip", r["Content-Disposition"])
+        buf = BytesIO(r.content)
+        with zipfile.ZipFile(buf) as zf:
+            names = set(zf.namelist())
+            self.assertIn("device.json", names)
+            self.assertIn("measurements.csv", names)
+            self.assertIn("air_quality_records.csv", names)
+            self.assertIn("device_status.csv", names)
+            self.assertIn("device_logs.csv", names)
+            meta = json.loads(zf.read("device.json").decode("utf-8"))
+        self.assertEqual(meta["device"]["id"], "devdl1234567890")
+        self.assertIn("device_name", meta["device"])
