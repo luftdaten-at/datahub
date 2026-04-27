@@ -1,0 +1,213 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{% trans "Municipalities (API registry)" %}{% endblock title %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.21.2/dist/bootstrap-table.min.js"></script>
+{% endblock styles %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <h2 class="mb-0">{% trans "Municipalities (API registry)" %}</h2>
+        {% if cities %}
+        <div class="ms-auto" style="min-width: 12rem; max-width: 22rem;">
+            <label for="municipalities-admin-table-search" class="visually-hidden">{% trans "Search" %}</label>
+            <input
+                type="search"
+                id="municipalities-admin-table-search"
+                class="form-control form-control-sm"
+                placeholder="{% trans 'Search' %}"
+                autocomplete="off"
+            >
+        </div>
+        {% endif %}
+    </div>
+
+    {% if city_registry_error %}
+    <div class="alert alert-warning" role="alert">
+        {% trans "Could not load city list from the API." %} {{ city_registry_error }}
+    </div>
+    {% endif %}
+
+    {% if not luftdaten_admin_configured %}
+    <div class="alert alert-info" role="alert">
+        {% trans "Set LUFTDATEN_ADMIN_API_KEY to enable updating coordinates via api.luftdaten.at POST /city/admin." %}
+    </div>
+    {% endif %}
+
+    {% if cities %}
+        <div
+            id="municipality-country-filters"
+            class="d-flex flex-wrap align-items-center gap-2 mb-3"
+            role="toolbar"
+            aria-label="{% trans 'Filter by country' %}"
+            data-label-all="{% trans 'All countries' %}"
+            data-label-na="{% trans 'N/A' %}"
+        >
+            <span class="text-muted small me-1">{% trans "Country" %}:</span>
+            <div class="d-flex flex-wrap gap-2" id="municipality-country-filter-buttons"></div>
+        </div>
+        <table
+            id="table"
+            data-toggle="table"
+            data-search="true"
+            data-search-selector="#municipalities-admin-table-search"
+            data-sortable="true"
+            data-pagination="true"
+            data-page-size="50"
+            data-page-list="[50, 100, 200]"
+            class="table">
+            <thead class="table-light">
+                <tr>
+                    <th data-field="id" data-sortable="true">{% trans "ID" %}</th>
+                    <th data-field="name" data-sortable="true">{% trans "Name" %}</th>
+                    <th data-field="slug" data-sortable="true">{% trans "Slug" %}</th>
+                    <th data-field="country" data-sortable="true">{% trans "Country" %}</th>
+                    <th data-field="latitude" data-sortable="true">{% trans "Latitude" %}</th>
+                    <th data-field="longitude" data-sortable="true">{% trans "Longitude" %}</th>
+                    <th data-field="actions" data-sortable="false">{% trans "Actions" %}</th>
+                    <th data-field="country_filter" data-visible="false" data-switchable="false">{% trans "Country filter" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for city in cities %}
+                    <tr data-country-slug="{{ city.country_slug }}">
+                        <td>{{ city.id|default:"—" }}</td>
+                        <td>
+                            {% if city.slug %}
+                            <a href="{% url 'municipalities-detail' city.slug %}" class="btn btn-secondary btn-sm" title="{% trans 'View municipality' %}">{{ city.name|default:city.slug }}</a>
+                            {% else %}
+                            {{ city.name|default:"—" }}
+                            {% endif %}
+                        </td>
+                        <td><code class="small">{{ city.slug|default:"—" }}</code></td>
+                        <td>{{ city.country_name|default:"—" }}</td>
+                        <td>{% if city.latitude is not None %}{{ city.latitude }}{% else %}—{% endif %}</td>
+                        <td>{% if city.longitude is not None %}{{ city.longitude }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if city.slug and luftdaten_admin_configured %}
+                            <button
+                                type="button"
+                                class="btn btn-outline-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editCityLocationModal"
+                                data-city-slug="{{ city.slug }}"
+                                data-city-name="{{ city.name|default:city.slug }}"
+                                data-latitude="{{ city.latitude|default_if_none:'' }}"
+                                data-longitude="{{ city.longitude|default_if_none:'' }}"
+                            >{% trans "Edit location" %}</button>
+                            {% elif city.slug %}
+                            <span class="text-muted small">{% trans "Admin API key required" %}</span>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>
+                        <td>{{ city.country_filter }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% elif not city_registry_error %}
+        <div class="alert alert-warning" role="alert">
+            {% trans "No cities returned from the API." %}
+        </div>
+    {% endif %}
+
+    {% if cities and luftdaten_admin_configured %}
+    <div class="modal fade" id="editCityLocationModal" tabindex="-1" aria-labelledby="editCityLocationModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="{% url 'municipalities-admin-update-location' %}">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editCityLocationModalLabel">{% trans "Edit municipality location" %}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="small text-muted mb-3" id="editCityLocationSubtitle"></p>
+                        <input type="hidden" name="city_slug" id="editCityLocationSlug" value="">
+                        <div class="mb-3">
+                            <label for="editCityLocationLat" class="form-label">{% trans "Latitude" %}</label>
+                            <input type="text" class="form-control" name="latitude" id="editCityLocationLat" inputmode="decimal" required autocomplete="off">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editCityLocationLon" class="form-label">{% trans "Longitude" %}</label>
+                            <input type="text" class="form-control" name="longitude" id="editCityLocationLon" inputmode="decimal" required autocomplete="off">
+                        </div>
+                        <p class="small text-muted mb-0">{% trans "Uses api.luftdaten.at POST /city/admin (name and timezone are taken from the current registry and API; the city slug may change if the name ever changes on the API side)." %}</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+                        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+{% if cities %}
+<script>
+(function () {
+    if (typeof LuftdatenDatahub === "undefined" || !LuftdatenDatahub.initBootstrapTableFilterToolbars) {
+        return;
+    }
+    LuftdatenDatahub.initBootstrapTableFilterToolbars({
+        tableSelector: "#table",
+        filters: [
+            {
+                rowDataKey: "country_slug",
+                filterField: "country_filter",
+                toolbarSelector: "#municipality-country-filters",
+                buttonHostSelector: "#municipality-country-filter-buttons",
+                sort: "locale",
+            },
+        ],
+    });
+})();
+</script>
+{% endif %}
+{% if cities and luftdaten_admin_configured %}
+<script>
+(function () {
+    var modal = document.getElementById("editCityLocationModal");
+    if (!modal) {
+        return;
+    }
+    modal.addEventListener("show.bs.modal", function (event) {
+        var btn = event.relatedTarget;
+        if (!btn || !btn.getAttribute) {
+            return;
+        }
+        var slug = btn.getAttribute("data-city-slug") || "";
+        var name = btn.getAttribute("data-city-name") || "";
+        var lat = btn.getAttribute("data-latitude") || "";
+        var lon = btn.getAttribute("data-longitude") || "";
+        document.getElementById("editCityLocationSlug").value = slug;
+        document.getElementById("editCityLocationLat").value = lat;
+        document.getElementById("editCityLocationLon").value = lon;
+        var sub = document.getElementById("editCityLocationSubtitle");
+        if (sub) {
+            sub.textContent = name + " (" + slug + ")";
+        }
+    });
+})();
+</script>
+{% endif %}
+{% endblock extra_js %}
