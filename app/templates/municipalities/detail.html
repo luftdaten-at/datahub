@@ -71,7 +71,7 @@
   <p>Es gibt {{ municipality.station_count }} Citizen Science Stationen in {{ municipality.name }}. Bitte beachten Sie, dass einzelne Messstationen durch ungünstige Aufstellorte die Mittelwerte verfälschen können. In unserer <a href="https://luftdaten.at/datahub-methodik/">Methodik</a> setzen wir jedoch gezielte statistische Verfahren ein, um diese Einflüsse so gut wie möglich zu korrigieren.</p>
   <h3>Mittelwerte der letzten Stunde (1h-Mittelwert)</h3>
   {% for value in municipality.values %}
-  {% if value.dimension in "PM1.0,PM2.5,PM10.0,Humidity,Temperature" %}
+  {% if value.dimension in "PM1.0,PM2.5,PM10.0" %}
   <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
     <div class="card text-center">
       <div class="card-body">

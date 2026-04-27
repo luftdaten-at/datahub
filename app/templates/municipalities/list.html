@@ -58,6 +58,28 @@
     .municipality-popup .close-btn:hover {
         color: #333;
     }
+    #municipalities-map-wrap {
+        position: relative;
+        min-height: 500px;
+    }
+    #municipalities-loading-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 0.75rem;
+        background-color: rgba(255, 255, 255, 0.92);
+        border-radius: 0.375rem;
+        transition: opacity 0.2s ease;
+    }
+    #municipalities-loading-overlay.municipalities-loading-hidden {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
 </style>
 {% endblock styles %}
 
@@ -70,13 +92,25 @@
     <!-- Map Section -->
     <div class="row mb-4">
         <div class="col-12">
-            <div id="map"></div>
+            <div id="municipalities-map-wrap">
+                <div id="map"></div>
+                <div id="municipalities-loading-overlay" aria-busy="true" aria-live="polite">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">{% trans "Loading..." %}</span>
+                    </div>
+                    <p class="mb-0 small text-muted">{% trans "Loading municipalities…" %}</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- Top municipalities by station count -->
     <div class="row mb-4" id="top-municipalities-cards">
-        <!-- Cards will be populated by JavaScript -->
+        <div id="top-municipalities-loading" class="col-12 py-4 text-center">
+            <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                <span class="visually-hidden">{% trans "Loading..." %}</span>
+            </div>
+        </div>
     </div>
 
 </div>
@@ -95,6 +129,26 @@
     function clearMunicipalitiesListError() {
         var el = document.getElementById("municipalities-list-error");
         if (el) el.innerHTML = "";
+    }
+
+    function hideMunicipalitiesMapLoading() {
+        var overlay = document.getElementById("municipalities-loading-overlay");
+        if (overlay) {
+            overlay.classList.add("municipalities-loading-hidden");
+            overlay.setAttribute("aria-busy", "false");
+        }
+    }
+
+    function removeTopMunicipalitiesLoading() {
+        var topLd = document.getElementById("top-municipalities-loading");
+        if (topLd) {
+            topLd.remove();
+        }
+    }
+
+    function hideMunicipalitiesPageLoading() {
+        removeTopMunicipalitiesLoading();
+        hideMunicipalitiesMapLoading();
     }
 
     async function loadMunicipalitiesPageData() {
@@ -299,13 +353,16 @@
     loadMunicipalitiesPageData()
         .then(function (bundle) {
             return drawMunicipalitiesMap(bundle.municipalities).then(function () {
+                removeTopMunicipalitiesLoading();
                 if (bundle.topMunicipalities && bundle.topMunicipalities.length > 0) {
                     displayTopMunicipalities(bundle.topMunicipalities, bundle.municipalities);
                 }
+                hideMunicipalitiesMapLoading();
             });
         })
         .catch(function (error) {
             console.error("Error loading municipalities list:", error);
+            hideMunicipalitiesPageLoading();
         });
 </script>
 {% endblock content %}
