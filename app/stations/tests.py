@@ -748,6 +748,16 @@ class FavoriteStationTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "Remove from favourites")
 
+    def test_detail_download_includes_precision_select(self):
+        sid = "export-test-station"
+        r = self.client.get(reverse("station-detail", kwargs={"pk": sid}))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'id="precisionSelect"')
+        self.assertContains(r, 'value="hour"')
+        self.assertContains(r, 'value="day"')
+        self.assertContains(r, "HISTORICAL_PRECISION_ALLOWED")
+        self.assertContains(r, 'params.set("output_format", "csv")')
+
     def test_anonymous_toggle_redirects_to_login(self):
         self.client.logout()
         url_toggle = reverse("station-favorite-toggle", kwargs={"pk": "foo"})
