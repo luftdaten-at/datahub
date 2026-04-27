@@ -161,15 +161,23 @@
     <div class="card mb-3">
       <div class="card-body">
         <h5 class="card-title">{% trans "Download Data" %}</h5>
-        <p class="card-text small text-muted mb-3">{% trans "Download data in CSV format" %}</p>
+        <p class="card-text small text-muted mb-3">{% trans "Download aggregated station measurements as CSV." %}</p>
         <form method="get" action="" id="dateForm">
           <div class="mb-2">
             <label for="startDate" class="form-label small">{% trans "Start date:" %}</label>
             <input type="date" class="form-control form-control-sm" id="startDate" name="start_date" required>
           </div>
-          <div class="mb-3">
+          <div class="mb-2">
             <label for="endDate" class="form-label small">{% trans "End date:" %}</label>
             <input type="date" class="form-control form-control-sm" id="endDate" name="end_date" required>
+          </div>
+          <div class="mb-2">
+            <label for="precisionSelect" class="form-label small">{% trans "Time aggregation (precision)" %}</label>
+            <select class="form-select form-select-sm" id="precisionSelect" name="precision" required>
+              {% for value, label in historical_precision_choices %}
+              <option value="{{ value }}"{% if value == historical_download_default_precision %} selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
           </div>
           <button type="submit" class="btn btn-primary btn-sm w-100">{% trans "Download CSV" %}</button>
         </form>
@@ -185,6 +193,12 @@ const API_URL = "{{ API_URL }}";
 const STATION_ID = "{{ station_id|escapejs }}";
 const IS_AIR_STATION = {% if is_air_station %}true{% else %}false{% endif %};
 const AIR_STATION_MAP_LABEL = `{% if air_display_name %}{{ air_display_name|escapejs }}{% endif %}`;
+/** Allowed precision query values for /station/historical (must match API). */
+const HISTORICAL_PRECISION_ALLOWED = new Set([
+  {% for value, label in historical_precision_choices %}
+  "{{ value|escapejs }}"{% if not forloop.last %},{% endif %}
+  {% endfor %}
+]);
 
 // Initialize map with default view (will be updated when data loads)
 var map = L.map('map').setView([48.2082, 16.3738], 13); // Default to Vienna
@@ -649,12 +663,32 @@ async function loadStationData() {
   }
 }
 
-// Download form handler
+// Download form handler: ISO8601 start/end (UTC day bounds) + precision + CSV per API contract.
 document.getElementById("dateForm").addEventListener("submit", function(event) {
   event.preventDefault();
   const startDate = document.getElementById("startDate").value;
   const endDate = document.getElementById("endDate").value;
-  const url = `${API_URL}/station/historical?station_ids=${STATION_ID}&start=${startDate}&end=${endDate}&precision=month&output_format=csv`;
+  if (!startDate || !endDate) {
+    return;
+  }
+  if (startDate > endDate) {
+    alert("{% trans 'Start date must be on or before end date.' %}");
+    return;
+  }
+  let precision = document.getElementById("precisionSelect").value;
+  if (!HISTORICAL_PRECISION_ALLOWED.has(precision)) {
+    precision = "{{ historical_download_default_precision|escapejs }}";
+  }
+  // UTC inclusive range for the selected calendar dates.
+  const startIso = startDate + "T00:00:00Z";
+  const endIso = endDate + "T23:59:59Z";
+  const params = new URLSearchParams();
+  params.set("station_ids", STATION_ID);
+  params.set("start", startIso);
+  params.set("end", endIso);
+  params.set("precision", precision);
+  params.set("output_format", "csv");
+  const url = API_URL + "/station/historical?" + params.toString();
   window.location.href = url;
 });
 

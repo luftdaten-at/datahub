@@ -11,9 +11,27 @@ from django.utils.translation import gettext as _
 from django.views import View
 from requests.exceptions import HTTPError, RequestException
 
-from main.enums import Dimension, Order, OutputFormat
+from main.enums import Dimension, Order, OutputFormat, Precision
 from .models import FavoriteStation
 from .station_url import air_station_url_pk_by_device_ids, resolve_station_from_pk
+
+_HISTORICAL_PRECISION_ORDER = (
+    Precision.MAX,
+    Precision.HOURLY,
+    Precision.DAYLY,
+    Precision.WEEKLY,
+    Precision.MONTHLY,
+    Precision.YEARYLY,
+)
+
+_HISTORICAL_PRECISION_LABELS = {
+    Precision.MAX.value: _("All (max resolution)"),
+    Precision.HOURLY.value: _("Hour"),
+    Precision.DAYLY.value: _("Day"),
+    Precision.WEEKLY.value: _("Week"),
+    Precision.MONTHLY.value: _("Month"),
+    Precision.YEARYLY.value: _("Year"),
+}
 
 
 def StationDetailView(request, pk):
@@ -24,6 +42,9 @@ def StationDetailView(request, pk):
         is_favorite = FavoriteStation.objects.filter(
             user=request.user, station_id=station_id
         ).exists()
+    historical_precision_choices = [
+        (p.value, _HISTORICAL_PRECISION_LABELS[p.value]) for p in _HISTORICAL_PRECISION_ORDER
+    ]
     return render(
         request,
         "stations/detail.html",
@@ -33,6 +54,8 @@ def StationDetailView(request, pk):
             "is_favorite": is_favorite,
             "is_air_station": r.is_air_station,
             "air_display_name": r.air_display_name,
+            "historical_precision_choices": historical_precision_choices,
+            "historical_download_default_precision": Precision.DAYLY.value,
         },
     )
 
