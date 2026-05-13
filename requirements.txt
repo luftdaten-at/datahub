@@ -52,6 +52,6 @@ six==1.17.0
 sqlparse==0.5.4
 typing_extensions==4.12.2
 uritemplate==4.1.1
-urllib3==2.6.3
+urllib3==2.7.0
 uvicorn==0.34.0
 whitenoise==6.8.2
