@@ -9,7 +9,7 @@ cryptography==46.0.7
 defusedxml==0.7.1
 dj-database-url==2.3.0
 dj-email-url==1.0.6
-Django==6.0.4
+Django==6.0.5
 django-allauth==65.14.1
 django-auditlog==3.0.0
 django-cache-url==3.4.5

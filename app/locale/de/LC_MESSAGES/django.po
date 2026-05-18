@@ -1796,6 +1796,72 @@ msgstr "Zu den Favoriten-Gemeinden hinzugefügt."
 msgid "PM2.5"
 msgstr "PM2.5"
 
+#: templates/home.html:39 templates/home.html:82
+msgid "24h Pollutant forecast (Geosphere)"
+msgstr "24h-Schadstoffvorhersage (Geosphere)"
+
+#: templates/home.html:44
+msgid "About this forecast"
+msgstr "Informationen zu dieser Vorhersage"
+
+#: templates/home.html:50
+msgid "Forecast parameter"
+msgstr "Vorhersageparameter"
+
+#: templates/home.html:60
+msgid "Loading forecast…"
+msgstr "Vorhersage wird geladen …"
+
+#: templates/home.html:88
+msgid "Forecast valid time: model hour nearest to 24 hours from now (shown in Vienna local time)."
+msgstr "Gültigkeitszeit der Vorhersage: nächstliegende Modellstunde zu jetzt + 24 Stunden (Anzeige in Wiener Ortszeit)."
+
+#: templates/home.html:91
+msgid "Forecast map colours match the stepped legend above."
+msgstr "Die Farben der Vorhersagekarte entsprechen der gestuften Legende oben."
+
+#: templates/home.html:92
+msgid "PM2.5 and PM10 use the same European Air Quality Index categories as the citizen stations on this map."
+msgstr "PM2.5 und PM10 nutzen dieselben Kategorien des europäischen Luftqualitätsindexes wie die Citizen-Messstationen auf dieser Karte."
+
+#: templates/home.html:93
+msgid "AQ index bands (details)"
+msgstr "Stufen des Luftqualitätsindexes (Details)"
+
+#: templates/home.html:94
+msgid "Ozone and nitrogen dioxide use separate µg/m³ bands for this model overlay."
+msgstr "Ozon und Stickstoffdioxid verwenden für diese Modell-Einblendung eigene µg/m³-Stufen."
+
+#: templates/home.html:97
+msgid "GeoSphere"
+msgstr "GeoSphere"
+
+#: templates/home.html:99
+msgid "Dataset page with description (chemical weather forecast, Central Europe)"
+msgstr "Datenseite mit Beschreibung (Schadstoffvorhersage Mitteleuropa)"
+
+#: templates/home.html:101
+msgid "Technical documentation for this dataset"
+msgstr "Technische Dokumentation zu diesem Datensatz"
+
+#: templates/home.html:103
+msgid "GeoSphere Dataset API reference"
+msgstr "GeoSphere Dataset API – Referenz"
+
+#~ msgid "Pollutant forecast (GeoSphere)"
+#~ msgstr "Schadstoffvorhersage (GeoSphere)"
+
+#~ msgid "Forecast time step: nearest model hour to the current time."
+#~ msgstr "Zeitschritt der Vorhersage: nächstliegende Modellstunde zur aktuellen Zeit."
+
+#: templates/home.html:53
+msgid "Ozone"
+msgstr "Ozon"
+
+#: templates/home.html:54
+msgid "Nitrogen dioxide"
+msgstr "Stickstoffdioxid"
+
 #~ msgid "We have sent you an email. If you have not received it please check your spam folder. Otherwise contact us if you do not receive it in a few minutes."
 #~ msgstr ""
 #~ "Wir haben Ihnen eine E-Mail gesendet. Wenn Sie diese nicht erhalten haben, überprüfen Sie bitte Ihren Spam-Ordner. Andernfalls kontaktieren Sie uns, wenn Sie sie nicht innerhalb "

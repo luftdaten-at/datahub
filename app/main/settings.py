@@ -303,6 +303,14 @@ LUFTDATEN_API_REQUEST_TIMEOUT = (15, 60)
 # Shared TTL (seconds) for cached JSON from Luftdaten API (e.g. statistics proxy, station/all list).
 LUFTDATEN_API_JSON_CACHE_TTL = 3600
 
+# GeoSphere Austria Dataset API (chem forecast overlay on home map; CC-BY 4.0).
+GEOSPHERE_DATASET_API_BASE = "https://dataset.api.hub.geosphere.at/v1"
+GEOSPHERE_CHEM_FORECAST_RESOURCE_ID = "chem-v2-1h-3km"
+# bbox south,west,north,east — matches basemap.at extent used on home map
+GEOSPHERE_CHEM_DEFAULT_BBOX = "46.35877,8.782379,49.037872,17.189532"
+GEOSPHERE_API_REQUEST_TIMEOUT = (15, 60)
+GEOSPHERE_API_CACHE_TTL = 3600
+
 # Bearer token for POST /v1/station/apikey and POST /v1/city/admin (must match api.luftdaten.at ADMIN_API_KEY).
 # Empty disables device API key sync and municipality location updates from the Datahub.
 LUFTDATEN_ADMIN_API_KEY = env("LUFTDATEN_ADMIN_API_KEY", default="")
