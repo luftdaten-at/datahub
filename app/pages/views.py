@@ -1,9 +1,12 @@
 import json
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.db.models import Max
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import TemplateView
@@ -11,6 +14,14 @@ from django.views.generic import TemplateView
 from main.settings import API_URL
 
 from .forms import FAQEntryStaffForm
+from .geosphere_chem import (
+    CHEM_ALLOWED_PARAMETERS,
+    fetch_chem_grid_geojson,
+    fetch_chem_metadata_cached,
+    fetch_chem_timestamps_cached,
+    select_chem_forecast_hour_iso,
+)
+from .geosphere_wind import fetch_tawes_wind_geojson_cached
 from .models import FAQEntry
 
 
@@ -147,7 +158,131 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         context['host'] = self.request.get_host()
         context['API_URL'] = API_URL
+        context["geosphere_chem_metadata_url"] = reverse(
+            "geosphere-chem-forecast-metadata"
+        )
+        context["geosphere_chem_grid_url"] = reverse(
+            "geosphere-chem-forecast-grid"
+        )
+        context["geosphere_wind_tawes_url"] = reverse(
+            "geosphere-wind-tawes-current",
+        )
         return context
+
+
+class GeosphereChemForecastMetadataProxyView(View):
+    """Proxies GeoSphere chem-v2-1h-3km grid forecast metadata (cached)."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        data = fetch_chem_metadata_cached()
+        if data is None:
+            return JsonResponse({"error": "upstream_unavailable"}, status=502)
+        return JsonResponse(data)
+
+
+class GeosphereChemForecastGridProxyView(View):
+    """Proxies chem forecast GeoJSON for one parameter, Austria bbox, nearest forecast hour."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        param = (request.GET.get("parameter") or "pm25surf").strip()
+        if param not in CHEM_ALLOWED_PARAMETERS:
+            return JsonResponse({"detail": "invalid parameter"}, status=400)
+
+        bbox = (request.GET.get("bbox") or "").strip()
+        if not bbox:
+            bbox = settings.GEOSPHERE_CHEM_DEFAULT_BBOX
+
+        try:
+            forecast_offset = int(request.GET.get("forecast_offset", "0"))
+        except ValueError:
+            forecast_offset = 0
+
+        timestamps = fetch_chem_timestamps_cached(forecast_offset)
+        hour_iso = select_chem_forecast_hour_iso(timestamps)
+        if hour_iso is None:
+            return self._empty_geojson(502)
+
+        cache_key = "geosphere_chem_grid:{}:{}:{}:{}".format(
+            param, hour_iso, bbox, forecast_offset
+        )
+        cached = cache.get(cache_key)
+        if cached is not None:
+            return self._json_response(cached)
+
+        payload = fetch_chem_grid_geojson(param, bbox, hour_iso, forecast_offset)
+        if payload is None:
+            return self._empty_geojson(502)
+
+        try:
+            body_str = json.dumps(
+                payload,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+        except (TypeError, ValueError):
+            return self._empty_geojson(502)
+
+        cache.set(cache_key, payload, settings.GEOSPHERE_API_CACHE_TTL)
+        return HttpResponse(
+            body_str.encode("utf-8"),
+            content_type="application/geo+json; charset=utf-8",
+        )
+
+    def _empty_geojson(self, status):
+        return HttpResponse(
+            '{"type":"FeatureCollection","features":[]}',
+            status=status,
+            content_type="application/geo+json; charset=utf-8",
+        )
+
+    def _json_response(self, payload):
+        body_str = json.dumps(
+            payload,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False,
+        )
+        return HttpResponse(
+            body_str.encode("utf-8"),
+            content_type="application/geo+json; charset=utf-8",
+        )
+
+
+class GeosphereTawesWindCurrentProxyView(View):
+    """Proxies GeoSphere TAWES current station GeoJSON (FF/DD/FFX), enriched with names."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        payload = fetch_tawes_wind_geojson_cached()
+        if payload is None:
+            return HttpResponse(
+                '{"type":"FeatureCollection","features":[],"timestamps":[]}',
+                status=502,
+                content_type="application/geo+json; charset=utf-8",
+            )
+        try:
+            body_str = json.dumps(
+                payload,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+        except (TypeError, ValueError):
+            return HttpResponse(
+                '{"type":"FeatureCollection","features":[],"timestamps":[]}',
+                status=502,
+                content_type="application/geo+json; charset=utf-8",
+            )
+        return HttpResponse(
+            body_str.encode("utf-8"),
+            content_type="application/geo+json; charset=utf-8",
+        )
 
 
 class DocumentationPageView(TemplateView):

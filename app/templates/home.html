@@ -29,6 +29,63 @@
             </select>
             <div id="legend" style="margin-top: 1rem;"></div>
             <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
+
+            <div class="home-map-chem-section mt-3 pt-3 border-top">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <div class="form-check mb-0 flex-grow-1">
+                        <input class="form-check-input" type="checkbox" id="chem-forecast-toggle"
+                            aria-controls="chem-forecast-details">
+                        <label class="form-check-label" for="chem-forecast-toggle">
+                            {% trans "24h Pollutant forecast (Geosphere)" %}
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-chem-info-btn"
+                        data-bs-toggle="modal" data-bs-target="#chem-forecast-info-modal"
+                        aria-label="{% trans 'About this forecast' %}">
+                        <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div id="chem-forecast-details" class="d-none">
+                <label class="form-label small mb-1 text-muted" for="chem-pollutant-select">{% trans "Forecast parameter" %}</label>
+                <select class="form-select form-select-sm mb-2" id="chem-pollutant-select" disabled>
+                    <option value="pm25surf">PM2.5</option>
+                    <option value="pm10surf">PM10</option>
+                    <option value="o3surf">{% trans "Ozone" %} (O₃)</option>
+                    <option value="no2surf">{% trans "Nitrogen dioxide" %} (NO₂)</option>
+                </select>
+                <div id="chem-forecast-meta" class="small text-muted mb-2 home-map-chem-meta d-none"></div>
+                <div id="chem-forecast-loading" class="home-map-chem-loading d-none text-secondary small mb-2" role="status">
+                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                    {% trans "Loading forecast…" %}
+                </div>
+                <div id="chem-forecast-legend" class="home-map-chem-legend d-none"></div>
+                </div>
+            </div>
+
+            <div class="home-map-wind-section mt-3 pt-3 border-top">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <div class="form-check mb-0 flex-grow-1">
+                        <input class="form-check-input" type="checkbox" id="wind-tawes-toggle"
+                            aria-controls="wind-tawes-details">
+                        <label class="form-check-label" for="wind-tawes-toggle">
+                            {% trans "Wind (TAWES stations, GeoSphere)" %}
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-wind-info-btn"
+                        data-bs-toggle="modal" data-bs-target="#wind-tawes-info-modal"
+                        aria-label="{% trans 'About this wind layer' %}">
+                        <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div id="wind-tawes-details" class="d-none">
+                    <div id="wind-tawes-meta" class="small text-muted mb-2 home-map-wind-meta d-none"></div>
+                    <div id="wind-tawes-loading" class="home-map-wind-loading d-none text-secondary small mb-2" role="status">
+                        <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                        {% trans "Loading wind…" %}
+                    </div>
+                    <div id="wind-tawes-legend" class="home-map-wind-legend d-none"></div>
+                </div>
+            </div>
         </div>
     </div>
     <div class="home-map-wrap">
@@ -37,6 +94,70 @@
             <div class="home-map-loading-box">
                 <div class="spinner-border text-secondary home-map-loading-spinner" aria-hidden="true"></div>
                 <span class="home-map-loading-label text-secondary small">{% trans "Loading..." %}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="chem-forecast-info-modal" tabindex="-1"
+        aria-labelledby="chem-forecast-info-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-6 mb-0" id="chem-forecast-info-modal-label">
+                        {% trans "24h Pollutant forecast (Geosphere)" %}
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                </div>
+                <div class="modal-body small text-muted chem-forecast-info-modal-body">
+                    <p class="mb-3">
+                        {% trans "Forecast valid time: model hour nearest to 24 hours from now (shown in Vienna local time)." %}
+                    </p>
+                    <p class="mb-3 home-map-chem-colors-note">
+                        {% trans "Forecast map colours match the stepped legend above." %}
+                        {% trans "PM2.5 and PM10 use the same European Air Quality Index categories as the citizen stations on this map." %}
+                        <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "AQ index bands (details)" %}</a>.
+                        {% trans "Ozone and nitrogen dioxide use separate µg/m³ bands for this model overlay." %}
+                    </p>
+                    <p class="mb-0 home-map-chem-source-links">
+                        <span class="fw-semibold text-body">{% trans "GeoSphere" %}</span>
+                        —
+                        <a href="https://data.hub.geosphere.at/dataset/chem-v2-1h-3km" target="_blank" rel="noopener noreferrer">{% trans "Dataset page with description (chemical weather forecast, Central Europe)" %}</a>
+                        <span class="text-muted" aria-hidden="true"> · </span>
+                        <a href="https://data.hub.geosphere.at/dataset/chem-v2-1h-3km/resource/chem-v2-1h-3km-api_dokumentation" target="_blank" rel="noopener noreferrer">{% trans "Technical documentation for this dataset" %}</a>
+                        <span class="text-muted" aria-hidden="true"> · </span>
+                        <a href="https://dataset.api.hub.geosphere.at/v1/docs/" target="_blank" rel="noopener noreferrer">{% trans "GeoSphere Dataset API reference" %}</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="wind-tawes-info-modal" tabindex="-1"
+        aria-labelledby="wind-tawes-info-modal-label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-6 mb-0" id="wind-tawes-info-modal-label">
+                        {% trans "Wind (TAWES stations, GeoSphere)" %}
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+                </div>
+                <div class="modal-body small text-muted wind-tawes-info-modal-body">
+                    <p class="mb-3">
+                        {% trans "GeoSphere Austria TAWES network (~270 automated stations). Mean wind speed (FF) and direction (DD) over the last 10 minutes, updated about every 10 minutes. Gust (FFX) is shown in the station popup. Arrows point where the wind blows toward (from meteorological wind direction)." %}
+                    </p>
+                    <p class="mb-3">
+                        {% trans "Observation time under the toggle is shown in Vienna local time." %}
+                    </p>
+                    <p class="mb-0 home-map-wind-source-links">
+                        <span class="fw-semibold text-body">{% trans "GeoSphere" %}</span>
+                        —
+                        <a href="https://data.hub.geosphere.at/dataset/tawes-v1-10min" target="_blank" rel="noopener noreferrer">{% trans "TAWES dataset (10 min stations)" %}</a>
+                        <span class="text-muted" aria-hidden="true"> · </span>
+                        <a href="https://dataset.api.hub.geosphere.at/v1/docs/" target="_blank" rel="noopener noreferrer">{% trans "GeoSphere Dataset API reference" %}</a>
+                    </p>
+                    <p class="small mt-2 mb-0 text-muted">{% trans "Data © GeoSphere Austria, CC-BY 4.0." %}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -223,6 +344,143 @@
         ];
         const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
 
+        const GEOSPHERE_GRID_URL = "{{ geosphere_chem_grid_url }}";
+        const GEOSPHERE_WIND_URL = "{{ geosphere_wind_tawes_url }}";
+        const GEOSPHERE_ATTRIBUTION =
+            '&copy; <a href="https://www.geosphere.at/">GeoSphere Austria</a> (CC-BY 4.0)';
+        const CHEM_FORECAST_DATE_LOCALE = "{{ LANGUAGE_CODE|default:'en' }}".replace(/_/g, "-");
+
+        /** Thresholds (m/s) and RGB for TAWES arrows / legend. */
+        const windLegendRgbSteps = [
+            [0, [50, 136, 189], ""],
+            [3, [102, 194, 165], ""],
+            [6, [254, 224, 144], ""],
+            [9, [253, 174, 107], ""],
+            [12, [244, 109, 67], ""],
+            [999, [215, 48, 79], ""],
+        ];
+        const WIND_TXT_LEGEND_TITLE = "{% filter escapejs %}{% trans 'Mean wind speed (10 min)' %}{% endfilter %}";
+        const WIND_TXT_STATION = "{% filter escapejs %}{% trans 'Station' %}{% endfilter %}";
+        const WIND_TXT_SPEED = "{% filter escapejs %}{% trans 'Wind speed' %}{% endfilter %}";
+        const WIND_TXT_DIRECTION_FROM = "{% filter escapejs %}{% trans 'Wind direction (where it blows from)' %}{% endfilter %}";
+        const WIND_TXT_BLOWING_TOWARD = "{% filter escapejs %}{% trans 'Blowing toward' %}{% endfilter %}";
+        const WIND_TXT_GUST = "{% filter escapejs %}{% trans 'Gust' %}{% endfilter %}";
+        const WIND_TXT_OBS_TIME = "{% filter escapejs %}{% trans 'Observation time' %}{% endfilter %}";
+
+        function formatChemForecastValidityIso(iso) {
+            if (!iso) {
+                return "";
+            }
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) {
+                return iso;
+            }
+            try {
+                return new Intl.DateTimeFormat(CHEM_FORECAST_DATE_LOCALE, {
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    timeZone: "Europe/Vienna",
+                    timeZoneName: "short",
+                }).format(d);
+            } catch (e) {
+                return iso;
+            }
+        }
+
+        const colorStepsO3 = [
+            [0, [80, 240, 230], "{% trans 'Good' %}"],
+            [60, [80, 204, 170], "{% trans 'Fair' %}"],
+            [100, [240, 230, 65], "{% trans 'Moderate' %}"],
+            [120, [255, 80, 80], "{% trans 'Poor' %}"],
+            [160, [150, 0, 50], "{% trans 'Very poor' %}"],
+            [240, [125, 33, 129], "{% trans 'Extremely poor' %}"],
+        ];
+        const colorStepsNO2 = [
+            [0, [80, 240, 230], "{% trans 'Good' %}"],
+            [40, [80, 204, 170], "{% trans 'Fair' %}"],
+            [90, [240, 230, 65], "{% trans 'Moderate' %}"],
+            [120, [255, 80, 80], "{% trans 'Poor' %}"],
+            [200, [150, 0, 50], "{% trans 'Very poor' %}"],
+            [400, [125, 33, 129], "{% trans 'Extremely poor' %}"],
+        ];
+        const chemLegendByParameter = {
+            pm25surf: colorStepsPM25,
+            pm10surf: colorStepsPM10,
+            o3surf: colorStepsO3,
+            no2surf: colorStepsNO2,
+        };
+
+        /** GeoSphere chem grid nominal resolution (metadata: spatial_resolution_m). */
+        const CHEM_GRID_CELL_METERS = 3000;
+
+        function metersToLatDegrees(meters) {
+            return meters / 111320;
+        }
+
+        function metersToLngDegrees(meters, lat) {
+            const cosLat = Math.cos((lat * Math.PI) / 180);
+            const denom = 111320 * (Math.abs(cosLat) < 1e-6 ? 1e-6 : cosLat);
+            return meters / denom;
+        }
+
+        function forecastGridCellBounds(lat, lon, cellMeters) {
+            const half = cellMeters / 2;
+            const dLat = metersToLatDegrees(half);
+            const dLng = metersToLngDegrees(half, lat);
+            return [
+                [lat - dLat, lon - dLng],
+                [lat + dLat, lon + dLng],
+            ];
+        }
+
+        let chemHeatLayer = null;
+        let windTawesMarkerLayer = null;
+        let geosphereChemAttribActive = false;
+        let geosphereWindAttribActive = false;
+        let geosphereAttribOn = false;
+
+        function chemPollutantSelectEl() {
+            return document.getElementById("chem-pollutant-select");
+        }
+
+        function createChemLegend(parameter) {
+            const legendDiv = document.getElementById("chem-forecast-legend");
+            if (!legendDiv) {
+                return;
+            }
+            const steps = chemLegendByParameter[parameter] || colorStepsPM25;
+            legendDiv.innerHTML = "";
+            legendDiv.classList.remove("d-none");
+            for (let i = 0; i < steps.length; i++) {
+                const from = steps[i][0];
+                const to = steps[i + 1] ? steps[i + 1][0] : "+";
+                const rgb = steps[i][1];
+                const description = steps[i][2];
+                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                const item = document.createElement("div");
+                item.className = "d-flex align-items-center mb-1";
+                const colorBox = document.createElement("span");
+                colorBox.style.background = colorString;
+                colorBox.style.width = "14px";
+                colorBox.style.height = "14px";
+                colorBox.style.display = "inline-block";
+                colorBox.style.marginRight = "8px";
+                colorBox.style.border = "1px solid #ccc";
+                colorBox.style.borderRadius = "50%";
+                const labelText = document.createElement("span");
+                labelText.style.fontSize = "0.75rem";
+                labelText.innerHTML =
+                    `${from}${to !== "+" ? "&ndash;" + to : "+"} µg/m³ | <strong>${description}</strong>`;
+                item.appendChild(colorBox);
+                item.appendChild(labelText);
+                legendDiv.appendChild(item);
+            }
+        }
+
     
         // Gibt reinen RGB-Wert [R, G, B] zurück
         function getColorForPM(value, colorSteps) {
@@ -233,6 +491,121 @@
                 }
             }
             return colorSteps[colorSteps.length - 1][1];
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement("div");
+            div.textContent = text == null ? "" : String(text);
+            return div.innerHTML;
+        }
+
+        function lastNumericInSeries(arr) {
+            if (!Array.isArray(arr)) {
+                return null;
+            }
+            for (let i = arr.length - 1; i >= 0; i--) {
+                const v = Number(arr[i]);
+                if (Number.isFinite(v)) {
+                    return v;
+                }
+            }
+            return null;
+        }
+
+        function createWindLegend() {
+            const legendDiv = document.getElementById("wind-tawes-legend");
+            if (!legendDiv) {
+                return;
+            }
+            legendDiv.innerHTML = "";
+            const title = document.createElement("div");
+            title.className = "small fw-semibold mb-1 text-muted";
+            title.textContent = WIND_TXT_LEGEND_TITLE;
+            legendDiv.appendChild(title);
+            legendDiv.classList.remove("d-none");
+            const steps = windLegendRgbSteps;
+            for (let i = 0; i < steps.length - 1; i++) {
+                const from = steps[i][0];
+                const nextTo = steps[i + 1][0];
+                const rgb = steps[i][1];
+                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+                const item = document.createElement("div");
+                item.className = "d-flex align-items-center mb-1";
+                const colorBox = document.createElement("span");
+                colorBox.style.background = colorString;
+                colorBox.style.width = "14px";
+                colorBox.style.height = "14px";
+                colorBox.style.display = "inline-block";
+                colorBox.style.marginRight = "8px";
+                colorBox.style.border = "1px solid #ccc";
+                colorBox.style.borderRadius = "50%";
+                const labelText = document.createElement("span");
+                labelText.style.fontSize = "0.75rem";
+                const hi = nextTo >= 900 ? "+" : String(nextTo);
+                labelText.innerHTML = `${from}&ndash;${hi} m/s`;
+                item.appendChild(colorBox);
+                item.appendChild(labelText);
+                legendDiv.appendChild(item);
+            }
+        }
+
+        function windCardinal16(deg) {
+            const d = ((Number(deg) % 360) + 360) % 360;
+            const names = [
+                "N",
+                "NNE",
+                "NE",
+                "ENE",
+                "E",
+                "ESE",
+                "SE",
+                "SSE",
+                "S",
+                "SSW",
+                "SW",
+                "WSW",
+                "W",
+                "WNW",
+                "NW",
+                "NNW",
+            ];
+            const ix = Math.round(d / 22.5) % 16;
+            return names[ix];
+        }
+
+        /** Pixel size for wind arrow marker; scales with mean wind speed (m/s). */
+        function windArrowIconSizePx(ffMs) {
+            const ff = Number(ffMs);
+            const x = Number.isFinite(ff) ? Math.min(Math.max(ff, 0), 35) : 0;
+            /* ~40–100 px */
+            return Math.round(40 + (x / 35) * 60);
+        }
+
+        /** SVG image icon (no leaflet-div-icon); scales with mean wind speed (m/s). */
+        function windArrowIcon(ffMs, flowBearingDeg) {
+            const rgb = getColorForPM(ffMs, windLegendRgbSteps);
+            const color = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+            const rot = ((flowBearingDeg % 360) + 360) % 360;
+            const tip = `${Number(ffMs).toFixed(1)} m/s`;
+            const sizePx = windArrowIconSizePx(ffMs);
+            const ax = Math.round(sizePx / 2);
+            const titleXml = escapeHtml(tip);
+            const pathD = "M12 17V8m0 0l-4.25 5M12 8l4.25 5";
+            const svg =
+                `<svg xmlns="http://www.w3.org/2000/svg" width="${sizePx}" height="${sizePx}" viewBox="0 0 24 24">` +
+                `<title>${titleXml}</title>` +
+                `<g transform="rotate(${rot} 12 12)">` +
+                `<path fill="none" stroke="#ffffff" stroke-width="5.75" stroke-linecap="round" stroke-linejoin="round" d="${pathD}"/>` +
+                `<path fill="none" stroke="${color}" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round" d="${pathD}"/>` +
+                "</g></svg>";
+            const iconUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+            return L.icon({
+                iconUrl,
+                iconSize: [sizePx, sizePx],
+                iconAnchor: [ax, ax],
+                popupAnchor: [0, -ax],
+                className: "home-map-wind-arrow-img",
+            });
         }
     
         function getMean(arr) {
@@ -301,6 +674,356 @@
             format: 'png',
             bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
         }).addTo(map);
+
+        map.createPane("chemForecastGrid");
+        map.getPane("chemForecastGrid").style.zIndex = "450";
+        map.createPane("windTawesMarkers");
+        map.getPane("windTawesMarkers").style.zIndex = "455";
+
+        function syncGeosphereAttribution() {
+            const need = geosphereChemAttribActive || geosphereWindAttribActive;
+            if (need && !geosphereAttribOn) {
+                map.attributionControl.addAttribution(GEOSPHERE_ATTRIBUTION);
+                geosphereAttribOn = true;
+            } else if (!need && geosphereAttribOn) {
+                map.attributionControl.removeAttribution(GEOSPHERE_ATTRIBUTION);
+                geosphereAttribOn = false;
+            }
+        }
+
+        function removeChemHeatLayer() {
+            if (chemHeatLayer) {
+                map.removeLayer(chemHeatLayer);
+                chemHeatLayer = null;
+            }
+            geosphereChemAttribActive = false;
+            syncGeosphereAttribution();
+            const meta = document.getElementById("chem-forecast-meta");
+            const leg = document.getElementById("chem-forecast-legend");
+            const loading = document.getElementById("chem-forecast-loading");
+            if (meta) {
+                meta.classList.add("d-none");
+                meta.textContent = "";
+            }
+            if (leg) {
+                leg.classList.add("d-none");
+            }
+            if (loading) {
+                loading.classList.add("d-none");
+            }
+        }
+
+        function removeWindTawesLayer() {
+            if (windTawesMarkerLayer) {
+                map.removeLayer(windTawesMarkerLayer);
+                windTawesMarkerLayer = null;
+            }
+            geosphereWindAttribActive = false;
+            syncGeosphereAttribution();
+            const meta = document.getElementById("wind-tawes-meta");
+            const leg = document.getElementById("wind-tawes-legend");
+            const loading = document.getElementById("wind-tawes-loading");
+            if (meta) {
+                meta.classList.add("d-none");
+                meta.textContent = "";
+            }
+            if (leg) {
+                leg.classList.add("d-none");
+            }
+            if (loading) {
+                loading.classList.add("d-none");
+            }
+        }
+
+        async function loadWindTawesLayer() {
+            if (!GEOSPHERE_WIND_URL || GEOSPHERE_WIND_URL.charAt(0) !== "/") {
+                console.error("Invalid GeoSphere wind URL");
+                return;
+            }
+            const loading = document.getElementById("wind-tawes-loading");
+            const meta = document.getElementById("wind-tawes-meta");
+            if (loading) {
+                loading.classList.remove("d-none");
+            }
+            if (windTawesMarkerLayer) {
+                map.removeLayer(windTawesMarkerLayer);
+                windTawesMarkerLayer = null;
+            }
+            const url = new URL(GEOSPHERE_WIND_URL, window.location.origin);
+            try {
+                const resp = await fetch(url.href);
+                if (!resp.ok) {
+                    console.error("Wind TAWES HTTP error:", resp.status);
+                    return;
+                }
+                const raw = await resp.text();
+                const trimmed = raw.replace(/^\uFEFF/, "").trim();
+                if (!trimmed.startsWith("{")) {
+                    console.error("Wind TAWES: non-JSON response");
+                    return;
+                }
+                const data = JSON.parse(trimmed);
+                const features =
+                    data.type === "FeatureCollection" && Array.isArray(data.features)
+                        ? data.features
+                        : [];
+                const tsArrWind = Array.isArray(data.timestamps) ? data.timestamps : [];
+                const tsLastWind = tsArrWind.length ? tsArrWind[tsArrWind.length - 1] : null;
+                const obsTimeFormattedWind = tsLastWind
+                    ? formatChemForecastValidityIso(tsLastWind)
+                    : "";
+                const markers = [];
+                for (let i = 0; i < features.length; i++) {
+                    const f = features[i];
+                    if (!f || f.type !== "Feature") {
+                        continue;
+                    }
+                    const geom = f.geometry;
+                    if (!geom || geom.type !== "Point") {
+                        continue;
+                    }
+                    const c = geom.coordinates;
+                    if (!c || c.length < 2) {
+                        continue;
+                    }
+                    const lon = c[0];
+                    const lat = c[1];
+                    const props = f.properties || {};
+                    const pMap = props.parameters || {};
+                    const ffBlock = pMap.FF || pMap.ff || {};
+                    const ddBlock = pMap.DD || pMap.dd || {};
+                    const fxBlock = pMap.FFX || pMap.ffx || {};
+                    const ff = lastNumericInSeries(ffBlock.data);
+                    const ddFrom = lastNumericInSeries(ddBlock.data);
+                    const ffx = lastNumericInSeries(fxBlock.data);
+                    if (!Number.isFinite(ff) || !Number.isFinite(ddFrom)) {
+                        continue;
+                    }
+                    const flowBear = ((ddFrom + 180.0) % 360.0 + 360.0) % 360.0;
+                    const fromCard = windCardinal16(ddFrom);
+                    const towardCard = windCardinal16(flowBear);
+                    const m = L.marker([lat, lon], {
+                        pane: "windTawesMarkers",
+                        icon: windArrowIcon(ff, flowBear),
+                    });
+                    const name = props.station_name || "";
+                    const state = props.state || "";
+                    const sid = props.station || "";
+                    const head = escapeHtml(name || sid || WIND_TXT_STATION);
+                    const bits = [`<strong>${head}</strong>`];
+                    if (state) {
+                        bits.push(escapeHtml(state));
+                    }
+                    bits.push(`${escapeHtml(WIND_TXT_SPEED)}: ${ff.toFixed(1)} m/s`);
+                    bits.push(
+                        `${escapeHtml(WIND_TXT_DIRECTION_FROM)}: ${fromCard} (${Math.round(ddFrom)}°)`
+                    );
+                    bits.push(
+                        `${escapeHtml(WIND_TXT_BLOWING_TOWARD)}: ${towardCard} (${Math.round(flowBear)}°)`
+                    );
+                    if (Number.isFinite(ffx)) {
+                        bits.push(`${escapeHtml(WIND_TXT_GUST)}: ${ffx.toFixed(1)} m/s`);
+                    }
+                    if (obsTimeFormattedWind) {
+                        bits.push(
+                            `${escapeHtml(WIND_TXT_OBS_TIME)}: ${escapeHtml(obsTimeFormattedWind)}`
+                        );
+                    }
+                    m.bindPopup(bits.join("<br>"));
+                    markers.push(m);
+                }
+                if (!markers.length) {
+                    geosphereWindAttribActive = false;
+                    syncGeosphereAttribution();
+                    if (meta) {
+                        meta.classList.add("d-none");
+                        meta.textContent = "";
+                    }
+                    const legEmpty = document.getElementById("wind-tawes-legend");
+                    if (legEmpty) {
+                        legEmpty.classList.add("d-none");
+                    }
+                    return;
+                }
+                windTawesMarkerLayer = L.layerGroup(markers);
+                windTawesMarkerLayer.addTo(map);
+                geosphereWindAttribActive = true;
+                syncGeosphereAttribution();
+                createWindLegend();
+                if (meta && tsLastWind) {
+                    meta.classList.remove("d-none");
+                    meta.textContent = obsTimeFormattedWind;
+                } else if (meta) {
+                    meta.classList.add("d-none");
+                    meta.textContent = "";
+                }
+                if (markerLayer) {
+                    markerLayer.bringToFront();
+                }
+            } catch (e) {
+                console.error("Wind TAWES layer failed:", e);
+            } finally {
+                if (loading) {
+                    loading.classList.add("d-none");
+                }
+            }
+        }
+
+        function onWindTawesToggle() {
+            const cb = document.getElementById("wind-tawes-toggle");
+            const details = document.getElementById("wind-tawes-details");
+            if (!cb) {
+                return;
+            }
+            const on = cb.checked;
+            if (details) {
+                details.classList.toggle("d-none", !on);
+            }
+            if (!on) {
+                removeWindTawesLayer();
+                return;
+            }
+            loadWindTawesLayer();
+        }
+
+        async function loadChemForecastLayer(parameter) {
+            if (!GEOSPHERE_GRID_URL || GEOSPHERE_GRID_URL.charAt(0) !== "/") {
+                console.error("Invalid geosphere grid URL");
+                return;
+            }
+            const loading = document.getElementById("chem-forecast-loading");
+            const meta = document.getElementById("chem-forecast-meta");
+            if (loading) {
+                loading.classList.remove("d-none");
+            }
+            if (chemHeatLayer) {
+                map.removeLayer(chemHeatLayer);
+                chemHeatLayer = null;
+            }
+            const url = new URL(GEOSPHERE_GRID_URL, window.location.origin);
+            url.searchParams.set("parameter", parameter);
+            try {
+                const resp = await fetch(url.href);
+                if (!resp.ok) {
+                    console.error("Chem forecast HTTP error:", resp.status);
+                    return;
+                }
+                const raw = await resp.text();
+                const trimmed = raw.replace(/^\uFEFF/, "").trim();
+                if (!trimmed.startsWith("{")) {
+                    console.error("Chem forecast: non-JSON response");
+                    return;
+                }
+                const data = JSON.parse(trimmed);
+                const features =
+                    data.type === "FeatureCollection" && Array.isArray(data.features)
+                        ? data.features
+                        : [];
+                const colorSteps = chemLegendByParameter[parameter] || colorStepsPM25;
+                const chemCanvasRenderer = L.canvas({ pane: "chemForecastGrid" });
+                const gridLayers = [];
+                for (let i = 0; i < features.length; i++) {
+                    const f = features[i];
+                    if (!f || f.type !== "Feature") {
+                        continue;
+                    }
+                    const geom = f.geometry;
+                    if (!geom || geom.type !== "Point") {
+                        continue;
+                    }
+                    const c = geom.coordinates;
+                    if (!c || c.length < 2) {
+                        continue;
+                    }
+                    const lon = c[0];
+                    const lat = c[1];
+                    const pMap = (f.properties && f.properties.parameters) || {};
+                    const block = pMap[parameter];
+                    const series = block && Array.isArray(block.data) ? block.data : [];
+                    const v = Number(series[0]);
+                    if (!Number.isFinite(v)) {
+                        continue;
+                    }
+                    const rgb = getColorForPM(v, colorSteps);
+                    const bounds = forecastGridCellBounds(lat, lon, CHEM_GRID_CELL_METERS);
+                    gridLayers.push(
+                        L.rectangle(bounds, {
+                            pane: "chemForecastGrid",
+                            renderer: chemCanvasRenderer,
+                            stroke: false,
+                            fill: true,
+                            fillColor: `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`,
+                            fillOpacity: 0.72,
+                            interactive: false,
+                        })
+                    );
+                }
+                chemHeatLayer = L.layerGroup(gridLayers);
+                chemHeatLayer.addTo(map);
+                if (markerLayer) {
+                    markerLayer.bringToFront();
+                }
+                geosphereChemAttribActive = true;
+                syncGeosphereAttribution();
+                createChemLegend(parameter);
+                const ts =
+                    Array.isArray(data.timestamps) && data.timestamps.length
+                        ? data.timestamps[0]
+                        : null;
+                if (meta && ts) {
+                    meta.classList.remove("d-none");
+                    meta.textContent = formatChemForecastValidityIso(ts);
+                }
+            } catch (e) {
+                console.error("Chem forecast layer failed:", e);
+            } finally {
+                if (loading) {
+                    loading.classList.add("d-none");
+                }
+            }
+        }
+
+        function onChemForecastToggle() {
+            const cb = document.getElementById("chem-forecast-toggle");
+            const sel = chemPollutantSelectEl();
+            const details = document.getElementById("chem-forecast-details");
+            if (!cb || !sel) {
+                return;
+            }
+            const on = cb.checked;
+            if (details) {
+                details.classList.toggle("d-none", !on);
+            }
+            sel.disabled = !on;
+            if (!on) {
+                removeChemHeatLayer();
+                return;
+            }
+            createChemLegend(sel.value);
+            loadChemForecastLayer(sel.value);
+        }
+
+        function onChemPollutantChange() {
+            const cb = document.getElementById("chem-forecast-toggle");
+            const sel = chemPollutantSelectEl();
+            if (!cb || !cb.checked || !sel) {
+                return;
+            }
+            loadChemForecastLayer(sel.value);
+        }
+
+        const chemToggleEl = document.getElementById("chem-forecast-toggle");
+        const chemSelectEl = document.getElementById("chem-pollutant-select");
+        if (chemToggleEl) {
+            chemToggleEl.addEventListener("change", onChemForecastToggle);
+        }
+        if (chemSelectEl) {
+            chemSelectEl.addEventListener("change", onChemPollutantChange);
+        }
+        const windToggleEl = document.getElementById("wind-tawes-toggle");
+        if (windToggleEl) {
+            windToggleEl.addEventListener("change", onWindTawesToggle);
+        }
     
         var markerLayer;
         let stationData = [];
@@ -375,6 +1098,7 @@
             }    
             markerLayer.addLayers(markerList);
             map.addLayer(markerLayer);
+            markerLayer.bringToFront();
         }
     
         function setMapLoading(isLoading) {

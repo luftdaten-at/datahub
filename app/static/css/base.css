@@ -103,6 +103,115 @@ html {
     white-space: nowrap;
 }
 
+.home-map-chem-section {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+}
+
+.home-map-chem-info-btn {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.chem-forecast-info-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.home-map-chem-meta {
+    word-break: break-word;
+}
+
+.home-map-chem-legend {
+    margin-top: 0.35rem;
+}
+
+.home-map-chem-loading .spinner-border-sm {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-width: 0.15em;
+}
+
+.home-map-chem-colors-note {
+    line-height: 1.35;
+}
+
+.home-map-chem-source-links {
+    line-height: 1.45;
+}
+
+.home-map-chem-source-links .fw-semibold {
+    color: inherit;
+}
+
+.chem-forecast-info-modal-body .home-map-chem-source-links .fw-semibold {
+    color: var(--bs-body-color);
+}
+
+.home-map-wind-section {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+}
+
+.home-map-wind-info-btn {
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.home-map-wind-meta {
+    word-break: break-word;
+}
+
+.home-map-wind-legend {
+    margin-top: 0.35rem;
+}
+
+.home-map-wind-loading .spinner-border-sm {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-width: 0.15em;
+}
+
+/* Wind arrows use L.icon (SVG data URL), not L.divIcon — no leaflet-div-icon on <img>. */
+.leaflet-marker-icon.home-map-wind-arrow-img {
+    border: none !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+.leaflet-marker-icon.home-map-wind-arrow-img:focus,
+.leaflet-marker-icon.home-map-wind-arrow-img:focus-visible {
+    outline: none;
+}
+
+.wind-tawes-info-modal-body p:last-child {
+    margin-bottom: 0;
+}
+
+.home-map-wind-source-links {
+    line-height: 1.45;
+}
+
+.home-map-wind-source-links .fw-semibold {
+    color: inherit;
+}
+
+.wind-tawes-info-modal-body .home-map-wind-source-links .fw-semibold {
+    color: var(--bs-body-color);
+}
+
 #infobox {
     height: 100vh;
     padding-top: 15vh;

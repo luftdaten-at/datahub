@@ -5,11 +5,29 @@ from .views import (
     FAQCreateView,
     FAQEntryDetailView,
     FAQReorderView,
+    GeosphereChemForecastGridProxyView,
+    GeosphereChemForecastMetadataProxyView,
+    GeosphereTawesWindCurrentProxyView,
     HelpPageView,
     HomePageView,
 )
 
 urlpatterns = [
+    path(
+        "proxy/geosphere/chem-forecast/metadata/",
+        GeosphereChemForecastMetadataProxyView.as_view(),
+        name="geosphere-chem-forecast-metadata",
+    ),
+    path(
+        "proxy/geosphere/chem-forecast/",
+        GeosphereChemForecastGridProxyView.as_view(),
+        name="geosphere-chem-forecast-grid",
+    ),
+    path(
+        "proxy/geosphere/wind/tawes/current/",
+        GeosphereTawesWindCurrentProxyView.as_view(),
+        name="geosphere-wind-tawes-current",
+    ),
     path("documentation", DocumentationPageView.as_view(), name="documentation"),
     path("help/api/faq/reorder/", FAQReorderView.as_view(), name="faq_api_reorder"),
     path("help/api/faq/", FAQCreateView.as_view(), name="faq_api_create"),
