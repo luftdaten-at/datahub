@@ -311,6 +311,13 @@ GEOSPHERE_CHEM_DEFAULT_BBOX = "46.35877,8.782379,49.037872,17.189532"
 GEOSPHERE_API_REQUEST_TIMEOUT = (15, 60)
 GEOSPHERE_API_CACHE_TTL = 3600
 
+# TAWES 10-minute station observations for wind arrows on home map (CC-BY 4.0).
+GEOSPHERE_TAWES_RESOURCE_ID = "tawes-v1-10min"
+# Cache merged GeoJSON from `/station/current/…` (refreshed every ~10 min upstream).
+GEOSPHERE_WIND_CACHE_TTL = 480
+# Station metadata changes rarely (station list for IDs query).
+GEOSPHERE_TAWES_METADATA_CACHE_TTL = 21600
+
 # Bearer token for POST /v1/station/apikey and POST /v1/city/admin (must match api.luftdaten.at ADMIN_API_KEY).
 # Empty disables device API key sync and municipality location updates from the Datahub.
 LUFTDATEN_ADMIN_API_KEY = env("LUFTDATEN_ADMIN_API_KEY", default="")

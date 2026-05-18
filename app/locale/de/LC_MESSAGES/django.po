@@ -1844,9 +1844,64 @@ msgstr "Datenseite mit Beschreibung (Schadstoffvorhersage Mitteleuropa)"
 msgid "Technical documentation for this dataset"
 msgstr "Technische Dokumentation zu diesem Datensatz"
 
-#: templates/home.html:103
+#: templates/home.html:103 templates/home.html:159
 msgid "GeoSphere Dataset API reference"
 msgstr "GeoSphere Dataset API – Referenz"
+
+#: templates/home.html:71 templates/home.html:141
+msgid "Wind (TAWES stations, GeoSphere)"
+msgstr "Wind (TAWES-Stationen, GeoSphere)"
+
+#: templates/home.html:77
+msgid "About this wind layer"
+msgstr "Informationen zur Wind-Einblendung"
+
+#: templates/home.html:86
+msgid "Loading wind…"
+msgstr "Wind wird geladen …"
+
+#: templates/home.html:147
+msgid "GeoSphere Austria TAWES network (~270 automated stations). Mean wind speed (FF) and direction (DD) over the last 10 minutes, updated about every 10 minutes. Gust (FFX) is shown in the station popup. Arrows point where the wind blows toward (from meteorological wind direction)."
+msgstr ""
+"TAWES-Netz von GeoSphere Austria (~270 automatisierte Stationen). Mittlere Windgeschwindigkeit (FF) und -richtung (DD) "
+"über die letzten 10 Minuten, etwa alle 10 Minuten aktualisiert. Windspitzen (FFX) stehen im Popup der Station. "
+"Pfeile zeigen die Flugrichtung (aus meteorologischer Windrichtung abgeleitet)."
+
+#: templates/home.html:151
+msgid "Observation time under the toggle is shown in Vienna local time."
+msgstr "Die angezeigte Messzeit unter der Option erfolgt in Wiener Ortszeit."
+
+#: templates/home.html:156
+msgid "TAWES dataset (10 min stations)"
+msgstr "TAWES-Datensatz (10‑Minuten-Stationen)"
+
+#: templates/home.html:160
+msgid "Data © GeoSphere Austria, CC-BY 4.0."
+msgstr "Daten © GeoSphere Austria, CC-BY 4.0."
+
+#: templates/home.html:369
+msgid "Mean wind speed (10 min)"
+msgstr "Mittlere Windgeschwindigkeit (10 min)"
+
+#: templates/home.html:371
+msgid "Wind speed"
+msgstr "Windgeschwindigkeit"
+
+#: templates/home.html:372
+msgid "Wind direction (where it blows from)"
+msgstr "Windrichtung (woher der Wind weht)"
+
+#: templates/home.html:373
+msgid "Blowing toward"
+msgstr "Weht nach"
+
+#: templates/home.html:374
+msgid "Gust"
+msgstr "Böen"
+
+#: templates/home.html:375
+msgid "Observation time"
+msgstr "Messzeit"
 
 #~ msgid "Pollutant forecast (GeoSphere)"
 #~ msgstr "Schadstoffvorhersage (GeoSphere)"

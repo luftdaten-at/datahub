@@ -21,6 +21,7 @@ from .geosphere_chem import (
     fetch_chem_timestamps_cached,
     select_chem_forecast_hour_iso,
 )
+from .geosphere_wind import fetch_tawes_wind_geojson_cached
 from .models import FAQEntry
 
 
@@ -163,6 +164,9 @@ class HomePageView(TemplateView):
         context["geosphere_chem_grid_url"] = reverse(
             "geosphere-chem-forecast-grid"
         )
+        context["geosphere_wind_tawes_url"] = reverse(
+            "geosphere-wind-tawes-current",
+        )
         return context
 
 
@@ -243,6 +247,38 @@ class GeosphereChemForecastGridProxyView(View):
             separators=(",", ":"),
             allow_nan=False,
         )
+        return HttpResponse(
+            body_str.encode("utf-8"),
+            content_type="application/geo+json; charset=utf-8",
+        )
+
+
+class GeosphereTawesWindCurrentProxyView(View):
+    """Proxies GeoSphere TAWES current station GeoJSON (FF/DD/FFX), enriched with names."""
+
+    http_method_names = ["get"]
+
+    def get(self, request):
+        payload = fetch_tawes_wind_geojson_cached()
+        if payload is None:
+            return HttpResponse(
+                '{"type":"FeatureCollection","features":[],"timestamps":[]}',
+                status=502,
+                content_type="application/geo+json; charset=utf-8",
+            )
+        try:
+            body_str = json.dumps(
+                payload,
+                ensure_ascii=False,
+                separators=(",", ":"),
+                allow_nan=False,
+            )
+        except (TypeError, ValueError):
+            return HttpResponse(
+                '{"type":"FeatureCollection","features":[],"timestamps":[]}',
+                status=502,
+                content_type="application/geo+json; charset=utf-8",
+            )
         return HttpResponse(
             body_str.encode("utf-8"),
             content_type="application/geo+json; charset=utf-8",
