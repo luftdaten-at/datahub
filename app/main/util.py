@@ -44,8 +44,7 @@ def get_or_create_station(station_info: dict):
 
     creates a station_status entry with the information in station_info
 
-    return: Device if there exists a Device where Device.id = station_info['device']
-            else new device is created
+    return: (Device, DeviceStatus) — the device row and the newly created status row.
     '''
     station, created = Device.objects.get_or_create(
         id = station_info['device']
@@ -71,7 +70,7 @@ def get_or_create_station(station_info: dict):
     station.save()
     station_status.save()
 
-    return station
+    return station, station_status
 
 
 def room_calculate_current_values(room):
