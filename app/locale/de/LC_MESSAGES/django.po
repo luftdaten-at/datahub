@@ -878,6 +878,10 @@ msgstr "Gemeinde"
 msgid "Air quality"
 msgstr "Luftqualität"
 
+#: templates/home.html:24
+msgid "Air quality (1-hour mean)"
+msgstr "Luftqualität (1h-Mittelwert)"
+
 #: templates/municipalities/detail.html:28 templates/municipalities/detail.html:29 templates/municipalities/detail.html:30 templates/home.html:31 templates/home.html:32 templates/home.html:33
 #: templates/stations/list.html:256 templates/stations/list.html:308 templates/stations/list.html:358 templates/workshops/detail.html:38 templates/workshops/detail.html:39
 #: templates/workshops/detail.html:40 templates/workshops/detail.html:558 templates/workshops/detail.html:559 templates/workshops/detail.html:560
