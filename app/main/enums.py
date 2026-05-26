@@ -46,6 +46,8 @@ class SensorModel():
     SEN66 = 23
     MLX90640 = 24
     TSL2591 = 25
+    SEN63C = 26
+    SEN62 = 27
 
     _names = {
         SEN5X: "SEN5X",
@@ -73,6 +75,8 @@ class SensorModel():
         SEN66: "SEN66",
         MLX90640: "MLX90640",
         TSL2591: "TSL_2591",
+        SEN63C: "SEN63C",
+        SEN62: "SEN62",
     }
 
     _manufacturer = {
@@ -94,13 +98,11 @@ class SensorModel():
         PMS5003: "Plantower",
         PMS7003: "Plantower",
         VIRTUAL_SENSOR: "Luftdaten.at",
-        LTR390: "Lite-On",
-        BMP388: "Bosch Sensortec",
-        BMP390: "Bosch Sensortec",
-        LSM6DS: "STMicroelectronics",
         SEN66: "Sensirion",
         MLX90640: "Mouser Electronics",
-        TSL2591: "Berry Base",
+        TSL2591: "ams OSRAM",
+        SEN63C: "Sensirion",
+        SEN62: "Sensirion",
     }
 
     _pins = {
@@ -117,6 +119,9 @@ class SensorModel():
         SHT35: 7,
         SHT4X: 7,
         SEN5X: 16,
+        SEN66: 16,
+        SEN63C: 17,
+        SEN62: 18,
     }
 
     @classmethod
@@ -358,6 +363,10 @@ class AirstationConfigFlags:
     MQTT_DISCOVERY_PREFIX = 15
     MQTT_DEVICE_NAME = 16
     MQTT_CERTIFICATE_PATH = 17
+    # IANA timezone name (e.g. ``Europe/Vienna``); Air Station ``0x06`` TLV only — not used with Cube ``0x07``
+    TZ = 18
+    LOG_LEVEL = 19
+    API_KEY = 20
 
 
 class AirStationMeasurementInterval:
