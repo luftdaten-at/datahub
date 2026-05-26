@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from api.models import MobilityMode
-from devices.models import Device, DeviceLogs
+from devices.models import Device, DeviceLogs, DeviceStatus
 from workshops.models import Workshop, Participant
 
 
@@ -114,6 +114,189 @@ class DeviceStatusEndpointTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def _status_payload(self, **device_overrides):
+        base = {
+            "time": "2025-01-07T12:00:00Z",
+            "device": self.device.id,
+            "firmware": "1.0",
+            "model": 1,
+            "apikey": "secret-key-123",
+            "battery": {"voltage": 3.7, "percentage": 80},
+        }
+        base.update(device_overrides)
+        return {"device": base, "status_list": []}
+
+    def test_sensor_scan_info_updates_sensor_list(self):
+        em_dash = "\u2014"
+        payload = self._status_payload()
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T12:00:00Z",
+                "level": 1,
+                "message": f"[INFO] Sensor scan: 2 connected {em_dash} 5, 26",
+            }
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(
+            st.sensor_list,
+            [
+                {"model_id": 5, "dimension_list": []},
+                {"model_id": 26, "dimension_list": []},
+            ],
+        )
+
+    def test_sensor_scan_without_info_bracket_updates_sensor_list(self):
+        payload = self._status_payload()
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T12:05:00Z",
+                "level": 1,
+                "message": "Sensor scan: 2 connected - 7, 8",
+            }
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(
+            st.sensor_list,
+            [
+                {"model_id": 7, "dimension_list": []},
+                {"model_id": 8, "dimension_list": []},
+            ],
+        )
+
+    def test_sensor_scan_non_info_level_does_not_update_sensor_list(self):
+        payload = self._status_payload(
+            sensor_list=[{"model_id": 1, "dimension_list": [2]}],
+        )
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T12:10:00Z",
+                "level": 0,
+                "message": "Sensor scan: 2 connected \u2014 99, 100",
+            }
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(st.sensor_list, [{"model_id": 1, "dimension_list": [2]}])
+
+    def test_sensor_scan_unrelated_info_leaves_sensor_list_none(self):
+        payload = self._status_payload()
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T12:15:00Z",
+                "level": 1,
+                "message": "Device idle",
+            }
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertIsNone(st.sensor_list)
+
+    def test_sensor_scan_preserves_dimension_list_when_model_id_overlap(self):
+        payload = self._status_payload(
+            sensor_list=[{"model_id": 5, "dimension_list": [2, 3, 5]}],
+        )
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T12:20:00Z",
+                "level": 1,
+                "message": "[INFO] Sensor scan: 2 connected \u2014 5, 26",
+            }
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(
+            st.sensor_list,
+            [
+                {"model_id": 5, "dimension_list": [2, 3, 5]},
+                {"model_id": 26, "dimension_list": []},
+            ],
+        )
+
+    def test_sensor_scan_last_matching_line_wins(self):
+        payload = self._status_payload()
+        payload["status_list"] = [
+            {
+                "time": "2025-01-07T11:00:00Z",
+                "level": 1,
+                "message": "Sensor scan: 1 connected \u2014 1",
+            },
+            {
+                "time": "2025-01-07T12:00:00Z",
+                "level": 1,
+                "message": "Sensor scan: 2 connected \u2014 5, 26",
+            },
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(
+            st.sensor_list,
+            [
+                {"model_id": 5, "dimension_list": []},
+                {"model_id": 26, "dimension_list": []},
+            ],
+        )
+
+    def test_sensor_scan_battery_pipe_format_serial_optional(self):
+        """Firmware line: Battery: … | sensors (N): … serial=…"""
+        msg = (
+            "[INFO] Sensor scan: Battery: none | sensors (2): "
+            "5 serial=n/a; 26 serial=2EBE26EBF3E66049"
+        )
+        payload = self._status_payload()
+        payload["status_list"] = [
+            {"time": "2025-01-07T12:25:00Z", "level": 1, "message": msg},
+        ]
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        st = DeviceStatus.objects.filter(device=self.device).latest("time_received")
+        self.assertEqual(
+            st.sensor_list,
+            [
+                {"model_id": 5, "dimension_list": []},
+                {
+                    "model_id": 26,
+                    "dimension_list": [],
+                    "serial": "2EBE26EBF3E66049",
+                },
+            ],
+        )
 
 
 class DeviceDataEndpointTest(TestCase):

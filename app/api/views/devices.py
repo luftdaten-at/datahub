@@ -17,6 +17,7 @@ from drf_spectacular.types import OpenApiTypes
 from django.contrib.gis.geos import Point
 
 from devices.models import Device, DeviceLogs, Measurement, Values
+from devices.sensor_scan import parse_sensor_scan, sensor_list_from_model_ids
 from main.util import get_or_create_station
 from api.models import Location, MobilityMode
 from workshops.models import Participant, Workshop
@@ -120,7 +121,7 @@ class CreateDeviceStatusAPIView(APIView):
             logger.warning("Device status 400: missing device or status_list. Request body: %s", request.data)
             raise ValidationError("Both 'device' and 'status_list' are required.")
 
-        device = get_or_create_station(station_info=device_data)
+        device, station_status = get_or_create_station(station_info=device_data)
 
         if device.api_key != device_data.get("apikey"):
             logger.warning("Device status 400: wrong API key. Request body: %s", request.data)
@@ -141,6 +142,22 @@ class CreateDeviceStatusAPIView(APIView):
                         level=status_data.get("level", 1),
                         message=status_data.get("message", ""),
                     )
+
+                scan_parse = None
+                for status_data in status_list:
+                    if status_data.get("level", 1) != 1:
+                        continue
+                    msg = status_data.get("message", "") or ""
+                    parsed = parse_sensor_scan(msg)
+                    if parsed is not None:
+                        scan_parse = parsed
+                if scan_parse is not None:
+                    station_status.sensor_list = sensor_list_from_model_ids(
+                        scan_parse.model_ids,
+                        previous=station_status.sensor_list,
+                        serial_by_model=scan_parse.serial_by_model,
+                    )
+                    station_status.save(update_fields=["sensor_list"])
 
             device.refresh_from_db()
             payload = {
@@ -216,7 +233,7 @@ class CreateDeviceDataAPIView(APIView):
                 "model": device_data.get("model"),
                 "apikey": device_data.get("apikey"),
             }
-            device = get_or_create_station(station_info=device_info)
+            device, _ = get_or_create_station(station_info=device_info)
 
             if device.api_key != device_data.get("apikey"):
                 raise ValidationError("Wrong API Key")
