@@ -163,6 +163,11 @@
         static BMP388 = 20;
         static BMP390 = 21;
         static LSM6DS = 22;
+        static SEN66 = 23;
+        static MLX90640 = 24;
+        static TSL2591 = 25;
+        static SEN63C = 26;
+        static SEN62 = 27;
 
         static names = {
             1: "SEN5X",
@@ -186,7 +191,12 @@
             19: "LTR390",
             20: "BMP388",
             21: "BMP390",
-            22: "lsm6ds"
+            22: "lsm6ds",
+            23: "SEN66",
+            24: "MLX90640",
+            25: "TSL_2591",
+            26: "SEN63C",
+            27: "SEN62"
         };
 
         static getSensorName(sensorModel) {
@@ -225,6 +235,11 @@
         static GYRO_X = 28;
         static GYRO_Y = 29;
         static GYRO_Z = 30;
+        static THERMAL_ARRAY = 31;
+        static VISIBLE = 32;
+        static INFRARED = 33;
+        static FULL_SPECTRUM = 34;
+        static RAW_LUMINOSITY = 35;
 
         static units = {
             1: "µg/m³",
@@ -253,7 +268,12 @@
             29: "radians/s",
             30: "radians/s",
             23: "UV Index",
-            24: "lx"
+            24: "lx",
+            31: "°C",
+            32: "count",
+            33: "count",
+            34: "count",
+            35: "count"
         };
 
         static names = {
@@ -285,7 +305,12 @@
             29: "gyro Y",
             30: "gyro Z",
             23: "UV Index",
-            24: "Lux"
+            24: "Lux",
+            31: "Thermal Image",
+            32: "Visible",
+            33: "Infrared",
+            34: "Full spectrum",
+            35: "Raw luminosity"
         };
 
         static sensorCommunityNames = {
