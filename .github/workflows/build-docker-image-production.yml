@@ -2,7 +2,10 @@ name: Build and Publish Docker Image for Production
 
 on:
   release:
-    types: [created]
+    # Use `published` so the workflow runs when a release becomes public (incl.
+    # "Publish release" after a draft). `created` alone often does not fire in
+    # that flow — see GitHub docs: github.com/actions/using-workflows/events-that-trigger-workflows#release
+    types: [published]
 
 jobs:
   build:
