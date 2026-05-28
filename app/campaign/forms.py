@@ -134,6 +134,9 @@ class RoomDeviceForm(forms.ModelForm):
             # query set should be a list of all devices in the same organisation as the room is
             self.fields['current_devices'].queryset = self.room.campaign.organization.current_devices.all()
             self.initial['current_devices'] = self.room.current_devices.all()
+            self.fields['current_devices'].label_from_instance = (
+                lambda d: d.device_name.strip() if d.device_name and d.device_name.strip() else str(d.pk)
+            )
         
         # Initialize form helper
         self.helper = FormHelper(self)

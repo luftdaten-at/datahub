@@ -11,9 +11,8 @@
 {% block content %}
 <div class="container mb-5">
     <!-- Room and Campaign Information -->
-    <div class="d-flex justify-content-between align-items-center mt-5">
+    <div class="mt-5">
         <h2>{% trans "Room:" %} {{ room.name }}</h2>
-        <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary">{% trans "Add Device" %}</a>
     </div>
     <p><strong>{% trans "Campaign:" %} </strong>{{ room.campaign.name }}</p>
 
@@ -22,28 +21,28 @@
         <!-- Temperature Display -->
         <div class="col-3">
             <div class="card" style="background-color: rgb({{ temperature_color.0 }}, {{ temperature_color.1 }}, {{ temperature_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
-                <strong>{% trans "Current Temperature:" %} </strong>{{ current_temperature }}&deg;C
+                <strong>{% trans "Temperature:" %} </strong>{{ current_temperature }}&deg;C
             </div>
         </div>
 
         <!-- PM2.5 Display -->
         <div class="col-3">
             <div class="card" style="background-color: rgb({{ pm2_5_color.0 }}, {{ pm2_5_color.1 }}, {{ pm2_5_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
-                <strong>{% trans "Current PM2.5:" %} </strong>{{ current_pm2_5 }} µg/m³
+                <strong>{% trans "PM2.5:" %} </strong>{{ current_pm2_5 }} µg/m³
             </div>
         </div>
 
         <!-- CO2 Display -->
         <div class="col-3">
             <div class="card" style="background-color: rgb({{ co2_color.0 }}, {{ co2_color.1 }}, {{ co2_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
-                <strong>{% trans "Current CO₂:" %} </strong>{{ current_co2 }} ppm
+                <strong>{% trans "CO₂:" %} </strong>{{ current_co2 }} ppm
             </div>
         </div>
 
         <!-- VOC Display -->
         <div class="col-3">
             <div class="card" style="background-color: rgb({{ tvoc_color.0 }}, {{ tvoc_color.1 }}, {{ tvoc_color.2 }}); color: black; padding: 10px; text-align: center; border-radius: 5px;">
-                <strong>{% trans "Current TVOC:" %} </strong>{{ current_tvoc }} ppb
+                <strong>{% trans "TVOC:" %} </strong>{{ current_tvoc }} ppb
             </div>
         </div>
     </div>
@@ -51,11 +50,15 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card mb-4">
-                <div class="card-header">
-                    <h3 class="mb-0">{% trans "24-hour overview" %}</h3>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0" id="overview-title">{% trans "24-hour overview" %}</h3>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="overview-range-toggle">
+                        <label class="form-check-label small" for="overview-range-toggle" id="overview-range-label">24h</label>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <canvas id="chart-24h" style="height: 100px;"></canvas>      
+                    <canvas id="chart-24h" style="height: 100px;"></canvas>
                 </div>
             </div>
         </div>
@@ -67,35 +70,24 @@
           <a href="{% url 'room-add-device' room.pk %}" class="btn btn-outline-primary btn-sm">{% trans "Add Device" %}</a>
         </div>
         <div class="card-body">
-          <!-- Responsive Table-Wrapper; nur nötig, wenn es sehr viele Spalten gibt -->
-          <div class="table-responsive">
-            <table class="table table-hover align-middle">
-              <thead>
-                <tr>
-                  <th>{% trans "Device ID" %}</th>
-                  <th>{% trans "Device name" %}</th>
-                  <th>{% trans "Last update" %}</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for device in room.current_devices.all %}
-                  <tr>
-                    <td>{{ device.id }}</td>
-                    <td>{{ device.device_name }}</td>
-                    <td>{{ device.last_update }}</td>
-                    <td class="text-end"><a href="" class="btn btn-danger btn-sm">{% trans "Remove" %}</a></td>
-                  </tr>
-                {% empty %}
-                  <tr>
-                    <td colspan="4" class="text-muted text-center">
-                      {% trans "No Device found" %}
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-        </div>
+          <div class="row g-3">
+            {% for device in room.current_devices.all %}
+              <div class="col-md-6 col-lg-4">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h5 class="card-title mb-2">{{ device.device_name|default:"—" }}</h5>
+                    <p class="card-text mb-0 text-muted small">
+                      <strong>{% trans "Last update" %}:</strong> {{ device.last_update|default:"—" }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="col-12 text-muted text-center">
+                {% trans "No Device found" %}
+              </div>
+            {% endfor %}
+          </div>
         </div>
       </div>
     
@@ -103,33 +95,47 @@
 </div>
 
 <script>
-    var dataTemperature = {{ data_24h.0|safe }};
-    var dataCO2         = {{ data_24h.2|safe }};
-    var labels          = {{ labels|safe }};
+    const dataTemperatureAll = {{ data_24h.0|safe }};
+    const dataCO2All = {{ data_24h.2|safe }};
+    const labelsAll = {{ labels|safe }};
 
-    // Erstelle das Chart
-    new Chart(document.getElementById('chart-24h'), {
+    function hideZeroValues(data) {
+        return data.map((v) => {
+            const n = Number(v);
+            if (!Number.isFinite(n) || n === 0) {
+                return null;
+            }
+            return n;
+        });
+    }
+
+    const tempSeries = hideZeroValues(dataTemperatureAll);
+    const co2Series = hideZeroValues(dataCO2All);
+
+    const chart = new Chart(document.getElementById('chart-24h'), {
         type: 'line',
         data: {
-            labels: labels,
+            labels: labelsAll,
             datasets: [
                 {
                     label: 'Temperatur (°C)',
-                    data: dataTemperature,
+                    data: tempSeries,
                     borderColor: 'rgba(255, 99, 132, 1)',
                     backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    fill: false,           // auf 'true' stellen, wenn du eine Fläche unter der Linie wünschst
+                    fill: false,
                     borderWidth: 2,
-                    yAxisID: 'y'
+                    yAxisID: 'y',
+                    spanGaps: true
                 },
                 {
                     label: 'CO₂ (ppm)',
-                    data: dataCO2,
+                    data: co2Series,
                     borderColor: 'rgba(54, 162, 235, 1)',
                     backgroundColor: 'rgba(54, 162, 235, 0.2)',
                     fill: false,
                     borderWidth: 2,
-                    yAxisID: 'y1'
+                    yAxisID: 'y1',
+                    spanGaps: true
                 }
             ]
         },
@@ -170,11 +176,30 @@
                         text: 'CO₂ (ppm)'
                     },
                     grid: {
-                        drawOnChartArea: false // Gitter-Linien für die rechte Achse ausblenden
+                        drawOnChartArea: false
                     }
                 }
             }
         }
     });
+
+    function setOverviewRange(show1h) {
+        const maxPoints = show1h ? 60 : labelsAll.length;
+        const start = Math.max(0, labelsAll.length - maxPoints);
+        chart.data.labels = labelsAll.slice(start);
+        chart.data.datasets[0].data = tempSeries.slice(start);
+        chart.data.datasets[1].data = co2Series.slice(start);
+        chart.update();
+
+        const title = document.getElementById('overview-title');
+        const label = document.getElementById('overview-range-label');
+        if (title) title.textContent = show1h ? '1-hour overview' : '24-hour overview';
+        if (label) label.textContent = show1h ? '1h' : '24h';
+    }
+
+    const rangeToggle = document.getElementById('overview-range-toggle');
+    if (rangeToggle) {
+        rangeToggle.addEventListener('change', (e) => setOverviewRange(Boolean(e.target.checked)));
+    }
 </script>
 {% endblock %}
