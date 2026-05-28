@@ -1450,8 +1450,8 @@ msgid "Station"
 msgstr "Station"
 
 #: templates/stations/detail.html:29
-msgid "48-hour overview (1-hour average)"
-msgstr "48-Stunden-Übersicht (1-Stunden-Durchschnitt)"
+msgid "48-hour overview (1h mean)"
+msgstr "48-Stunden-Übersicht (1h-Mittelwert)"
 
 #: templates/stations/detail.html:33
 msgid "Particulate Matter (PM1)"
