@@ -91,11 +91,9 @@
                             <td>{{ device.current_organization.name|default:_("N/A") }}</td>
                             <td>{{ device.created_at|date:"Y-m-d H:i" }}</td>
                             <td>
-                                {% with latest_status=device.status_list.all|dictsortreversed:"time_received"|first %}
-                                    {% if latest_status %}
-                                        {{ latest_status.time_received|date:"Y-m-d H:i" }}
-                                    {% endif %}
-                                {% endwith %}
+                                {% if device.latest_status_time %}
+                                    {{ device.latest_status_time|date:"Y-m-d H:i" }}
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}

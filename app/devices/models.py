@@ -120,6 +120,11 @@ class DeviceStatus(models.Model):
     battery_soc = models.FloatField(null=True, blank=True)
     sensor_list = models.JSONField(null=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['device', '-time_received'], name='devicestatus_device_time_idx'),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.pk:  # Check if the instance is new
             self.time_received = timezone.now()  # Set the created_at field only if it's a new instance
