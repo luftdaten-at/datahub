@@ -27,6 +27,27 @@ from api.serializers import DeviceSerializer, DeviceDataSerializer, DeviceStatus
 logger = logging.getLogger("myapp")
 
 
+def extract_device_block(data):
+    """Top-level 'device' or 'station' (firmware)."""
+    return data.get("device") or data.get("station")
+
+
+def device_id_from_block(block):
+    """Data API uses 'id'; status/firmware use 'device'."""
+    device_id = block.get("id") or block.get("device")
+    if not device_id:
+        raise ValidationError("Device block must include 'id' or 'device'.")
+    return device_id
+
+
+def extract_location(data, device_block):
+    """Top-level location or nested under station."""
+    loc = data.get("location") or (device_block or {}).get("location")
+    if not loc:
+        return None
+    return loc
+
+
 def _latest_status_list_level(status_list):
     """Level of the status_list entry with the greatest `time` (not necessarily last index)."""
     latest_dt = None
@@ -114,12 +135,12 @@ class CreateDeviceStatusAPIView(APIView):
     serializer_class = DeviceStatusRequestSerializer
 
     def post(self, request, *args, **kwargs):
-        device_data = request.data.get("device") or request.data.get("station")
+        device_data = extract_device_block(request.data)
         status_list = request.data.get("status_list", [])
 
-        if not device_data or not status_list:
-            logger.warning("Device status 400: missing device or status_list. Request body: %s", request.data)
-            raise ValidationError("Both 'device' and 'status_list' are required.")
+        if not device_data:
+            logger.warning("Device status 400: missing device block. Request body: %s", request.data)
+            raise ValidationError("Device block ('device' or 'station') is required.")
 
         device, station_status = get_or_create_station(station_info=device_data)
 
@@ -134,30 +155,31 @@ class CreateDeviceStatusAPIView(APIView):
         device.save()
 
         try:
-            with transaction.atomic():
-                for status_data in status_list:
-                    DeviceLogs.objects.create(
-                        device=device,
-                        timestamp=status_data["time"],
-                        level=status_data.get("level", 1),
-                        message=status_data.get("message", ""),
-                    )
+            if status_list:
+                with transaction.atomic():
+                    for status_data in status_list:
+                        DeviceLogs.objects.create(
+                            device=device,
+                            timestamp=status_data["time"],
+                            level=status_data.get("level", 1),
+                            message=status_data.get("message", ""),
+                        )
 
-                scan_parse = None
-                for status_data in status_list:
-                    if status_data.get("level", 1) != 1:
-                        continue
-                    msg = status_data.get("message", "") or ""
-                    parsed = parse_sensor_scan(msg)
-                    if parsed is not None:
-                        scan_parse = parsed
-                if scan_parse is not None:
-                    station_status.sensor_list = sensor_list_from_model_ids(
-                        scan_parse.model_ids,
-                        previous=station_status.sensor_list,
-                        serial_by_model=scan_parse.serial_by_model,
-                    )
-                    station_status.save(update_fields=["sensor_list"])
+                    scan_parse = None
+                    for status_data in status_list:
+                        if status_data.get("level", 1) != 1:
+                            continue
+                        msg = status_data.get("message", "") or ""
+                        parsed = parse_sensor_scan(msg)
+                        if parsed is not None:
+                            scan_parse = parsed
+                    if scan_parse is not None:
+                        station_status.sensor_list = sensor_list_from_model_ids(
+                            scan_parse.model_ids,
+                            previous=station_status.sensor_list,
+                            serial_by_model=scan_parse.serial_by_model,
+                        )
+                        station_status.save(update_fields=["sensor_list"])
 
             device.refresh_from_db()
             payload = {
@@ -217,18 +239,18 @@ class CreateDeviceDataAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         try:
-            device_data = request.data.get("device")
+            device_data = extract_device_block(request.data)
             workshop_data = request.data.get("workshop")
             sensors_data = request.data.get("sensors")
-            location_data = request.data.get("location")
+            location_data = extract_location(request.data, device_data)
 
             if not device_data:
-                raise ValidationError("'device' is required.")
+                raise ValidationError("Device block ('device' or 'station') is required.")
             if workshop_data and not location_data:
                 raise ValidationError("'location' is required when 'workshop' is provided.")
 
             device_info = {
-                "device": device_data["id"],
+                "device": device_id_from_block(device_data),
                 "firmware": device_data.get("firmware", ""),
                 "model": device_data.get("model"),
                 "apikey": device_data.get("apikey"),

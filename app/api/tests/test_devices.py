@@ -115,6 +115,61 @@ class DeviceStatusEndpointTest(TestCase):
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_device_status_station_alias_returns_200(self):
+        """Firmware may send top-level 'station' with device id in 'device' field."""
+        payload = {
+            "sensors": {},
+            "station": {
+                "time": "2026-05-30T19:51:42.000Z",
+                "device": self.device.id,
+                "firmware": "1.5.12",
+                "model": 1,
+                "apikey": "secret-key-123",
+            },
+            "status_list": [
+                {
+                    "time": "2026-05-30T19:51:42.000Z",
+                    "level": 1,
+                    "message": "Device online",
+                }
+            ],
+        }
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertTrue(DeviceLogs.objects.filter(device=self.device, message="Device online").exists())
+
+    def test_device_status_empty_status_list_returns_200(self):
+        """Heartbeat with station block and empty status_list still succeeds."""
+        logs_before = DeviceLogs.objects.filter(device=self.device).count()
+        status_before = DeviceStatus.objects.filter(device=self.device).count()
+        payload = {
+            "sensors": {},
+            "status_list": [],
+            "station": {
+                "time": "2026-05-30T19:51:48.000Z",
+                "device": self.device.id,
+                "firmware": "1.5.5",
+                "location": {"lat": "47.261609", "lon": "11.3912323", "height": "12.0"},
+                "apikey": "secret-key-123",
+                "model": 1,
+                "test_mode": False,
+                "calibration_mode": False,
+            },
+        }
+        response = self.client.post(
+            reverse("api:v1:device-status"),
+            data=payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get("status"), "success")
+        self.assertEqual(DeviceLogs.objects.filter(device=self.device).count(), logs_before)
+        self.assertGreater(DeviceStatus.objects.filter(device=self.device).count(), status_before)
+
     def _status_payload(self, **device_overrides):
         base = {
             "time": "2025-01-07T12:00:00Z",
@@ -388,6 +443,53 @@ class DeviceDataEndpointTest(TestCase):
         response = self.client.post(
             reverse("api:v1:device-data"),
             data=self.valid_payload,
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_device_data_station_alias_returns_200(self):
+        """Firmware may send top-level 'station' with device id in 'device' field."""
+        response = self.client.post(
+            reverse("api:v1:device-data"),
+            data={
+                "station": {
+                    "time": "2025-01-07T11:23:23Z",
+                    "device": self.device.id,
+                    "firmware": "2.0",
+                    "model": 1,
+                    "apikey": self.device.api_key,
+                },
+                "sensors": {},
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_device_data_station_with_nested_location_and_workshop(self):
+        """Location nested under station satisfies workshop requirement."""
+        response = self.client.post(
+            reverse("api:v1:device-data"),
+            data={
+                "station": {
+                    "time": "2025-01-07T11:23:23Z",
+                    "device": self.device.id,
+                    "firmware": "2.0",
+                    "model": 1,
+                    "apikey": self.device.api_key,
+                    "location": {"lat": "48.1769523", "lon": "16.3654834"},
+                },
+                "workshop": {
+                    "id": self.workshop.name,
+                    "participant": self.participant.name,
+                    "mode": "walking",
+                },
+                "sensors": {
+                    "1": {
+                        "type": 1,
+                        "data": {"2": 5.0, "3": 6.0},
+                    },
+                },
+            },
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
