@@ -3,14 +3,93 @@ import json
 import zipfile
 from io import BytesIO
 
+from datetime import timedelta
+
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse, resolve
 from django.utils import timezone
 
 from devices.models import Device, DeviceLogs, DeviceStatus, Measurement
-from devices.views import AirStationsOverviewView, DeviceMoveMeasurementsView
+from devices.views import AirStationsOverviewView, DeviceListView, DeviceMoveMeasurementsView
 from main.enums import LdProduct, Dimension
 from api.models import AirQualityRecord
+
+
+class DeviceListViewTests(TestCase):
+    """Tests for the admin device list (/devices/)."""
+
+    def setUp(self):
+        self.url = reverse('devices-list')
+        self.superuser = get_user_model().objects.create_superuser(
+            username='listadmin',
+            email='listadmin@test.com',
+            password='testpass123',
+        )
+
+    def test_url_resolves_to_device_list_view(self):
+        view = resolve('/devices/')
+        self.assertEqual(view.func.__name__, DeviceListView.as_view().__name__)
+
+    def test_latest_status_time_from_annotation(self):
+        """Status update column uses annotated latest_status_time, not per-device queries."""
+        device = Device.objects.create(id='123456789012345', model=1, auto_number=1)
+        older = timezone.now() - timedelta(hours=2)
+        newer = timezone.now() - timedelta(hours=1)
+        DeviceStatus.objects.bulk_create([
+            DeviceStatus(device=device, time_received=older),
+            DeviceStatus(device=device, time_received=newer),
+        ])
+
+        self.client.login(username='listadmin', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        devices = list(response.context['devices'])
+        self.assertEqual(len(devices), 1)
+        self.assertEqual(devices[0].latest_status_time, newer)
+        self.assertContains(response, newer.strftime('%Y-%m-%d'))
+
+    def test_short_device_ids_excluded(self):
+        Device.objects.create(id='12345678901234', model=1, auto_number=1)
+        Device.objects.create(id='123456789012345', model=1, auto_number=2)
+
+        self.client.login(username='listadmin', password='testpass123')
+        response = self.client.get(self.url)
+        devices = list(response.context['devices'])
+        self.assertEqual(len(devices), 1)
+        self.assertEqual(devices[0].id, '123456789012345')
+
+    def test_query_count_does_not_scale_with_device_count(self):
+        """List view must not issue one status query per device (N+1)."""
+        self.client.login(username='listadmin', password='testpass123')
+
+        def create_devices(count, id_offset):
+            for i in range(count):
+                device = Device.objects.create(
+                    id=f'{id_offset + i:015d}',
+                    model=1,
+                    auto_number=i + 1,
+                )
+                for j in range(5):
+                    DeviceStatus.objects.bulk_create([
+                        DeviceStatus(
+                            device=device,
+                            time_received=timezone.now() - timedelta(minutes=j),
+                        ),
+                    ])
+
+        create_devices(2, 100)
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(self.url)
+        queries_two_devices = len(ctx.captured_queries)
+
+        create_devices(5, 200)
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(self.url)
+        queries_seven_devices = len(ctx.captured_queries)
+
+        self.assertEqual(queries_two_devices, queries_seven_devices)
 
 
 class AirStationsOverviewTests(TestCase):

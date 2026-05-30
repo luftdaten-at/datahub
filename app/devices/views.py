@@ -71,11 +71,15 @@ class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return self.request.user.is_authenticated and self.request.user.is_superuser
 
     def get_queryset(self):
-        # Optimize queryset by selecting related 'current_organization'
-        device_list = Device.objects.select_related('current_organization').all().order_by('id')
-        device_list = [device for device in device_list if len(device.id) >= 15]
-
-        return device_list
+        latest_status = DeviceStatus.objects.filter(device=OuterRef('pk')).order_by('-time_received')
+        return (
+            Device.objects
+            .annotate(id_len=Length('id'))
+            .filter(id_len__gte=15)
+            .select_related('current_organization')
+            .annotate(latest_status_time=Subquery(latest_status.values('time_received')[:1]))
+            .order_by('id')
+        )
 
 
 class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView):
