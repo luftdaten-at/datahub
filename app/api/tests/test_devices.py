@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from api.models import MobilityMode
-from devices.models import Device, DeviceLogs, DeviceStatus
+from devices.models import Device, DeviceLogs, DeviceStatus, Measurement
 from workshops.models import Workshop, Participant
 
 
@@ -446,6 +446,41 @@ class DeviceDataEndpointTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        measurement = Measurement.objects.get(device=self.device)
+        self.assertEqual(measurement.workshop, self.workshop)
+        self.assertEqual(measurement.participant, self.participant)
+        self.assertIsNotNone(measurement.mode)
+        self.assertEqual(measurement.mode.name, "walking")
+        self.assertIsNotNone(measurement.location_id)
+
+    def test_device_data_workshop_nested_in_station(self):
+        """Workshop nested under station block is attached to measurements."""
+        response = self.client.post(
+            reverse("api:v1:device-data"),
+            data={
+                "station": {
+                    "time": "2025-01-07T11:23:23Z",
+                    "device": self.device.id,
+                    "firmware": "2.0",
+                    "model": 1,
+                    "apikey": self.device.api_key,
+                    "location": {"lat": "48.1769523", "lon": "16.3654834"},
+                    "workshop": {
+                        "id": self.workshop.name,
+                        "participant": self.participant.name,
+                        "mode": "walking",
+                    },
+                },
+                "sensors": {
+                    "1": {"type": 1, "data": {"2": 5.0}},
+                },
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        measurement = Measurement.objects.get(device=self.device)
+        self.assertEqual(measurement.workshop, self.workshop)
+        self.assertIsNotNone(measurement.location_id)
 
     def test_device_data_station_alias_returns_200(self):
         """Firmware may send top-level 'station' with device id in 'device' field."""
@@ -493,6 +528,9 @@ class DeviceDataEndpointTest(TestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        measurement = Measurement.objects.get(device=self.device)
+        self.assertEqual(measurement.workshop, self.workshop)
+        self.assertIsNotNone(measurement.location_id)
 
     def test_device_data_wrong_api_key_returns_400(self):
         payload = {**self.valid_payload}

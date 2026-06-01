@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime, timezone
 
+from django.conf import settings
 from django.db import transaction
 from django.utils import timezone as django_timezone
 from django.utils.dateparse import parse_datetime
@@ -46,6 +47,37 @@ def extract_location(data, device_block):
     if not loc:
         return None
     return loc
+
+
+def extract_workshop(data, device_block):
+    """Top-level workshop or nested under device/station; string slug or object."""
+    raw = data.get("workshop") or (device_block or {}).get("workshop")
+    if not raw:
+        return None
+    if isinstance(raw, str):
+        return {
+            "id": raw,
+            "participant": data.get("participant") or (device_block or {}).get("participant"),
+            "mode": data.get("mode") or (device_block or {}).get("mode"),
+        }
+    if isinstance(raw, dict):
+        workshop_id = raw.get("id") or raw.get("name") or raw.get("workshop")
+        if not workshop_id:
+            return None
+        return {
+            "id": workshop_id,
+            "participant": (
+                raw.get("participant")
+                or data.get("participant")
+                or (device_block or {}).get("participant")
+            ),
+            "mode": (
+                raw.get("mode")
+                or data.get("mode")
+                or (device_block or {}).get("mode")
+            ),
+        }
+    return None
 
 
 def _latest_status_list_level(status_list):
@@ -240,7 +272,7 @@ class CreateDeviceDataAPIView(APIView):
     def post(self, request, *args, **kwargs):
         try:
             device_data = extract_device_block(request.data)
-            workshop_data = request.data.get("workshop")
+            workshop_data = extract_workshop(request.data, device_data)
             sensors_data = request.data.get("sensors")
             location_data = extract_location(request.data, device_data)
 
@@ -273,18 +305,39 @@ class CreateDeviceDataAPIView(APIView):
             mode_obj = None
             if workshop_data:
                 workshop_obj = Workshop.objects.filter(name=workshop_data["id"]).first()
-                participant_obj, _ = Participant.objects.get_or_create(
-                    name=workshop_data["participant"],
-                    defaults={"workshop": workshop_obj},
-                )
-                mode_name = workshop_data["mode"]
-                mode_obj, _ = MobilityMode.objects.get_or_create(
-                    name=mode_name,
-                    defaults={"title": mode_name.title(), "description": ""},
-                )
+                if workshop_obj is None and settings.DEBUG:
+                    logger.warning(
+                        "device-data: workshop id %r not found for device %s",
+                        workshop_data["id"],
+                        device_info["device"],
+                    )
+                participant_name = workshop_data.get("participant")
+                if participant_name:
+                    participant_obj, _ = Participant.objects.get_or_create(
+                        name=participant_name,
+                        defaults={"workshop": workshop_obj},
+                    )
+                mode_name = workshop_data.get("mode")
+                if mode_name:
+                    mode_obj, _ = MobilityMode.objects.get_or_create(
+                        name=mode_name,
+                        defaults={"title": mode_name.title(), "description": ""},
+                    )
 
             lat = location_data.get("lat") if location_data else None
             lon = location_data.get("lon") if location_data else None
+
+            if settings.DEBUG:
+                logger.info(
+                    "device-data device=%s workshop_id=%r resolved_workshop=%s "
+                    "has_location=%s participant=%r mode=%r",
+                    device_info["device"],
+                    workshop_data.get("id") if workshop_data else None,
+                    workshop_obj.name if workshop_obj else None,
+                    lat is not None and lon is not None,
+                    workshop_data.get("participant") if workshop_data else None,
+                    workshop_data.get("mode") if workshop_data else None,
+                )
 
             try:
                 with transaction.atomic():
