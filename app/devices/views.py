@@ -667,7 +667,9 @@ class DeviceEditView(UpdateView):
     model = Device
     form_class = DeviceForm
     template_name = 'devices/form.html'
-    success_url = reverse_lazy('devices-list')  # URL to redirect to after a successful update
+
+    def get_success_url(self):
+        return reverse('device-detail', kwargs={'pk': self.object.pk})
 
     def get_queryset(self):
         """
