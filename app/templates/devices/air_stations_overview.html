@@ -49,8 +49,12 @@
                         {% if overview_summary.firmware_counts %}
                             <ul class="list-unstyled mb-0 small" style="max-height: 12rem; overflow-y: auto;">
                                 {% for label, count in overview_summary.firmware_counts %}
-                                    <li class="d-flex justify-content-between gap-2">
-                                        <span class="text-break">{{ label }}</span>
+                                    <li class="d-flex justify-content-between align-items-center gap-2">
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-start text-break air-summary-filter"
+                                            data-filter-index="0"
+                                            data-filter-raw="{% if label == 'N/A' %}{% else %}{{ label }}{% endif %}">
+                                            {{ label }}
+                                        </button>
                                         <span class="fw-semibold">{{ count }}</span>
                                     </li>
                                 {% endfor %}
@@ -68,8 +72,12 @@
                         {% if overview_summary.sensor_counts %}
                             <ul class="list-unstyled mb-0 small" style="max-height: 12rem; overflow-y: auto;">
                                 {% for name, count in overview_summary.sensor_counts %}
-                                    <li class="d-flex justify-content-between gap-2">
-                                        <span class="text-break">{{ name }}</span>
+                                    <li class="d-flex justify-content-between align-items-center gap-2">
+                                        <button type="button" class="btn btn-link btn-sm p-0 text-start text-break air-summary-filter"
+                                            data-filter-index="1"
+                                            data-filter-raw="{{ name }}">
+                                            {{ name }}
+                                        </button>
                                         <span class="fw-semibold">{{ count }}</span>
                                     </li>
                                 {% endfor %}
@@ -81,16 +89,29 @@
                 </div>
             </div>
         </div>
-        <div
-            id="air-station-firmware-filters"
-            class="d-flex flex-wrap align-items-center gap-2 mb-3"
-            role="toolbar"
-            aria-label="{% trans 'Filter by firmware' %}"
-            data-label-all="{% trans 'All firmware' %}"
-            data-label-na="{% trans 'N/A' %}"
-        >
-            <span class="text-muted small me-1">{% trans "Firmware" %}:</span>
-            <div class="d-flex flex-wrap gap-2" id="air-station-firmware-filter-buttons"></div>
+        <div class="d-flex flex-wrap align-items-center gap-4 mb-3">
+            <div
+                id="air-station-firmware-filters"
+                class="d-flex flex-wrap align-items-center gap-2"
+                role="toolbar"
+                aria-label="{% trans 'Filter by firmware' %}"
+                data-label-all="{% trans 'All firmware' %}"
+                data-label-na="{% trans 'N/A' %}"
+            >
+                <span class="text-muted small me-1">{% trans "Firmware" %}:</span>
+                <div class="d-flex flex-wrap gap-2" id="air-station-firmware-filter-buttons"></div>
+            </div>
+            <div
+                id="air-station-sensor-filters"
+                class="d-flex flex-wrap align-items-center gap-2"
+                role="toolbar"
+                aria-label="{% trans 'Filter by sensor' %}"
+                data-label-all="{% trans 'All sensors' %}"
+                data-label-na="{% trans 'N/A' %}"
+            >
+                <span class="text-muted small me-1">{% trans "Sensor" %}:</span>
+                <div class="d-flex flex-wrap gap-2" id="air-station-sensor-filter-buttons"></div>
+            </div>
         </div>
         <table
             id="table"
@@ -108,6 +129,7 @@
                     <th data-field="firmware" data-sortable="true">{% trans "Firmware" %}</th>
                     <th data-field="firmware_filter" data-visible="false" data-switchable="false">{% trans "Firmware filter" %}</th>
                     <th data-field="sensors" data-sortable="true">{% trans "Sensors" %}</th>
+                    <th data-field="sensors_filter" data-visible="false" data-switchable="false">{% trans "Sensors filter" %}</th>
                     <th data-field="last_status" data-sortable="true">{% trans "Last Status" %}</th>
                 </tr>
             </thead>
@@ -126,6 +148,7 @@
                                 —
                             {% endif %}
                         </td>
+                        <td>{{ device.sensors_filter|default:'' }}</td>
                         <td>
                             {% if device.last_log_time %}
                                 <span title="{{ device.last_log_message|default:'' }}">{{ device.last_log_time|date:"Y-m-d H:i" }}</span>
@@ -155,7 +178,7 @@
     if (typeof LuftdatenDatahub === "undefined" || !LuftdatenDatahub.initBootstrapTableFilterToolbars) {
         return;
     }
-    LuftdatenDatahub.initBootstrapTableFilterToolbars({
+    var filterApi = LuftdatenDatahub.initBootstrapTableFilterToolbars({
         tableSelector: "#table",
         filters: [
             {
@@ -165,8 +188,23 @@
                 buttonHostSelector: "#air-station-firmware-filter-buttons",
                 sort: "semver",
             },
+            {
+                rowDataKey: "sensors",
+                filterField: "sensors_filter",
+                toolbarSelector: "#air-station-sensor-filters",
+                buttonHostSelector: "#air-station-sensor-filter-buttons",
+                sort: "locale",
+                match: "tokenComma",
+            },
         ],
     });
+    if (filterApi) {
+        document.querySelectorAll(".air-summary-filter").forEach(function (el) {
+            el.addEventListener("click", function () {
+                filterApi.setFilter(Number(el.dataset.filterIndex), el.dataset.filterRaw);
+            });
+        });
+    }
 })();
 </script>
 {% endif %}

@@ -231,6 +231,11 @@ class AirStationsOverviewTests(TestCase):
         self.assertContains(response, 'Status (24h)')
         self.assertContains(response, 'By firmware')
         self.assertContains(response, 'By sensor')
+        self.assertContains(response, 'air-summary-filter')
+        self.assertContains(response, 'air-station-sensor-filters')
+        self.assertContains(response, 'sensors_filter')
+        with_log_device = next(d for d in response.context['air_stations'] if d.id == with_log.id)
+        self.assertEqual(with_log_device.sensors_filter, 'SEN5X')
 
     def test_sensors_column_from_measurements_at_last_update(self):
         """Sensors column lists sensor names (not dimensions) from measurements at device.last_update."""

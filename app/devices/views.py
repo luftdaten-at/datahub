@@ -149,6 +149,7 @@ class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView)
             names = air_station_sensor_names(device)
             sensor_names_by_device[device.pk] = names
             device.sensors_display = ", ".join(names) if names else ""
+            device.sensors_filter = device.sensors_display
         context['overview_summary'] = air_station_overview_summaries(
             air_stations, sensor_names_by_device=sensor_names_by_device
         )
