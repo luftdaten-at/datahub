@@ -38,62 +38,62 @@
             <div id="homeLegendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
                 <div id="legend" style="margin-top: 1rem;"></div>
                 <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
-            </div>
 
-            <div class="home-map-chem-section mt-3 pt-3 border-top">
-                <div class="d-flex align-items-start gap-2 mb-2">
-                    <div class="form-check mb-0 flex-grow-1">
-                        <input class="form-check-input" type="checkbox" id="chem-forecast-toggle"
-                            aria-controls="chem-forecast-details">
-                        <label class="form-check-label" for="chem-forecast-toggle">
-                            {% trans "24h Pollutant forecast (Geosphere)" %}
-                        </label>
+                <div class="home-map-chem-section mt-3 pt-3 border-top">
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <div class="form-check mb-0 flex-grow-1">
+                            <input class="form-check-input" type="checkbox" id="chem-forecast-toggle"
+                                aria-controls="chem-forecast-details">
+                            <label class="form-check-label" for="chem-forecast-toggle">
+                                {% trans "24h Pollutant forecast (Geosphere)" %}
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-chem-info-btn"
+                            data-bs-toggle="modal" data-bs-target="#chem-forecast-info-modal"
+                            aria-label="{% trans 'About this forecast' %}">
+                            <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
+                        </button>
                     </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-chem-info-btn"
-                        data-bs-toggle="modal" data-bs-target="#chem-forecast-info-modal"
-                        aria-label="{% trans 'About this forecast' %}">
-                        <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <div id="chem-forecast-details" class="d-none">
-                <label class="form-label small mb-1 text-muted" for="chem-pollutant-select">{% trans "Forecast parameter" %}</label>
-                <select class="form-select form-select-sm mb-2" id="chem-pollutant-select" disabled>
-                    <option value="pm25surf">PM2.5</option>
-                    <option value="pm10surf">PM10</option>
-                    <option value="o3surf">{% trans "Ozone" %} (O₃)</option>
-                    <option value="no2surf">{% trans "Nitrogen dioxide" %} (NO₂)</option>
-                </select>
-                <div id="chem-forecast-meta" class="small text-muted mb-2 home-map-chem-meta d-none"></div>
-                <div id="chem-forecast-loading" class="home-map-chem-loading d-none text-secondary small mb-2" role="status">
-                    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-                    {% trans "Loading forecast…" %}
-                </div>
-                <div id="chem-forecast-legend" class="home-map-chem-legend d-none"></div>
-                </div>
-            </div>
-
-            <div class="home-map-wind-section mt-3 pt-3 border-top">
-                <div class="d-flex align-items-start gap-2 mb-2">
-                    <div class="form-check mb-0 flex-grow-1">
-                        <input class="form-check-input" type="checkbox" id="wind-tawes-toggle"
-                            aria-controls="wind-tawes-details">
-                        <label class="form-check-label" for="wind-tawes-toggle">
-                            {% trans "Wind (TAWES stations, GeoSphere)" %}
-                        </label>
-                    </div>
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-wind-info-btn"
-                        data-bs-toggle="modal" data-bs-target="#wind-tawes-info-modal"
-                        aria-label="{% trans 'About this wind layer' %}">
-                        <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
-                    </button>
-                </div>
-                <div id="wind-tawes-details" class="d-none">
-                    <div id="wind-tawes-meta" class="small text-muted mb-2 home-map-wind-meta d-none"></div>
-                    <div id="wind-tawes-loading" class="home-map-wind-loading d-none text-secondary small mb-2" role="status">
+                    <div id="chem-forecast-details" class="d-none">
+                    <label class="form-label small mb-1 text-muted" for="chem-pollutant-select">{% trans "Forecast parameter" %}</label>
+                    <select class="form-select form-select-sm mb-2" id="chem-pollutant-select" disabled>
+                        <option value="pm25surf">PM2.5</option>
+                        <option value="pm10surf">PM10</option>
+                        <option value="o3surf">{% trans "Ozone" %} (O₃)</option>
+                        <option value="no2surf">{% trans "Nitrogen dioxide" %} (NO₂)</option>
+                    </select>
+                    <div id="chem-forecast-meta" class="small text-muted mb-2 home-map-chem-meta d-none"></div>
+                    <div id="chem-forecast-loading" class="home-map-chem-loading d-none text-secondary small mb-2" role="status">
                         <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
-                        {% trans "Loading wind…" %}
+                        {% trans "Loading forecast…" %}
                     </div>
-                    <div id="wind-tawes-legend" class="home-map-wind-legend d-none"></div>
+                    <div id="chem-forecast-legend" class="home-map-chem-legend d-none"></div>
+                    </div>
+                </div>
+
+                <div class="home-map-wind-section mt-3 pt-3 border-top">
+                    <div class="d-flex align-items-start gap-2 mb-2">
+                        <div class="form-check mb-0 flex-grow-1">
+                            <input class="form-check-input" type="checkbox" id="wind-tawes-toggle"
+                                aria-controls="wind-tawes-details">
+                            <label class="form-check-label" for="wind-tawes-toggle">
+                                {% trans "Wind (TAWES stations, GeoSphere)" %}
+                            </label>
+                        </div>
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-circle home-map-wind-info-btn"
+                            data-bs-toggle="modal" data-bs-target="#wind-tawes-info-modal"
+                            aria-label="{% trans 'About this wind layer' %}">
+                            <i class="bi bi-info-lg d-inline-flex" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div id="wind-tawes-details" class="d-none">
+                        <div id="wind-tawes-meta" class="small text-muted mb-2 home-map-wind-meta d-none"></div>
+                        <div id="wind-tawes-loading" class="home-map-wind-loading d-none text-secondary small mb-2" role="status">
+                            <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+                            {% trans "Loading wind…" %}
+                        </div>
+                        <div id="wind-tawes-legend" class="home-map-wind-legend d-none"></div>
+                    </div>
                 </div>
             </div>
         </div>
