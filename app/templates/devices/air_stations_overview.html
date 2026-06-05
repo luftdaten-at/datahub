@@ -28,8 +28,59 @@
         </div>
         {% endif %}
     </div>
-    
+
     {% if air_stations %}
+        <div class="row mb-4">
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card text-center shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">{% trans "Status (24h)" %}</h5>
+                        <p class="display-6 mb-1">
+                            {{ overview_summary.status_last_24h_count }} / {{ overview_summary.total_count }}
+                        </p>
+                        <p class="text-muted small mb-0">{% trans "with status in last 24 hours" %}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-6 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">{% trans "By firmware" %}</h5>
+                        {% if overview_summary.firmware_counts %}
+                            <ul class="list-unstyled mb-0 small" style="max-height: 12rem; overflow-y: auto;">
+                                {% for label, count in overview_summary.firmware_counts %}
+                                    <li class="d-flex justify-content-between gap-2">
+                                        <span class="text-break">{{ label }}</span>
+                                        <span class="fw-semibold">{{ count }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">{% trans "No data" %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-sm-12 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">{% trans "By sensor" %}</h5>
+                        {% if overview_summary.sensor_counts %}
+                            <ul class="list-unstyled mb-0 small" style="max-height: 12rem; overflow-y: auto;">
+                                {% for name, count in overview_summary.sensor_counts %}
+                                    <li class="d-flex justify-content-between gap-2">
+                                        <span class="text-break">{{ name }}</span>
+                                        <span class="fw-semibold">{{ count }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="text-muted mb-0">{% trans "No data" %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
         <div
             id="air-station-firmware-filters"
             class="d-flex flex-wrap align-items-center gap-2 mb-3"

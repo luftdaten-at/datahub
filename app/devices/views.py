@@ -2,7 +2,8 @@ import io
 import json
 import logging
 import zipfile
-from collections import defaultdict
+from collections import Counter, defaultdict
+from datetime import timedelta
 import csv
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -38,9 +39,9 @@ from django.db.models.functions import Length
 logger = logging.getLogger('myapp')
 
 
-def air_station_sensors_display(device):
+def air_station_sensor_names(device):
     """
-    Sensor names only for the air stations table (no dimensions).
+    Sensor names for an air station (no dimensions).
     Same sources as device detail: measurements at last_update, else latest status sensor_list.
     """
     names = set()
@@ -56,9 +57,44 @@ def air_station_sensors_display(device):
         if status and status.sensor_list:
             for data in status.sensor_list:
                 names.add(SensorModel.get_sensor_name(data["model_id"]))
+    return sorted(names)
+
+
+def air_station_sensors_display(device):
+    names = air_station_sensor_names(device)
     if not names:
         return ""
-    return ", ".join(sorted(names))
+    return ", ".join(names)
+
+
+def air_station_overview_summaries(air_stations, sensor_names_by_device=None):
+    """Aggregate counts for the air stations overview summary cards."""
+    cutoff = timezone.now() - timedelta(hours=24)
+    status_last_24h_count = 0
+    firmware_counter = Counter()
+    sensor_counter = Counter()
+
+    for device in air_stations:
+        if device.last_log_time and device.last_log_time >= cutoff:
+            status_last_24h_count += 1
+        firmware_counter[device.firmware if device.firmware else "N/A"] += 1
+        names = (
+            sensor_names_by_device.get(device.pk)
+            if sensor_names_by_device is not None
+            else air_station_sensor_names(device)
+        )
+        for name in names:
+            sensor_counter[name] += 1
+
+    firmware_counts = sorted(firmware_counter.items(), key=lambda x: x[0].lower())
+    sensor_counts = sorted(sensor_counter.items(), key=lambda x: (-x[1], x[0].lower()))
+
+    return {
+        "total_count": len(air_stations),
+        "status_last_24h_count": status_last_24h_count,
+        "firmware_counts": firmware_counts,
+        "sensor_counts": sensor_counts,
+    }
 
 
 class DeviceListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -107,8 +143,15 @@ class AirStationsOverviewView(LoginRequiredMixin, UserPassesTestMixin, ListView)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        for device in context['air_stations']:
-            device.sensors_display = air_station_sensors_display(device)
+        air_stations = context['air_stations']
+        sensor_names_by_device = {}
+        for device in air_stations:
+            names = air_station_sensor_names(device)
+            sensor_names_by_device[device.pk] = names
+            device.sensors_display = ", ".join(names) if names else ""
+        context['overview_summary'] = air_station_overview_summaries(
+            air_stations, sensor_names_by_device=sensor_names_by_device
+        )
         return context
 
 
