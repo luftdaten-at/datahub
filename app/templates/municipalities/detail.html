@@ -20,19 +20,22 @@
 {% block content %}
 <div class="row">
 <div class="container-fluid">
-    <div class="position-absolute top-0 end-0 card" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+    <div class="position-absolute top-0 end-0 card map-overlay-panel" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card-body">
-            <div class="d-flex align-items-center">
-              <select class="form-select w-auto" aria-label="Default select example" onchange="showPM(this)">
+            <div class="d-flex align-items-center gap-2">
+              <select class="form-select flex-grow-1" aria-label="Default select example" onchange="showPM(this)">
                 <option value="1">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM1</option>
                 <option value="25" selected>{% trans "Air quality" %} {% trans "Particulate Matter" %} PM2.5</option>
                 <option value="10">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM10</option>
               </select>
-              <button class="btn btn-secondary btn-sm ms-2 d-block d-md-none" type="button" id="toggleLegendButton" data-bs-toggle="collapse" data-bs-target="#legendCollapse" aria-expanded="false" aria-controls="legendCollapse">
-                <i id="toggleLegendIcon" class="bi bi-chevron-down"></i>
+              <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
+                data-bs-toggle="collapse" data-bs-target="#legendCollapse"
+                aria-expanded="false" aria-controls="legendCollapse"
+                aria-label="{% trans 'Toggle legend' %}">
+                <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
               </button>
             </div>
-            <div id="legendCollapse" class="collapse d-md-block mt-2">
+            <div id="legendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
               <div id="legend" style="margin-top: 1rem;"></div>
               <span style="font-size: 0.8rem;">
                 <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a>
@@ -315,18 +318,5 @@
         map.addLayer(markerLayer);
     }
 
-    // Legend-Collapse Code (Bootstrap)
-    var legendCollapseEl = document.getElementById('legendCollapse');
-    var toggleLegendIcon = document.getElementById('toggleLegendIcon');
-
-    legendCollapseEl.addEventListener('shown.bs.collapse', function () {
-        toggleLegendIcon.classList.remove('bi-chevron-down');
-        toggleLegendIcon.classList.add('bi-chevron-up');
-    });
-
-    legendCollapseEl.addEventListener('hidden.bs.collapse', function () {
-        toggleLegendIcon.classList.remove('bi-chevron-up');
-        toggleLegendIcon.classList.add('bi-chevron-down');
-    });
 </script>
 {% endblock content %}

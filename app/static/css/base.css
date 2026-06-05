@@ -212,6 +212,17 @@ html {
     color: var(--bs-body-color);
 }
 
+.map-overlay-panel {
+    max-width: min(20rem, calc(100vw - 2rem));
+}
+
+.map-legend-toggle {
+    flex-shrink: 0;
+    min-width: 2rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.5rem;
+}
+
 #infobox {
     height: 100vh;
     padding-top: 15vh;

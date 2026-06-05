@@ -18,17 +18,27 @@
 
 {% block map %}
 <div class="container-fluid ps-0">
-    <div class="position-absolute top-0 end-0 card"
+    <div class="position-absolute top-0 end-0 card map-overlay-panel"
         style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card-body">
             <h5 class="card-title">{% trans "Air quality (1-hour mean)" %}</h5>
-            <select class="form-select" aria-label="Default select example" onchange="showPM(this)">
-                <option value="1">{% trans "Particulate Matter" %} PM1</option>
-                <option value="25" selected>{% trans "Particulate Matter" %} PM2.5</option>
-                <option value="10">{% trans "Particulate Matter" %} PM10</option>
-            </select>
-            <div id="legend" style="margin-top: 1rem;"></div>
-            <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
+            <div class="d-flex align-items-center gap-2">
+                <select class="form-select flex-grow-1" aria-label="Default select example" onchange="showPM(this)">
+                    <option value="1">{% trans "Particulate Matter" %} PM1</option>
+                    <option value="25" selected>{% trans "Particulate Matter" %} PM2.5</option>
+                    <option value="10">{% trans "Particulate Matter" %} PM10</option>
+                </select>
+                <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
+                    data-bs-toggle="collapse" data-bs-target="#homeLegendCollapse"
+                    aria-expanded="false" aria-controls="homeLegendCollapse"
+                    aria-label="{% trans 'Toggle legend' %}">
+                    <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div id="homeLegendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
+                <div id="legend" style="margin-top: 1rem;"></div>
+                <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
+            </div>
 
             <div class="home-map-chem-section mt-3 pt-3 border-top">
                 <div class="d-flex align-items-start gap-2 mb-2">
