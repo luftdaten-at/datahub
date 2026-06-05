@@ -75,15 +75,15 @@
         var $ = global.jQuery || global.$;
         if (!$) {
             console.warn("initBootstrapTableFilterToolbars: jQuery not found");
-            return;
+            return null;
         }
         if (!options || !options.tableSelector || !options.filters || !options.filters.length) {
             console.warn("initBootstrapTableFilterToolbars: missing options");
-            return;
+            return null;
         }
         var $table = $(options.tableSelector);
         if (!$table.length) {
-            return;
+            return null;
         }
 
         var filters = options.filters.map(function (f) {
@@ -93,6 +93,7 @@
                 toolbarSelector: f.toolbarSelector,
                 buttonHostSelector: f.buttonHostSelector,
                 sort: f.sort || "locale",
+                match: f.match || "exact",
                 $toolbar: $(f.toolbarSelector),
                 $btnHost: $(f.buttonHostSelector),
             };
@@ -101,7 +102,7 @@
         for (var i = 0; i < filters.length; i++) {
             var fi = filters[i];
             if (!fi.$toolbar.length || !fi.$btnHost.length) {
-                return;
+                return null;
             }
         }
 
@@ -121,7 +122,19 @@
                 rows.forEach(function (row) {
                     var v = row[fi.filterField];
                     var raw = String(v == null ? "" : v);
-                    seen[raw] = true;
+                    if (fi.match === "tokenComma") {
+                        if (raw === "") {
+                            seen[""] = true;
+                        } else {
+                            raw.split(", ").forEach(function (token) {
+                                if (token) {
+                                    seen[token] = true;
+                                }
+                            });
+                        }
+                    } else {
+                        seen[raw] = true;
+                    }
                 });
             } catch (e) {
                 console.warn("collectValues getData:", e);
@@ -135,15 +148,61 @@
             return keys;
         }
 
+        function rowMatchesActiveFilters(row) {
+            for (var j = 0; j < filters.length; j++) {
+                if (active[j] === "__all__") {
+                    continue;
+                }
+                var fi = filters[j];
+                var cell = String(row[fi.filterField] == null ? "" : row[fi.filterField]);
+                if (fi.match === "tokenComma") {
+                    if (active[j] === "") {
+                        if (cell !== "") {
+                            return false;
+                        }
+                    } else if (cell.split(", ").indexOf(active[j]) === -1) {
+                        return false;
+                    }
+                } else if (cell !== active[j]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         function applyCombinedFilter() {
             try {
-                var spec = {};
-                for (var j = 0; j < filters.length; j++) {
+                var hasActive = false;
+                for (var j = 0; j < active.length; j++) {
                     if (active[j] !== "__all__") {
-                        spec[filters[j].filterField] = [active[j]];
+                        hasActive = true;
+                        break;
                     }
                 }
-                $table.bootstrapTable("filterBy", spec);
+                if (!hasActive) {
+                    $table.bootstrapTable("filterBy", {});
+                    return;
+                }
+                var usesCustom = false;
+                for (var k = 0; k < filters.length; k++) {
+                    if (filters[k].match === "tokenComma") {
+                        usesCustom = true;
+                        break;
+                    }
+                }
+                if (usesCustom || filters.length > 1) {
+                    $table.bootstrapTable("filterBy", {}, {
+                        filterAlgorithm: function (row) {
+                            return rowMatchesActiveFilters(row);
+                        },
+                    });
+                } else {
+                    var spec = {};
+                    if (active[0] !== "__all__") {
+                        spec[filters[0].filterField] = [active[0]];
+                    }
+                    $table.bootstrapTable("filterBy", spec);
+                }
             } catch (e) {
                 console.warn("bootstrapTable filterBy:", e);
             }
@@ -233,7 +292,10 @@
                 keys.forEach(function (k) {
                     keySet[k] = true;
                 });
-                if (active[i] !== "__all__" && !Object.prototype.hasOwnProperty.call(keySet, active[i])) {
+                if (
+                    active[i] !== "__all__" &&
+                    !Object.prototype.hasOwnProperty.call(keySet, active[i])
+                ) {
                     active[i] = "__all__";
                     dirty = true;
                 }
@@ -256,9 +318,33 @@
             syncChipsToCurrentView();
         }
 
+        function setFilter(index, raw) {
+            if (index < 0 || index >= filters.length) {
+                return;
+            }
+            if (!builtStates.length) {
+                buildAllToolbars();
+            }
+            active[index] = raw;
+            applyActiveHighlights();
+            applyCombinedFilter();
+        }
+
+        function clearFilter(index) {
+            setFilter(index, "__all__");
+        }
+
+        var api = {
+            setFilter: setFilter,
+            clearFilter: clearFilter,
+        };
+        $table.data("luftdatenFilterToolbars", api);
+
         $(function () {
             initWhenReady();
         });
+
+        return api;
     }
 
     /** @deprecated Prefer initBootstrapTableFilterToolbars with a filters array */
