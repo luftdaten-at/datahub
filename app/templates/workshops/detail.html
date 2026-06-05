@@ -25,21 +25,31 @@
 
 {% block map %}
 <div class=".container-fluid">
-    <div class="position-absolute top-0 end-0" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
+    <div class="position-absolute top-0 end-0 map-overlay-panel" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">{% trans "Air quality" %}</h5>
-                <select class="form-select" aria-label="Default select example" onchange="addMarkerLayer(this.value); drawChart(this.value)">
-                    <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
-                    <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
-                    <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
-                    <option value="temperature">{% trans "Temperature" %} </option>
-                    <option value="humidity">{% trans "Humidity" %}</option>
-                    <option value="voc">{% trans "VOC Index" %}</option>
-                    <option value="nox">{% trans "NOx Index" %}</option>
-                </select>
-                <div id="legend" style="margin-top: 1rem;"></div>
-                <span id="legend-method" style="font-size: 0.8rem;"></span>
+                <div class="d-flex align-items-center gap-2">
+                    <select class="form-select flex-grow-1" aria-label="Default select example" onchange="addMarkerLayer(this.value); drawChart(this.value)">
+                        <option value="pm1">{% trans "Particulate Matter" %} PM1</option>
+                        <option value="pm25" selected>{% trans "Particulate Matter" %} PM2.5</option>
+                        <option value="pm10">{% trans "Particulate Matter" %} PM10</option>
+                        <option value="temperature">{% trans "Temperature" %} </option>
+                        <option value="humidity">{% trans "Humidity" %}</option>
+                        <option value="voc">{% trans "VOC Index" %}</option>
+                        <option value="nox">{% trans "NOx Index" %}</option>
+                    </select>
+                    <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
+                        data-bs-toggle="collapse" data-bs-target="#workshopLegendCollapse"
+                        aria-expanded="false" aria-controls="workshopLegendCollapse"
+                        aria-label="{% trans 'Toggle legend' %}">
+                        <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
+                    </button>
+                </div>
+                <div id="workshopLegendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
+                    <div id="legend" style="margin-top: 1rem;"></div>
+                    <span id="legend-method" style="font-size: 0.8rem;"></span>
+                </div>
             </div>
         </div>
         {% if workshop.heat_hotspots_enabled %}

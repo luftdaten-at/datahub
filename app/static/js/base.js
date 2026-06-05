@@ -280,8 +280,39 @@
         });
     }
 
+    function initMapLegendCollapses() {
+        document.querySelectorAll(".map-legend-collapse").forEach(function (collapseEl) {
+            if (!collapseEl.id) {
+                return;
+            }
+            var toggle = document.querySelector(
+                '.map-legend-toggle[data-bs-target="#' + collapseEl.id + '"]'
+            );
+            if (!toggle) {
+                return;
+            }
+            var icon = toggle.querySelector(".map-legend-toggle-icon");
+            if (!icon) {
+                return;
+            }
+            collapseEl.addEventListener("shown.bs.collapse", function () {
+                icon.classList.remove("bi-chevron-down");
+                icon.classList.add("bi-chevron-up");
+            });
+            collapseEl.addEventListener("hidden.bs.collapse", function () {
+                icon.classList.remove("bi-chevron-up");
+                icon.classList.add("bi-chevron-down");
+            });
+        });
+    }
+
     global.LuftdatenDatahub = global.LuftdatenDatahub || {};
     global.LuftdatenDatahub.initBootstrapTableFilterToolbars = initBootstrapTableFilterToolbars;
     global.LuftdatenDatahub.initBootstrapTableFirmwareFilter = initBootstrapTableFirmwareFilter;
     global.LuftdatenDatahub.compareFirmwareOrder = compareFirmwareOrder;
+    global.LuftdatenDatahub.initMapLegendCollapses = initMapLegendCollapses;
+
+    if (typeof document !== "undefined") {
+        document.addEventListener("DOMContentLoaded", initMapLegendCollapses);
+    }
 })(typeof window !== "undefined" ? window : this);

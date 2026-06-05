@@ -407,10 +407,16 @@
     <div class="row mt-4">
         <div class="col-12">
             <div class="card shadow-sm">
-                <div class="card-header">
+                <div class="card-header d-flex justify-content-between align-items-center gap-2">
                     <h5 class="mb-0">{% trans "Air Quality Index" %}</h5>
+                    <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
+                        data-bs-toggle="collapse" data-bs-target="#stationsListLegendCollapse"
+                        aria-expanded="false" aria-controls="stationsListLegendCollapse"
+                        aria-label="{% trans 'Toggle legend' %}">
+                        <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
+                    </button>
                 </div>
-                <div class="card-body">
+                <div id="stationsListLegendCollapse" class="collapse d-md-block map-legend-collapse card-body">
                     <div class="row">
                         <div class="col-md-4">
                             <h6>PM1.0</h6>
