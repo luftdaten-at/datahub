@@ -189,6 +189,49 @@ class AirStationsOverviewTests(TestCase):
         self.assertContains(response, 'Device online')
         self.assertContains(response, '2.0')
 
+    def test_overview_summary_context(self):
+        """Summary cards: 24h status, firmware and sensor breakdowns."""
+        measured_time = timezone.now()
+        with_log = Device.objects.create(
+            id='111111111111111',
+            model=LdProduct.AIR_STATION,
+            auto_number=1,
+            firmware='1.0',
+            last_update=measured_time,
+        )
+        DeviceLogs.objects.create(
+            device=with_log,
+            timestamp=timezone.now(),
+            level=1,
+            message='online',
+        )
+        Measurement.objects.create(
+            device=with_log,
+            time_measured=measured_time,
+            sensor_model=1,
+        )
+        Device.objects.create(
+            id='222222222222222',
+            model=LdProduct.AIR_STATION,
+            auto_number=2,
+            firmware='2.0',
+        )
+
+        self.client.login(username='admin', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        summary = response.context['overview_summary']
+        self.assertEqual(summary['total_count'], 2)
+        self.assertEqual(summary['status_last_24h_count'], 1)
+        firmware_dict = dict(summary['firmware_counts'])
+        self.assertEqual(firmware_dict['1.0'], 1)
+        self.assertEqual(firmware_dict['2.0'], 1)
+        sensor_dict = dict(summary['sensor_counts'])
+        self.assertEqual(sensor_dict['SEN5X'], 1)
+        self.assertContains(response, 'Status (24h)')
+        self.assertContains(response, 'By firmware')
+        self.assertContains(response, 'By sensor')
+
     def test_sensors_column_from_measurements_at_last_update(self):
         """Sensors column lists sensor names (not dimensions) from measurements at device.last_update."""
         measured_time = timezone.now()
