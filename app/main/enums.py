@@ -48,6 +48,8 @@ class SensorModel():
     TSL2591 = 25
     SEN63C = 26
     SEN62 = 27
+    BMP581 = 28
+    SHTC3 = 29
 
     _names = {
         SEN5X: "SEN5X",
@@ -77,6 +79,8 @@ class SensorModel():
         TSL2591: "TSL_2591",
         SEN63C: "SEN63C",
         SEN62: "SEN62",
+        BMP581: "BMP581",
+        SHTC3: "SHTC3",
     }
 
     _manufacturer = {
@@ -103,6 +107,8 @@ class SensorModel():
         TSL2591: "ams OSRAM",
         SEN63C: "Sensirion",
         SEN62: "Sensirion",
+        BMP581: "Bosch Sensortec",
+        SHTC3: "Sensirion",
     }
 
     _pins = {
@@ -113,11 +119,13 @@ class SensorModel():
         BME280: 11,
         BME680: 11,
         BMP280: 3,
+        BMP581: 3,
         DHT22: 7,
         SHT30: 7,
         SHT31: 7,
         SHT35: 7,
         SHT4X: 7,
+        SHTC3: 7,
         SEN5X: 16,
         SEN66: 16,
         SEN63C: 17,
