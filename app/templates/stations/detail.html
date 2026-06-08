@@ -59,17 +59,10 @@
       </div>
     </div>
     
-    <div id="chart-temperature-div" class="card mb-3" style="display: none;">
+    <div id="chart-climate-div" class="card mb-3" style="display: none;">
       <div class="card-body">
-        <h5 class="card-title">{% trans "Temperature (°C)" %}</h5>
-        <canvas id="chart-temperature" class="chart-height"></canvas>
-      </div>
-    </div>
-    
-    <div id="chart-humidity-div" class="card mb-3" style="display: none;">
-      <div class="card-body">
-        <h5 class="card-title">{% trans "Humidity (%)" %}</h5>
-        <canvas id="chart-humidity" class="chart-height"></canvas>
+        <h5 class="card-title">{% trans "Temperature and humidity" %}</h5>
+        <canvas id="chart-climate" class="chart-height"></canvas>
       </div>
     </div>
 
@@ -106,6 +99,45 @@
         </div>
       </div>
     </div>
+
+    <div class="mb-4 mt-5">
+      <h3 class="mb-2" style="font-weight: 600; color: #333;">{% trans "30-day overview (daily mean)" %}</h3>
+      <p class="text-muted small mb-0">{% trans "Daily averaged measurements from the past 30 days" %}</p>
+    </div>
+    <div id="loading-message-30d" class="alert alert-info mb-4">
+      {% trans "Loading data..." %}
+    </div>
+
+    <div id="chart-pm1-30d-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM1)" %}</h5>
+        <canvas id="chart-pm1-30d" style="height: 100px;"></canvas>
+      </div>
+    </div>
+
+    <div id="chart-pm25-30d-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM2.5)" %}</h5>
+        <canvas id="chart-pm25-30d" style="height: 100px;"></canvas>
+      </div>
+    </div>
+
+    <div id="chart-pm10-30d-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Particulate Matter (PM10)" %}</h5>
+        <canvas id="chart-pm10-30d" style="height: 100px;"></canvas>
+      </div>
+    </div>
+
+    <div id="chart-climate-30d-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Temperature and humidity" %}</h5>
+        <canvas id="chart-climate-30d" class="chart-height"></canvas>
+      </div>
+    </div>
+    <div id="no-data-message-30d" class="alert alert-secondary mb-4" style="display: none;">
+      {% trans "No daily data available for the past 30 days." %}
+    </div>
   </div>
     
   <!-- Sidebar: Station Information -->
@@ -131,10 +163,6 @@
           <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this station to your favourites." %}</a>
         </p>
         {% endif %}
-        <p class="card-text mb-2">
-          <strong>{% trans "Station ID" %}:</strong><br>
-          <span id="station-id-display">{{ station_id }}</span>
-        </p>
         <p class="card-text mb-2" id="station-time-display" style="display: none;">
           <strong>{% trans "Last Update" %}:</strong><br>
           <span id="station-time"></span>
@@ -218,15 +246,27 @@ var marker = null;
 var stationCoordinates = null;
 
 // Generate labels for 48 hours
-var labels = [];
+var labels48h = [];
 var now = new Date();
 for (var i = 48; i > 0; i--) {
   var pastTime = new Date(now.getTime() - i * 60 * 60 * 1000);
   var day = pastTime.getDate().toString().padStart(2, '0');
   var month = (pastTime.getMonth() + 1).toString().padStart(2, '0');
   var hours = pastTime.getHours().toString().padStart(2, '0');
-  var formattedLabel = `${day}.${month}. ${hours}:00`;
-  labels.push(formattedLabel);
+  labels48h.push(`${day}.${month}. ${hours}:00`);
+}
+
+const OVERVIEW_DAY_COUNT = 30;
+
+function buildDailyLabels(dayCount, periodStart) {
+  var result = [];
+  for (var i = 0; i < dayCount; i++) {
+    var d = new Date(periodStart.getTime() + i * 24 * 60 * 60 * 1000);
+    var day = d.getDate().toString().padStart(2, '0');
+    var month = (d.getMonth() + 1).toString().padStart(2, '0');
+    result.push(`${day}.${month}.`);
+  }
+  return result;
 }
 
 // Common chart options
@@ -344,12 +384,12 @@ function createLegend(legendId, colorSteps) {
   }
 }
 
-// Function to create a bar chart with European AQI colors
-function createPMChart(ctx, label, data, yAxisLabel, colorSteps) {
+// Function to create a bar chart with European AQI colors and optional humidity overlay
+function createPMChart(ctx, label, data, yAxisLabel, colorSteps, humidityData, chartLabels) {
   var options = JSON.parse(JSON.stringify(commonOptions));
   options.scales.y.title.text = yAxisLabel;
-  
-  // Create color arrays based on data values
+  chartLabels = chartLabels || labels48h;
+
   var backgroundColor = data.map(function(val) {
     var rgb = getColorForPM(val, colorSteps);
     return 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 0.5)';
@@ -358,112 +398,242 @@ function createPMChart(ctx, label, data, yAxisLabel, colorSteps) {
     var rgb = getColorForPM(val, colorSteps);
     return 'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', 1)';
   });
-  
+
+  var datasets = [{
+    type: 'bar',
+    label: label,
+    data: data,
+    yAxisID: 'y',
+    backgroundColor: backgroundColor,
+    borderColor: borderColor,
+    borderWidth: 0,
+    barPercentage: 1.0,
+    categoryPercentage: 1.0,
+    order: 2
+  }];
+
+  if (humidityData) {
+    datasets.push({
+      type: 'line',
+      label: 'Luftfeuchtigkeit (%)',
+      data: humidityData,
+      yAxisID: 'y1',
+      backgroundColor: 'rgba(54, 162, 235, 0.5)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      borderWidth: 2,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 2,
+      pointHoverRadius: 4,
+      spanGaps: true,
+      order: 1
+    });
+    options.plugins.legend.display = true;
+    options.scales.y1 = {
+      beginAtZero: true,
+      max: 100,
+      position: 'right',
+      title: {
+        display: true,
+        text: 'Relative Luftfeuchtigkeit (%)'
+      },
+      grid: {
+        drawOnChartArea: false
+      }
+    };
+  }
+
   return new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: labels,
-      datasets: [{
-        label: label,
-        data: data,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        borderWidth: 0,
-        barPercentage: 1.0,
-        categoryPercentage: 1.0
-      }]
+      labels: chartLabels,
+      datasets: datasets
     },
     options: options
   });
 }
 
-// Function to create a bar chart (for non-PM charts)
-function createChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
+// Combined temperature and humidity line chart (dual y-axis)
+function createClimateChart(ctx, tempData, humidityData, chartLabels) {
   var options = JSON.parse(JSON.stringify(commonOptions));
-  options.scales.y.title.text = yAxisLabel;
-  return new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: label,
-        data: data,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        borderWidth: 0,
-        barPercentage: 1.0,
-        categoryPercentage: 1.0
-      }]
-    },
-    options: options
-  });
-}
+  chartLabels = chartLabels || labels48h;
+  var datasets = [];
 
-// Function to create a line chart
-function createLineChart(ctx, label, data, yAxisLabel, backgroundColor, borderColor) {
-  var options = JSON.parse(JSON.stringify(commonOptions));
-  options.scales.y.title.text = yAxisLabel;
-  options.scales.y.beginAtZero = false;
+  if (tempData) {
+    datasets.push({
+      label: 'Temperatur (°C)',
+      data: tempData,
+      yAxisID: 'y',
+      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 2,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 2,
+      pointHoverRadius: 4,
+      spanGaps: true
+    });
+    options.scales.y.beginAtZero = false;
+    options.scales.y.title.text = 'Temperatur (°C)';
+  }
+
+  if (humidityData) {
+    datasets.push({
+      label: 'Luftfeuchtigkeit (%)',
+      data: humidityData,
+      yAxisID: tempData ? 'y1' : 'y',
+      backgroundColor: 'rgba(54, 162, 235, 0.5)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      borderWidth: 2,
+      fill: false,
+      tension: 0.4,
+      pointRadius: 2,
+      pointHoverRadius: 4,
+      spanGaps: true
+    });
+    if (!tempData) {
+      options.scales.y.beginAtZero = true;
+      options.scales.y.title.text = 'Relative Luftfeuchtigkeit (%)';
+    } else {
+      options.scales.y1 = {
+        beginAtZero: true,
+        max: 100,
+        position: 'right',
+        title: {
+          display: true,
+          text: 'Relative Luftfeuchtigkeit (%)'
+        },
+        grid: {
+          drawOnChartArea: false
+        }
+      };
+    }
+  }
+
+  if (datasets.length > 1) {
+    options.plugins.legend.display = true;
+  }
+
   return new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels,
-      datasets: [{
-        label: label,
-        data: data,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-        pointRadius: 2,
-        pointHoverRadius: 4,
-        spanGaps: true // Draw lines across null values to connect data points
-      }]
+      labels: chartLabels,
+      datasets: datasets
     },
     options: options
   });
 }
 
-// Process 48h data similar to Python view
-function process48hData(data48h, timeMinus48h) {
+// Process historical data into fixed buckets (hourly or daily)
+function processPeriodData(data, periodStart, bucketCount, bucketMs) {
   var dimHourVal = {};
-  var dimsForDisplay = ['2', '3', '5', '6', '7']; // PM1, PM2.5, PM10, Humidity, Temperature
-  var lineChartDims = ['6', '7']; // Humidity and Temperature use line charts - use null for missing values
-  
-  // Initialize all dimensions
+  var dimsForDisplay = ['2', '3', '5', '6', '7'];
+  var lineChartDims = ['6', '7'];
+
   dimsForDisplay.forEach(function(dim) {
-    // Use null for line charts (so Chart.js skips missing points), 0 for bar charts
     var initialValue = lineChartDims.includes(dim) ? null : 0;
-    dimHourVal[dim] = new Array(48).fill(initialValue);
+    dimHourVal[dim] = new Array(bucketCount).fill(initialValue);
   });
-  
-  // Process each hour of data
-  data48h.forEach(function(dataHour) {
-    var hour = new Date(dataHour.time_measured);
-    var hourIndex = Math.floor((hour - timeMinus48h) / (1000 * 60 * 60));
-    
-    if (hourIndex >= 0 && hourIndex < 48) {
-      dataHour.values.forEach(function(dimVal) {
+
+  data.forEach(function(dataPoint) {
+    var measured = new Date(dataPoint.time_measured);
+    var bucketIndex = Math.floor((measured - periodStart) / bucketMs);
+
+    if (bucketIndex >= 0 && bucketIndex < bucketCount) {
+      dataPoint.values.forEach(function(dimVal) {
         var dim = String(dimVal.dimension);
         if (dimsForDisplay.includes(dim)) {
-          dimHourVal[dim][hourIndex] = dimVal.value;
+          dimHourVal[dim][bucketIndex] = dimVal.value;
         }
       });
     }
   });
-  
-  // Mark dimensions with no data as false
+
   dimsForDisplay.forEach(function(dim) {
-    var hasData = dimHourVal[dim].some(function(val) { 
-      return val !== null && val !== 0; 
+    var hasData = dimHourVal[dim].some(function(val) {
+      return val !== null && val !== 0;
     });
     if (!hasData) {
       dimHourVal[dim] = false;
     }
   });
-  
+
   return dimHourVal;
+}
+
+function renderOverviewCharts(dimVal, chartLabels, chartIds) {
+  var humiditySeries = dimVal['6'] !== false ? dimVal['6'] : null;
+  var hasPMCharts = false;
+  var hasClimateChart = false;
+
+  if (dimVal['3'] !== false) {
+    document.getElementById(chartIds.pm25Div).style.display = 'block';
+    createPMChart(
+      document.getElementById(chartIds.pm25Canvas).getContext('2d'),
+      'PM2.5 (µg/m³)',
+      dimVal['3'],
+      'Konzentration (µg/m³)',
+      colorStepsPM25,
+      humiditySeries,
+      chartLabels
+    );
+    hasPMCharts = true;
+  }
+
+  if (dimVal['5'] !== false) {
+    document.getElementById(chartIds.pm10Div).style.display = 'block';
+    createPMChart(
+      document.getElementById(chartIds.pm10Canvas).getContext('2d'),
+      'PM10 (µg/m³)',
+      dimVal['5'],
+      'Konzentration (µg/m³)',
+      colorStepsPM10,
+      humiditySeries,
+      chartLabels
+    );
+    hasPMCharts = true;
+  }
+
+  if (dimVal['2'] !== false) {
+    document.getElementById(chartIds.pm1Div).style.display = 'block';
+    createPMChart(
+      document.getElementById(chartIds.pm1Canvas).getContext('2d'),
+      'PM1 (µg/m³)',
+      dimVal['2'],
+      'Konzentration (µg/m³)',
+      colorStepsPM1,
+      humiditySeries,
+      chartLabels
+    );
+    hasPMCharts = true;
+  }
+
+  var tempSeries = dimVal['7'] !== false ? dimVal['7'] : null;
+  if (tempSeries || humiditySeries) {
+    document.getElementById(chartIds.climateDiv).style.display = 'block';
+    createClimateChart(
+      document.getElementById(chartIds.climateCanvas).getContext('2d'),
+      tempSeries,
+      humiditySeries,
+      chartLabels
+    );
+    hasClimateChart = true;
+  }
+
+  return {
+    hasPM: hasPMCharts,
+    hasAny: hasPMCharts || hasClimateChart
+  };
+}
+
+async function fetchHistoricalJson(precision, startTime, endTime) {
+  const url = `${API_URL}/station/historical?station_ids=${STATION_ID}&output_format=json&precision=${precision}&start=${startTime}&end=${endTime}`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Failed to fetch historical data: ${response.status} ${errorText}`);
+  }
+  return response.json();
 }
 
 // Fetch station data
@@ -489,11 +659,7 @@ async function loadStationData() {
     const coordinates = geometry.coordinates || [];
     
     if (!IS_AIR_STATION) {
-    // Update station ID display in header
-    document.getElementById('station-id').textContent = properties.device || STATION_ID;
-    
-    // Update sidebar station information
-    document.getElementById('station-id-display').textContent = properties.device || STATION_ID;
+      document.getElementById('station-id').textContent = properties.device || STATION_ID;
     }
     
     if (properties.time) {
@@ -531,26 +697,11 @@ async function loadStationData() {
     const now = new Date();
     const currentTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), 0, 0, 0);
     const timeMinus48h = new Date(currentTime.getTime() - 47 * 60 * 60 * 1000);
-    
-    // Format dates as ISO 8601 without seconds (YYYY-MM-DDTHH:MM)
-    const startTime = timeMinus48h.toISOString().slice(0, 16);
-    const endTime = currentTime.toISOString().slice(0, 16);
-    
-    // Use "hour" not "hourly" for precision (matches Precision.HOURLY.value)
-    const historicalUrl = `${API_URL}/station/historical?station_ids=${STATION_ID}&output_format=json&precision=hour&start=${startTime}&end=${endTime}`;
-    console.log('Fetching historical data from:', historicalUrl);
-    
-    const historicalResponse = await fetch(historicalUrl);
-    
-    if (!historicalResponse.ok) {
-      const errorText = await historicalResponse.text();
-      console.error('Historical data fetch failed:', historicalResponse.status, errorText);
-      throw new Error(`Failed to fetch historical data: ${historicalResponse.status} ${errorText}`);
-    }
-    
-    const data48h = await historicalResponse.json();
-    console.log('Received historical data:', data48h.length, 'records');
-    const dimHourVal = process48hData(data48h, timeMinus48h);
+    const startTime48h = timeMinus48h.toISOString().slice(0, 16);
+    const endTime48h = currentTime.toISOString().slice(0, 16);
+
+    const data48h = await fetchHistoricalJson('hour', startTime48h, endTime48h);
+    const dimHourVal = processPeriodData(data48h, timeMinus48h, 48, 60 * 60 * 1000);
     
     // Fetch sensor info
     const infoUrl = `${API_URL}/station/info?station_id=${STATION_ID}`;
@@ -588,79 +739,65 @@ async function loadStationData() {
                                '</div>';
     }
     
-    // Create charts with European AQI colors
-    var hasPMCharts = false;
-    
-    if (dimHourVal['3'] !== false) {
-      document.getElementById('chart-pm25-div').style.display = 'block';
-      createPMChart(
-        document.getElementById('chart-pm25').getContext('2d'),
-        'PM2.5 (µg/m³)',
-        dimHourVal['3'],
-        'Konzentration (µg/m³)',
-        colorStepsPM25
-      );
-      hasPMCharts = true;
-    }
-    
-    if (dimHourVal['5'] !== false) {
-      document.getElementById('chart-pm10-div').style.display = 'block';
-      createPMChart(
-        document.getElementById('chart-pm10').getContext('2d'),
-        'PM10 (µg/m³)',
-        dimHourVal['5'],
-        'Konzentration (µg/m³)',
-        colorStepsPM10
-      );
-      hasPMCharts = true;
-    }
-    
-    if (dimHourVal['2'] !== false) {
-      document.getElementById('chart-pm1-div').style.display = 'block';
-      createPMChart(
-        document.getElementById('chart-pm1').getContext('2d'),
-        'PM1 (µg/m³)',
-        dimHourVal['2'],
-        'Konzentration (µg/m³)',
-        colorStepsPM1
-      );
-      hasPMCharts = true;
-    }
-    
-    // Show and create legend if any PM charts are displayed
-    if (hasPMCharts) {
+    var chartIds48h = {
+      pm1Div: 'chart-pm1-div',
+      pm25Div: 'chart-pm25-div',
+      pm10Div: 'chart-pm10-div',
+      climateDiv: 'chart-climate-div',
+      pm1Canvas: 'chart-pm1',
+      pm25Canvas: 'chart-pm25',
+      pm10Canvas: 'chart-pm10',
+      climateCanvas: 'chart-climate'
+    };
+    var overview48h = renderOverviewCharts(dimHourVal, labels48h, chartIds48h);
+
+    if (overview48h.hasPM) {
       document.getElementById('aqi-legend-container').style.display = 'block';
       createLegend('legend-pm1', colorStepsPM1);
       createLegend('legend-pm25', colorStepsPM25);
       createLegend('legend-pm10', colorStepsPM10);
     }
-    
-    if (dimHourVal['7'] !== false) {
-      document.getElementById('chart-temperature-div').style.display = 'block';
-      createLineChart(
-        document.getElementById('chart-temperature').getContext('2d'),
-        'Temperatur (°C)',
-        dimHourVal['7'],
-        'Temperatur (°C)',
-        'rgba(255, 99, 132, 0.5)',
-        'rgba(255, 99, 132, 1)'
-      );
-    }
-    
-    if (dimHourVal['6'] !== false) {
-      document.getElementById('chart-humidity-div').style.display = 'block';
-      createLineChart(
-        document.getElementById('chart-humidity').getContext('2d'),
-        'Luftfeuchtigkeit (%)',
-        dimHourVal['6'],
-        'Relative Luftfeuchtigkeit (%)',
-        'rgba(54, 162, 235, 0.5)',
-        'rgba(54, 162, 235, 1)'
-      );
-    }
-    
-    // Hide loading message
+
     document.getElementById('loading-message').style.display = 'none';
+
+    // Fetch and render 30-day daily overview (non-fatal if unavailable)
+    try {
+      const currentDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+      const timeMinus30d = new Date(currentDay.getTime() - (OVERVIEW_DAY_COUNT - 1) * 24 * 60 * 60 * 1000);
+      const startTime30d = timeMinus30d.toISOString().slice(0, 10) + 'T00:00';
+      const endTime30d = currentDay.toISOString().slice(0, 10) + 'T23:59';
+      const labels30d = buildDailyLabels(OVERVIEW_DAY_COUNT, timeMinus30d);
+
+      const data30d = await fetchHistoricalJson('day', startTime30d, endTime30d);
+      const dimDayVal = processPeriodData(
+        data30d,
+        timeMinus30d,
+        OVERVIEW_DAY_COUNT,
+        24 * 60 * 60 * 1000
+      );
+
+      var chartIds30d = {
+        pm1Div: 'chart-pm1-30d-div',
+        pm25Div: 'chart-pm25-30d-div',
+        pm10Div: 'chart-pm10-30d-div',
+        climateDiv: 'chart-climate-30d-div',
+        pm1Canvas: 'chart-pm1-30d',
+        pm25Canvas: 'chart-pm25-30d',
+        pm10Canvas: 'chart-pm10-30d',
+        climateCanvas: 'chart-climate-30d'
+      };
+      var overview30d = renderOverviewCharts(dimDayVal, labels30d, chartIds30d);
+
+      document.getElementById('loading-message-30d').style.display = 'none';
+      if (!overview30d.hasAny) {
+        document.getElementById('no-data-message-30d').style.display = 'block';
+      }
+    } catch (error30d) {
+      console.error('Error loading 30-day data:', error30d);
+      document.getElementById('loading-message-30d').innerHTML =
+        '{% trans "Error loading 30-day data" %}: ' + (error30d.message || 'Unknown error');
+      document.getElementById('loading-message-30d').className = 'alert alert-warning mb-4';
+    }
     
   } catch (error) {
     console.error('Error loading station data:', error);
