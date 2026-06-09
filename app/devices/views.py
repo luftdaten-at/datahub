@@ -2,7 +2,7 @@ import io
 import json
 import logging
 import zipfile
-from collections import Counter, defaultdict
+from collections import Counter
 from datetime import timedelta
 import csv
 from django.http import HttpResponse, HttpResponseRedirect
@@ -23,7 +23,8 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.contrib import messages
 
-from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values
+from .models import Device, DeviceStatus, DeviceLogs, Measurement, Values, Sensor
+from .sensor_display import device_sensor_entries
 from accounts.models import CustomUser
 from .forms import DeviceForm, DeviceNotesForm, DeviceApikeyForm
 from .luftdaten_station_apikey import StationApikeySyncError, sync_station_apikey
@@ -305,23 +306,7 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             4: 'critical',
         }
 
-        sensors = defaultdict(list)
-        # add available sensors
-        q = Measurement.objects.filter(device=device, time_measured=device.last_update).all()
-        if not q:
-            try:
-                status = device.status_list.filter(sensor_list__isnull=False).latest('time_received')
-            except DeviceStatus.DoesNotExist:
-                status = None
-            if status:
-                for data in status.sensor_list:
-                    sensors[SensorModel.get_sensor_name(data['model_id'])].extend(Dimension.get_name(dim) for dim in data['dimension_list'])
-        else:
-            for measurement in q:
-                for value in measurement.values.all():
-                    sensors[SensorModel.get_sensor_name(measurement.sensor_model)].append(Dimension.get_name(value.dimension))
-
-        context['sensors'] = dict(sensors)
+        context['sensor_entries'] = device_sensor_entries(device)
 
         context["log_level_choices"] = [
             (0, _("Debug")),
@@ -332,6 +317,15 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         ]
 
         return context
+
+
+class SensorDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Sensor
+    context_object_name = "sensor"
+    template_name = "devices/sensor_detail.html"
+
+    def test_func(self):
+        return self.request.user.is_authenticated and self.request.user.is_superuser
 
 
 class DeviceMoveMeasurementsView(LoginRequiredMixin, UserPassesTestMixin, View):

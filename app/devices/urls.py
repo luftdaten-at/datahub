@@ -15,6 +15,7 @@ from .views import (
     DeviceDataView,
     DeviceMeasurementsView,
     MeasurementDeleteView,
+    SensorDetailView,
     calibrationView,
 )
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('air-stations/', AirStationsOverviewView.as_view(), name='air-stations-overview'),
     path('calibration/', calibrationView, name='calibration'),
     path('my/', DeviceMyView.as_view(), name='devices-my'),
+    path('sensors/<int:pk>/', SensorDetailView.as_view(), name='sensor-detail'),
     path('<str:pk>/', DeviceDetailView.as_view(), name='device-detail'),
     path('<str:pk>/move-measurements/', DeviceMoveMeasurementsView.as_view(), name='device-move-measurements'),
     path('<str:pk>/data/download/', DeviceDataDownloadView.as_view(), name='device-data-download'),

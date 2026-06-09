@@ -52,9 +52,17 @@
                 <li class="list-group-item">
                     <strong>{% trans "Sensors:" %}</strong>
                     <ul>
-                        {% for sensor, dimension_list in sensors.items %}
-                            <li>{{ sensor }}: 
-                                {% for dimension in dimension_list %}
+                        {% for entry in sensor_entries %}
+                            <li>
+                                {% if entry.sensor %}
+                                    <a href="{% url 'sensor-detail' entry.sensor.pk %}">{{ entry.name }}</a>
+                                {% else %}
+                                    {{ entry.name }}
+                                {% endif %}
+                                {% if entry.serial %}
+                                    <span class="text-muted">({% trans "serial" %}: {{ entry.serial }})</span>
+                                {% endif %}:
+                                {% for dimension in entry.dimensions %}
                                     {{ dimension }}{% if not forloop.last %}, {% endif %}
                                 {% endfor %}
                             </li>

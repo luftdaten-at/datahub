@@ -18,6 +18,7 @@ from drf_spectacular.types import OpenApiTypes
 from django.contrib.gis.geos import Point
 
 from devices.models import Device, DeviceLogs, Measurement, Values
+from devices.sensor_display import sync_sensor_registry_from_list
 from devices.sensor_scan import parse_sensor_scan, sensor_list_from_model_ids
 from main.util import get_or_create_station
 from api.models import Location, MobilityMode
@@ -212,6 +213,7 @@ class CreateDeviceStatusAPIView(APIView):
                             serial_by_model=scan_parse.serial_by_model,
                         )
                         station_status.save(update_fields=["sensor_list"])
+                        sync_sensor_registry_from_list(station_status.sensor_list)
 
             device.refresh_from_db()
             payload = {

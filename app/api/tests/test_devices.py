@@ -5,8 +5,9 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from api.models import MobilityMode
-from devices.models import Device, DeviceLogs, DeviceStatus, Measurement
+from devices.models import Device, DeviceLogs, DeviceStatus, Measurement, Sensor
 from workshops.models import Workshop, Participant
+from main.enums import SensorModel
 
 
 class DeviceStatusEndpointTest(TestCase):
@@ -351,6 +352,18 @@ class DeviceStatusEndpointTest(TestCase):
                     "serial": "2EBE26EBF3E66049",
                 },
             ],
+        )
+        self.assertTrue(
+            Sensor.objects.filter(
+                name=SensorModel.get_sensor_name(26),
+                serial="2EBE26EBF3E66049",
+            ).exists()
+        )
+        self.assertTrue(
+            Sensor.objects.filter(
+                name=SensorModel.get_sensor_name(5),
+                serial="",
+            ).exists()
         )
 
 

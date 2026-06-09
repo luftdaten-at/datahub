@@ -11,9 +11,10 @@ from django.test.utils import CaptureQueriesContext
 from django.urls import reverse, resolve
 from django.utils import timezone
 
-from devices.models import Device, DeviceLogs, DeviceStatus, Measurement
+from devices.models import Device, DeviceLogs, DeviceStatus, Measurement, Sensor
 from devices.views import AirStationsOverviewView, DeviceListView, DeviceMoveMeasurementsView
-from main.enums import LdProduct, Dimension
+from devices.sensor_display import sync_sensor_registry_from_list, device_sensor_entries
+from main.enums import LdProduct, Dimension, SensorModel
 from api.models import AirQualityRecord
 
 
@@ -404,3 +405,95 @@ class DeviceDataDownloadTests(TestCase):
             meta = json.loads(zf.read("device.json").decode("utf-8"))
         self.assertEqual(meta["device"]["id"], "devdl1234567890")
         self.assertIn("device_name", meta["device"])
+
+
+class DeviceDetailSensorTests(TestCase):
+    """Device detail sensor list: serial numbers and links to Sensor registry."""
+
+    def setUp(self):
+        self.superuser = get_user_model().objects.create_superuser(
+            username="detailadmin",
+            email="detailadmin@test.com",
+            password="testpass123",
+        )
+        self.device = Device.objects.create(
+            id="123456789012345",
+            model=LdProduct.AIR_STATION,
+            auto_number=1,
+        )
+
+    def test_device_detail_shows_serial_from_sensor_list(self):
+        DeviceStatus.objects.create(
+            device=self.device,
+            time_received=timezone.now(),
+            sensor_list=[
+                {
+                    "model_id": 26,
+                    "dimension_list": [Dimension.PM2_5],
+                    "serial": "2EBE26EBF3E66049",
+                },
+            ],
+        )
+        self.client.login(username="detailadmin", password="testpass123")
+        response = self.client.get(reverse("device-detail", kwargs={"pk": self.device.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "SEN63C")
+        self.assertContains(response, "2EBE26EBF3E66049")
+        self.assertContains(response, "serial")
+
+    def test_device_detail_links_to_sensor_detail_when_registry_exists(self):
+        sensor = Sensor.objects.create(name="SEN63C", serial="2EBE26EBF3E66049")
+        DeviceStatus.objects.create(
+            device=self.device,
+            time_received=timezone.now(),
+            sensor_list=[
+                {
+                    "model_id": 26,
+                    "dimension_list": [Dimension.PM2_5],
+                    "serial": "2EBE26EBF3E66049",
+                },
+            ],
+        )
+        self.client.login(username="detailadmin", password="testpass123")
+        response = self.client.get(reverse("device-detail", kwargs={"pk": self.device.pk}))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("sensor-detail", kwargs={"pk": sensor.pk}))
+
+    def test_sync_sensor_registry_from_list_creates_rows(self):
+        sync_sensor_registry_from_list(
+            [
+                {"model_id": 26, "serial": "ABC123"},
+                {"model_id": 5, "serial": ""},
+            ]
+        )
+        self.assertTrue(
+            Sensor.objects.filter(
+                name=SensorModel.get_sensor_name(26),
+                serial="ABC123",
+            ).exists()
+        )
+        self.assertTrue(
+            Sensor.objects.filter(
+                name=SensorModel.get_sensor_name(5),
+                serial="",
+            ).exists()
+        )
+
+    def test_device_sensor_entries_fallback_to_measurements(self):
+        from devices.models import Values
+
+        measured_time = timezone.now()
+        self.device.last_update = measured_time
+        self.device.save(update_fields=["last_update"])
+        measurement = Measurement.objects.create(
+            device=self.device,
+            time_measured=measured_time,
+            sensor_model=1,
+        )
+        Values.objects.create(measurement=measurement, dimension=Dimension.PM2_5, value=12.0)
+
+        entries = device_sensor_entries(self.device)
+        self.assertEqual(len(entries), 1)
+        self.assertEqual(entries[0]["name"], "SEN5X")
+        self.assertIsNone(entries[0]["serial"])
+        self.assertIn("PM2.5", entries[0]["dimensions"])

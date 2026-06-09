@@ -1,0 +1,43 @@
+{% extends "_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Sensor" %}: {{ sensor.name }}{% endblock title %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>{% trans "Sensor" %}: {{ sensor.name }}</h2>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">{% trans "Back" %}</a>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <strong>{% trans "Name" %}:</strong> {{ sensor.name }}
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Serial" %}:</strong>
+                    {% if sensor.serial %}{{ sensor.serial }}{% else %}<span class="text-muted">{% trans "N/A" %}</span>{% endif %}
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Product type" %}:</strong>
+                    {% if sensor.product_type %}{{ sensor.product_type }}{% else %}<span class="text-muted">{% trans "N/A" %}</span>{% endif %}
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Firmware" %}:</strong>
+                    {% if sensor.firmware %}{{ sensor.firmware }}{% else %}<span class="text-muted">{% trans "N/A" %}</span>{% endif %}
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Hardware" %}:</strong>
+                    {% if sensor.hardware %}{{ sensor.hardware }}{% else %}<span class="text-muted">{% trans "N/A" %}</span>{% endif %}
+                </li>
+                <li class="list-group-item">
+                    <strong>{% trans "Protocol" %}:</strong>
+                    {% if sensor.protocol %}{{ sensor.protocol }}{% else %}<span class="text-muted">{% trans "N/A" %}</span>{% endif %}
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock content %}
