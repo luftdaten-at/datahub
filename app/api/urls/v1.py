@@ -14,6 +14,7 @@ from api.views import (
     CreateWorkshopSpotAPIView,
     DeleteWorkshopSpotAPIView,
     GetWorkshopSpotsAPIView,
+    StationNameView,
     WorkshopAirQualityDataView,
     WorkshopDetailView,
 )
@@ -31,6 +32,9 @@ urlpatterns = [
     # Devices (status and data)
     path("devices/status/", CreateDeviceStatusAPIView.as_view(), name="device-status"),
     path("devices/data/", CreateDeviceDataAPIView.as_view(), name="device-data"),
+
+    # Stations
+    path("stations/name/", StationNameView.as_view(), name="station-name"),
 
     # Workshops
     path("workshops/data/add/", AirQualityDataAddView.as_view(), name="workshop-data-add"),
