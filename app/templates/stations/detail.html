@@ -66,6 +66,13 @@
       </div>
     </div>
 
+    <div id="chart-pressure-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Pressure" %}</h5>
+        <canvas id="chart-pressure" class="chart-height"></canvas>
+      </div>
+    </div>
+
     <!-- Air Quality Index Legend -->
     <div id="aqi-legend-container" class="card mb-3" style="display: none;">
       <div class="card-header d-flex justify-content-between align-items-center gap-2">
@@ -133,6 +140,13 @@
       <div class="card-body">
         <h5 class="card-title">{% trans "Temperature and humidity" %}</h5>
         <canvas id="chart-climate-30d" class="chart-height"></canvas>
+      </div>
+    </div>
+
+    <div id="chart-pressure-30d-div" class="card mb-3" style="display: none;">
+      <div class="card-body">
+        <h5 class="card-title">{% trans "Pressure" %}</h5>
+        <canvas id="chart-pressure-30d" class="chart-height"></canvas>
       </div>
     </div>
     <div id="no-data-message-30d" class="alert alert-secondary mb-4" style="display: none;">
@@ -524,11 +538,39 @@ function createClimateChart(ctx, tempData, humidityData, chartLabels) {
   });
 }
 
+function createPressureChart(ctx, pressureData, chartLabels) {
+  var options = JSON.parse(JSON.stringify(commonOptions));
+  chartLabels = chartLabels || labels48h;
+  options.scales.y.beginAtZero = false;
+  options.scales.y.title.text = 'Luftdruck (hPa)';
+
+  return new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: chartLabels,
+      datasets: [{
+        label: 'Luftdruck (hPa)',
+        data: pressureData,
+        yAxisID: 'y',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 2,
+        pointHoverRadius: 4,
+        spanGaps: true
+      }]
+    },
+    options: options
+  });
+}
+
 // Process historical data into fixed buckets (hourly or daily)
 function processPeriodData(data, periodStart, bucketCount, bucketMs) {
   var dimHourVal = {};
-  var dimsForDisplay = ['2', '3', '5', '6', '7'];
-  var lineChartDims = ['6', '7'];
+  var dimsForDisplay = ['2', '3', '5', '6', '7', '10'];
+  var lineChartDims = ['6', '7', '10'];
 
   dimsForDisplay.forEach(function(dim) {
     var initialValue = lineChartDims.includes(dim) ? null : 0;
@@ -561,10 +603,14 @@ function processPeriodData(data, periodStart, bucketCount, bucketMs) {
   return dimHourVal;
 }
 
-function renderOverviewCharts(dimVal, chartLabels, chartIds) {
-  var humiditySeries = dimVal['6'] !== false ? dimVal['6'] : null;
+function renderOverviewCharts(dimVal, chartLabels, chartIds, options) {
+  options = options || {};
+  var pmHumidityOverlay = options.pmHumidityOverlay !== false;
+  var humiditySeries = pmHumidityOverlay && dimVal['6'] !== false ? dimVal['6'] : null;
+  var climateHumiditySeries = dimVal['6'] !== false ? dimVal['6'] : null;
   var hasPMCharts = false;
   var hasClimateChart = false;
+  var hasPressureChart = false;
 
   if (dimVal['3'] !== false) {
     document.getElementById(chartIds.pm25Div).style.display = 'block';
@@ -609,20 +655,33 @@ function renderOverviewCharts(dimVal, chartLabels, chartIds) {
   }
 
   var tempSeries = dimVal['7'] !== false ? dimVal['7'] : null;
-  if (tempSeries || humiditySeries) {
+  if (tempSeries || climateHumiditySeries) {
     document.getElementById(chartIds.climateDiv).style.display = 'block';
     createClimateChart(
       document.getElementById(chartIds.climateCanvas).getContext('2d'),
       tempSeries,
-      humiditySeries,
+      climateHumiditySeries,
       chartLabels
     );
     hasClimateChart = true;
   }
 
+  var pressureSeries = dimVal['10'] !== false ? dimVal['10'] : null;
+  if (pressureSeries && chartIds.pressureDiv && chartIds.pressureCanvas) {
+    document.getElementById(chartIds.pressureDiv).style.display = 'block';
+    createPressureChart(
+      document.getElementById(chartIds.pressureCanvas).getContext('2d'),
+      pressureSeries,
+      chartLabels
+    );
+    hasPressureChart = true;
+  }
+
   return {
     hasPM: hasPMCharts,
-    hasAny: hasPMCharts || hasClimateChart
+    hasClimate: hasClimateChart,
+    hasPressure: hasPressureChart,
+    hasAny: hasPMCharts || hasClimateChart || hasPressureChart
   };
 }
 
@@ -744,10 +803,12 @@ async function loadStationData() {
       pm25Div: 'chart-pm25-div',
       pm10Div: 'chart-pm10-div',
       climateDiv: 'chart-climate-div',
+      pressureDiv: 'chart-pressure-div',
       pm1Canvas: 'chart-pm1',
       pm25Canvas: 'chart-pm25',
       pm10Canvas: 'chart-pm10',
-      climateCanvas: 'chart-climate'
+      climateCanvas: 'chart-climate',
+      pressureCanvas: 'chart-pressure'
     };
     var overview48h = renderOverviewCharts(dimHourVal, labels48h, chartIds48h);
 
@@ -781,12 +842,14 @@ async function loadStationData() {
         pm25Div: 'chart-pm25-30d-div',
         pm10Div: 'chart-pm10-30d-div',
         climateDiv: 'chart-climate-30d-div',
+        pressureDiv: 'chart-pressure-30d-div',
         pm1Canvas: 'chart-pm1-30d',
         pm25Canvas: 'chart-pm25-30d',
         pm10Canvas: 'chart-pm10-30d',
-        climateCanvas: 'chart-climate-30d'
+        climateCanvas: 'chart-climate-30d',
+        pressureCanvas: 'chart-pressure-30d'
       };
-      var overview30d = renderOverviewCharts(dimDayVal, labels30d, chartIds30d);
+      var overview30d = renderOverviewCharts(dimDayVal, labels30d, chartIds30d, { pmHumidityOverlay: false });
 
       document.getElementById('loading-message-30d').style.display = 'none';
       if (!overview30d.hasAny) {
