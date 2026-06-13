@@ -15,7 +15,7 @@ from .devices import (
     DeviceStatusLogSerializer,
     SensorDataSerializer,
     SensorSerializer,
-    StationNameSerializer,
+    DeviceNameSerializer,
     WorkshopContextSerializer,
 )
 from .workshops import (
@@ -38,7 +38,7 @@ __all__ = [
     "DeviceStatusLogSerializer",
     "SensorDataSerializer",
     "SensorSerializer",
-    "StationNameSerializer",
+    "DeviceNameSerializer",
     "WorkshopContextSerializer",
     "WorkshopSerializer",
     "WorkshopSpotPkSerializer",

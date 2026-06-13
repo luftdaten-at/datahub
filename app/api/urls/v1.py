@@ -14,7 +14,7 @@ from api.views import (
     CreateWorkshopSpotAPIView,
     DeleteWorkshopSpotAPIView,
     GetWorkshopSpotsAPIView,
-    StationNameView,
+    DeviceNameView,
     WorkshopAirQualityDataView,
     WorkshopDetailView,
 )
@@ -29,12 +29,10 @@ urlpatterns = [
     path("schema/", SchemaView.as_view(), name="schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="api:v1:schema"), name="swagger-ui"),
 
-    # Devices (status and data)
+    # Devices (status, data, name)
     path("devices/status/", CreateDeviceStatusAPIView.as_view(), name="device-status"),
     path("devices/data/", CreateDeviceDataAPIView.as_view(), name="device-data"),
-
-    # Stations
-    path("stations/name/", StationNameView.as_view(), name="station-name"),
+    path("devices/name/", DeviceNameView.as_view(), name="device-name"),
 
     # Workshops
     path("workshops/data/add/", AirQualityDataAddView.as_view(), name="workshop-data-add"),
