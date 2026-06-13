@@ -3,6 +3,7 @@ from .devices import (
     CreateDeviceDataAPIView,
     CreateDeviceStatusAPIView,
     DeviceDetailView,
+    StationNameView,
 )
 from .workshops import (
     AirQualityDataAddView,
@@ -27,6 +28,7 @@ __all__ = [
     "DeleteWorkshopSpotAPIView",
     "DeviceDetailView",
     "GetWorkshopSpotsAPIView",
+    "StationNameView",
     "WorkshopAirQualityDataView",
     "WorkshopDetailView",
 ]

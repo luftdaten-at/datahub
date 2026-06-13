@@ -23,7 +23,14 @@ from main.util import get_or_create_station
 from api.models import Location, MobilityMode
 from workshops.models import Participant, Workshop
 
-from api.serializers import DeviceSerializer, DeviceDataSerializer, DeviceStatusRequestSerializer
+from stations.station_url import resolve_station_from_pk
+
+from api.serializers import (
+    DeviceSerializer,
+    DeviceDataSerializer,
+    DeviceStatusRequestSerializer,
+    StationNameSerializer,
+)
 
 logger = logging.getLogger("myapp")
 
@@ -121,6 +128,46 @@ def _latest_status_list_level(status_list):
 class DeviceDetailView(RetrieveAPIView):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
+
+@extend_schema(
+    tags=["stations"],
+    summary="Get device name by station id",
+    description=(
+        "Returns the human-readable device name for a station/device id. "
+        "Accepts the full device primary key or a short Air Station auto-number."
+    ),
+    parameters=[
+        OpenApiParameter(
+            name="device",
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description="Device id (station hardware id or Air Station auto-number)",
+            required=True,
+            examples=[OpenApiExample("Example device", value="D83BDA6E37DDAAA")],
+        )
+    ],
+    responses={
+        200: StationNameSerializer,
+        400: {"description": "Missing or invalid query parameter"},
+        404: {"description": "Device not found"},
+    },
+)
+class StationNameView(APIView):
+    def get(self, request):
+        device_id = (request.query_params.get("device") or "").strip()
+        if not device_id:
+            raise ValidationError({"device": "Query parameter 'device' is required."})
+        resolution = resolve_station_from_pk(device_id)
+        if resolution.device is None:
+            return Response({"detail": "Device not found."}, status=status.HTTP_404_NOT_FOUND)
+        dev = resolution.device
+        return Response(
+            {
+                "device": dev.id,
+                "device_name": dev.device_name or dev.id,
+            }
+        )
 
 
 @extend_schema(
