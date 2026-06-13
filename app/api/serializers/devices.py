@@ -131,8 +131,8 @@ class DeviceStatusRequestSerializer(serializers.Serializer):
     status_list = serializers.ListField(child=DeviceStatusLogSerializer())
 
 
-class StationNameSerializer(serializers.Serializer):
-    """Response for GET /v1/stations/name/."""
+class DeviceNameSerializer(serializers.Serializer):
+    """Response for GET /v1/devices/name/."""
 
     device = serializers.CharField()
     device_name = serializers.CharField()

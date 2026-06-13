@@ -29,7 +29,7 @@ from api.serializers import (
     DeviceSerializer,
     DeviceDataSerializer,
     DeviceStatusRequestSerializer,
-    StationNameSerializer,
+    DeviceNameSerializer,
 )
 
 logger = logging.getLogger("myapp")
@@ -131,10 +131,10 @@ class DeviceDetailView(RetrieveAPIView):
 
 
 @extend_schema(
-    tags=["stations"],
-    summary="Get device name by station id",
+    tags=["devices"],
+    summary="Get device name by id",
     description=(
-        "Returns the human-readable device name for a station/device id. "
+        "Returns the human-readable device name for a device id. "
         "Accepts the full device primary key or a short Air Station auto-number."
     ),
     parameters=[
@@ -142,18 +142,18 @@ class DeviceDetailView(RetrieveAPIView):
             name="device",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description="Device id (station hardware id or Air Station auto-number)",
+            description="Device id (hardware id or Air Station auto-number)",
             required=True,
             examples=[OpenApiExample("Example device", value="D83BDA6E37DDAAA")],
         )
     ],
     responses={
-        200: StationNameSerializer,
+        200: DeviceNameSerializer,
         400: {"description": "Missing or invalid query parameter"},
         404: {"description": "Device not found"},
     },
 )
-class StationNameView(APIView):
+class DeviceNameView(APIView):
     def get(self, request):
         device_id = (request.query_params.get("device") or "").strip()
         if not device_id:
