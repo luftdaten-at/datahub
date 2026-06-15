@@ -101,7 +101,7 @@
         </div>
         <div class="mt-2">
           <small class="text-muted">
-            <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a>
+            <a href="https://luftdaten.at/datahub-methodik/">{% trans "Method: European Air Quality Index" %}</a>
           </small>
         </div>
       </div>
@@ -320,30 +320,7 @@ var commonOptions = {
 };
 
 // European Air Quality Index color steps for PM
-const colorStepsPM1 = [
-  [0,    [80, 240, 230],  "Good"],
-  [10,   [80, 204, 170],  "Fair"],
-  [20,   [240, 230, 65],  "Moderate"],
-  [25,   [255, 80, 80],   "Poor"],
-  [50,   [150, 0, 50],    "Very poor"],
-  [75,   [125, 33, 129],  "Extremely poor"]
-];
-const colorStepsPM25 = [
-  [0,    [80, 240, 230],  "Good"],
-  [10,   [80, 204, 170],  "Fair"],
-  [20,   [240, 230, 65],  "Moderate"],
-  [25,   [255, 80, 80],   "Poor"],
-  [50,   [150, 0, 50],    "Very poor"],
-  [75,   [125, 33, 129],  "Extremely poor"]
-];
-const colorStepsPM10 = [
-  [0,    [80, 240, 230],  "Good"],
-  [20,   [80, 204, 170],  "Fair"],
-  [40,   [240, 230, 65],  "Moderate"],
-  [50,   [255, 80, 80],   "Poor"],
-  [100,  [150, 0, 50],    "Very poor"],
-  [150,  [125, 33, 129],  "Extremely poor"]
-];
+{% include "_eaqi_pm_color_steps.html" %}
 
 // Get color for PM value based on European AQI
 function getColorForPM(value, colorSteps) {

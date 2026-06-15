@@ -433,7 +433,7 @@
                     </div>
                     <div class="mt-3">
                         <small class="text-muted">
-                            <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a>
+                            <a href="https://luftdaten.at/datahub-methodik/">{% trans "Method: European Air Quality Index" %}</a>
                         </small>
                     </div>
                 </div>
@@ -453,30 +453,7 @@
         return '/stations/' + encodeURIComponent(shortPk || sid) + '/';
     }
     // Color value map from home page
-    const colorStepsPM1 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
-    const colorStepsPM25 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
-    const colorStepsPM10 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
+    {% include "_eaqi_pm_color_steps.html" %}
     
     const colorStepsMap = {
         'pm1': colorStepsPM1,
