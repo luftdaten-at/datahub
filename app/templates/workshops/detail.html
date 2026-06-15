@@ -178,30 +178,7 @@
     const measurementsLabel = "{% trans 'Points' %}";
 
     // 2) Farblogik: Direkt RGB-Werte
-    const colorStepsPM1 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
-    const colorStepsPM25 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
-    const colorStepsPM10 = [
-        [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-        [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
-        [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-        [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
-        [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
-        [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-    ];
+    {% include "_eaqi_pm_color_steps.html" %}
 
     const colorStepsArray = {
         'pm1': colorStepsPM1,
@@ -289,7 +266,7 @@
             return;
         }
 
-        document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/luftqualitaet/grenzwerte/">Method: European Air Quality Index</a>';
+        document.getElementById("legend-method").innerHTML = '<a href="https://luftdaten.at/datahub-methodik/">Method: European Air Quality Index</a>';
 
         for (var i = 0; i < colorSteps.length; i++) {
             var from = colorSteps[i][0];

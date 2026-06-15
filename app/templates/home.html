@@ -37,7 +37,7 @@
             </div>
             <div id="homeLegendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
                 <div id="legend" style="margin-top: 1rem;"></div>
-                <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "Method: European Air Quality Index" %}</a></span>
+                <span style="font-size: 0.8rem;"><a href="https://luftdaten.at/datahub-methodik/">{% trans "Method: European Air Quality Index" %}</a></span>
 
                 <div class="home-map-chem-section mt-3 pt-3 border-top">
                     <div class="d-flex align-items-start gap-2 mb-2">
@@ -125,7 +125,7 @@
                     <p class="mb-3 home-map-chem-colors-note">
                         {% trans "Forecast map colours match the stepped legend above." %}
                         {% trans "PM2.5 and PM10 use the same European Air Quality Index categories as the citizen stations on this map." %}
-                        <a href="https://luftdaten.at/luftqualitaet/grenzwerte/">{% trans "AQ index bands (details)" %}</a>.
+                        <a href="https://luftdaten.at/datahub-methodik/">{% trans "AQ index bands (details)" %}</a>.
                         {% trans "Ozone and nitrogen dioxide use separate µg/m³ bands for this model overlay." %}
                     </p>
                     <p class="mb-0 home-map-chem-source-links">
@@ -328,30 +328,7 @@
 
         // 2) Farblogik: Direkt RGB-Werte statt HSV
         // Beispielwerte als [R, G, B], alle im Bereich 0..255
-        const colorStepsPM1 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
-        const colorStepsPM25 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [10,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [20,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [25,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [50,   [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [75,   [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
-        const colorStepsPM10 = [
-            [0,    [80, 240, 230],  "{% trans 'Good' %}"],
-            [20,   [80, 204, 170],  "{% trans 'Fair' %}"],
-            [40,   [240, 230, 65],  "{% trans 'Moderate' %}"],
-            [50,   [255, 80, 80],   "{% trans 'Poor' %}"],
-            [100,  [150, 0, 50],    "{% trans 'Very poor' %}"],
-            [150,  [125, 33, 129],  "{% trans 'Extremely poor' %}"]
-        ];
+        {% include "_eaqi_pm_color_steps.html" %}
         const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
 
         const GEOSPHERE_GRID_URL = "{{ geosphere_chem_grid_url }}";

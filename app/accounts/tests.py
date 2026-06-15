@@ -35,14 +35,17 @@ class Pm25ToRgbTests(TestCase):
 
     def test_band_boundaries_match_map_scale(self):
         self.assertEqual(pm25_to_rgb(0), (80, 240, 230))
-        self.assertEqual(pm25_to_rgb(9.9), (80, 240, 230))
-        self.assertEqual(pm25_to_rgb(10), (80, 204, 170))
-        self.assertEqual(pm25_to_rgb(24.9), (240, 230, 65))
-        self.assertEqual(pm25_to_rgb(25), (255, 80, 80))
-        self.assertEqual(pm25_to_rgb(49.9), (255, 80, 80))
-        self.assertEqual(pm25_to_rgb(50), (150, 0, 50))
-        self.assertEqual(pm25_to_rgb(74.9), (150, 0, 50))
-        self.assertEqual(pm25_to_rgb(75), (125, 33, 129))
+        self.assertEqual(pm25_to_rgb(5), (80, 240, 230))
+        self.assertEqual(pm25_to_rgb(5.9), (80, 240, 230))
+        self.assertEqual(pm25_to_rgb(6), (80, 204, 170))
+        self.assertEqual(pm25_to_rgb(15.9), (80, 204, 170))
+        self.assertEqual(pm25_to_rgb(16), (240, 230, 65))
+        self.assertEqual(pm25_to_rgb(50), (240, 230, 65))
+        self.assertEqual(pm25_to_rgb(51), (255, 80, 80))
+        self.assertEqual(pm25_to_rgb(90.9), (255, 80, 80))
+        self.assertEqual(pm25_to_rgb(91), (150, 0, 50))
+        self.assertEqual(pm25_to_rgb(140), (150, 0, 50))
+        self.assertEqual(pm25_to_rgb(141), (125, 33, 129))
         self.assertEqual(pm25_to_rgb(200), (125, 33, 129))
 
 

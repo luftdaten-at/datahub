@@ -1,19 +1,11 @@
 """
-PM2.5 µg/m³ → RGB for map-consistent styling (matches home.html colorStepsPM25 / getColorForPM).
+PM2.5 µg/m³ → RGB for map-consistent styling (matches EAQI bands in eaqi_pm.py).
 """
 
 import math
 from typing import Optional, Tuple
 
-# (lower_bound_inclusive, (R, G, B)) — same thresholds as templates/home.html colorStepsPM25
-PM25_COLOR_STEPS = [
-    (0, (80, 240, 230)),
-    (10, (80, 204, 170)),
-    (20, (240, 230, 65)),
-    (25, (255, 80, 80)),
-    (50, (150, 0, 50)),
-    (75, (125, 33, 129)),
-]
+from main.eaqi_pm import PM25_COLOR_STEPS
 
 
 def pm25_to_rgb(value: Optional[float]) -> Tuple[int, int, int]:
