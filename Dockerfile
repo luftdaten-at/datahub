@@ -11,7 +11,9 @@ RUN apk add --no-cache \
     gdal-dev \
     geos \
     geos-dev \
+    proj \
     proj-dev \
+    proj-util \
     postgresql-dev \
     libxml2-dev \
     libxslt-dev \
@@ -33,6 +35,9 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Set work directory
 WORKDIR /usr/src/app
+
+# pyproj builds from source on Alpine; needs PROJ headers, proj binary, and PROJ_DIR
+ENV PROJ_DIR=/usr
 
 # Install dependencies
 COPY ./requirements.txt .
