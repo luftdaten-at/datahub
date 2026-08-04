@@ -1,0 +1,11 @@
+{% load i18n %}
+{% if flags %}
+<div class="alert alert-warning mt-3" role="status">
+  <strong>{% trans "Data quality notes" %}:</strong>
+  <ul class="mb-0 mt-2">
+    {% for flag in flags %}
+    <li>{{ flag }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}

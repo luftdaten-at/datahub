@@ -1,0 +1,30 @@
+{% load i18n %}
+<div class="row">
+  <p>
+    {% blocktrans with count=municipality.station_count name=municipality.name %}
+    There are {{ count }} citizen science stations in {{ name }}.
+    {% endblocktrans %}
+    {% blocktrans %}
+    Please note that individual stations in unfavourable locations can skew the averages. In our methodology we apply statistical procedures to correct for these effects as far as possible.
+    {% endblocktrans %}
+    <a href="https://luftdaten.at/datahub-methodik/">{% trans "Methodology" %}</a>
+  </p>
+  <h3>{% trans "Hourly averages (1 h mean)" %}</h3>
+  {% for value in municipality.values %}
+  {% if value.dimension == "PM1.0" or value.dimension == "PM2.5" or value.dimension == "PM10.0" %}
+  <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+    <div class="card text-center">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-muted">{{ value.dimension }}</h6>
+        <p class="card-text display-6">{{ value.value|floatformat:2 }} {{ value.unit }}</p>
+        <h6 class="card-subtitle mb-2 text-muted">
+          {% blocktrans with value_count=value.value_count station_count=value.station_count %}
+          Calculated from {{ value_count }} values from {{ station_count }} stations
+          {% endblocktrans %}
+        </h6>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>

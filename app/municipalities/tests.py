@@ -321,3 +321,118 @@ class MunicipalityAdminLocationUpdateTests(TestCase):
         headers = call_kw.get("headers") or mock_admin_post.call_args[1].get("headers")
         self.assertIn("Authorization", headers)
         self.assertTrue(headers["Authorization"].startswith("Bearer "))
+
+
+def _city_current_response(name="Wien", slug="wien"):
+    return {
+        "type": "Feature",
+        "geometry": {"coordinates": [16.37, 48.21]},
+        "properties": {
+            "name": name,
+            "country": "AT",
+            "timezone": "Europe/Vienna",
+            "time": "2025-01-01T12:00:00Z",
+            "station_count": 10,
+            "values": [],
+        },
+    }
+
+
+class MunicipalityDetailContextTests(TestCase):
+    def setUp(self):
+        cache.clear()
+
+    def tearDown(self):
+        cache.clear()
+
+    @patch("municipalities.views.requests.get")
+    def test_detail_renders_without_local_profile(self, mock_get):
+        mock_resp = Mock()
+        mock_resp.json.return_value = _city_current_response()
+        mock_resp.raise_for_status = Mock()
+        mock_get.return_value = mock_resp
+
+        r = self.client.get(reverse("municipalities-detail", kwargs={"pk": "wien"}))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "No Copernicus land indicators")
+        self.assertContains(r, "No evaluable satellite heat data")
+
+    @patch("municipalities.views.requests.get")
+    def test_detail_shows_land_profile(self, mock_get):
+        from context.models import Municipality, MunicipalityLandProfile
+        from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+
+        ring = (
+            (16.32, 48.16),
+            (16.42, 48.16),
+            (16.42, 48.26),
+            (16.32, 48.26),
+            (16.32, 48.16),
+        )
+        m = Municipality.objects.create(
+            slug="wien",
+            name="Wien",
+            centroid=Point(16.37, 48.21, srid=4326),
+            boundary=MultiPolygon(Polygon(ring), srid=4326),
+            match_method=Municipality.MATCH_AUTO,
+        )
+        MunicipalityLandProfile.objects.create(
+            municipality=m,
+            reference_year=2021,
+            imperviousness_pct=58.0,
+            tree_cover_pct=22.0,
+            data_source="urban_atlas",
+            producer_version="1.0.0",
+        )
+
+        mock_resp = Mock()
+        mock_resp.json.return_value = _city_current_response()
+        mock_resp.raise_for_status = Mock()
+        mock_get.return_value = mock_resp
+
+        r = self.client.get(reverse("municipalities-detail", kwargs={"pk": "wien"}))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "58.0")
+        self.assertContains(r, "Environment")
+
+    @patch("municipalities.views.requests.get")
+    def test_detail_hides_heat_when_clear_fraction_low(self, mock_get):
+        from context.models import Municipality, MunicipalityHeatProfile
+        from django.contrib.gis.geos import MultiPolygon, Point, Polygon
+        from datetime import datetime, timezone
+
+        ring = (
+            (16.32, 48.16),
+            (16.42, 48.16),
+            (16.42, 48.26),
+            (16.32, 48.26),
+            (16.32, 48.16),
+        )
+        m = Municipality.objects.create(
+            slug="wien",
+            name="Wien",
+            centroid=Point(16.37, 48.21, srid=4326),
+            boundary=MultiPolygon(Polygon(ring), srid=4326),
+            match_method=Municipality.MATCH_AUTO,
+        )
+        MunicipalityHeatProfile.objects.create(
+            municipality=m,
+            reference_date="2026-06-29",
+            acquisition_utc=datetime(2026, 6, 29, 9, 0, tzinfo=timezone.utc),
+            sensor="LANDSAT_9",
+            stac_item_id="x",
+            clear_fraction=0.50,
+            lst_mean=40.0,
+            suhi_day=5.0,
+            producer_version="1.0.0",
+        )
+
+        mock_resp = Mock()
+        mock_resp.json.return_value = _city_current_response()
+        mock_resp.raise_for_status = Mock()
+        mock_get.return_value = mock_resp
+
+        r = self.client.get(reverse("municipalities-detail", kwargs={"pk": "wien"}))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "No evaluable satellite heat data")
+        self.assertNotContains(r, "Urban heat island (day)")

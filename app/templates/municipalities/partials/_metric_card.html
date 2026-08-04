@@ -1,0 +1,15 @@
+{% load i18n %}
+<div class="col-sm-12 col-md-6 col-lg-3 mb-4">
+  <div class="card text-center h-100">
+    <div class="card-body">
+      <h6 class="card-subtitle mb-2 text-muted">{{ label }}</h6>
+      <p class="card-text display-6 mb-0">
+        {% if value is not None %}{{ value|floatformat:1 }}{% else %}—{% endif %}
+        {% if unit %}<span class="fs-6 text-muted">{{ unit }}</span>{% endif %}
+      </p>
+      {% if subtitle %}
+      <p class="card-text small text-muted mt-2 mb-0">{{ subtitle }}</p>
+      {% endif %}
+    </div>
+  </div>
+</div>

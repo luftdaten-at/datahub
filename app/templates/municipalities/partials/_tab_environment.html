@@ -1,0 +1,45 @@
+{% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+
+{% if land_profile %}
+<p class="text-muted small mb-3">
+  {% blocktrans with year=land_profile.reference_year source=land_profile.data_source %}
+  Reference year {{ year }}, source: {{ source }}.
+  {% endblocktrans %}
+  {% if peer_group %}
+  {% if LANGUAGE_CODE == "de" %}
+  {% blocktrans with label=peer_group.label_de %}Peer group: {{ label }}.{% endblocktrans %}
+  {% else %}
+  {% blocktrans with label=peer_group.label_en %}Peer group: {{ label }}.{% endblocktrans %}
+  {% endif %}
+  {% endif %}
+</p>
+
+<div class="row">
+  {% trans "Imperviousness" as impervious_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=impervious_label value=land_profile.imperviousness_pct unit="%" %}
+
+  {% trans "Imperviousness change (2018–2021)" as change_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=change_label value=land_profile.imperviousness_change_pp unit="pp" %}
+
+  {% trans "Tree cover" as tree_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=tree_label value=land_profile.tree_cover_pct unit="%" %}
+</div>
+
+{% if land_profile.landuse_shares %}
+<div class="row mt-4">
+  <div class="col-12">
+    <h4>{% trans "Land use shares" %}</h4>
+    <canvas id="landuse-bars" height="120" aria-label="{% trans 'Land use shares chart' %}"></canvas>
+  </div>
+</div>
+{{ land_profile.landuse_shares|json_script:"landuse-shares-data" }}
+{% endif %}
+
+{% include "municipalities/partials/_quality_note.html" with flags=land_profile.quality_flags %}
+
+{% else %}
+<div class="alert alert-light border">
+  {% trans "No Copernicus land indicators are available for this municipality yet." %}
+</div>
+{% endif %}
