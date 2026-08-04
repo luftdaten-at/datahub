@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'campaign.apps.CampaignConfig',
     'municipalities.apps.MunicipalitiesConfig',
+    'context.apps.ContextConfig',
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
     'stations.apps.StationsConfig',
@@ -323,6 +324,22 @@ GEOSPHERE_TAWES_METADATA_CACHE_TTL = 21600
 LUFTDATEN_ADMIN_API_KEY = env("LUFTDATEN_ADMIN_API_KEY", default="")
 # Minimum length for device/station API keys when syncing to api.luftdaten.at (matches STATION_APIKEY_MIN_LENGTH there).
 STATION_APIKEY_MIN_LENGTH = env.int("STATION_APIKEY_MIN_LENGTH", default=16)
+
+# --- Context modules (Copernicus Land, land surface temperature) ----------------
+
+CONTEXT_IMPORT_INBOX = env("CONTEXT_IMPORT_INBOX", default="/data/in")
+CONTEXT_TILES_DIR = env("CONTEXT_TILES_DIR", default="/data/tiles")
+CONTEXT_TILES_URL = env("CONTEXT_TILES_URL", default="/tiles/")
+CONTEXT_IMPORT_API_KEY = env("CONTEXT_IMPORT_API_KEY", default="")
+CONTEXT_ACCEPTED_FORMAT_VERSIONS = ["1.0", "1.1"]
+CONTEXT_IMPORT_MAX_LST_DELTA_K = 15.0
+CONTEXT_IMPORT_MIN_COVERAGE = 0.50
+CONTEXT_HEAT_REFERENCE_DATE = env("CONTEXT_HEAT_REFERENCE_DATE", default="2026-06-29")
+CONTEXT_LST_SCALE_MIN = 20.0
+CONTEXT_LST_SCALE_MAX = 55.0
+CONTEXT_MIN_CLEAR_FRACTION = 0.95
+CONTEXT_MIN_REGRESSION_R2 = 0.30
+CONTEXT_PROFILE_CACHE_TTL = 3600
 
 LOG_VIEWER_FILES = ['logs/log.log']
 #LOG_VIEWER_FILES_PATTERN = '*.log*'

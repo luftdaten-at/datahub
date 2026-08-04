@@ -7,6 +7,8 @@ services:
     volumes:
       - static_volume:/usr/src/app/staticfiles
       - media_volume:/usr/src/app/media
+      - inbox_volume:/data/in
+      - tiles_volume:/data/tiles:ro
     depends_on:
       - db
     env_file:
@@ -32,6 +34,7 @@ services:
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/media
+      - tiles_volume:/home/app/web/tiles:ro
     depends_on:
       - app
     labels:
@@ -64,6 +67,8 @@ services:
 volumes:
   static_volume:
   media_volume:
+  inbox_volume:
+  tiles_volume:
   db_data:
   postgis_db_data:
 networks:

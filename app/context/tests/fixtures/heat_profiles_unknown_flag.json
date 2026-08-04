@@ -1,0 +1,24 @@
+{
+  "format_version": "1.0",
+  "module": "heat",
+  "generated_utc": "2026-09-15T08:12:44Z",
+  "producer": "luftdaten-at/heat-pipeline",
+  "producer_version": "1.0.0",
+  "reference_date_primary": "2026-06-29",
+  "manifest": {},
+  "profiles": [
+    {
+      "municipality_slug": "graz",
+      "reference_date": "2026-06-29",
+      "acquisition_utc": "2026-06-29T09:47:12Z",
+      "sensor": "LANDSAT_9",
+      "stac_item_id": "LC09_L2SP_190027_20260629_02_T1",
+      "clear_fraction": 0.993,
+      "lst_mean": 38.4,
+      "lst_p10": 30.1,
+      "lst_p90": 46.7,
+      "lst_max": 54.2,
+      "quality_flags": ["totally_unknown_flag"]
+    }
+  ]
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datahub.luftdaten.at/schemas/heat_profiles.v1.schema.json",
+  "title": "Heat profiles v1",
+  "type": "object",
+  "required": [
+    "format_version",
+    "module",
+    "generated_utc",
+    "producer",
+    "producer_version",
+    "profiles"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "format_version": {
+      "type": "string",
+      "pattern": "^1\\."
+    },
+    "module": {
+      "const": "heat"
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "producer_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reference_date_primary": {
+      "type": "string",
+      "format": "date"
+    },
+    "manifest": {
+      "type": "object"
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    }
+  },
+  "$defs": {
+    "quality_flags": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "insufficient_clear_pixels",
+          "no_rural_reference",
+          "high_relief",
+          "weak_regression",
+          "substituted_date",
+          "population_suppressed"
+        ]
+      }
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "municipality_slug",
+        "reference_date",
+        "acquisition_utc",
+        "sensor",
+        "stac_item_id",
+        "clear_fraction",
+        "quality_flags"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "municipality_slug": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "acquisition_utc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sensor": {
+          "type": "string"
+        },
+        "stac_item_id": {
+          "type": "string"
+        },
+        "clear_fraction": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lst_mean": {
+          "type": ["number", "null"],
+          "minimum": -20,
+          "maximum": 70
+        },
+        "lst_p10": {
+          "type": ["number", "null"],
+          "minimum": -20,
+          "maximum": 70
+        },
+        "lst_p90": {
+          "type": ["number", "null"],
+          "minimum": -20,
+          "maximum": 70
+        },
+        "lst_max": {
+          "type": ["number", "null"],
+          "minimum": -20,
+          "maximum": 70
+        },
+        "suhi_day": {
+          "type": ["number", "null"],
+          "minimum": -10,
+          "maximum": 20
+        },
+        "suhi_night": {
+          "type": ["number", "null"],
+          "minimum": -10,
+          "maximum": 20
+        },
+        "dlst_per_10pct_tcd": {
+          "type": ["number", "null"]
+        },
+        "dlst_per_10pct_imd": {
+          "type": ["number", "null"]
+        },
+        "regression_r2": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 1
+        },
+        "regression_n": {
+          "type": ["integer", "null"],
+          "minimum": 1
+        },
+        "pop_in_hotspots": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "pop_total": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "lst_by_landuse": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          }
+        },
+        "quality_flags": {
+          "$ref": "#/$defs/quality_flags"
+        }
+      }
+    }
+  }
+}
