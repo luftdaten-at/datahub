@@ -1,0 +1,46 @@
+{
+  "format_version": "1.0",
+  "module": "land",
+  "generated_utc": "2026-09-15T08:00:00Z",
+  "producer": "luftdaten-at/land-pipeline",
+  "producer_version": "1.0.0",
+  "reference_year_primary": 2021,
+  "manifest": {
+    "clms_release": "2021",
+    "products": ["HRL_IMD", "HRL_TCD", "UrbanAtlas"]
+  },
+  "profiles": [
+    {
+      "municipality_slug": "graz",
+      "reference_year": 2021,
+      "imperviousness_pct": 42.5,
+      "imperviousness_change_pp": 1.8,
+      "tree_cover_pct": 28.3,
+      "landuse_shares": {
+        "continuous_urban_fabric": 18.2,
+        "discontinuous_urban_fabric": 22.1,
+        "green_urban": 12.4,
+        "forest": 25.0,
+        "agriculture": 15.3
+      },
+      "data_source": "urban_atlas",
+      "quality_flags": []
+    },
+    {
+      "municipality_slug": "wien",
+      "reference_year": 2021,
+      "imperviousness_pct": 58.0,
+      "imperviousness_change_pp": 0.9,
+      "tree_cover_pct": 22.0,
+      "landuse_shares": {
+        "continuous_urban_fabric": 35.0,
+        "discontinuous_urban_fabric": 28.0,
+        "green_urban": 8.0,
+        "forest": 12.0,
+        "agriculture": 5.0
+      },
+      "data_source": "urban_atlas",
+      "quality_flags": []
+    }
+  ]
+}

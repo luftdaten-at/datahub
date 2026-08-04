@@ -1,0 +1,84 @@
+{% load i18n %}
+
+{% if heat_visible %}
+<div class="row">
+  <div class="col-12">
+    <p class="text-muted small">
+      {% blocktrans with d=heat_profile.reference_date t=heat_acquisition_local s=heat_profile.sensor %}
+      Acquisition on {{ d }}, {{ t }} (local time), {{ s }}.
+      {% endblocktrans %}
+    </p>
+  </div>
+</div>
+
+<div class="row">
+  {% if heat_metrics.suhi_day %}
+  {% trans "Urban heat island (day)" as suhi_day_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=suhi_day_label value=heat_profile.suhi_day unit="K" %}
+  {% endif %}
+
+  {% if heat_metrics.suhi_night %}
+  {% trans "Urban heat island (night)" as suhi_night_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=suhi_night_label value=heat_profile.suhi_night unit="K" %}
+  {% endif %}
+
+  {% if heat_metrics.lst_stats %}
+  {% trans "Mean land surface temperature" as lst_mean_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=lst_mean_label value=heat_profile.lst_mean unit="°C" %}
+  {% endif %}
+
+  {% if heat_lst_range is not None %}
+  {% trans "Temperature spread (p90 − p10)" as lst_range_label %}
+  {% include "municipalities/partials/_metric_card.html" with label=lst_range_label value=heat_lst_range unit="K" %}
+  {% endif %}
+
+  {% if heat_metrics.population %}
+  {% trans "Population in hotspots" as pop_label %}
+  {% blocktrans with total=heat_profile.pop_total asvar pop_subtitle %}of {{ total }} residents total{% endblocktrans %}
+  {% include "municipalities/partials/_metric_card.html" with label=pop_label value=heat_profile.pop_in_hotspots subtitle=pop_subtitle %}
+  {% endif %}
+</div>
+
+{% if heat_metrics.cooling_regression %}
+<div class="row mt-3">
+  {% if heat_profile.dlst_per_10pct_tcd is not None %}
+  <div class="col-md-6 mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-subtitle text-muted">{% trans "Cooling per 10% tree cover" %}</h6>
+        <p class="card-text fs-4 mb-0">{{ heat_profile.dlst_per_10pct_tcd|floatformat:2 }} K</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  {% if heat_profile.dlst_per_10pct_imd is not None %}
+  <div class="col-md-6 mb-3">
+    <div class="card">
+      <div class="card-body">
+        <h6 class="card-subtitle text-muted">{% trans "Warming per 10% imperviousness" %}</h6>
+        <p class="card-text fs-4 mb-0">{{ heat_profile.dlst_per_10pct_imd|floatformat:2 }} K</p>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if heat_metrics.lst_by_landuse %}
+<div class="row mt-4">
+  <div class="col-12">
+    <h4>{% trans "Land surface temperature by land use" %}</h4>
+    <canvas id="heat-landuse-bars" height="120" aria-label="{% trans 'LST by land use chart' %}"></canvas>
+  </div>
+</div>
+{{ heat_profile.lst_by_landuse|json_script:"heat-landuse-data" }}
+{% endif %}
+
+{% include "municipalities/partials/_quality_note.html" with flags=heat_profile.quality_flags %}
+{% include "municipalities/partials/_heat_disclaimer.html" %}
+
+{% else %}
+<div class="alert alert-light border">
+  {% trans "No evaluable satellite heat data is available for this municipality." %}
+</div>
+{% endif %}

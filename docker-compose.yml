@@ -4,6 +4,8 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./app:/usr/src/app
+      - inbox_volume:/data/in
+      - tiles_volume:/data/tiles
     env_file:
       - .env
     depends_on:
@@ -38,3 +40,5 @@ services:
 volumes:
   postgres_data:
   pgadmin-data:
+  inbox_volume:
+  tiles_volume:

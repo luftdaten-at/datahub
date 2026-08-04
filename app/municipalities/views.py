@@ -19,6 +19,8 @@ from .luftdaten_city_admin import (
     country_code_for_country_slug,
     update_city_admin,
 )
+from context.services import get_municipality_context
+
 from .models import FavoriteMunicipality
 
 CITY_ALL_CACHE_KEY = "city_all_data"
@@ -144,6 +146,15 @@ def municipality_detail_view(request, pk):
             user=request.user, municipality_slug=municipality_slug
         ).exists()
 
+    ctx = get_municipality_context(municipality_slug)
+    coords = municipality_info.get("coordinates") or [None, None]
+    map_config = {
+        "apiUrl": settings.API_URL,
+        "centroid": [coords[1], coords[0]],
+        "bbox": ctx.bbox,
+        "slug": municipality_slug,
+    }
+
     return render(
         request,
         "municipalities/detail.html",
@@ -151,6 +162,17 @@ def municipality_detail_view(request, pk):
             "municipality": municipality_info,
             "municipality_slug": municipality_slug,
             "is_favorite": is_favorite,
+            "land_profile": ctx.land,
+            "heat_profile": ctx.heat,
+            "peer_group": ctx.peer_group,
+            "boundary_geojson": ctx.boundary_geojson,
+            "bbox": ctx.bbox,
+            "tiles_url": ctx.tiles_url,
+            "heat_visible": ctx.heat_visible,
+            "heat_metrics": ctx.heat_metrics,
+            "heat_lst_range": ctx.heat_lst_range,
+            "heat_acquisition_local": ctx.heat_acquisition_local,
+            "map_config": map_config,
         },
     )
 

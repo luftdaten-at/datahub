@@ -1,0 +1,72 @@
+{
+  "format_version": "1.0",
+  "module": "heat",
+  "generated_utc": "2026-09-15T08:12:44Z",
+  "producer": "luftdaten-at/heat-pipeline",
+  "producer_version": "1.0.0",
+  "reference_date_primary": "2026-06-29",
+  "manifest": {
+    "stac_items": ["LC09_L2SP_190027_20260629_02_T1"],
+    "s2_items": ["S2B_MSIL2A_20260628T100029_N0511_R122_T33UWP"],
+    "lapse_rate_k_per_m": -0.0081,
+    "sharpening_method": "tsharp_ndvi"
+  },
+  "profiles": [
+    {
+      "municipality_slug": "graz",
+      "reference_date": "2026-06-29",
+      "acquisition_utc": "2026-06-29T09:47:12Z",
+      "sensor": "LANDSAT_9",
+      "stac_item_id": "LC09_L2SP_190027_20260629_02_T1",
+      "clear_fraction": 0.993,
+      "lst_mean": 38.4,
+      "lst_p10": 30.1,
+      "lst_p90": 46.7,
+      "lst_max": 54.2,
+      "suhi_day": 4.8,
+      "suhi_night": 3.1,
+      "dlst_per_10pct_tcd": -2.4,
+      "dlst_per_10pct_imd": 1.9,
+      "regression_r2": 0.58,
+      "regression_n": 41822,
+      "pop_in_hotspots": 31240,
+      "pop_total": 294630,
+      "lst_by_landuse": {
+        "water": 27.9,
+        "forest": 31.2,
+        "green_urban": 34.0,
+        "residential_low": 39.1,
+        "industrial": 47.6
+      },
+      "quality_flags": []
+    },
+    {
+      "municipality_slug": "wien",
+      "reference_date": "2026-06-29",
+      "acquisition_utc": "2026-06-29T09:47:12Z",
+      "sensor": "LANDSAT_9",
+      "stac_item_id": "LC09_L2SP_190027_20260629_02_T1",
+      "clear_fraction": 0.991,
+      "lst_mean": 40.2,
+      "lst_p10": 32.0,
+      "lst_p90": 48.1,
+      "lst_max": 56.0,
+      "suhi_day": 5.2,
+      "suhi_night": 3.4,
+      "dlst_per_10pct_tcd": -2.1,
+      "dlst_per_10pct_imd": 2.0,
+      "regression_r2": 0.61,
+      "regression_n": 85000,
+      "pop_in_hotspots": 450000,
+      "pop_total": 1900000,
+      "lst_by_landuse": {
+        "water": 28.5,
+        "forest": 30.0,
+        "green_urban": 35.0,
+        "residential_low": 41.0,
+        "industrial": 49.0
+      },
+      "quality_flags": []
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://datahub.luftdaten.at/schemas/land_profiles.v1.schema.json",
+  "title": "Land profiles v1",
+  "type": "object",
+  "required": [
+    "format_version",
+    "module",
+    "generated_utc",
+    "producer",
+    "producer_version",
+    "profiles"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "format_version": {
+      "type": "string",
+      "pattern": "^1\\."
+    },
+    "module": {
+      "const": "land"
+    },
+    "generated_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "producer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "producer_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reference_year_primary": {
+      "type": "integer",
+      "minimum": 1990,
+      "maximum": 2100
+    },
+    "manifest": {
+      "type": "object"
+    },
+    "profiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    }
+  },
+  "$defs": {
+    "quality_flags": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "insufficient_clear_pixels",
+          "no_rural_reference",
+          "high_relief",
+          "weak_regression",
+          "substituted_date",
+          "population_suppressed"
+        ]
+      }
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "municipality_slug",
+        "reference_year",
+        "data_source",
+        "quality_flags"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "municipality_slug": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reference_year": {
+          "type": "integer",
+          "minimum": 1990,
+          "maximum": 2100
+        },
+        "imperviousness_pct": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "imperviousness_change_pp": {
+          "type": ["number", "null"],
+          "minimum": -100,
+          "maximum": 100
+        },
+        "tree_cover_pct": {
+          "type": ["number", "null"],
+          "minimum": 0,
+          "maximum": 100
+        },
+        "landuse_shares": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          }
+        },
+        "data_source": {
+          "enum": ["urban_atlas", "clc_plus"]
+        },
+        "quality_flags": {
+          "$ref": "#/$defs/quality_flags"
+        }
+      }
+    }
+  }
+}

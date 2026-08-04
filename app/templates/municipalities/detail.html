@@ -5,294 +5,90 @@
 {% block title %}{% trans "Municipality" %}: {{ municipality.name }}{% endblock title %}
 
 {% block styles %}
-<!-- Leaflet CSS -->
 <link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.css' %}" crossorigin="">
 <link rel="stylesheet" href="{% static 'css/MarkerCluster.Default.css' %}" crossorigin="">
-
-<!-- Leaflet JS -->
 <script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script src="{% static 'js/chart.umd.js' %}" crossorigin=""></script>
 <script src="{% static 'js/leaflet.markercluster.js' %}"></script>
-{% comment %} <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script> {% endcomment %}
 {% endblock styles %}
 
 {% block content %}
 <div class="row">
-<div class="container-fluid">
+  <div class="container-fluid">
     <div class="position-absolute top-0 end-0 card map-overlay-panel" style="width: 20rem; z-index: 1000; margin-top: 4.5rem; margin-right: 1rem;">
-        <div class="card-body">
-            <div class="d-flex align-items-center gap-2">
-              <select class="form-select flex-grow-1" aria-label="Default select example" onchange="showPM(this)">
-                <option value="1">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM1</option>
-                <option value="25" selected>{% trans "Air quality" %} {% trans "Particulate Matter" %} PM2.5</option>
-                <option value="10">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM10</option>
-              </select>
-              <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
-                data-bs-toggle="collapse" data-bs-target="#legendCollapse"
-                aria-expanded="false" aria-controls="legendCollapse"
-                aria-label="{% trans 'Toggle legend' %}">
-                <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
-              </button>
-            </div>
-            <div id="legendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
-              <div id="legend" style="margin-top: 1rem;"></div>
-              <span style="font-size: 0.8rem;">
-                <a href="https://luftdaten.at/datahub-methodik/">{% trans "Method: European Air Quality Index" %}</a>
-              </span>
-            </div>
-          </div>
-    </div>
-    <div id="map" style="width: 100%; height: 400px;"></div>
-</div>
-</div>
-
-<div class="row">
-  <div class="col-lg-12 mt-3">
-    <h1>{{ municipality.name }}</h1>
-    {% if user.is_authenticated %}
-    <form method="post" action="{% url 'municipality-favorite-toggle' municipality_slug %}" class="mb-3">
-      {% csrf_token %}
-      {% if is_favorite %}
-      <button type="submit" class="btn btn-outline-danger btn-sm">
-        <i class="bi bi-star-fill" aria-hidden="true"></i> {% trans "Remove municipality from favourites" %}
-      </button>
-      {% else %}
-      <button type="submit" class="btn btn-outline-primary btn-sm">
-        <i class="bi bi-star" aria-hidden="true"></i> {% trans "Add municipality to favourites" %}
-      </button>
-      {% endif %}
-    </form>
-    {% else %}
-    <p class="small text-muted mb-3">
-      <a href="{% url 'account_login' %}?next={{ request.path|urlencode }}">{% trans "Log in to save this municipality to your favourites." %}</a>
-    </p>
-    {% endif %}
-  </div>
-</div>
-<div class="row">
-  <p>Es gibt {{ municipality.station_count }} Citizen Science Stationen in {{ municipality.name }}. Bitte beachten Sie, dass einzelne Messstationen durch ungünstige Aufstellorte die Mittelwerte verfälschen können. In unserer <a href="https://luftdaten.at/datahub-methodik/">Methodik</a> setzen wir jedoch gezielte statistische Verfahren ein, um diese Einflüsse so gut wie möglich zu korrigieren.</p>
-  <h3>Mittelwerte der letzten Stunde (1h-Mittelwert)</h3>
-  {% for value in municipality.values %}
-  {% if value.dimension in "PM1.0,PM2.5,PM10.0" %}
-  <div class="col-sm-12 col-md-6 col-lg-3 mb-4">
-    <div class="card text-center">
       <div class="card-body">
-        <h6 class="card-subtitle mb-2 text-muted">{{ value.dimension }}</h6>
-        <p class="card-text display-6">{{ value.value|floatformat:2 }} {{ value.unit }}</p>
-        <h6 class="card-subtitle mb-2 text-muted">Berechnung aus {{ value.value_count }} Werten von {{ value.station_count }} Stationen</h6>
+        <div class="d-flex align-items-center gap-2">
+          <select class="form-select flex-grow-1" id="pm-select" aria-label="{% trans 'Particulate matter type' %}">
+            <option value="1">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM1</option>
+            <option value="25" selected>{% trans "Air quality" %} {% trans "Particulate Matter" %} PM2.5</option>
+            <option value="10">{% trans "Air quality" %} {% trans "Particulate Matter" %} PM10</option>
+          </select>
+          <button type="button" class="btn btn-outline-secondary btn-sm map-legend-toggle d-md-none"
+            data-bs-toggle="collapse" data-bs-target="#legendCollapse"
+            aria-expanded="false" aria-controls="legendCollapse"
+            aria-label="{% trans 'Toggle legend' %}">
+            <i class="bi bi-chevron-down map-legend-toggle-icon" aria-hidden="true"></i>
+          </button>
+        </div>
+        <div id="legendCollapse" class="collapse d-md-block map-legend-collapse mt-2">
+          <div id="legend" style="margin-top: 1rem;"></div>
+          <span style="font-size: 0.8rem;">
+            <a href="https://luftdaten.at/datahub-methodik/">{% trans "Method: European Air Quality Index" %}</a>
+          </span>
+        </div>
       </div>
     </div>
+    <div id="map" style="width: 100%; height: 400px;"></div>
   </div>
-  {% endif %}
-  {% endfor %}
 </div>
 
-<script>
-    function createHeatmaps() {}
+<div class="row">
+  {% include "municipalities/partials/_header.html" %}
+</div>
 
-    // Farbdefinitionen für die PM-Werte (jetzt direkt in RGB)
-    {% include "_eaqi_pm_color_steps.html" %}
+<ul class="nav nav-tabs mt-2" id="municipalityTabs" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="tab-current-btn" data-bs-toggle="tab"
+      data-bs-target="#tab-current" type="button" role="tab"
+      aria-controls="tab-current" aria-selected="true">
+      {% trans "Current" %}
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="tab-environment-btn" data-bs-toggle="tab"
+      data-bs-target="#tab-environment" type="button" role="tab"
+      aria-controls="tab-environment" aria-selected="false">
+      {% trans "Environment" %}
+    </button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="tab-heat-btn" data-bs-toggle="tab"
+      data-bs-target="#tab-heat" type="button" role="tab"
+      aria-controls="tab-heat" aria-selected="false">
+      {% trans "Heat" %}
+    </button>
+  </li>
+</ul>
 
-    const colorStepsArray = [colorStepsPM1, colorStepsPM25, colorStepsPM10];
-
-    // Entnimmt direkt RGB-Farben aus colorSteps
-    function getColorForPM(value, colorSteps) {
-        if (isNaN(value)) {
-            // Grau (z. B. [128,128,128]) für ungültige Werte
-            return [128, 128, 128];
-        }
-        for (let i = 0; i < colorSteps.length - 1; i++) {
-            if (value >= colorSteps[i][0] && value < colorSteps[i + 1][0]) {
-                return colorSteps[i][1];
-            }
-        }
-        return colorSteps[colorSteps.length - 1][1];
-    }
-
-    function getMean(arr) {
-        let acc = 0, count = 0;
-        for (let i = 0; i < arr.length; i++) {
-            if (isNaN(arr[i])) continue;
-            acc += Number(arr[i]);
-            count++;
-        }
-        return count === 0 ? NaN : acc / count;
-    }
-
-    // Legendenerzeugung nimmt jetzt direkt die RGB-Farbwerte
-    function createLegend(pmTypeIndex, colorSteps) {
-        const legendDiv = document.getElementById('legend');
-        legendDiv.innerHTML = '';
-        for (let i = 0; i < colorSteps.length; i++) {
-            const from = colorSteps[i][0];
-            const to   = colorSteps[i + 1] ? colorSteps[i + 1][0] : '+';
-            const rgb  = colorSteps[i][1];  // [R,G,B]
-            const description = colorSteps[i][2];
-
-            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-
-            const item = document.createElement('div');
-            item.style.display = 'flex';
-            item.style.flexDirection = 'row';
-            item.style.alignItems = 'center';
-            item.style.marginBottom = '4px';
-
-            const colorBox = document.createElement('span');
-            colorBox.style.background = colorString;
-            colorBox.style.width = '18px';
-            colorBox.style.height = '18px';
-            colorBox.style.display = 'inline-block';
-            colorBox.style.marginRight = '8px';
-            colorBox.style.border = '1px solid #ccc';
-            colorBox.style.borderRadius = '50%';
-
-            const labelText = document.createElement('span');
-            labelText.innerHTML = `${from}${to !== '+' ? '&ndash;' + to : '+'} µg/m³ | <strong>${description}</strong>`;
-            labelText.style.fontSize = '0.8rem';
-
-            item.appendChild(colorBox);
-            item.appendChild(labelText);
-            legendDiv.appendChild(item);
-        }
-    }
-
-    // Auswahl-Event (Dropdown) zum Umschalten der PM-Werte
-    function showPM(selection) {
-        const pmTypeIndex = selection.selectedIndex; // 0: PM1, 1: PM2.5, 2: PM10
-        const colorSteps = colorStepsArray[pmTypeIndex];
-        addMarkerLayer(pmTypeIndex, colorSteps);
-        createLegend(pmTypeIndex, colorSteps);
-    }
-
-    // Leaflet-Karte (Ausschnitt, Tiles etc.) – dein vorhandener Code
-    var map = L.map('map').setView([{{ municipality.coordinates.1|stringformat:"f" }}, {{ municipality.coordinates.0|stringformat:"f" }}], 13);
-    const tiles = L.tileLayer('https://mapsneu.wien.gv.at/basemap/bmapgrau/{type}/google3857/{z}/{y}/{x}.{format}', {
-        maxZoom: 19,
-        attribution: 'Datenquelle: basemap.at',
-        type: 'normal',
-        format: 'png',
-        bounds: [[46.35877, 8.782379], [49.037872, 17.189532]]
-    }).addTo(map);
-
-    // Daten abrufen (Beispiel CSV) – dein vorhandener Code
-    var stationData = [];
-    async function fetchMarkerData() {
-        const api_url = "{{API_URL}}";
-        const response = await fetch(`${api_url}/station/current/all`);
-        stationData = [];
-        const text = await response.text();
-        const items = text.split("\n");
-
-        for (let row in items) {
-            if (items[row].length === 0 || row == 0) continue;
-            const data = items[row].split(",");
-            const [stationID, lat, lon, pm1, pm25, pm10] = data;
-            stationData.push({
-                stationID,
-                lat:  parseFloat(lat),
-                lon:  parseFloat(lon),
-                pm1:  parseFloat(pm1),
-                pm25: parseFloat(pm25),
-                pm10: parseFloat(pm10)
-            });
-        }
-    }
-
-    // Hauptaufruf
-    fetchMarkerData().then(() => {
-        // Standard: PM2.5
-        const defaultPmTypeIndex = 1;
-        const defaultColorSteps  = colorStepsArray[defaultPmTypeIndex];
-
-        addMarkerLayer(defaultPmTypeIndex, defaultColorSteps);
-        createLegend(defaultPmTypeIndex, defaultColorSteps);
-        createHeatmaps(); // z.B. falls du Heatmaps erstellst
-    });
-
-    var markerLayer;
-    function addMarkerLayer(pmTypeIndex, colorSteps) {
-        if (markerLayer != null) {
-            map.removeLayer(markerLayer);
-        }
-        markerLayer = L.markerClusterGroup({
-            iconCreateFunction: function (cluster) {
-                // Alle PM-Werte im Cluster für Mittelwert
-                const meanPM = getMean(cluster.getAllChildMarkers().map(marker => marker.pm));
-                const rgb    = getColorForPM(meanPM, colorSteps);
-                const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-
-                // Dynamische Textfarbe (hell/dunkel)
-                const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
-                const textColor  = brightness > 125 ? "black" : "white";
-                const displayValue = isNaN(meanPM) ? '' : meanPM.toFixed(1);
-
-                return L.divIcon({
-                    iconSize: [40, 40],
-                    className: '',
-                    html: `
-                        <div class="clickable"
-                             style="
-                                height: 3.5em;
-                                width: 3.5em;
-                                background-color: ${colorString};
-                                border-radius: 50%;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                font-size: 10pt;
-                                border: 1px solid white;
-                             ">
-                             <span style="color: ${textColor};">${displayValue}</span>
-                        </div>`
-                });
-            },
-            showCoverageOnHover: false,
-        });
-
-        const markerList = [];
-        for (let i = 0; i < stationData.length; i++) {
-            const station = stationData[i];
-            // Ermitteln, ob pm1, pm25 oder pm10
-            const pmValue = station[['pm1', 'pm25', 'pm10'][pmTypeIndex]];
-            const rgb     = getColorForPM(pmValue, colorSteps);
-            const colorString = `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-            const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
-            const textColor  = brightness > 125 ? "black" : "white";
-            const displayValue = isNaN(pmValue) ? '' : pmValue.toFixed(1);
-
-            const html = `
-                <a class="hiddenlink clickable" href="/stations/${station.stationID}">
-                    <div style="
-                        height: 3.5em;
-                        width: 3.5em;
-                        background-color: ${colorString};
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 10pt;
-                    ">
-                        <span style="color: ${textColor};">
-                            ${displayValue}
-                        </span>
-                    </div>
-                </a>`;
-
-            const marker = L.marker([station.lat, station.lon], {
-                icon: L.divIcon({
-                    iconSize: [40, 40],
-                    className: '',
-                    html: html
-                })
-            });
-            marker.pm = pmValue;
-            markerList.push(marker);
-        }
-
-        markerLayer.addLayers(markerList);
-        map.addLayer(markerLayer);
-    }
-
-</script>
+<div class="tab-content py-3" id="municipalityTabContent">
+  <div class="tab-pane fade show active" id="tab-current" role="tabpanel"
+    aria-labelledby="tab-current-btn" tabindex="0">
+    {% include "municipalities/partials/_tab_current.html" %}
+  </div>
+  <div class="tab-pane fade" id="tab-environment" role="tabpanel"
+    aria-labelledby="tab-environment-btn" tabindex="0">
+    {% include "municipalities/partials/_tab_environment.html" %}
+  </div>
+  <div class="tab-pane fade" id="tab-heat" role="tabpanel"
+    aria-labelledby="tab-heat-btn" tabindex="0">
+    {% include "municipalities/partials/_tab_heat.html" %}
+  </div>
+</div>
 {% endblock content %}
+
+{% block extra_js %}
+{% include "_eaqi_pm_color_steps.html" %}
+{{ map_config|json_script:"municipality-map-config" }}
+<script src="{% static 'js/municipality-detail.js' %}"></script>
+{% endblock extra_js %}
