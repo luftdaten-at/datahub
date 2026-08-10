@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'campaign.apps.CampaignConfig',
     'municipalities.apps.MunicipalitiesConfig',
     'context.apps.ContextConfig',
+    'surveys.apps.SurveysConfig',
     'devices.apps.DevicesConfig',
     'pages.apps.PagesConfig',
     'stations.apps.StationsConfig',

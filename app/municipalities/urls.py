@@ -2,6 +2,8 @@ from django.urls import path
 
 from .views import (
     FavoriteMunicipalityToggleView,
+    ManageMunicipalityListView,
+    ManageMunicipalitySyncView,
     MunicipalitiesApiOverviewView,
     MunicipalityAdminLocationUpdateView,
     municipality_detail_view,
@@ -10,6 +12,16 @@ from .views import (
 
 urlpatterns = [
     path("", municipalities_list_view, name="municipalities-list"),
+    path(
+        "manage/",
+        ManageMunicipalityListView.as_view(),
+        name="municipalities-manage-list",
+    ),
+    path(
+        "manage/sync/",
+        ManageMunicipalitySyncView.as_view(),
+        name="municipalities-manage-sync",
+    ),
     path(
         "admin/overview/",
         MunicipalitiesApiOverviewView.as_view(),

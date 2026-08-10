@@ -44,6 +44,7 @@ urlpatterns = [
     path('devices/', include('devices.urls')),
     path('stations/', include('stations.urls')),
     path('workshops/', include('workshops.urls')),
+    path('surveys/', include('surveys.urls')),
     path('organizations/', include('organizations.urls')),
     path('logs/', include('log_viewer_custom.urls')),
 ] + i18n_patterns(

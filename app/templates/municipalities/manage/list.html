@@ -1,0 +1,97 @@
+{% extends "_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Manage municipalities" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% trans 'Close' %}"></button>
+      </div>
+    {% endfor %}
+  {% endif %}
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h1 class="mb-0">{% trans "Local municipalities" %}</h1>
+    <form method="post" action="{% url 'municipalities-manage-sync' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-primary">{% trans "Import from API" %}</button>
+    </form>
+  </div>
+
+  <p class="text-muted">
+    {% trans "Mirrors api.luftdaten.at /city/all into the local database. For boundary matching and GIS edits, use Django Admin at /backend/." %}
+  </p>
+
+  <form method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-auto">
+      <label for="match_method" class="form-label">{% trans "Match status" %}</label>
+      <select name="match_method" id="match_method" class="form-select">
+        <option value="">{% trans "All" %}</option>
+        {% for value, label in match_method_choices %}
+        <option value="{{ value }}" {% if match_method_filter == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-outline-secondary">{% trans "Filter" %}</button>
+    </div>
+  </form>
+
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>{% trans "Name" %}</th>
+        <th>{% trans "Slug" %}</th>
+        <th>{% trans "Country" %}</th>
+        <th>{% trans "GKZ" %}</th>
+        <th>{% trans "Match" %}</th>
+        <th>{% trans "Boundary" %}</th>
+        <th>{% trans "Synced" %}</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for m in municipalities %}
+      <tr>
+        <td>{{ m.name }}</td>
+        <td><code>{{ m.slug }}</code></td>
+        <td>{{ m.country_code }}</td>
+        <td>{{ m.gkz|default:"—" }}</td>
+        <td>{{ m.get_match_method_display }}</td>
+        <td>{% if m.boundary %}✓{% else %}—{% endif %}</td>
+        <td>{{ m.synced_at|date:"Y-m-d H:i" }}</td>
+        <td>
+          <a href="{% url 'municipalities-detail' m.slug %}" class="btn btn-sm btn-outline-primary">{% trans "View" %}</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="8" class="text-muted">{% trans "No municipalities yet. Use Import from API." %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if is_paginated %}
+  <nav aria-label="{% trans 'Pagination' %}">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if match_method_filter %}&match_method={{ match_method_filter }}{% endif %}">{% trans "Previous" %}</a>
+      </li>
+      {% endif %}
+      <li class="page-item disabled">
+        <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      </li>
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if match_method_filter %}&match_method={{ match_method_filter }}{% endif %}">{% trans "Next" %}</a>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+</div>
+{% endblock %}

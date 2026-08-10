@@ -1,0 +1,258 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}{% trans "Edit survey" %}{% else %}{% trans "New survey" %}{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{% if object %}{% trans "Edit survey" %}{% else %}{% trans "New survey" %}{% endif %}</h1>
+
+  {% if object %}
+  <nav class="mb-3">
+    <a href="#questions">{% trans "Questions" %}</a> |
+    <a href="{% url 'surveys-manage-responses' object.pk %}">{% trans "Responses" %}</a>
+    {% if object.status == "published" %}
+    | <a href="{% url 'surveys-detail' object.slug %}" target="_blank" rel="noopener noreferrer">{% trans "View public form" %}</a>
+    {% endif %}
+  </nav>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <section id="questions">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">{% trans "Questions" %}</h2>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-primary" id="questionAddBtn">{% trans "Add question" %}</button>
+          <button type="button" class="btn btn-outline-primary" id="pageBreakAddBtn">{% trans "Add page break" %}</button>
+        </div>
+      </div>
+
+      <div id="survey-question-api"
+           class="visually-hidden"
+           aria-hidden="true"
+           data-create-url="{% url 'surveys-manage-questions-api' object.pk %}"
+           data-reorder-url="{% url 'surveys-manage-questions-reorder' object.pk %}"
+           data-detail-url-template="{% url 'surveys-manage-question-api' object.pk question_api_detail_placeholder_pk %}"
+           data-detail-pk-placeholder="{{ question_api_detail_placeholder_pk }}"
+           data-label-required="{% trans 'Required' %}"
+           data-label-edit="{% trans 'Edit' %}"
+           data-label-delete="{% trans 'Delete' %}"
+           data-label-drag-title="{% trans 'Drag to reorder' %}"
+           data-label-empty="{% trans 'No questions yet.' %}"
+           data-label-delete-confirm="{% trans 'Delete this question?' %}"
+           data-label-delete-failed="{% trans 'Delete failed' %}"
+           data-label-label-required="{% trans 'Label is required.' %}"
+           data-label-validation-failed="{% trans 'Validation failed' %}"
+           data-label-request-failed="{% trans 'Request failed' %}"
+           data-label-reorder-failed="{% trans 'Could not save order' %}"
+           data-label-page-break="{% trans 'Page break' %}"
+           data-label-page-break-hint="{% trans 'Optional page title for the following page' %}"
+           data-label-page-num="{% trans 'Page %(num)s' %}"
+           data-label-starts-page="{% trans 'Starts page %(num)s' %}"
+           data-label-pages-summary="{% trans '%(count)s page(s)' %}">
+      </div>
+      {{ questions_json|json_script:"survey-questions-json" }}
+
+      <p class="text-muted small mb-3">
+        {% blocktrans trimmed %}
+        Questions appear on the public survey form in this order. Drag to reorder.
+        Use <strong>Help text</strong> for optional guidance under the question label.
+        <strong>Range</strong>, <strong>Likert</strong>, <strong>Single choice</strong>, <strong>Multiple choice</strong>, and <strong>Map points</strong> show type-specific settings in the modal.
+        Use <strong>Page break</strong> (or the Add page break button) to split the public form into multiple pages.
+        Map point questions define their own categories in the question modal; upload a survey boundary before publishing.
+        {% endblocktrans %}
+      </p>
+
+      <p class="text-muted small mb-2" id="surveyPagesSummary">{% if questions %}{% blocktrans with count=question_page_count %}{{ count }} page(s){% endblocktrans %}{% endif %}</p>
+
+      <div id="surveyQuestionsList" class="list-group mb-3">
+        {% for q in questions %}
+        <div class="list-group-item question-item d-flex align-items-start gap-2{% if q.question_type == 'page_break' %} question-page-break border border-2 border-dashed{% endif %}"
+             data-question-id="{{ q.id }}"
+             data-question-type="{{ q.question_type }}">
+          <span class="question-drag-handle text-muted pt-1" title="{% trans 'Drag to reorder' %}" aria-hidden="true">⋮⋮</span>
+          <div class="flex-grow-1">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+              <span class="badge {% if q.question_type == 'page_break' %}text-bg-info{% else %}text-bg-secondary{% endif %}">{{ q.get_question_type_display }}</span>
+              {% if q.question_type == "page_break" %}
+              <span class="badge text-bg-light border question-page-badge">{% blocktrans with num=q.page_number %}Starts page {{ num }}{% endblocktrans %}</span>
+              {% else %}
+              <span class="badge text-bg-light border question-page-badge">{% blocktrans with num=q.page_number %}Page {{ num }}{% endblocktrans %}</span>
+              {% endif %}
+              {% if q.required %}<span class="badge text-bg-warning">{% trans "Required" %}</span>{% endif %}
+            </div>
+            <div class="fw-semibold">{% if q.label %}{{ q.label }}{% elif q.question_type == 'page_break' %}{% trans "Page break" %}{% endif %}</div>
+            {% if q.help_text %}<div class="small text-muted">{{ q.help_text }}</div>{% endif %}
+          </div>
+          <div class="btn-group btn-group-sm">
+            <button type="button" class="btn btn-outline-secondary question-edit-btn" data-question-id="{{ q.id }}">{% trans "Edit" %}</button>
+            <button type="button" class="btn btn-outline-danger question-delete-btn" data-question-id="{{ q.id }}">{% trans "Delete" %}</button>
+          </div>
+        </div>
+        {% empty %}
+        <div id="surveyQuestionsEmpty" class="text-muted py-3">{% trans "No questions yet." %}</div>
+        {% endfor %}
+      </div>
+      </section>
+    </div>
+
+    <div class="col-lg-5">
+      <h2 class="h5 mb-3">{% trans "Survey details" %}</h2>
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+        <a href="{% url 'surveys-manage-list' %}" class="btn btn-outline-secondary">{% trans "Back" %}</a>
+      </form>
+
+      <div class="mt-4">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="text-muted small">{% trans "Status" %}:</span>
+          <span class="badge bg-secondary">{{ object.get_status_display }}</span>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+        {% if object.status == "draft" %}
+        <form method="post" action="{% url 'surveys-manage-publish' object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">{% trans "Publish" %}</button>
+        </form>
+        {% endif %}
+        {% if object.status == "published" %}
+        <form method="post" action="{% url 'surveys-manage-close' object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-warning">{% trans "Close survey" %}</button>
+        </form>
+        <form method="post" action="{% url 'surveys-manage-unpublish' object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-secondary">{% trans "Unpublish" %}</button>
+        </form>
+        {% endif %}
+        {% if object.status == "closed" %}
+        <form method="post" action="{% url 'surveys-manage-reopen' object.pk %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">{% trans "Reopen" %}</button>
+        </form>
+        {% endif %}
+        </div>
+      </div>
+      {% if object.boundary %}
+      <p class="text-success small mt-2">{% trans "Boundary is set." %}</p>
+      {% else %}
+      <p class="text-warning small mt-2">{% trans "Upload a boundary before publishing." %}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="modal fade" id="questionModal" tabindex="-1" aria-labelledby="questionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title h5" id="questionModalLabel"
+              data-add-title="{% trans 'Add question' %}"
+              data-edit-title="{% trans 'Edit question' %}">{% trans "Add question" %}</h2>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% trans 'Close' %}"></button>
+        </div>
+        <div class="modal-body">
+          <div id="questionFormError" class="alert alert-danger d-none" role="alert"></div>
+          <div class="mb-3">
+            <label for="questionTypeInput" class="form-label">{% trans "Type" %}</label>
+            <select id="questionTypeInput" class="form-select">
+              {% for value, label in question_type_choices %}
+              <option value="{{ value }}">{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="questionLabelInput" class="form-label">{% trans "Label" %}</label>
+            <input type="text" id="questionLabelInput" class="form-control">
+            <div class="form-text" id="questionLabelHelp"></div>
+          </div>
+          <div class="mb-3" id="questionHelpRow">
+            <label for="questionHelpInput" class="form-label">{% trans "Help text" %}</label>
+            <input type="text" id="questionHelpInput" class="form-control">
+            <div class="form-text">{% trans "Optional hint shown to respondents below the question label." %}</div>
+          </div>
+          <div class="form-check mb-3" id="questionRequiredRow">
+            <input type="checkbox" id="questionRequiredInput" class="form-check-input">
+            <label for="questionRequiredInput" class="form-check-label">{% trans "Required" %}</label>
+          </div>
+          <div id="questionConfigPanel">
+            <div id="configRange" class="question-config-section d-none">
+              <div class="row g-2">
+                <div class="col-6">
+                  <label for="configRangeMin" class="form-label">{% trans "Min" %}</label>
+                  <input type="number" id="configRangeMin" class="form-control" value="0" step="any">
+                </div>
+                <div class="col-6">
+                  <label for="configRangeMax" class="form-label">{% trans "Max" %}</label>
+                  <input type="number" id="configRangeMax" class="form-control" value="10" step="any">
+                </div>
+              </div>
+              <div class="form-text">{% trans "Lower and upper bounds for the range slider." %}</div>
+            </div>
+            <div id="configLikert" class="question-config-section d-none">
+              <label for="configLikertScale" class="form-label">{% trans "Scale (1 to N)" %}</label>
+              <input type="number" id="configLikertScale" class="form-control" value="5" min="1">
+              <div class="form-text">{% trans "Number of options on the Likert scale (1 through N)." %}</div>
+            </div>
+            <div id="configChoiceOptions" class="question-config-section d-none">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">{% trans "Options" %}</label>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="choiceOptionAddBtn">{% trans "Add option" %}</button>
+              </div>
+              <div id="choiceOptionsEditor" class="mb-2"></div>
+              <div class="form-text">{% trans "Define at least two answer options for single-choice and multiple-choice questions." %}</div>
+            </div>
+            <div id="configMapPoints" class="question-config-section d-none">
+              <label for="configMapMaxPoints" class="form-label">{% trans "Max points" %}</label>
+              <input type="number" id="configMapMaxPoints" class="form-control" value="50" min="1">
+              <div class="form-text mb-3">{% trans "Maximum number of map points a respondent may place." %}</div>
+              <label class="form-label">{% trans "Category" %}</label>
+              <div id="mapCategoriesEditor" class="mb-2"></div>
+              <div class="form-text mb-3">{% trans "Define the category for points on this map question (key, label, color)." %}</div>
+              <hr class="my-3">
+              <label class="form-label">{% trans "Point detail choices" %}</label>
+              <div class="form-text mb-2">{% trans "Optional list shown in a map popup after placing a point. Leave options empty to disable." %}</div>
+              <label for="configMapPointChoicesMode" class="form-label">{% trans "Selection mode" %}</label>
+              <select id="configMapPointChoicesMode" class="form-select mb-2">
+                <option value="single">{% trans "Single choice" %}</option>
+                <option value="multiple">{% trans "Multiple choice" %}</option>
+              </select>
+              <label for="configMapPointChoicesHelp" class="form-label">{% trans "Helper text" %}</label>
+              <input type="text" id="configMapPointChoicesHelp" class="form-control mb-2" maxlength="500">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label mb-0">{% trans "Options" %}</label>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="mapPointChoiceAddBtn">{% trans "Add option" %}</button>
+              </div>
+              <div id="mapPointChoicesEditor" class="mb-2"></div>
+              <div class="form-text">{% trans "Define at least two options when point detail choices are enabled." %}</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">{% trans "Cancel" %}</button>
+          <button type="button" class="btn btn-primary" id="questionSaveBtn">{% trans "Save question" %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <form method="post" enctype="multipart/form-data" class="mt-3">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+    <a href="{% url 'surveys-manage-list' %}" class="btn btn-outline-secondary">{% trans "Back" %}</a>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if object %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" crossorigin="anonymous"></script>
+<script src="{% static 'js/survey-manage-edit.js' %}"></script>
+{% endif %}
+{% endblock extra_js %}
