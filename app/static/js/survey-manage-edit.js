@@ -187,7 +187,7 @@
             return { scale: parseInt(configLikertScale.value, 10) };
         }
         if (isChoiceType(type)) {
-            return { options: readOptionsFromEditor() };
+            return { options: readOptionsFromEditor(choiceOptionsEditor) };
         }
         if (type === TYPE_MAP_POINTS) {
             const config = {
