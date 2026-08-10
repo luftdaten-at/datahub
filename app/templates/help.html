@@ -134,7 +134,7 @@
 
 {% block extra_js %}
 {% if can_edit_faq %}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js" crossorigin="anonymous"></script>
+<script src="{% static 'js/Sortable.min.js' %}"></script>
 <script src="{% static 'js/help-faq-edit.js' %}"></script>
 {% endif %}
 {% endblock extra_js %}

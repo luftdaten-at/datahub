@@ -29,6 +29,7 @@ from municipalities.views import cities_legacy_redirect
 urlpatterns = [
     path('campaign/admin/jsi18n/', JavaScriptCatalog.as_view(), name='javascript-catalog'),  # Add this line
     path('robots.txt', RedirectView.as_view(url=settings.STATIC_URL + "robots.txt", permanent=True)),
+    path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + "favicon.ico", permanent=True)),
     # Django admin
     path('backend/', admin.site.urls),
     # User management
