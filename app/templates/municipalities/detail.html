@@ -88,7 +88,9 @@
 {% endblock content %}
 
 {% block extra_js %}
+<script>
 {% include "_eaqi_pm_color_steps.html" %}
+</script>
 {{ map_config|json_script:"municipality-map-config" }}
 <script src="{% static 'js/municipality-detail.js' %}"></script>
 {% endblock extra_js %}

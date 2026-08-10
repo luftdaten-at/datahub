@@ -25,6 +25,18 @@ from context.services import get_municipality_context
 
 from .models import FavoriteMunicipality
 
+AUSTRIA_REGIONS_GEOJSON_PATH = (
+    settings.BASE_DIR / "static" / "img" / "laender_999_geo.json"
+)
+
+
+def _load_austria_regions_geojson():
+    try:
+        with AUSTRIA_REGIONS_GEOJSON_PATH.open(encoding="utf-8") as geo_file:
+            return json.load(geo_file)
+    except (OSError, json.JSONDecodeError, TypeError):
+        return None
+
 
 def cities_legacy_redirect(request, remainder=None):
     """Permanent redirect from old /cities/... URLs to /municipalities/..."""
@@ -289,6 +301,9 @@ def municipalities_list_view(request):
         "empty_local": _(
             "No municipalities in the local database yet. Staff can import them from the API."
         ),
+        "map_regions_unavailable": _(
+            "Could not load the map outline for this page."
+        ),
     }
 
     translations_json = json.dumps(translations)
@@ -300,6 +315,7 @@ def municipalities_list_view(request):
             "translations_json": translations_json,
             "municipality_detail_url_template": detail_url_template,
             "municipalities_payload": municipalities_payload,
+            "austria_geojson": _load_austria_regions_geojson(),
         },
     )
 
