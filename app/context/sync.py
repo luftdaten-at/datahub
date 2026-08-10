@@ -5,7 +5,7 @@ from __future__ import annotations
 from django.contrib.gis.geos import Point
 
 from municipalities.luftdaten_city_admin import COUNTRY_SLUG_TO_ISO
-from municipalities.views import load_city_registry_cities
+from municipalities.city_registry import load_city_registry_cities
 
 from .models import Municipality
 

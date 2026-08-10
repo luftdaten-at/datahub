@@ -1,0 +1,164 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ survey.title }}{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'css/leaflet.css' %}" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="{% static 'js/leaflet.js' %}" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  .survey-form-row {
+    min-height: calc(100vh - 12rem);
+  }
+  .survey-map-column {
+    min-height: calc(100vh - 12rem);
+  }
+  #survey-map-panel {
+    min-height: calc(100vh - 12rem);
+  }
+  #survey-boundary-overview {
+    width: 100%;
+    height: 100%;
+    min-height: calc(100vh - 12rem);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4 px-3 px-lg-4">
+  {% if not accepting %}
+  <h1>{{ survey.title }}</h1>
+  <div class="alert alert-warning">{% trans "This survey is not currently accepting responses." %}</div>
+  {% else %}
+  <form method="post" action="{% url 'surveys-submit' survey.slug %}" id="survey-form">
+    {% csrf_token %}
+    <div class="visually-hidden" aria-hidden="true">
+      <label for="website">Website</label>
+      <input type="text" name="website" id="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="row g-4 survey-form-row">
+      <div class="col-lg-5">
+        <h1>{{ survey.title }}</h1>
+        <div id="survey-pages">
+          {% for page in survey_pages %}
+          <div class="survey-page{% if not forloop.first %} d-none{% endif %}" data-page-index="{{ forloop.counter0 }}">
+            {% if forloop.first and survey.description %}
+            <div class="mb-4 survey-description">{{ survey.description }}</div>
+            {% endif %}
+            {% if page.title %}
+            <h2 class="h5 mb-3">{{ page.title }}</h2>
+            {% endif %}
+
+            {% for question in page.questions %}
+            <div class="mb-4 survey-question{% if question.question_type == 'map_points' %} survey-question-map{% endif %}"
+                 data-question-type="{{ question.question_type }}"
+                 data-question-id="{{ question.id }}">
+              <label class="form-label fw-semibold"{% if question.question_type != "single_choice" and question.question_type != "multiple_choice" %} for="q_{{ question.id }}"{% endif %}>
+                {{ question.label }}{% if question.required %} *{% endif %}
+              </label>
+              {% if question.help_text %}
+              <div class="form-text">{{ question.help_text }}</div>
+              {% endif %}
+
+              {% if question.question_type == "text" %}
+              <textarea class="form-control" name="q_{{ question.id }}" id="q_{{ question.id }}" rows="3"
+                {% if question.required %}required{% endif %}></textarea>
+
+              {% elif question.question_type == "range" %}
+              <input type="range" class="form-range" name="q_{{ question.id }}" id="q_{{ question.id }}"
+                min="{{ question.config.min|default:0 }}" max="{{ question.config.max|default:10 }}"
+                step="{{ question.config.step|default:1 }}"
+                {% if question.required %}required{% endif %}>
+              <output for="q_{{ question.id }}" class="small text-muted"></output>
+
+              {% elif question.question_type == "likert" %}
+              <select class="form-select" name="q_{{ question.id }}" id="q_{{ question.id }}"
+                {% if question.required %}required{% endif %}>
+                <option value="">—</option>
+                {% for n in "1234567890"|make_list %}
+                {% if forloop.counter <= question.config.scale|default:5 %}
+                <option value="{{ forloop.counter }}">{{ forloop.counter }}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+
+              {% elif question.question_type == "single_choice" %}
+              <fieldset class="mb-0">
+                <legend class="visually-hidden">{{ question.label }}</legend>
+                {% for option in question.config.options %}
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="q_{{ question.id }}"
+                         id="q_{{ question.id }}_{{ forloop.counter0 }}" value="{{ option }}"
+                         {% if question.required %}required{% endif %}>
+                  <label class="form-check-label" for="q_{{ question.id }}_{{ forloop.counter0 }}">{{ option }}</label>
+                </div>
+                {% endfor %}
+              </fieldset>
+
+              {% elif question.question_type == "multiple_choice" %}
+              <fieldset class="mb-0">
+                <legend class="visually-hidden">{{ question.label }}</legend>
+                {% for option in question.config.options %}
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="q_{{ question.id }}"
+                         id="q_{{ question.id }}_{{ forloop.counter0 }}" value="{{ option }}">
+                  <label class="form-check-label" for="q_{{ question.id }}_{{ forloop.counter0 }}">{{ option }}</label>
+                </div>
+                {% endfor %}
+              </fieldset>
+
+              {% elif question.question_type == "map_points" %}
+              <input type="hidden" name="q_{{ question.id }}" id="q_{{ question.id }}" value="[]">
+              <div id="points-list-q-{{ question.id }}" class="small mb-2"></div>
+              <p class="form-text">{% trans "Click on the map on the right to add points for this question." %}</p>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% empty %}
+          <p class="text-muted">{% trans "This survey has no questions yet." %}</p>
+          {% endfor %}
+        </div>
+
+        {% if survey_pages %}
+        <div id="survey-page-nav" class="d-flex align-items-center gap-2 mt-4">
+          <button type="button" id="survey-page-back" class="btn btn-outline-secondary d-none">{% trans "Back" %}</button>
+          <span id="survey-page-indicator" class="text-muted small flex-grow-1"></span>
+          <button type="button" id="survey-page-next" class="btn btn-primary">{% trans "Next" %}</button>
+          <button type="submit" id="survey-page-submit" class="btn btn-primary d-none">{% trans "Submit response" %}</button>
+        </div>
+        {% endif %}
+      </div>
+
+      {% if has_boundary %}
+      <div class="col-lg-7 d-flex flex-column survey-map-column">
+        <div id="survey-map-panel" class="flex-grow-1 d-flex flex-column">
+          <select id="survey-active-map-question" class="form-select form-select-sm w-auto align-self-end mb-2 d-none"></select>
+          <div id="survey-boundary-overview" class="border rounded flex-grow-1"></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if accepting %}
+{{ map_config|json_script:"survey-map-config" }}
+<div id="survey-form-ui"
+     class="visually-hidden"
+     aria-hidden="true"
+     data-label-back="{% trans 'Back' %}"
+     data-label-next="{% trans 'Next' %}"
+     data-label-page="{% trans 'Page %(current)s of %(total)s' %}"
+     data-label-max-points="{% trans 'Maximum %(max)s points allowed.' %}"
+     data-label-active-question="{% trans 'Placing points for: %(label)s' %}"
+     data-label-no-selection="{% trans 'No selection yet' %}">
+</div>
+<script src="{% static 'js/survey-form.js' %}"></script>
+{% endif %}
+{% endblock %}

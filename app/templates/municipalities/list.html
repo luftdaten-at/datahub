@@ -115,6 +115,8 @@
 
 </div>
 
+{{ municipalities_payload|json_script:"municipality-list-data" }}
+
 <script>
     const API_URL = "{{ API_URL }}";
     const municipalityDetailUrlTemplate = "{{ municipality_detail_url_template|escapejs }}";
@@ -151,48 +153,49 @@
         hideMunicipalitiesMapLoading();
     }
 
+    function loadLocalMunicipalities() {
+        var dataEl = document.getElementById("municipality-list-data");
+        if (!dataEl) {
+            return [];
+        }
+        try {
+            return JSON.parse(dataEl.textContent);
+        } catch (err) {
+            console.error("Failed to parse municipality list data:", err);
+            return [];
+        }
+    }
+
+    async function loadStatisticsTopCities() {
+        try {
+            var statsRes = await fetch(API_URL + "/statistics/", { credentials: "omit" });
+            if (!statsRes.ok) {
+                return [];
+            }
+            var statsData = await statsRes.json();
+            if (statsData.distribution && statsData.distribution.top_cities) {
+                return statsData.distribution.top_cities;
+            }
+        } catch (parseErr) {
+            /* ignore statistics errors */
+        }
+        return [];
+    }
+
     async function loadMunicipalitiesPageData() {
         clearMunicipalitiesListError();
-        var citiesRes;
-        var statsRes;
-        try {
-            var pair = await Promise.all([
-                fetch(API_URL + "/city/all", { credentials: "omit" }),
-                fetch(API_URL + "/statistics/", { credentials: "omit" }),
-            ]);
-            citiesRes = pair[0];
-            statsRes = pair[1];
-        } catch (err) {
-            showMunicipalitiesListError("There was an error fetching the municipality data.");
-            throw err;
-        }
-        if (!citiesRes.ok) {
-            var msg =
-                citiesRes.status === 404
-                    ? "There was an error fetching the municipality data: 404."
-                    : "There was an error fetching the municipality data.";
-            showMunicipalitiesListError(msg);
-            throw new Error(msg);
-        }
-        var data = await citiesRes.json();
-        var municipalities = data.cities || [];
+        var municipalities = loadLocalMunicipalities();
         municipalities.sort(function (a, b) {
             return String(a.name || "")
                 .toLowerCase()
                 .localeCompare(String(b.name || "").toLowerCase());
         });
 
-        var topMunicipalities = [];
-        if (statsRes.ok) {
-            try {
-                var statsData = await statsRes.json();
-                if (statsData.distribution && statsData.distribution.top_cities) {
-                    topMunicipalities = statsData.distribution.top_cities;
-                }
-            } catch (parseErr) {
-                /* same as server: ignore statistics parse errors */
-            }
+        if (municipalities.length === 0) {
+            showMunicipalitiesListError(translations.empty_local);
         }
+
+        var topMunicipalities = await loadStatisticsTopCities();
         return { municipalities: municipalities, topMunicipalities: topMunicipalities };
     }
 

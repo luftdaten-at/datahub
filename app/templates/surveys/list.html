@@ -1,0 +1,26 @@
+{% extends "_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Surveys" %}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{% trans "Surveys" %}</h1>
+  <p class="text-muted">{% trans "Participate in spatial surveys linked to municipalities." %}</p>
+  <div class="list-group">
+    {% for survey in surveys %}
+    <a href="{% url 'surveys-detail' survey.slug %}" class="list-group-item list-group-item-action">
+      <div class="d-flex w-100 justify-content-between">
+        <h5 class="mb-1">{{ survey.title }}</h5>
+        <small>{{ survey.municipality.name }}</small>
+      </div>
+      {% if survey.description %}
+      <p class="mb-1 text-muted small">{{ survey.description|truncatewords:30 }}</p>
+      {% endif %}
+    </a>
+    {% empty %}
+    <p class="text-muted">{% trans "No surveys are currently open." %}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

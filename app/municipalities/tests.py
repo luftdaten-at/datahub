@@ -6,8 +6,8 @@ from django.test import TestCase, override_settings
 from django.urls import resolve, reverse
 
 from municipalities.models import FavoriteMunicipality
+from municipalities.city_registry import CITY_ALL_CACHE_KEY
 from municipalities.views import (
-    CITY_ALL_CACHE_KEY,
     MunicipalitiesApiOverviewView,
     MunicipalityAdminLocationUpdateView,
 )
@@ -436,3 +436,89 @@ class MunicipalityDetailContextTests(TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "No evaluable satellite heat data")
         self.assertNotContains(r, "Urban heat island (day)")
+
+
+class ManageMunicipalityTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.staff = User.objects.create_user(
+            username="staff",
+            email="staff@test.com",
+            password="testpass123",
+            is_staff=True,
+        )
+        self.regular = User.objects.create_user(
+            username="user",
+            email="user@test.com",
+            password="testpass123",
+        )
+        self.manage_url = reverse("municipalities-manage-list")
+        self.sync_url = reverse("municipalities-manage-sync")
+
+    def test_non_staff_get_manage_forbidden(self):
+        self.client.login(username="user", password="testpass123")
+        r = self.client.get(self.manage_url)
+        self.assertEqual(r.status_code, 403)
+
+    def test_staff_get_manage_ok(self):
+        self.client.login(username="staff", password="testpass123")
+        r = self.client.get(self.manage_url)
+        self.assertEqual(r.status_code, 200)
+        self.assertTemplateUsed(r, "municipalities/manage/list.html")
+
+    @patch("context.sync.sync_municipalities_from_api")
+    def test_staff_post_sync_redirects_with_message(self, mock_sync):
+        mock_sync.return_value = (2, 5, None)
+        self.client.login(username="staff", password="testpass123")
+        r = self.client.post(self.sync_url, follow=True)
+        self.assertEqual(r.status_code, 200)
+        mock_sync.assert_called_once()
+        self.assertContains(r, "2 created")
+        self.assertContains(r, "5 updated")
+
+    @patch("context.sync.sync_municipalities_from_api")
+    def test_staff_post_sync_shows_error(self, mock_sync):
+        mock_sync.return_value = (0, 0, "API unavailable")
+        self.client.login(username="staff", password="testpass123")
+        r = self.client.post(self.sync_url, follow=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "API unavailable")
+
+
+class MunicipalitiesListLocalTests(TestCase):
+    @patch("municipalities.views.requests.get")
+    def test_public_list_uses_local_db_not_city_all(self, mock_get):
+        from context.models import Municipality
+        from django.contrib.gis.geos import Point
+
+        Municipality.objects.create(
+            slug="graz",
+            name="Graz",
+            country_code="AT",
+            centroid=Point(15.44, 47.07, srid=4326),
+        )
+
+        r = self.client.get(reverse("municipalities-list"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "municipality-list-data")
+        self.assertContains(r, "Graz")
+        self.assertContains(r, "graz")
+        mock_get.assert_not_called()
+
+
+class StaffNavbarTests(TestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.staff = User.objects.create_user(
+            username="staffnav",
+            email="staffnav@test.com",
+            password="testpass123",
+            is_staff=True,
+        )
+
+    def test_staff_nav_shows_surveys_manage_link(self):
+        self.client.login(username="staffnav", password="testpass123")
+        r = self.client.get(reverse("municipalities-list"))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, reverse("surveys-manage-list"))
+        self.assertContains(r, reverse("municipalities-manage-list"))

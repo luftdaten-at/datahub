@@ -1,0 +1,38 @@
+{% extends "_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Responses" %} — {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{% trans "Responses" %}: {{ survey.title }}</h1>
+  <p>
+    <a href="{% url 'surveys-manage-edit' survey.pk %}">{% trans "Back to survey" %}</a> |
+    <a href="{% url 'surveys-manage-responses-export' survey.pk %}">{% trans "Export CSV" %}</a>
+  </p>
+
+  {% for resp in responses %}
+  <div class="card mb-3">
+    <div class="card-header">
+      #{{ resp.pk }} — {{ resp.submitted_at }}
+      {% if resp.user %} ({{ resp.user.username }}){% else %} ({% trans "anonymous" %}){% endif %}
+    </div>
+    <div class="card-body small">
+      {% for answer in resp.answers.all %}
+      <p><strong>{{ answer.question.label }}:</strong>
+        {% if answer.text_value %}{{ answer.text_value }}{% else %}{{ answer.number_value }}{% endif %}
+      </p>
+      {% endfor %}
+      {% for pt in resp.map_points.all %}
+      <p><strong>{{ pt.question.label }}:</strong>
+        {{ pt.category.label }} @ {{ pt.location.y|floatformat:5 }}, {{ pt.location.x|floatformat:5 }}
+        {% if pt.comment %} — {{ pt.comment }}{% endif %}
+      </p>
+      {% endfor %}
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-muted">{% trans "No responses yet." %}</p>
+  {% endfor %}
+</div>
+{% endblock %}

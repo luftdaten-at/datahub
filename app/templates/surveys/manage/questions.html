@@ -1,0 +1,44 @@
+{% extends "_base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% trans "Questions" %} — {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1>{% trans "Questions" %}: {{ survey.title }}</h1>
+  <p><a href="{% url 'surveys-manage-edit' survey.pk %}">{% trans "Back to survey" %}</a></p>
+
+  <table class="table table-sm mt-3">
+    <thead>
+      <tr><th>#</th><th>{% trans "Type" %}</th><th>{% trans "Label" %}</th><th>{% trans "Required" %}</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for q in questions %}
+      <tr>
+        <td>{{ q.order }}</td>
+        <td>{{ q.get_question_type_display }}</td>
+        <td>{{ q.label }}</td>
+        <td>{% if q.required %}✓{% endif %}</td>
+        <td>
+          <form method="post" class="d-inline">
+            {% csrf_token %}
+            <input type="hidden" name="delete_id" value="{{ q.id }}">
+            <button type="submit" class="btn btn-sm btn-outline-danger">{% trans "Delete" %}</button>
+          </form>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="text-muted">{% trans "No questions yet." %}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <h2 class="h5 mt-4">{% trans "Add question" %}</h2>
+  <form method="post">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="submit" class="btn btn-primary">{% trans "Add" %}</button>
+  </form>
+</div>
+{% endblock %}

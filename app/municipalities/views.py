@@ -10,10 +10,12 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views import View
-from django.views.generic import TemplateView
+from django.views.generic import ListView, TemplateView
 
+from context.models import Municipality
 from main.enums import Dimension
 
+from .city_registry import CITY_ALL_CACHE_KEY, load_city_registry_cities
 from .luftdaten_city_admin import (
     CityAdminUpdateError,
     country_code_for_country_slug,
@@ -22,66 +24,6 @@ from .luftdaten_city_admin import (
 from context.services import get_municipality_context
 
 from .models import FavoriteMunicipality
-
-CITY_ALL_CACHE_KEY = "city_all_data"
-
-
-def load_city_registry_cities():
-    """Return (cities, error_message). Caches successful fetches."""
-    cities = cache.get(CITY_ALL_CACHE_KEY)
-    if cities is not None:
-        return cities, None
-    try:
-        response = requests.get(
-            f"{settings.API_URL}/city/all",
-            timeout=settings.LUFTDATEN_API_REQUEST_TIMEOUT,
-        )
-        response.raise_for_status()
-        cities = _normalize_cities_from_api(response.json())
-        cache.set(
-            CITY_ALL_CACHE_KEY,
-            cities,
-            settings.LUFTDATEN_API_JSON_CACHE_TTL,
-        )
-        return cities, None
-    except (
-        requests.exceptions.RequestException,
-        ValueError,
-        TypeError,
-    ) as exc:
-        return [], str(exc)
-
-
-def _normalize_cities_from_api(payload):
-    """Turn /city/all JSON into rows for the admin overview template."""
-    raw = payload.get("cities", []) if isinstance(payload, dict) else []
-    cities = []
-    for item in raw:
-        if not isinstance(item, dict):
-            continue
-        loc = item.get("location") or {}
-        if not isinstance(loc, dict):
-            loc = {}
-        country = item.get("country") or {}
-        if not isinstance(country, dict):
-            country = {}
-        country_slug = country.get("slug") or ""
-        cities.append(
-            {
-                "id": item.get("id"),
-                "name": item.get("name") or "",
-                "slug": item.get("slug") or "",
-                "country_name": country.get("name") or "",
-                "country_slug": country_slug,
-                "latitude": loc.get("latitude"),
-                "longitude": loc.get("longitude"),
-                "country_filter": country_slug,
-            }
-        )
-    cities.sort(
-        key=lambda c: ((c["name"] or c["slug"] or "").lower(), c["slug"] or "")
-    )
-    return cities
 
 
 def cities_legacy_redirect(request, remainder=None):
@@ -321,6 +263,22 @@ def municipalities_list_view(request):
         "municipalities-detail", kwargs={"pk": "__SLUG__"}
     )
 
+    municipalities_payload = [
+        {
+            "name": m.name,
+            "slug": m.slug,
+            "country": {
+                "name": m.country_code,
+                "slug": m.country_code.lower(),
+            },
+            "location": {
+                "latitude": m.centroid.y if m.centroid else None,
+                "longitude": m.centroid.x if m.centroid else None,
+            },
+        }
+        for m in Municipality.objects.order_by("name")
+    ]
+
     translations = {
         "municipalities_with_most_stations": _(
             "Municipalities with most stations"
@@ -328,6 +286,9 @@ def municipalities_list_view(request):
         "country": _("Country"),
         "stations": _("Stations"),
         "view_details": _("View Details"),
+        "empty_local": _(
+            "No municipalities in the local database yet. Staff can import them from the API."
+        ),
     }
 
     translations_json = json.dumps(translations)
@@ -338,5 +299,52 @@ def municipalities_list_view(request):
         {
             "translations_json": translations_json,
             "municipality_detail_url_template": detail_url_template,
+            "municipalities_payload": municipalities_payload,
         },
     )
+
+
+class StaffRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff
+
+
+class ManageMunicipalityListView(StaffRequiredMixin, ListView):
+    model = Municipality
+    template_name = "municipalities/manage/list.html"
+    context_object_name = "municipalities"
+    paginate_by = 50
+
+    def get_queryset(self):
+        qs = Municipality.objects.order_by("name")
+        match_method = self.request.GET.get("match_method")
+        if match_method:
+            qs = qs.filter(match_method=match_method)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["match_method_filter"] = self.request.GET.get("match_method", "")
+        context["match_method_choices"] = Municipality.MATCH_CHOICES
+        return context
+
+
+class ManageMunicipalitySyncView(StaffRequiredMixin, View):
+    http_method_names = ["post"]
+
+    def post(self, request):
+        from context.sync import sync_municipalities_from_api
+
+        created, updated, error = sync_municipalities_from_api()
+        if error:
+            messages.error(
+                request,
+                _("Sync failed: %(error)s") % {"error": error},
+            )
+        else:
+            messages.success(
+                request,
+                _("Synced municipalities: %(created)s created, %(updated)s updated.")
+                % {"created": created, "updated": updated},
+            )
+        return redirect("municipalities-manage-list")

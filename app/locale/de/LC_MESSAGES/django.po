@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-13 18:26+0200\n"
+"POT-Creation-Date: 2026-08-10 09:54+0200\n"
 "PO-Revision-Date: 2026-03-21 16:46+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -19,7 +19,7 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 3.9\n"
 
-#: accounts/dashboard_air.py:122 templates/home.html:373
+#: accounts/dashboard_air.py:122 templates/home.html:350
 #: templates/stations/detail.html:24
 msgid "Station"
 msgstr "Station"
@@ -108,6 +108,7 @@ msgstr ""
 #: templates/devices/air_stations_overview.html:128
 #: templates/devices/detail.html:49 templates/devices/list.html:70
 #: templates/devices/my.html:13 templates/municipalities/admin_overview.html:76
+#: templates/municipalities/manage/list.html:45
 msgid "Name"
 msgstr "Name"
 
@@ -153,7 +154,7 @@ msgid "The API key must be at least %(min)d characters long."
 msgstr ""
 
 #: devices/luftdaten_station_apikey.py:41
-#: municipalities/luftdaten_city_admin.py:66 municipalities/views.py:189
+#: municipalities/luftdaten_city_admin.py:66 municipalities/views.py:153
 msgid "Luftdaten admin API key is not configured on this server."
 msgstr ""
 
@@ -229,11 +230,11 @@ msgstr "Sie sind nicht berechtigt, dieses Gerät zu löschen."
 msgid "All Levels"
 msgstr "Alle Stufen"
 
-#: main/settings.py:203
+#: main/settings.py:205
 msgid "English"
 msgstr "Englisch"
 
-#: main/settings.py:204
+#: main/settings.py:206
 msgid "German"
 msgstr "Deutsch"
 
@@ -256,72 +257,89 @@ msgstr ""
 msgid "City update was rejected by api.luftdaten.at."
 msgstr ""
 
-#: municipalities/views.py:195
+#: municipalities/views.py:159
 msgid "Missing city identifier."
 msgstr ""
 
-#: municipalities/views.py:201
+#: municipalities/views.py:165
 #, fuzzy
 #| msgid "Invalid station."
 msgid "Invalid latitude or longitude."
 msgstr "Ungültige Station."
 
-#: municipalities/views.py:204
+#: municipalities/views.py:168
 msgid "Latitude and longitude are out of range."
 msgstr ""
 
-#: municipalities/views.py:210
+#: municipalities/views.py:174
 msgid "City not found in registry."
 msgstr ""
 
-#: municipalities/views.py:215
+#: municipalities/views.py:179
 msgid "City has no name in registry."
 msgstr ""
 
-#: municipalities/views.py:236
+#: municipalities/views.py:200
 #, python-format
 msgid "Could not load current city data: %(err)s"
 msgstr ""
 
-#: municipalities/views.py:245
+#: municipalities/views.py:209
 msgid "City has no timezone in API response."
 msgstr ""
 
-#: municipalities/views.py:264
+#: municipalities/views.py:228
 #, python-format
 msgid "Updated location for %(name)s on api.luftdaten.at."
 msgstr ""
 
-#: municipalities/views.py:276
+#: municipalities/views.py:240
 msgid "Invalid municipality."
 msgstr "Ungültige Gemeinde."
 
-#: municipalities/views.py:283
+#: municipalities/views.py:247
 msgid "Removed from favourite municipalities."
 msgstr "Aus den Favoriten-Gemeinden entfernt."
 
-#: municipalities/views.py:289
+#: municipalities/views.py:253
 msgid "Added to favourite municipalities."
 msgstr "Zu den Favoriten-Gemeinden hinzugefügt."
 
-#: municipalities/views.py:304
+#: municipalities/views.py:284
 msgid "Municipalities with most stations"
 msgstr "Gemeinden mit den meisten Stationen"
 
-#: municipalities/views.py:306 templates/municipalities/admin_overview.html:60
+#: municipalities/views.py:286 templates/municipalities/admin_overview.html:60
 #: templates/municipalities/admin_overview.html:78
-#: templates/municipalities/list.html:281
+#: templates/municipalities/list.html:284
+#: templates/municipalities/manage/list.html:47
 msgid "Country"
 msgstr "Land"
 
-#: municipalities/views.py:307 templates/_base.html:40
+#: municipalities/views.py:287 templates/_base.html:40
 msgid "Stations"
 msgstr "Stationen"
 
-#: municipalities/views.py:308 templates/workshops/list.html:55
+#: municipalities/views.py:288 templates/workshops/list.html:55
 #: templates/workshops/list.html:130
 msgid "View Details"
 msgstr "Details anzeigen"
+
+#: municipalities/views.py:290
+msgid ""
+"No municipalities in the local database yet. Staff can import them from the "
+"API."
+msgstr ""
+
+#: municipalities/views.py:342
+#, python-format
+msgid "Sync failed: %(error)s"
+msgstr ""
+
+#: municipalities/views.py:347
+#, python-format
+msgid "Synced municipalities: %(created)s created, %(updated)s updated."
+msgstr ""
 
 #: organizations/forms.py:10
 msgid "Keep current ownership"
@@ -411,6 +429,119 @@ msgstr "Aus den Favoriten entfernt."
 msgid "Added to favourite stations."
 msgstr "Zu den Favoriten hinzugefügt."
 
+#: surveys/forms.py:164 templates/surveys/manage/form.html:46
+msgid "Label is required."
+msgstr "Bezeichnung ist erforderlich."
+
+#: surveys/forms.py:176
+msgid "Enter a valid hex color (e.g. #3388ff)."
+msgstr "Geben Sie eine gültige Hex-Farbe ein (z. B. #3388ff)."
+
+#: surveys/forms.py:184
+msgid ""
+"Stable slug used internally (e.g. tree, bench). Lowercase letters, numbers, "
+"and hyphens."
+msgstr ""
+"Stabiler Slug für die interne Verwendung (z. B. baum, bank). "
+"Kleinbuchstaben, Zahlen und Bindestriche."
+
+#: surveys/forms.py:186
+msgid "Name shown to respondents when they pick a category for a map point."
+msgstr ""
+"Name, der Befragten bei der Auswahl einer Kategorie für einen Karteneintrag "
+"angezeigt wird."
+
+#: surveys/forms.py:187
+msgid "Hex color for points of this category on the map (e.g. #3388ff)."
+msgstr "Hex-Farbe für Punkte dieser Kategorie auf der Karte (z. B. #3388ff)."
+
+#: surveys/models.py:13 templates/help.html:27 templates/help.html:49
+msgid "Draft"
+msgstr "Entwurf"
+
+#: surveys/models.py:14 templates/help.html:121
+msgid "Published"
+msgstr "Veröffentlicht"
+
+#: surveys/models.py:15
+msgid "Closed"
+msgstr "Geschlossen"
+
+#: surveys/models.py:69
+msgid "Text"
+msgstr "Text"
+
+#: surveys/models.py:70
+msgid "Range"
+msgstr "Skala"
+
+#: surveys/models.py:71
+msgid "Likert scale"
+msgstr "Likert-Skala"
+
+#: surveys/models.py:72 templates/surveys/manage/form.html:220
+msgid "Single choice"
+msgstr "Einzelauswahl"
+
+#: surveys/models.py:73 templates/surveys/manage/form.html:221
+msgid "Multiple choice"
+msgstr "Mehrfachauswahl"
+
+#: surveys/models.py:74
+msgid "Map points"
+msgstr "Kartenpunkte"
+
+#: surveys/models.py:75 templates/surveys/manage/form.html:50
+#: templates/surveys/manage/form.html:86
+msgid "Page break"
+msgstr "Seitenumbruch"
+
+#: surveys/views.py:119
+#, python-format
+msgid "Boundary not loaded: %(error)s"
+msgstr "Grenze nicht geladen: %(error)s"
+
+#: surveys/views.py:121
+msgid "Survey created."
+msgstr "Umfrage erstellt."
+
+#: surveys/views.py:141
+msgid "Boundary updated."
+msgstr "Grenze aktualisiert."
+
+#: surveys/views.py:145
+msgid "Survey saved."
+msgstr "Umfrage gespeichert."
+
+#: surveys/views.py:375 surveys/views.py:411
+#: templates/surveys/manage/form.html:143
+msgid "Upload a boundary before publishing."
+msgstr "Laden Sie vor der Veröffentlichung eine Grenze hoch."
+
+#: surveys/views.py:379
+msgid "Survey published."
+msgstr "Umfrage veröffentlicht."
+
+#: surveys/views.py:390
+msgid "Survey closed."
+msgstr "Umfrage geschlossen."
+
+#: surveys/views.py:401
+msgid "Survey unpublished."
+msgstr "Veröffentlichung aufgehoben."
+
+#: surveys/views.py:415
+msgid "Survey reopened."
+msgstr "Umfrage wieder geöffnet."
+
+#: surveys/views.py:507
+msgid "Please fix the errors below."
+msgstr "Bitte korrigieren Sie die folgenden Fehler."
+
+#: surveys/views.py:513
+msgid "Thank you — your response was submitted."
+msgstr "Vielen Dank — Ihre Antwort wurde übermittelt."
+
 #: templates/_base.html:11 templates/_base.html:27
 msgid "Luftdaten.at Datahub"
 msgstr "Luftdaten.at Datahub"
@@ -424,7 +555,7 @@ msgstr "Navigation umschalten"
 msgid "Workshops"
 msgstr "Workshops"
 
-#: templates/_base.html:43 templates/_base.html:66
+#: templates/_base.html:43 templates/_base.html:72
 #: templates/municipalities/list.html:5 templates/municipalities/list.html:88
 msgid "Municipalities"
 msgstr "Gemeinden"
@@ -452,57 +583,105 @@ msgstr "Meine Kampagnen"
 msgid "My Workshops"
 msgstr "Meine Workshops"
 
-#: templates/_base.html:64 templates/campaigns/participants/detail.html:48
+#: templates/_base.html:63 templates/account/users/edit.html:86
+#: templates/account/users/list.html:27
+#, fuzzy
+#| msgid "Is Staff"
+msgid "Staff"
+msgstr "Ist Mitarbeiter:in"
+
+#: templates/_base.html:64 templates/surveys/list.html:4
+#: templates/surveys/list.html:8
+msgid "Surveys"
+msgstr "Umfragen"
+
+#: templates/_base.html:65
+#, fuzzy
+#| msgid "Municipalities"
+msgid "Municipalities (local)"
+msgstr "Gemeinden"
+
+#: templates/_base.html:70 templates/campaigns/participants/detail.html:48
 #: templates/campaigns/room/detail.html:69 templates/devices/list.html:6
 #: templates/devices/list.html:17 templates/organizations/detail.html:344
 #: templates/workshops/detail.html:121 templates/workshops/detail.html:177
 msgid "Devices"
 msgstr "Geräte"
 
-#: templates/_base.html:65
+#: templates/_base.html:71
 #, fuzzy
 #| msgid "Air Station"
 msgid "Air Stations"
 msgstr "Air Station"
 
-#: templates/_base.html:67
+#: templates/_base.html:73
 msgid "Calibration"
 msgstr "Kalibrierung"
 
-#: templates/_base.html:68 templates/account/users/edit.html:12
+#: templates/_base.html:74 templates/account/users/edit.html:12
 #: templates/account/users/list.html:5 templates/organizations/detail.html:108
 #: templates/workshops/management.html:17
 msgid "Users"
 msgstr "Nutzer:innen"
 
-#: templates/_base.html:69
+#: templates/_base.html:75
 msgid "Logs"
 msgstr ""
 
-#: templates/_base.html:72
+#: templates/_base.html:78
 msgid "Log Out"
 msgstr "Abmelden"
 
-#: templates/_base.html:77 templates/account/password_reset_from_key.html:119
+#: templates/_base.html:83 templates/account/password_reset_from_key.html:119
 msgid "Log In"
 msgstr "Anmelden"
 
-#: templates/_base.html:81
+#: templates/_base.html:87
 msgid "Sign Up"
 msgstr "Registrieren"
 
-#: templates/_base.html:106
+#: templates/_base.html:112
 msgid "Privacy"
 msgstr "Datenschutz"
 
-#: templates/_base.html:109
+#: templates/_base.html:115
 msgid "About Us"
 msgstr "Impressum"
 
-#: templates/_base.html:112 templates/account/dashboard.html:65
+#: templates/_base.html:118 templates/account/dashboard.html:65
 #: templates/help.html:5 templates/help.html:12
 msgid "Help"
 msgstr "Hilfe"
+
+#: templates/_eaqi_pm_color_steps.html:3 templates/_eaqi_pm_color_steps.html:12
+#: templates/home.html:382 templates/home.html:390
+msgid "Good"
+msgstr "Gut"
+
+#: templates/_eaqi_pm_color_steps.html:4 templates/_eaqi_pm_color_steps.html:13
+#: templates/home.html:383 templates/home.html:391
+msgid "Fair"
+msgstr "Ausreichend"
+
+#: templates/_eaqi_pm_color_steps.html:5 templates/_eaqi_pm_color_steps.html:14
+#: templates/home.html:384 templates/home.html:392
+msgid "Moderate"
+msgstr "Mäßig"
+
+#: templates/_eaqi_pm_color_steps.html:6 templates/_eaqi_pm_color_steps.html:15
+#: templates/home.html:385 templates/home.html:393
+msgid "Poor"
+msgstr "Schlecht"
+
+#: templates/_eaqi_pm_color_steps.html:7 templates/_eaqi_pm_color_steps.html:16
+#: templates/home.html:386 templates/home.html:394
+msgid "Very poor"
+msgstr "Sehr schlecht"
+
+#: templates/_eaqi_pm_color_steps.html:8 templates/_eaqi_pm_color_steps.html:17
+#: templates/home.html:387 templates/home.html:395
+msgid "Extremely poor"
+msgstr "Extrem schlecht"
 
 #: templates/account/account_confirm_delete.html:5
 #: templates/account/account_confirm_delete.html:8
@@ -534,6 +713,7 @@ msgstr "Löschen bestätigen"
 #: templates/municipalities/admin_overview.html:153
 #: templates/organizations/create.html:36
 #: templates/organizations/detail.html:231
+#: templates/surveys/manage/form.html:235
 #: templates/workshops/confirm_delete.html:11
 msgid "Cancel"
 msgstr "Abbrechen"
@@ -919,6 +1099,7 @@ msgid "Your account is currently an owner in these organizations:"
 msgstr "Ihr Konto ist derzeit Eigentümer dieser Organisationen:"
 
 #: templates/account/settings.html:35
+#: templates/municipalities/manage/list.html:66
 msgid "View"
 msgstr "Anzeigen"
 
@@ -927,7 +1108,8 @@ msgstr "Anzeigen"
 #: templates/devices/detail.html:39 templates/devices/my.html:25
 #: templates/help.html:59 templates/organizations/detail.html:325
 #: templates/organizations/detail.html:399 templates/organizations/my.html:102
-#: templates/workshops/my.html:34
+#: templates/surveys/manage/form.html:40 templates/surveys/manage/form.html:90
+#: templates/surveys/manage/list.html:30 templates/workshops/my.html:34
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -1073,12 +1255,6 @@ msgstr ""
 msgid "Activate account"
 msgstr "Aktive Stationen"
 
-#: templates/account/users/edit.html:86 templates/account/users/list.html:27
-#, fuzzy
-#| msgid "Is Staff"
-msgid "Staff"
-msgstr "Ist Mitarbeiter:in"
-
 #: templates/account/users/edit.html:87
 msgid "Django admin / staff-only features."
 msgstr ""
@@ -1152,6 +1328,7 @@ msgstr ""
 #: templates/devices/detail_logs_partial.html:39
 #: templates/devices/measurements.html:135
 #: templates/devices/measurements.html:139
+#: templates/municipalities/manage/list.html:82
 msgid "Previous"
 msgstr "Vorherige"
 
@@ -1168,6 +1345,8 @@ msgstr ""
 #: templates/devices/detail_logs_partial.html:63
 #: templates/devices/measurements.html:151
 #: templates/devices/measurements.html:155
+#: templates/municipalities/manage/list.html:90
+#: templates/surveys/detail.html:129 templates/surveys/detail.html:156
 msgid "Next"
 msgstr "Nächste"
 
@@ -1221,7 +1400,7 @@ msgstr "Momentane Messwerte"
 
 #: templates/campaigns/detail.html:112 templates/campaigns/detail.html:166
 #: templates/campaigns/my.html:105 templates/devices/my.html:25
-#: templates/municipalities/list.html:286
+#: templates/municipalities/list.html:289
 #: templates/organizations/detail.html:320
 #: templates/organizations/detail.html:395 templates/organizations/my.html:97
 #: templates/workshops/my.html:30
@@ -1230,7 +1409,8 @@ msgstr "Details"
 
 #: templates/campaigns/detail.html:120 templates/campaigns/my.html:114
 #: templates/help.html:63 templates/organizations/my.html:106
-#: templates/workshops/my.html:38
+#: templates/surveys/manage/form.html:41 templates/surveys/manage/form.html:91
+#: templates/surveys/manage/questions.html:27 templates/workshops/my.html:38
 msgid "Delete"
 msgstr "Löschen"
 
@@ -1276,7 +1456,9 @@ msgstr "Messkampagne"
 
 #: templates/campaigns/form.html:14 templates/devices/detail.html:94
 #: templates/help.html:126 templates/municipalities/admin_overview.html:154
-#: templates/workshops/form.html:14 templates/workshops/upload_images.html:14
+#: templates/surveys/manage/form.html:106
+#: templates/surveys/manage/form.html:246 templates/workshops/form.html:14
+#: templates/workshops/upload_images.html:14
 msgid "Save"
 msgstr "Speichern"
 
@@ -1587,6 +1769,8 @@ msgstr "Gerätedaten:"
 #: templates/home.html:119 templates/home.html:153
 #: templates/municipalities/admin_overview.html:19
 #: templates/municipalities/admin_overview.html:137
+#: templates/municipalities/manage/list.html:11
+#: templates/surveys/manage/form.html:155
 msgid "Close"
 msgstr "Schließen"
 
@@ -1664,7 +1848,8 @@ msgstr "Workshops und erhobene Daten"
 msgid "Workshop"
 msgstr "Workshop"
 
-#: templates/devices/data.html:100 workshops/forms.py:15
+#: templates/devices/data.html:100 templates/surveys/manage/list.html:15
+#: workshops/forms.py:15
 msgid "Title"
 msgstr "Titel"
 
@@ -1839,7 +2024,7 @@ msgid "Battery Voltage (V)"
 msgstr "Batteriespannung (V)"
 
 #: templates/devices/detail.html:371 templates/devices/measurements.html:71
-#: templates/workshops/detail.html:909
+#: templates/workshops/detail.html:886
 msgid "Time"
 msgstr "Zeit"
 
@@ -1935,6 +2120,7 @@ msgstr "Zurück zum Gerät"
 #: templates/devices/measurements.html:31
 #: templates/devices/measurements.html:40
 #: templates/devices/measurements.html:49
+#: templates/municipalities/manage/list.html:31
 msgid "All"
 msgstr ""
 
@@ -2032,15 +2218,15 @@ msgstr ""
 "Sie können Einträge über den Ziehpunkt sortieren oder Fragen hinzufügen, "
 "bearbeiten und löschen."
 
-#: templates/help.html:20
+#: templates/help.html:20 templates/surveys/manage/form.html:27
+#: templates/surveys/manage/form.html:153
+#: templates/surveys/manage/form.html:154
+#: templates/surveys/manage/questions.html:37
 msgid "Add question"
 msgstr "Frage hinzufügen"
 
-#: templates/help.html:27 templates/help.html:49
-msgid "Draft"
-msgstr "Entwurf"
-
-#: templates/help.html:38
+#: templates/help.html:38 templates/surveys/manage/form.html:42
+#: templates/surveys/manage/form.html:75
 msgid "Drag to reorder"
 msgstr "Zum Sortieren ziehen"
 
@@ -2074,32 +2260,28 @@ msgstr "Frage"
 msgid "Answer"
 msgstr "Antwort"
 
-#: templates/help.html:121
-msgid "Published"
-msgstr "Veröffentlicht"
-
 #: templates/home.html:24
 msgid "Air quality (1-hour mean)"
 msgstr "Luftqualität (1h-Mittelwert)"
 
 #: templates/home.html:27 templates/home.html:28 templates/home.html:29
-#: templates/municipalities/detail.html:28
-#: templates/municipalities/detail.html:29
-#: templates/municipalities/detail.html:30 templates/stations/list.html:257
+#: templates/municipalities/detail.html:23
+#: templates/municipalities/detail.html:24
+#: templates/municipalities/detail.html:25 templates/stations/list.html:257
 #: templates/stations/list.html:309 templates/stations/list.html:359
 #: templates/workshops/detail.html:34 templates/workshops/detail.html:35
-#: templates/workshops/detail.html:36 templates/workshops/detail.html:789
-#: templates/workshops/detail.html:790 templates/workshops/detail.html:791
+#: templates/workshops/detail.html:36 templates/workshops/detail.html:766
+#: templates/workshops/detail.html:767 templates/workshops/detail.html:768
 msgid "Particulate Matter"
 msgstr "Feinstaub"
 
-#: templates/home.html:34 templates/municipalities/detail.html:35
+#: templates/home.html:34 templates/municipalities/detail.html:30
 #: templates/stations/detail.html:83 templates/stations/list.html:415
 #: templates/workshops/detail.html:45
 msgid "Toggle legend"
 msgstr "Legende ein-/ausblenden"
 
-#: templates/home.html:40 templates/municipalities/detail.html:42
+#: templates/home.html:40 templates/municipalities/detail.html:37
 #: templates/stations/detail.html:104 templates/stations/list.html:436
 msgid "Method: European Air Quality Index"
 msgstr "Methode: Europäischer Luftqualitätsindex"
@@ -2240,93 +2422,27 @@ msgstr "Letzte 7 Tage"
 msgid "Last 30 Days"
 msgstr "Letzte 30 Tage"
 
-#: templates/home.html:332 templates/home.html:340 templates/home.html:348
-#: templates/home.html:405 templates/home.html:413
-#: templates/municipalities/detail.html:98
-#: templates/municipalities/detail.html:106
-#: templates/municipalities/detail.html:114 templates/stations/list.html:457
-#: templates/stations/list.html:465 templates/stations/list.html:473
-#: templates/workshops/detail.html:182 templates/workshops/detail.html:190
-#: templates/workshops/detail.html:198
-msgid "Good"
-msgstr "Gut"
-
-#: templates/home.html:333 templates/home.html:341 templates/home.html:349
-#: templates/home.html:406 templates/home.html:414
-#: templates/municipalities/detail.html:99
-#: templates/municipalities/detail.html:107
-#: templates/municipalities/detail.html:115 templates/stations/list.html:458
-#: templates/stations/list.html:466 templates/stations/list.html:474
-#: templates/workshops/detail.html:183 templates/workshops/detail.html:191
-#: templates/workshops/detail.html:199
-msgid "Fair"
-msgstr "Ausreichend"
-
-#: templates/home.html:334 templates/home.html:342 templates/home.html:350
-#: templates/home.html:407 templates/home.html:415
-#: templates/municipalities/detail.html:100
-#: templates/municipalities/detail.html:108
-#: templates/municipalities/detail.html:116 templates/stations/list.html:459
-#: templates/stations/list.html:467 templates/stations/list.html:475
-#: templates/workshops/detail.html:184 templates/workshops/detail.html:192
-#: templates/workshops/detail.html:200
-msgid "Moderate"
-msgstr "Mäßig"
-
-#: templates/home.html:335 templates/home.html:343 templates/home.html:351
-#: templates/home.html:408 templates/home.html:416
-#: templates/municipalities/detail.html:101
-#: templates/municipalities/detail.html:109
-#: templates/municipalities/detail.html:117 templates/stations/list.html:460
-#: templates/stations/list.html:468 templates/stations/list.html:476
-#: templates/workshops/detail.html:185 templates/workshops/detail.html:193
-#: templates/workshops/detail.html:201
-msgid "Poor"
-msgstr "Schlecht"
-
-#: templates/home.html:336 templates/home.html:344 templates/home.html:352
-#: templates/home.html:409 templates/home.html:417
-#: templates/municipalities/detail.html:102
-#: templates/municipalities/detail.html:110
-#: templates/municipalities/detail.html:118 templates/stations/list.html:461
-#: templates/stations/list.html:469 templates/stations/list.html:477
-#: templates/workshops/detail.html:186 templates/workshops/detail.html:194
-#: templates/workshops/detail.html:202
-msgid "Very poor"
-msgstr "Sehr schlecht"
-
-#: templates/home.html:337 templates/home.html:345 templates/home.html:353
-#: templates/home.html:410 templates/home.html:418
-#: templates/municipalities/detail.html:103
-#: templates/municipalities/detail.html:111
-#: templates/municipalities/detail.html:119 templates/stations/list.html:462
-#: templates/stations/list.html:470 templates/stations/list.html:478
-#: templates/workshops/detail.html:187 templates/workshops/detail.html:195
-#: templates/workshops/detail.html:203
-msgid "Extremely poor"
-msgstr "Extrem schlecht"
-
-#: templates/home.html:372
+#: templates/home.html:349
 msgid "Mean wind speed (10 min)"
 msgstr "Mittlere Windgeschwindigkeit (10 min)"
 
-#: templates/home.html:374
+#: templates/home.html:351
 msgid "Wind speed"
 msgstr "Windgeschwindigkeit"
 
-#: templates/home.html:375
+#: templates/home.html:352
 msgid "Wind direction (where it blows from)"
 msgstr "Windrichtung (woher der Wind weht)"
 
-#: templates/home.html:376
+#: templates/home.html:353
 msgid "Blowing toward"
 msgstr "Weht nach"
 
-#: templates/home.html:377
+#: templates/home.html:354
 msgid "Gust"
 msgstr "Böen"
 
-#: templates/home.html:378
+#: templates/home.html:355
 msgid "Observation time"
 msgstr "Messzeit"
 
@@ -2438,6 +2554,7 @@ msgid "All countries"
 msgstr ""
 
 #: templates/municipalities/admin_overview.html:77
+#: templates/municipalities/manage/list.html:46
 msgid "Slug"
 msgstr ""
 
@@ -2490,33 +2607,271 @@ msgid ""
 "on the API side)."
 msgstr ""
 
-#: templates/municipalities/detail.html:5
+#: templates/municipalities/detail.html:5 templates/surveys/manage/list.html:16
 msgid "Municipality"
 msgstr "Gemeinde"
 
-#: templates/municipalities/detail.html:28
-#: templates/municipalities/detail.html:29
-#: templates/municipalities/detail.html:30 templates/workshops/detail.html:31
+#: templates/municipalities/detail.html:22
+#, fuzzy
+#| msgid "Particulate Matter"
+msgid "Particulate matter type"
+msgstr "Feinstaub"
+
+#: templates/municipalities/detail.html:23
+#: templates/municipalities/detail.html:24
+#: templates/municipalities/detail.html:25 templates/workshops/detail.html:31
 msgid "Air quality"
 msgstr "Luftqualität"
 
-#: templates/municipalities/detail.html:59
-msgid "Remove municipality from favourites"
-msgstr "Gemeinde aus Favoriten entfernen"
+#: templates/municipalities/detail.html:55
+#, fuzzy
+#| msgid "Current TVOC:"
+msgid "Current"
+msgstr "Momentan TVOC:"
 
-#: templates/municipalities/detail.html:63
-msgid "Add municipality to favourites"
-msgstr "Gemeinde zu Favoriten hinzufügen"
+#: templates/municipalities/detail.html:62
+msgid "Environment"
+msgstr ""
 
 #: templates/municipalities/detail.html:69
-msgid "Log in to save this municipality to your favourites."
-msgstr "Melden Sie sich an, um diese Gemeinde als Favorit zu speichern."
+msgid "Heat"
+msgstr ""
 
 #: templates/municipalities/list.html:101
 #, fuzzy
 #| msgid "Browse municipalities"
 msgid "Loading municipalities…"
 msgstr "Gemeinden durchsuchen"
+
+#: templates/municipalities/manage/list.html:4
+#, fuzzy
+#| msgid "Municipalities"
+msgid "Manage municipalities"
+msgstr "Gemeinden"
+
+#: templates/municipalities/manage/list.html:16
+#, fuzzy
+#| msgid "Browse municipalities"
+msgid "Local municipalities"
+msgstr "Gemeinden durchsuchen"
+
+#: templates/municipalities/manage/list.html:19
+msgid "Import from API"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:24
+msgid ""
+"Mirrors api.luftdaten.at /city/all into the local database. For boundary "
+"matching and GIS edits, use Django Admin at /backend/."
+msgstr ""
+
+#: templates/municipalities/manage/list.html:29
+#, fuzzy
+#| msgid "Battery Status"
+msgid "Match status"
+msgstr "Batteriestatus"
+
+#: templates/municipalities/manage/list.html:38
+msgid "Filter"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:48
+msgid "GKZ"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:49
+msgid "Match"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:50
+msgid "Boundary"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:51
+msgid "Synced"
+msgstr ""
+
+#: templates/municipalities/manage/list.html:71
+msgid "No municipalities yet. Use Import from API."
+msgstr ""
+
+#: templates/municipalities/manage/list.html:78
+#, fuzzy
+#| msgid "Log pagination"
+msgid "Pagination"
+msgstr "Protokollpaginierung"
+
+#: templates/municipalities/partials/_header.html:9
+msgid "Remove municipality from favourites"
+msgstr "Gemeinde aus Favoriten entfernen"
+
+#: templates/municipalities/partials/_header.html:13
+msgid "Add municipality to favourites"
+msgstr "Gemeinde zu Favoriten hinzufügen"
+
+#: templates/municipalities/partials/_header.html:19
+msgid "Log in to save this municipality to your favourites."
+msgstr "Melden Sie sich an, um diese Gemeinde als Favorit zu speichern."
+
+#: templates/municipalities/partials/_heat_disclaimer.html:3
+#, fuzzy
+#| msgid "About this wind layer"
+msgid "About these heat indicators"
+msgstr "Informationen zur Wind-Einblendung"
+
+#: templates/municipalities/partials/_heat_disclaimer.html:5
+msgid ""
+"Land surface temperature is not the same as air temperature measured at "
+"weather stations."
+msgstr ""
+
+#: templates/municipalities/partials/_heat_disclaimer.html:6
+msgid ""
+"The satellite overpass typically occurs in the morning; values represent "
+"that moment, not a daily average."
+msgstr ""
+
+#: templates/municipalities/partials/_heat_disclaimer.html:7
+msgid ""
+"A single reference day is a snapshot — it does not show a heat trend over "
+"time."
+msgstr ""
+
+#: templates/municipalities/partials/_quality_note.html:4
+msgid "Data quality notes"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_current.html:4
+#, python-format
+msgid ""
+"\n"
+"    There are %(count)s citizen science stations in %(name)s.\n"
+"    "
+msgstr ""
+
+#: templates/municipalities/partials/_tab_current.html:7
+msgid ""
+"\n"
+"    Please note that individual stations in unfavourable locations can skew "
+"the averages. In our methodology we apply statistical procedures to correct "
+"for these effects as far as possible.\n"
+"    "
+msgstr ""
+
+#: templates/municipalities/partials/_tab_current.html:10
+msgid "Methodology"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_current.html:12
+#, fuzzy
+#| msgid "48-hour overview (1h mean)"
+msgid "Hourly averages (1 h mean)"
+msgstr "48-Stunden-Übersicht (1h-Mittelwert)"
+
+#: templates/municipalities/partials/_tab_current.html:21
+#, python-format
+msgid ""
+"\n"
+"          Calculated from %(value_count)s values from %(station_count)s "
+"stations\n"
+"          "
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:6
+#, python-format
+msgid ""
+"\n"
+"  Reference year %(year)s, source: %(source)s.\n"
+"  "
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:11
+#: templates/municipalities/partials/_tab_environment.html:13
+#, python-format
+msgid "Peer group: %(label)s."
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:19
+msgid "Imperviousness"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:22
+msgid "Imperviousness change (2018–2021)"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:25
+msgid "Tree cover"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:32
+msgid "Land use shares"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:33
+msgid "Land use shares chart"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_environment.html:43
+msgid "No Copernicus land indicators are available for this municipality yet."
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:7
+#, python-format
+msgid ""
+"\n"
+"      Acquisition on %(d)s, %(t)s (local time), %(s)s.\n"
+"      "
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:16
+msgid "Urban heat island (day)"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:21
+msgid "Urban heat island (night)"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:26
+msgid "Mean land surface temperature"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:31
+msgid "Temperature spread (p90 − p10)"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:36
+msgid "Population in hotspots"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:37
+#, fuzzy, python-format
+#| msgid "Total Measurements"
+msgid "of %(total)s residents total"
+msgstr "Gesamtmessungen"
+
+#: templates/municipalities/partials/_tab_heat.html:48
+#, python-format
+msgid "Cooling per 10%% tree cover"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:58
+#, python-format
+msgid "Warming per 10%% imperviousness"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:70
+msgid "Land surface temperature by land use"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:71
+msgid "LST by land use chart"
+msgstr ""
+
+#: templates/municipalities/partials/_tab_heat.html:82
+#, fuzzy
+#| msgid "No battery status available for this device."
+msgid "No evaluable satellite heat data is available for this municipality."
+msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
 
 #: templates/organizations/create.html:12
 msgid "Edit Organization"
@@ -2758,23 +3113,23 @@ msgstr "Zeitliche Aggregation (Auflösung)"
 msgid "Download CSV"
 msgstr "CSV herunterladen"
 
-#: templates/stations/detail.html:796
+#: templates/stations/detail.html:773
 msgid "No sensors found"
 msgstr "Keine Sensoren gefunden"
 
-#: templates/stations/detail.html:861
+#: templates/stations/detail.html:838
 msgid "Error loading 30-day data"
 msgstr "Fehler beim Laden der 30-Tage-Daten"
 
-#: templates/stations/detail.html:869
+#: templates/stations/detail.html:846
 msgid "Error loading data"
 msgstr "Fehler beim Laden der Daten"
 
-#: templates/stations/detail.html:869
+#: templates/stations/detail.html:846
 msgid "Please try again later."
 msgstr "Bitte versuchen Sie es später erneut."
 
-#: templates/stations/detail.html:883
+#: templates/stations/detail.html:860
 msgid "Start date must be on or before end date."
 msgstr "Das Startdatum muss am oder vor dem Enddatum liegen."
 
@@ -2804,6 +3159,340 @@ msgstr "Für PM2,5 liegen keine Daten vor"
 msgid "No data available for PM10.0"
 msgstr "Für PM10.0 liegen keine Daten vor."
 
+#: templates/surveys/detail.html:32
+msgid "This survey is not currently accepting responses."
+msgstr "Diese Umfrage nimmt derzeit keine Antworten entgegen."
+
+#: templates/surveys/detail.html:115
+msgid "Click on the map on the right to add points for this question."
+msgstr ""
+"Klicken Sie auf die Karte rechts, um Punkte für diese Frage hinzuzufügen."
+
+#: templates/surveys/detail.html:121
+msgid "This survey has no questions yet."
+msgstr "Diese Umfrage hat noch keine Fragen."
+
+#: templates/surveys/detail.html:127 templates/surveys/detail.html:155
+#: templates/surveys/manage/form.html:107
+#: templates/surveys/manage/form.html:247
+msgid "Back"
+msgstr "Zurück"
+
+#: templates/surveys/detail.html:130
+msgid "Submit response"
+msgstr "Antwort absenden"
+
+#: templates/surveys/detail.html:157
+#, fuzzy, python-format
+#| msgid "Page %(current)s of %(total)s"
+msgid "Page %%(current)s of %%(total)s"
+msgstr "Seite %(current)s von %(total)s"
+
+#: templates/surveys/detail.html:158
+#, python-format
+msgid "Maximum %%(max)s points allowed."
+msgstr "Maximal %%(max)s Punkte erlaubt."
+
+#: templates/surveys/detail.html:159
+#, python-format
+msgid "Placing points for: %%(label)s"
+msgstr "Punkte setzen für: %%(label)s"
+
+#: templates/surveys/detail.html:160
+msgid "No selection yet"
+msgstr "Noch keine Auswahl"
+
+#: templates/surveys/list.html:9
+msgid "Participate in spatial surveys linked to municipalities."
+msgstr "Nehmen Sie an räumlichen Umfragen in Gemeinden teil."
+
+#: templates/surveys/list.html:22
+msgid "No surveys are currently open."
+msgstr "Derzeit sind keine Umfragen geöffnet."
+
+#: templates/surveys/manage/form.html:6 templates/surveys/manage/form.html:10
+msgid "Edit survey"
+msgstr "Umfrage bearbeiten"
+
+#: templates/surveys/manage/form.html:6 templates/surveys/manage/form.html:10
+#: templates/surveys/manage/list.html:10
+msgid "New survey"
+msgstr "Neue Umfrage"
+
+#: templates/surveys/manage/form.html:14 templates/surveys/manage/form.html:25
+#: templates/surveys/manage/list.html:31
+#: templates/surveys/manage/questions.html:5
+#: templates/surveys/manage/questions.html:9
+msgid "Questions"
+msgstr "Fragen"
+
+#: templates/surveys/manage/form.html:15 templates/surveys/manage/list.html:18
+#: templates/surveys/manage/list.html:32
+#: templates/surveys/manage/responses.html:4
+#: templates/surveys/manage/responses.html:8
+msgid "Responses"
+msgstr "Antworten"
+
+#: templates/surveys/manage/form.html:17
+msgid "View public form"
+msgstr "Öffentliches Formular anzeigen"
+
+#: templates/surveys/manage/form.html:28
+msgid "Add page break"
+msgstr "Seitenumbruch hinzufügen"
+
+#: templates/surveys/manage/form.html:39 templates/surveys/manage/form.html:84
+#: templates/surveys/manage/form.html:179
+#: templates/surveys/manage/questions.html:14
+msgid "Required"
+msgstr "Pflichtfeld"
+
+#: templates/surveys/manage/form.html:43 templates/surveys/manage/form.html:95
+#: templates/surveys/manage/questions.html:32
+msgid "No questions yet."
+msgstr "Noch keine Fragen."
+
+#: templates/surveys/manage/form.html:44
+msgid "Delete this question?"
+msgstr "Diese Frage löschen?"
+
+#: templates/surveys/manage/form.html:45
+msgid "Delete failed"
+msgstr "Löschen fehlgeschlagen"
+
+#: templates/surveys/manage/form.html:47
+msgid "Validation failed"
+msgstr "Validierung fehlgeschlagen"
+
+#: templates/surveys/manage/form.html:48
+msgid "Request failed"
+msgstr "Anfrage fehlgeschlagen"
+
+#: templates/surveys/manage/form.html:49
+msgid "Could not save order"
+msgstr "Reihenfolge konnte nicht gespeichert werden"
+
+#: templates/surveys/manage/form.html:51
+msgid "Optional page title for the following page"
+msgstr "Optionaler Seitentitel für die folgende Seite"
+
+#: templates/surveys/manage/form.html:52
+#, python-format
+msgid "Page %%(num)s"
+msgstr "Seite %%(num)s"
+
+#: templates/surveys/manage/form.html:53
+#, python-format
+msgid "Starts page %%(num)s"
+msgstr "Beginnt Seite %%(num)s"
+
+#: templates/surveys/manage/form.html:54
+#, python-format
+msgid "%%(count)s page(s)"
+msgstr "%%(count)s Seite(n)"
+
+#: templates/surveys/manage/form.html:59
+msgid ""
+"Questions appear on the public survey form in this order. Drag to reorder. "
+"Use <strong>Help text</strong> for optional guidance under the question "
+"label. <strong>Range</strong>, <strong>Likert</strong>, <strong>Single "
+"choice</strong>, <strong>Multiple choice</strong>, and <strong>Map points</"
+"strong> show type-specific settings in the modal. Use <strong>Page break</"
+"strong> (or the Add page break button) to split the public form into "
+"multiple pages. Map point questions define their own categories in the "
+"question modal; upload a survey boundary before publishing."
+msgstr ""
+"Fragen erscheinen in dieser Reihenfolge im öffentlichen Umfrageformular. Zum "
+"Sortieren ziehen. <strong>Hilfetext</strong> für optionalen Hinweis unter "
+"der Fragebezeichnung. <strong>Skala</strong>, <strong>Likert</strong>, "
+"<strong>Einzelauswahl</strong>, <strong>Mehrfachauswahl</strong> und "
+"<strong>Kartenpunkte</strong> zeigen typspezifische Einstellungen im Dialog. "
+"Verwenden Sie <strong>Seitenumbruch</strong> (oder die Schaltfläche "
+"Seitenumbruch hinzufügen), um das öffentliche Formular in mehrere Seiten "
+"aufzuteilen. Kartenpunkt-Fragen definieren ihre Kategorien im Fragedialog; "
+"laden Sie vor der Veröffentlichung eine Umfrage-Grenze hoch."
+
+#: templates/surveys/manage/form.html:68
+#, python-format
+msgid "%(count)s page(s)"
+msgstr "%(count)s Seite(n)"
+
+#: templates/surveys/manage/form.html:80
+#, python-format
+msgid "Starts page %(num)s"
+msgstr "Beginnt Seite %(num)s"
+
+#: templates/surveys/manage/form.html:82
+#, python-format
+msgid "Page %(num)s"
+msgstr "Seite %(num)s"
+
+#: templates/surveys/manage/form.html:102
+msgid "Survey details"
+msgstr "Umfragedetails"
+
+#: templates/surveys/manage/form.html:112 templates/surveys/manage/list.html:17
+msgid "Status"
+msgstr "Status"
+
+#: templates/surveys/manage/form.html:119
+msgid "Publish"
+msgstr "Veröffentlichen"
+
+#: templates/surveys/manage/form.html:125
+msgid "Close survey"
+msgstr "Umfrage schließen"
+
+#: templates/surveys/manage/form.html:129
+msgid "Unpublish"
+msgstr "Veröffentlichung aufheben"
+
+#: templates/surveys/manage/form.html:135
+msgid "Reopen"
+msgstr "Wieder öffnen"
+
+#: templates/surveys/manage/form.html:141
+msgid "Boundary is set."
+msgstr "Grenze ist gesetzt."
+
+#: templates/surveys/manage/form.html:154
+msgid "Edit question"
+msgstr "Frage bearbeiten"
+
+#: templates/surveys/manage/form.html:160
+#: templates/surveys/manage/questions.html:14
+msgid "Type"
+msgstr "Typ"
+
+#: templates/surveys/manage/form.html:168
+#: templates/surveys/manage/questions.html:14
+msgid "Label"
+msgstr "Bezeichnung"
+
+#: templates/surveys/manage/form.html:173
+msgid "Help text"
+msgstr "Hilfetext"
+
+#: templates/surveys/manage/form.html:175
+msgid "Optional hint shown to respondents below the question label."
+msgstr "Optionaler Hinweis für Befragte unter der Fragebezeichnung."
+
+#: templates/surveys/manage/form.html:185
+msgid "Min"
+msgstr "Min."
+
+#: templates/surveys/manage/form.html:189
+msgid "Max"
+msgstr "Max."
+
+#: templates/surveys/manage/form.html:193
+msgid "Lower and upper bounds for the range slider."
+msgstr "Untere und obere Grenze für den Schieberegler."
+
+#: templates/surveys/manage/form.html:196
+msgid "Scale (1 to N)"
+msgstr "Skala (1 bis N)"
+
+#: templates/surveys/manage/form.html:198
+msgid "Number of options on the Likert scale (1 through N)."
+msgstr "Anzahl der Optionen auf der Likert-Skala (1 bis N)."
+
+#: templates/surveys/manage/form.html:202
+#: templates/surveys/manage/form.html:226
+msgid "Options"
+msgstr "Optionen"
+
+#: templates/surveys/manage/form.html:203
+#: templates/surveys/manage/form.html:227
+msgid "Add option"
+msgstr "Option hinzufügen"
+
+#: templates/surveys/manage/form.html:206
+msgid ""
+"Define at least two answer options for single-choice and multiple-choice "
+"questions."
+msgstr ""
+"Definieren Sie mindestens zwei Antwortoptionen für Einzelauswahl- und "
+"Mehrfachauswahl-Fragen."
+
+#: templates/surveys/manage/form.html:209
+msgid "Max points"
+msgstr "Max. Punkte"
+
+#: templates/surveys/manage/form.html:211
+msgid "Maximum number of map points a respondent may place."
+msgstr "Maximale Anzahl an Kartenpunkten, die ein Befragter setzen darf."
+
+#: templates/surveys/manage/form.html:212
+msgid "Category"
+msgstr "Kategorie"
+
+#: templates/surveys/manage/form.html:214
+msgid ""
+"Define the category for points on this map question (key, label, color)."
+msgstr ""
+"Definieren Sie die Kategorie für Punkte dieser Kartenfrage (Schlüssel, "
+"Bezeichnung, Farbe)."
+
+#: templates/surveys/manage/form.html:216
+msgid "Point detail choices"
+msgstr "Punkt-Detailauswahl"
+
+#: templates/surveys/manage/form.html:217
+msgid ""
+"Optional list shown in a map popup after placing a point. Leave options "
+"empty to disable."
+msgstr ""
+"Optionale Liste in einem Karten-Popup nach dem Setzen eines Punkts. "
+"Optionen leer lassen, um die Funktion zu deaktivieren."
+
+#: templates/surveys/manage/form.html:218
+msgid "Selection mode"
+msgstr "Auswahlmodus"
+
+#: templates/surveys/manage/form.html:223
+msgid "Helper text"
+msgstr "Hilfetext"
+
+#: templates/surveys/manage/form.html:230
+msgid "Define at least two options when point detail choices are enabled."
+msgstr ""
+"Definieren Sie mindestens zwei Optionen, wenn Punkt-Detailauswahl "
+"aktiviert ist."
+
+#: templates/surveys/manage/form.html:236
+msgid "Save question"
+msgstr "Frage speichern"
+
+#: templates/surveys/manage/list.html:4 templates/surveys/manage/list.html:9
+msgid "Manage surveys"
+msgstr "Umfragen verwalten"
+
+#: templates/surveys/manage/list.html:36
+msgid "No surveys yet."
+msgstr "Noch keine Umfragen."
+
+#: templates/surveys/manage/questions.html:10
+#: templates/surveys/manage/responses.html:10
+msgid "Back to survey"
+msgstr "Zurück zur Umfrage"
+
+#: templates/surveys/manage/questions.html:41
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: templates/surveys/manage/responses.html:11
+msgid "Export CSV"
+msgstr "CSV exportieren"
+
+#: templates/surveys/manage/responses.html:18
+msgid "anonymous"
+msgstr "anonym"
+
+#: templates/surveys/manage/responses.html:35
+msgid "No responses yet."
+msgstr "Noch keine Antworten."
+
 #: templates/workshops/confirm_delete.html:7
 msgid "Do you really want to delete"
 msgstr "Möchtest du wirklich löschen"
@@ -2820,11 +3509,11 @@ msgstr "Temperatur"
 msgid "Humidity"
 msgstr "Luftfeuchtigkeit"
 
-#: templates/workshops/detail.html:39 templates/workshops/detail.html:793
+#: templates/workshops/detail.html:39 templates/workshops/detail.html:770
 msgid "VOC Index"
 msgstr "VOC-Index"
 
-#: templates/workshops/detail.html:40 templates/workshops/detail.html:794
+#: templates/workshops/detail.html:40 templates/workshops/detail.html:771
 msgid "NOx Index"
 msgstr "NOx Index"
 
@@ -2878,7 +3567,7 @@ msgstr "Diagramm Optionen"
 msgid "Skalierung wählen"
 msgstr "Skalierung auswählen"
 
-#: templates/workshops/detail.html:153 templates/workshops/detail.html:929
+#: templates/workshops/detail.html:153 templates/workshops/detail.html:906
 msgid "Logarithmic scale"
 msgstr "Logarithmische Skala"
 
@@ -2886,12 +3575,12 @@ msgstr "Logarithmische Skala"
 msgid "Glättung wählen"
 msgstr "Glättung auswählen"
 
-#: templates/workshops/detail.html:158 templates/workshops/detail.html:941
+#: templates/workshops/detail.html:158 templates/workshops/detail.html:918
 msgid "Add moving average"
 msgstr "Gleitenden Durchschnitt hinzufügen"
 
 #: templates/workshops/detail.html:161 templates/workshops/detail.html:163
-#: templates/workshops/detail.html:951
+#: templates/workshops/detail.html:928
 #, python-format
 msgid "Hide outliers (95%% confidence interval)"
 msgstr "Ausreißer ausblenden (95%%-Konfidenzintervall)"
@@ -2900,43 +3589,43 @@ msgstr "Ausreißer ausblenden (95%%-Konfidenzintervall)"
 msgid "Points"
 msgstr "Punkte"
 
-#: templates/workshops/detail.html:747
+#: templates/workshops/detail.html:724
 msgid "Zoom map to show all points."
 msgstr "Zoomen Sie die Karte, um alle Punkte anzuzeigen."
 
-#: templates/workshops/detail.html:750
+#: templates/workshops/detail.html:727
 msgid "Zoom to all"
 msgstr "Auf alle Punkte zoomen"
 
-#: templates/workshops/detail.html:792
+#: templates/workshops/detail.html:769
 msgid "Temperature difference"
 msgstr "Temperaturunterschied"
 
-#: templates/workshops/detail.html:807
+#: templates/workshops/detail.html:784
 msgid "Chart"
 msgstr "Diagramm"
 
-#: templates/workshops/detail.html:887
+#: templates/workshops/detail.html:864
 msgid "Moving average"
 msgstr "Gleitender Durchschnitt"
 
-#: templates/workshops/detail.html:928
+#: templates/workshops/detail.html:905
 msgid "Linear scale"
 msgstr "Lineare Skala"
 
-#: templates/workshops/detail.html:940
+#: templates/workshops/detail.html:917
 msgid "Hide moving average"
 msgstr "Gleitenden Durchschnitt ausblenden"
 
-#: templates/workshops/detail.html:950
+#: templates/workshops/detail.html:927
 msgid "Show outliers"
 msgstr "Ausreißer anzeigen"
 
-#: templates/workshops/detail.html:999
+#: templates/workshops/detail.html:976
 msgid "Activate or deactivate drawing cool circles on the map."
 msgstr ""
 
-#: templates/workshops/detail.html:1007
+#: templates/workshops/detail.html:984
 msgid "Activate or deactivate drawing hot circles on the map."
 msgstr ""
 
@@ -3071,6 +3760,74 @@ msgstr "JSON-Datei"
 msgid "Upload a JSON file in the Luftdaten.at JSON Trip format."
 msgstr "Laden Sie eine JSON-Datei im Luftdaten.at JSON Trip Format hoch."
 
+#~ msgid "Survey map"
+#~ msgstr "Umfragekarte"
+
+#~ msgid "Survey boundary overview."
+#~ msgstr "Übersicht der Umfrage-Grenze."
+
+#~ msgid "Click on the map to add points for the active map question."
+#~ msgstr ""
+#~ "Klicken Sie auf die Karte, um Punkte für die aktive Kartenfrage "
+#~ "hinzuzufügen."
+
+#~ msgid "Category for new points"
+#~ msgstr "Kategorie für neue Punkte"
+
+#~ msgid "Add category"
+#~ msgstr "Kategorie hinzufügen"
+
+#~ msgid ""
+#~ "Categories label map points (e.g. tree, bench) when respondents place "
+#~ "points on map questions. <strong>Key</strong> is a stable slug; "
+#~ "<strong>Label</strong> is shown to respondents; <strong>Color</strong> "
+#~ "marks points on the map."
+#~ msgstr ""
+#~ "Kategorien beschriften Kartenpunkte (z. B. Baum, Bank), wenn Befragte "
+#~ "Punkte auf Kartenfragen setzen. <strong>Schlüssel</strong> ist ein "
+#~ "stabiler Slug; <strong>Bezeichnung</strong> wird Befragten angezeigt; "
+#~ "<strong>Farbe</strong> markiert Punkte auf der Karte."
+
+#~ msgid "No categories yet."
+#~ msgstr "Noch keine Kategorien."
+
+#~ msgid "Delete this category?"
+#~ msgstr "Diese Kategorie löschen?"
+
+#~ msgid "Key is required."
+#~ msgstr "Schlüssel ist erforderlich."
+
+#~ msgid "Edit category"
+#~ msgstr "Kategorie bearbeiten"
+
+#~ msgid "Key"
+#~ msgstr "Schlüssel"
+
+#~ msgid "Color"
+#~ msgstr "Farbe"
+
+#~ msgid "Choose color"
+#~ msgstr "Farbe wählen"
+
+#~ msgid "Save category"
+#~ msgstr "Kategorie speichern"
+
+#~ msgid "Map categories"
+#~ msgstr "Karten-Kategorien"
+
+#~ msgid "Map point categories"
+#~ msgstr "Kartenpunkt-Kategorien"
+
+#~ msgid "Display order in category selectors (lower numbers first)."
+#~ msgstr ""
+#~ "Anzeigereihenfolge in Kategorie-Auswahlfeldern (kleinere Zahlen zuerst)."
+
+#~ msgid "Category deleted."
+#~ msgstr "Kategorie gelöscht."
+
+#~ msgid "Category added."
+#~ msgstr "Kategorie hinzugefügt."
+
 #~ msgid "Clean air at the workplace"
 #~ msgstr "Saubere Luft am Arbeitsplatz"
 
@@ -3083,14 +3840,8 @@ msgstr "Laden Sie eine JSON-Datei im Luftdaten.at JSON Trip Format hoch."
 #~ msgid "Current PM2.5:"
 #~ msgstr "Momentan PM2.5:"
 
-#~ msgid "Current TVOC:"
-#~ msgstr "Momentan TVOC:"
-
 #~ msgid "Loading station data"
 #~ msgstr "Messstationsdaten werden geladen"
-
-#~ msgid "No battery status available for this device."
-#~ msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
 
 #~ msgid "Temperature (°C)"
 #~ msgstr "Temperatur (°C)"
