@@ -9,7 +9,7 @@ cryptography>=48.0.1
 defusedxml==0.7.1
 dj-database-url==2.3.0
 dj-email-url==1.0.6
-django>=6.0.6
+django>=6.0.6,<6.2
 django-allauth==65.14.1
 django-auditlog==3.0.0
 django-cache-url==3.4.5
@@ -17,7 +17,7 @@ django-cors-headers==4.7.0
 django-crispy-forms==2.3
 django-debug-toolbar==5.0.1
 django-log-viewer==1.1.8
-djangorestframework==3.16.1
+djangorestframework==3.18.0
 drf-spectacular==0.28.0
 drf-spectacular-sidecar==2024.12.1
 environs==14.1.0
