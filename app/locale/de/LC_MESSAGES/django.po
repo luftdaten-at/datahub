@@ -259,39 +259,37 @@ msgstr ""
 
 #: municipalities/views.py:159
 msgid "Missing city identifier."
-msgstr ""
+msgstr "Stadtkennung fehlt."
 
 #: municipalities/views.py:165
-#, fuzzy
-#| msgid "Invalid station."
 msgid "Invalid latitude or longitude."
-msgstr "Ungültige Station."
+msgstr "Ungültiger Breiten- oder Längengrad."
 
 #: municipalities/views.py:168
 msgid "Latitude and longitude are out of range."
-msgstr ""
+msgstr "Breiten- und Längengrad liegen außerhalb des gültigen Bereichs."
 
 #: municipalities/views.py:174
 msgid "City not found in registry."
-msgstr ""
+msgstr "Stadt im Register nicht gefunden."
 
 #: municipalities/views.py:179
 msgid "City has no name in registry."
-msgstr ""
+msgstr "Stadt hat im Register keinen Namen."
 
 #: municipalities/views.py:200
 #, python-format
 msgid "Could not load current city data: %(err)s"
-msgstr ""
+msgstr "Aktuelle Stadtdaten konnten nicht geladen werden: %(err)s"
 
 #: municipalities/views.py:209
 msgid "City has no timezone in API response."
-msgstr ""
+msgstr "Stadt hat keine Zeitzone in der API-Antwort."
 
 #: municipalities/views.py:228
 #, python-format
 msgid "Updated location for %(name)s on api.luftdaten.at."
-msgstr ""
+msgstr "Standort für %(name)s auf api.luftdaten.at aktualisiert."
 
 #: municipalities/views.py:240
 msgid "Invalid municipality."
@@ -330,16 +328,19 @@ msgid ""
 "No municipalities in the local database yet. Staff can import them from the "
 "API."
 msgstr ""
+"Noch keine Gemeinden in der lokalen Datenbank. Mitarbeitende können sie "
+"aus der API importieren."
 
 #: municipalities/views.py:342
 #, python-format
 msgid "Sync failed: %(error)s"
-msgstr ""
+msgstr "Synchronisation fehlgeschlagen: %(error)s"
 
 #: municipalities/views.py:347
 #, python-format
 msgid "Synced municipalities: %(created)s created, %(updated)s updated."
 msgstr ""
+"Gemeinden synchronisiert: %(created)s erstellt, %(updated)s aktualisiert."
 
 #: organizations/forms.py:10
 msgid "Keep current ownership"
@@ -1611,7 +1612,7 @@ msgstr "Übersicht über Stationen"
 #: templates/municipalities/admin_overview.html:27
 #: templates/municipalities/admin_overview.html:32
 msgid "Search"
-msgstr ""
+msgstr "Suchen"
 
 #: templates/devices/air_stations_overview.html:37
 #, fuzzy
@@ -2122,7 +2123,7 @@ msgstr "Zurück zum Gerät"
 #: templates/devices/measurements.html:49
 #: templates/municipalities/manage/list.html:31
 msgid "All"
-msgstr ""
+msgstr "Alle"
 
 #: templates/devices/measurements.html:38
 #: templates/devices/measurements.html:73
@@ -2530,75 +2531,67 @@ msgstr "Auto-Aktualisierung stoppen"
 
 #: templates/municipalities/admin_overview.html:6
 #: templates/municipalities/admin_overview.html:24
-#, fuzzy
-#| msgid "Municipalities"
 msgid "Municipalities (API registry)"
-msgstr "Gemeinden"
+msgstr "Gemeinden (API-Register)"
 
 #: templates/municipalities/admin_overview.html:41
 msgid "Could not load city list from the API."
-msgstr ""
+msgstr "Städteliste konnte nicht von der API geladen werden."
 
 #: templates/municipalities/admin_overview.html:47
 msgid ""
 "Set LUFTDATEN_ADMIN_API_KEY to enable updating coordinates via "
 "api.luftdaten.at POST /city/admin."
 msgstr ""
+"Setzen Sie LUFTDATEN_ADMIN_API_KEY, um Koordinaten über api.luftdaten.at "
+"POST /city/admin zu aktualisieren."
 
 #: templates/municipalities/admin_overview.html:56
 msgid "Filter by country"
-msgstr ""
+msgstr "Nach Land filtern"
 
 #: templates/municipalities/admin_overview.html:57
 msgid "All countries"
-msgstr ""
+msgstr "Alle Länder"
 
 #: templates/municipalities/admin_overview.html:77
 #: templates/municipalities/manage/list.html:46
 msgid "Slug"
-msgstr ""
+msgstr "Slug"
 
 #: templates/municipalities/admin_overview.html:79
 #: templates/municipalities/admin_overview.html:143
 msgid "Latitude"
-msgstr ""
+msgstr "Breitengrad"
 
 #: templates/municipalities/admin_overview.html:80
 #: templates/municipalities/admin_overview.html:147
 msgid "Longitude"
-msgstr ""
+msgstr "Längengrad"
 
 #: templates/municipalities/admin_overview.html:82
-#, fuzzy
-#| msgid "Country"
 msgid "Country filter"
-msgstr "Land"
+msgstr "Landfilter"
 
 #: templates/municipalities/admin_overview.html:91
-#, fuzzy
-#| msgid "Municipality"
 msgid "View municipality"
-msgstr "Gemeinde"
+msgstr "Gemeinde anzeigen"
 
 #: templates/municipalities/admin_overview.html:111
-#, fuzzy
-#| msgid "Edit Organization"
 msgid "Edit location"
-msgstr "Organisation bearbeiten"
+msgstr "Standort bearbeiten"
 
 #: templates/municipalities/admin_overview.html:113
 msgid "Admin API key required"
-msgstr ""
+msgstr "Admin-API-Schlüssel erforderlich"
 
 #: templates/municipalities/admin_overview.html:125
 msgid "No cities returned from the API."
-msgstr ""
+msgstr "Keine Städte von der API zurückgegeben."
 
 #: templates/municipalities/admin_overview.html:136
-#, fuzzy
-#| msgid "Add municipality to favourites"
 msgid "Edit municipality location"
-msgstr "Gemeinde zu Favoriten hinzufügen"
+msgstr "Gemeinde-Standort bearbeiten"
 
 #: templates/municipalities/admin_overview.html:150
 msgid ""
@@ -2606,16 +2599,17 @@ msgid ""
 "current registry and API; the city slug may change if the name ever changes "
 "on the API side)."
 msgstr ""
+"Verwendet api.luftdaten.at POST /city/admin (Name und Zeitzone werden aus dem "
+"aktuellen Register und der API übernommen; der Stadt-Slug kann sich ändern, "
+"wenn sich der Name auf API-Seite ändert)."
 
 #: templates/municipalities/detail.html:5 templates/surveys/manage/list.html:16
 msgid "Municipality"
 msgstr "Gemeinde"
 
 #: templates/municipalities/detail.html:22
-#, fuzzy
-#| msgid "Particulate Matter"
 msgid "Particulate matter type"
-msgstr "Feinstaub"
+msgstr "Feinstaubtyp"
 
 #: templates/municipalities/detail.html:23
 #: templates/municipalities/detail.html:24
@@ -2624,82 +2618,72 @@ msgid "Air quality"
 msgstr "Luftqualität"
 
 #: templates/municipalities/detail.html:55
-#, fuzzy
-#| msgid "Current TVOC:"
 msgid "Current"
-msgstr "Momentan TVOC:"
+msgstr "Aktuell"
 
 #: templates/municipalities/detail.html:62
 msgid "Environment"
-msgstr ""
+msgstr "Umwelt"
 
 #: templates/municipalities/detail.html:69
 msgid "Heat"
-msgstr ""
+msgstr "Hitze"
 
 #: templates/municipalities/list.html:101
-#, fuzzy
-#| msgid "Browse municipalities"
 msgid "Loading municipalities…"
-msgstr "Gemeinden durchsuchen"
+msgstr "Gemeinden werden geladen …"
 
 #: templates/municipalities/manage/list.html:4
-#, fuzzy
-#| msgid "Municipalities"
 msgid "Manage municipalities"
-msgstr "Gemeinden"
+msgstr "Gemeinden verwalten"
 
 #: templates/municipalities/manage/list.html:16
-#, fuzzy
-#| msgid "Browse municipalities"
 msgid "Local municipalities"
-msgstr "Gemeinden durchsuchen"
+msgstr "Lokale Gemeinden"
 
 #: templates/municipalities/manage/list.html:19
 msgid "Import from API"
-msgstr ""
+msgstr "Aus API importieren"
 
 #: templates/municipalities/manage/list.html:24
 msgid ""
 "Mirrors api.luftdaten.at /city/all into the local database. For boundary "
 "matching and GIS edits, use Django Admin at /backend/."
 msgstr ""
+"Spiegelt api.luftdaten.at /city/all in die lokale Datenbank. Für "
+"Grenzabgleich und GIS-Bearbeitung Django Admin unter /backend/ verwenden."
 
 #: templates/municipalities/manage/list.html:29
-#, fuzzy
-#| msgid "Battery Status"
 msgid "Match status"
-msgstr "Batteriestatus"
+msgstr "Abgleichstatus"
 
 #: templates/municipalities/manage/list.html:38
 msgid "Filter"
-msgstr ""
+msgstr "Filtern"
 
 #: templates/municipalities/manage/list.html:48
 msgid "GKZ"
-msgstr ""
+msgstr "GKZ"
 
 #: templates/municipalities/manage/list.html:49
 msgid "Match"
-msgstr ""
+msgstr "Abgleich"
 
 #: templates/municipalities/manage/list.html:50
 msgid "Boundary"
-msgstr ""
+msgstr "Grenze"
 
 #: templates/municipalities/manage/list.html:51
 msgid "Synced"
-msgstr ""
+msgstr "Synchronisiert"
 
 #: templates/municipalities/manage/list.html:71
 msgid "No municipalities yet. Use Import from API."
-msgstr ""
+msgstr "Noch keine Gemeinden. Import aus API verwenden."
 
 #: templates/municipalities/manage/list.html:78
-#, fuzzy
-#| msgid "Log pagination"
 msgid "Pagination"
-msgstr "Protokollpaginierung"
+msgstr "Seitennummerierung"
 
 #: templates/municipalities/partials/_header.html:9
 msgid "Remove municipality from favourites"
@@ -2714,32 +2698,36 @@ msgid "Log in to save this municipality to your favourites."
 msgstr "Melden Sie sich an, um diese Gemeinde als Favorit zu speichern."
 
 #: templates/municipalities/partials/_heat_disclaimer.html:3
-#, fuzzy
-#| msgid "About this wind layer"
 msgid "About these heat indicators"
-msgstr "Informationen zur Wind-Einblendung"
+msgstr "Über diese Hitzeindikatoren"
 
 #: templates/municipalities/partials/_heat_disclaimer.html:5
 msgid ""
 "Land surface temperature is not the same as air temperature measured at "
 "weather stations."
 msgstr ""
+"Die Landoberflächentemperatur ist nicht dasselbe wie die an "
+"Wetterstationen gemessene Lufttemperatur."
 
 #: templates/municipalities/partials/_heat_disclaimer.html:6
 msgid ""
 "The satellite overpass typically occurs in the morning; values represent "
 "that moment, not a daily average."
 msgstr ""
+"Der Satellitenüberflug erfolgt typischerweise am Morgen; die Werte "
+"beziehen sich auf diesen Zeitpunkt, nicht auf einen Tagesmittelwert."
 
 #: templates/municipalities/partials/_heat_disclaimer.html:7
 msgid ""
 "A single reference day is a snapshot — it does not show a heat trend over "
 "time."
 msgstr ""
+"Ein einzelner Referenztag ist eine Momentaufnahme — er zeigt keinen "
+"Hitzetrend über die Zeit."
 
 #: templates/municipalities/partials/_quality_note.html:4
 msgid "Data quality notes"
-msgstr ""
+msgstr "Hinweise zur Datenqualität"
 
 #: templates/municipalities/partials/_tab_current.html:4
 #, python-format
@@ -2748,6 +2736,9 @@ msgid ""
 "    There are %(count)s citizen science stations in %(name)s.\n"
 "    "
 msgstr ""
+"\n"
+"    In %(name)s gibt es %(count)s Citizen-Science-Stationen.\n"
+"    "
 
 #: templates/municipalities/partials/_tab_current.html:7
 msgid ""
@@ -2757,16 +2748,19 @@ msgid ""
 "for these effects as far as possible.\n"
 "    "
 msgstr ""
+"\n"
+"    Bitte beachten Sie, dass einzelne Stationen an ungünstigen Standorten "
+"die Mittelwerte verzerren können. In unserer Methodik wenden wir "
+"statistische Verfahren an, um diese Effekte soweit möglich zu korrigieren.\n"
+"    "
 
 #: templates/municipalities/partials/_tab_current.html:10
 msgid "Methodology"
-msgstr ""
+msgstr "Methodik"
 
 #: templates/municipalities/partials/_tab_current.html:12
-#, fuzzy
-#| msgid "48-hour overview (1h mean)"
 msgid "Hourly averages (1 h mean)"
-msgstr "48-Stunden-Übersicht (1h-Mittelwert)"
+msgstr "Stundenmittelwerte (1-h-Mittel)"
 
 #: templates/municipalities/partials/_tab_current.html:21
 #, python-format
@@ -2776,6 +2770,10 @@ msgid ""
 "stations\n"
 "          "
 msgstr ""
+"\n"
+"          Berechnet aus %(value_count)s Werten von %(station_count)s "
+"Stationen\n"
+"          "
 
 #: templates/municipalities/partials/_tab_environment.html:6
 #, python-format
@@ -2784,36 +2782,40 @@ msgid ""
 "  Reference year %(year)s, source: %(source)s.\n"
 "  "
 msgstr ""
+"\n"
+"  Referenzjahr %(year)s, Quelle: %(source)s.\n"
+"  "
 
 #: templates/municipalities/partials/_tab_environment.html:11
 #: templates/municipalities/partials/_tab_environment.html:13
 #, python-format
 msgid "Peer group: %(label)s."
-msgstr ""
+msgstr "Peer-Gruppe: %(label)s."
 
 #: templates/municipalities/partials/_tab_environment.html:19
 msgid "Imperviousness"
-msgstr ""
+msgstr "Versiegelung"
 
 #: templates/municipalities/partials/_tab_environment.html:22
 msgid "Imperviousness change (2018–2021)"
-msgstr ""
+msgstr "Versiegelungsänderung (2018–2021)"
 
 #: templates/municipalities/partials/_tab_environment.html:25
 msgid "Tree cover"
-msgstr ""
+msgstr "Baumbedeckung"
 
 #: templates/municipalities/partials/_tab_environment.html:32
 msgid "Land use shares"
-msgstr ""
+msgstr "Flächennutzungsanteile"
 
 #: templates/municipalities/partials/_tab_environment.html:33
 msgid "Land use shares chart"
-msgstr ""
+msgstr "Diagramm Flächennutzungsanteile"
 
 #: templates/municipalities/partials/_tab_environment.html:43
 msgid "No Copernicus land indicators are available for this municipality yet."
 msgstr ""
+"Für diese Gemeinde sind noch keine Copernicus-Landindikatoren verfügbar."
 
 #: templates/municipalities/partials/_tab_heat.html:7
 #, python-format
@@ -2822,56 +2824,58 @@ msgid ""
 "      Acquisition on %(d)s, %(t)s (local time), %(s)s.\n"
 "      "
 msgstr ""
+"\n"
+"      Aufnahme am %(d)s, %(t)s (Ortszeit), %(s)s.\n"
+"      "
 
 #: templates/municipalities/partials/_tab_heat.html:16
 msgid "Urban heat island (day)"
-msgstr ""
+msgstr "Städtische Wärmeinsel (Tag)"
 
 #: templates/municipalities/partials/_tab_heat.html:21
 msgid "Urban heat island (night)"
-msgstr ""
+msgstr "Städtische Wärmeinsel (Nacht)"
 
 #: templates/municipalities/partials/_tab_heat.html:26
 msgid "Mean land surface temperature"
-msgstr ""
+msgstr "Mittlere Landoberflächentemperatur"
 
 #: templates/municipalities/partials/_tab_heat.html:31
 msgid "Temperature spread (p90 − p10)"
-msgstr ""
+msgstr "Temperaturspreizung (p90 − p10)"
 
 #: templates/municipalities/partials/_tab_heat.html:36
 msgid "Population in hotspots"
-msgstr ""
+msgstr "Bevölkerung in Hotspots"
 
 #: templates/municipalities/partials/_tab_heat.html:37
-#, fuzzy, python-format
-#| msgid "Total Measurements"
+#, python-format
 msgid "of %(total)s residents total"
-msgstr "Gesamtmessungen"
+msgstr "von insgesamt %(total)s Einwohnern"
 
 #: templates/municipalities/partials/_tab_heat.html:48
 #, python-format
 msgid "Cooling per 10%% tree cover"
-msgstr ""
+msgstr "Abkühlung pro 10 %% Baumbedeckung"
 
 #: templates/municipalities/partials/_tab_heat.html:58
 #, python-format
 msgid "Warming per 10%% imperviousness"
-msgstr ""
+msgstr "Erwärmung pro 10 %% Versiegelung"
 
 #: templates/municipalities/partials/_tab_heat.html:70
 msgid "Land surface temperature by land use"
-msgstr ""
+msgstr "Landoberflächentemperatur nach Flächennutzung"
 
 #: templates/municipalities/partials/_tab_heat.html:71
 msgid "LST by land use chart"
-msgstr ""
+msgstr "Diagramm LOT nach Flächennutzung"
 
 #: templates/municipalities/partials/_tab_heat.html:82
-#, fuzzy
-#| msgid "No battery status available for this device."
 msgid "No evaluable satellite heat data is available for this municipality."
-msgstr "Kein Batteriestatus verfügbar für dieses Gerät."
+msgstr ""
+"Für diese Gemeinde sind keine auswertbaren Satelliten-Hitzedaten "
+"verfügbar."
 
 #: templates/organizations/create.html:12
 msgid "Edit Organization"

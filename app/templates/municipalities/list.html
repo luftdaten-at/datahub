@@ -116,6 +116,9 @@
 </div>
 
 {{ municipalities_payload|json_script:"municipality-list-data" }}
+{% if austria_geojson %}
+{{ austria_geojson|json_script:"austria-regions-geojson" }}
+{% endif %}
 
 <script>
     const API_URL = "{{ API_URL }}";
@@ -163,6 +166,19 @@
         } catch (err) {
             console.error("Failed to parse municipality list data:", err);
             return [];
+        }
+    }
+
+    function loadAustriaRegionsGeojson() {
+        var dataEl = document.getElementById("austria-regions-geojson");
+        if (!dataEl) {
+            return null;
+        }
+        try {
+            return JSON.parse(dataEl.textContent);
+        } catch (err) {
+            console.error("Failed to parse Austria regions GeoJSON:", err);
+            return null;
         }
     }
 
@@ -226,12 +242,12 @@
     });
 
     function drawMunicipalitiesMap(municipalities) {
-        return Promise.all([
-            d3.json("{% static 'img/laender_999_geo.json' %}"),
-            Promise.resolve(municipalities),
-        ]).then(function (results) {
-            var geojson = results[0];
-            var municipalitiesList = results[1];
+        return Promise.resolve().then(function () {
+            var geojson = loadAustriaRegionsGeojson();
+            if (!geojson || !geojson.features) {
+                showMunicipalitiesListError(translations.map_regions_unavailable);
+                throw new Error("Austria regions GeoJSON unavailable");
+            }
 
             projection.fitSize([width, height], geojson);
 
@@ -242,7 +258,7 @@
                 .attr("class", "region")
                 .attr("d", path);
 
-            var municipalitiesWithLocation = municipalitiesList.filter(function (m) {
+            var municipalitiesWithLocation = municipalities.filter(function (m) {
                 return (
                     m.location &&
                     m.location.latitude !== null &&
