@@ -1,6 +1,7 @@
-from django.db import models
 from django.contrib.gis.db.models import PointField, PolygonField
 from django.conf import settings
+from django.core.cache import cache
+from django.db import models
 import string
 import random
 
@@ -16,6 +17,7 @@ class Workshop(models.Model):
     end_date = models.DateTimeField()
     public = models.BooleanField(default=True)
     heat_hotspots_enabled = models.BooleanField(default=False)
+    caching_enabled = models.BooleanField(default=True)
     mapbox_top_left_lat = models.FloatField(null=True, blank=True)
     mapbox_top_left_lon = models.FloatField(null=True, blank=True)
     mapbox_top_right_lat = models.FloatField(null=True, blank=True)
@@ -43,7 +45,16 @@ class Workshop(models.Model):
         if not self.name:
             # Generate a unique ID for new workshops
             self.name = self.generate_name()
+        had_caching = None
+        if self.pk:
+            had_caching = (
+                Workshop.objects.filter(pk=self.pk)
+                .values_list("caching_enabled", flat=True)
+                .first()
+            )
         super(Workshop, self).save(*args, **kwargs)
+        if had_caching is True and self.caching_enabled is False:
+            cache.delete(f"workshop_data_{self.name}")
 
     @staticmethod
     def generate_name():
