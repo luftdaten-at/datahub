@@ -187,16 +187,17 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
     serializer_class = AirQualityRecordWorkshopSerializer
 
     def get(self, request, pk):
-        cache_key = f"workshop_data_{pk}"
-        cached_data = cache.get(cache_key)
-        if cached_data is not None:
-            logger.info(f"Workshop {pk}: Returning cached data")
-            return JsonResponse(cached_data, status=200, safe=False)
-
         try:
             workshop_obj = Workshop.objects.get(name=pk)
         except Workshop.DoesNotExist:
             return JsonResponse({"error": "Workshop not found"}, status=404)
+
+        cache_key = f"workshop_data_{pk}"
+        if workshop_obj.caching_enabled:
+            cached_data = cache.get(cache_key)
+            if cached_data is not None:
+                logger.info(f"Workshop {pk}: Returning cached data")
+                return JsonResponse(cached_data, status=200, safe=False)
 
         aqr_reverse = {v: k for k, v in enums.AQR_DIMENSION_MAP.items()}
         measurements = Measurement.objects.filter(workshop=workshop_obj).all()
@@ -297,6 +298,7 @@ class WorkshopAirQualityDataView(RetrieveAPIView):
             }
             ret.append(data)
 
-        cache.set(cache_key, ret, 900)
-        logger.info(f"Workshop {pk}: Cached data for 15 minutes")
+        if workshop_obj.caching_enabled:
+            cache.set(cache_key, ret, 900)
+            logger.info(f"Workshop {pk}: Cached data for 15 minutes")
         return JsonResponse(ret, status=200, safe=False)
