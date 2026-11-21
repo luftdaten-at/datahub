@@ -1,6 +1,6 @@
 services:
   app:
-    image: luftdaten/datahub:0.8.2
+    image: ghcr.io/luftdaten-at/datahub:latest
     command: >
       sh -c "python manage.py collectstatic --noinput && python manage.py migrate && uvicorn main.asgi:application --host 0.0.0.0 --port 8000"
     restart: unless-stopped
@@ -29,7 +29,7 @@ services:
     networks:
       - internal
   nginx:
-    build: ./nginx
+    image: ghcr.io/luftdaten-at/datahub/nginx:latest
     restart: unless-stopped
     volumes:
       - static_volume:/home/app/web/staticfiles
